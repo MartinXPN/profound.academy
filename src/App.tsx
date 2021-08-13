@@ -1,9 +1,12 @@
 import React from 'react';
-import logo from './logo.svg';
 
-import { initializeApp } from 'firebase/app';
+import firebase from 'firebase/app';
+import 'firebase/analytics';
+import 'firebase/auth';
+import 'firebase/firestore';
 
 import './App.css';
+import Auth from "./auth/Auth";
 
 
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
@@ -17,26 +20,16 @@ const firebaseConfig = {
     measurementId: "G-5EM92EE4GL"
 };
 
-const firebaseApp = initializeApp(firebaseConfig);
+// Initialize Firebase
+firebase.initializeApp(firebaseConfig);
+firebase.analytics();
 
 
 function App() {
-    console.log(firebaseApp);
     return (
         <div className="App">
             <header className="App-header">
-                <img src={logo} className="App-logo" alt="logo"/>
-                <p>
-                    Edit <code>src/App.tsx</code> and save to reload.
-                </p>
-                <a
-                    className="App-link"
-                    href="https://reactjs.org"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                >
-                    Learn React
-                </a>
+                <Auth />
             </header>
         </div>
     );

@@ -7,6 +7,7 @@ import 'firebase/firestore';
 
 import './App.css';
 import Auth from "./auth/Auth";
+import Content from "./content/Content";
 
 
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
@@ -30,6 +31,7 @@ function App() {
         <div className="App">
             <header className="App-header">
                 <Auth />
+                <Content />
             </header>
         </div>
     );

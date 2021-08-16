@@ -1,12 +1,5 @@
 import * as functions from 'firebase-functions';
-import * as cors from 'cors';
-import * as express from 'express';
 import {fetchNotionPage} from './services';
-
-
-const app = express();
-app.use(cors({origin: true}));
-
 
 // Start writing Firebase Functions
 // https://firebase.google.com/docs/functions/typescript
@@ -16,10 +9,16 @@ export const helloWorld = functions.https.onRequest((request, response) => {
     response.send('Hello from Firebase!');
 });
 
-
-app.get('/:id', async (req, res) => {
-    const pageId = req.params.id;
-    res.send(await fetchNotionPage(pageId));
+exports.getNotionPage = functions.https.onCall(async (data, context) => {
+    functions.logger.info(`data: ${JSON.stringify(data)}`);
+    const pageId = data.pageId;
+    if (!pageId) {
+        throw new functions.https.HttpsError(
+            'invalid-argument',
+            'pageId needs to be provided in data'
+        );
+    }
+    const recordMap = await fetchNotionPage(pageId);
+    functions.logger.info(`recordMap: ${JSON.stringify(recordMap)}`);
+    return recordMap;
 });
-
-exports.notionPage = functions.https.onRequest(app);

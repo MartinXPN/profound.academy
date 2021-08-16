@@ -5,7 +5,7 @@ import {fetchNotionPage} from './services';
 
 
 const app = express();
-const corsHandler = cors({origin: true});
+app.use(cors({origin: true}));
 
 
 // Start writing Firebase Functions
@@ -19,8 +19,6 @@ export const helloWorld = functions.https.onRequest((request, response) => {
 
 app.get('/:id', async (req, res) => {
     const pageId = req.params.id;
-    // eslint-disable-next-line @typescript-eslint/no-empty-function
-    corsHandler(req, res, () => {});
     res.send(await fetchNotionPage(pageId));
 });
 

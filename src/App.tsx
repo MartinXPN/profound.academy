@@ -9,6 +9,7 @@ import "firebase/performance";
 import './App.css';
 import Auth from "./auth/Auth";
 import Content from "./content/Content";
+import Editor from "./editor/Editor";
 
 
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
@@ -30,10 +31,13 @@ firebase.performance();
 
 function App() {
     return (
-        <div className="App">
-            <Content />
-            <Auth />
-        </div>
+        <>
+            <div className="App">
+                <Content />
+                <Auth />
+            </div>
+            <Editor />
+        </>
     );
 }
 

@@ -4,6 +4,7 @@ import firebase from 'firebase/app';
 import 'firebase/analytics';
 import 'firebase/auth';
 import 'firebase/firestore';
+import "firebase/performance";
 
 import './App.css';
 import Auth from "./auth/Auth";
@@ -24,15 +25,14 @@ const firebaseConfig = {
 // Initialize Firebase
 firebase.initializeApp(firebaseConfig);
 firebase.analytics();
+firebase.performance();
 
 
 function App() {
     return (
         <div className="App">
-            <header className="App-header">
-                <Auth />
-                <Content />
-            </header>
+            <Content />
+            <Auth />
         </div>
     );
 }

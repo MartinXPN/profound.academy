@@ -1,0 +1,4 @@
+/* Fix issue where the user is prevented from selecting text: https://github.com/NotionX/react-notion-x/issues/81 */
+.notion-viewport {
+    z-index: -1;
+}

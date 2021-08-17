@@ -13,6 +13,8 @@
     "@types/react-dom": "^17.0.0",
     "ace-builds": "^1.4.12",
     "firebase": "^8.9.1",
+    "notion-types": "^4.8.2",
+    "prismjs": "^1.24.1",
     "react": "^17.0.2",
     "react-ace": "^9.4.3",
     "react-dom": "^17.0.2",

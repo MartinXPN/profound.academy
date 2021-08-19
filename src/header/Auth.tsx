@@ -4,6 +4,8 @@ import StyledFirebaseAuth from 'react-firebaseui/StyledFirebaseAuth';
 import firebase from 'firebase/app';
 import 'firebase/auth';
 import './Auth.css';
+import Button from "@material-ui/core/Button";
+import {Avatar, createStyles, makeStyles, Theme} from "@material-ui/core";
 
 
 // Configure FirebaseUI.
@@ -21,7 +23,17 @@ const uiConfig = {
     },
 };
 
+const useStyles = makeStyles((theme: Theme) =>
+    createStyles({
+        margin: {
+            margin: theme.spacing(1),
+        },
+    }),
+);
+
+
 function Auth() {
+    const classes = useStyles();
     const [isSignedIn, setIsSignedIn] = useState(false); // Local signed-in state.
 
     // Listen to the Firebase Auth state and set the local state.
@@ -40,12 +52,18 @@ function Auth() {
             </div>
         );
     }
-    // @ts-ignore
-    const user = firebase.auth().currentUser.displayName;
+    const user = firebase.auth().currentUser;
+    if (!user) {
+        return (<div>Error</div>);
+    }
     return (
         <div className="Auth-SignOut">
-            <p className="Auth-Name">{user}</p>
-            <button className="Auth-SignOut-Button" onClick={() => firebase.auth().signOut()}>Sign Out</button>
+            <p className="Auth-Name">{user.displayName}</p>
+            {
+                // @ts-ignore
+                <Avatar src={user.photoURL} alt={user.displayName} className={classes.margin}/>
+            }
+            <Button variant="outlined" onClick={() => firebase.auth().signOut()}>Sign Out</Button>
         </div>
     );
 }

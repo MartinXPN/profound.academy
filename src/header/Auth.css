@@ -1,0 +1,23 @@
+.Auth {
+    text-align: center;
+    align-content: center;
+}
+
+.Auth-SignOut {
+    position: absolute;
+    right: 20px;
+    top: 10px;
+    display: flex;
+    color: white;
+}
+
+.Auth-SignIn {
+    left: 50%;
+}
+
+.Auth-Name {
+    padding-right: 10px;
+    color: black;
+    font-weight: bold;
+    display: inline-block;
+}

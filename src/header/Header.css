@@ -1,0 +1,12 @@
+.LandingPage {
+    align-content: center;
+    text-align: center;
+    padding: 5%;
+}
+
+.LandingPage-Image {
+    display: block;
+    width: 40%;
+    margin-left: auto;
+    margin-right: auto;
+}

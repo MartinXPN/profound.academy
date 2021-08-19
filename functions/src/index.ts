@@ -9,7 +9,7 @@ export const helloWorld = functions.https.onRequest((request, response) => {
     response.send('Hello from Firebase!');
 });
 
-exports.getNotionPage = functions.https.onCall(async (data, context) => {
+export const getNotionPage = functions.https.onCall(async (data, context) => {
     functions.logger.info(`data: ${JSON.stringify(data)}`);
     const pageId = data.pageId;
     if (!pageId) {

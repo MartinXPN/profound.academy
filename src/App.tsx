@@ -2,14 +2,13 @@ import React from 'react';
 
 import firebase from 'firebase/app';
 import 'firebase/analytics';
-import 'firebase/auth';
-import 'firebase/firestore';
-import "firebase/performance";
+import { MuiThemeProvider, createTheme } from '@material-ui/core/styles';
 
-import './App.css';
-import Auth from "./auth/Auth";
 import Content from "./content/Content";
 import Editor from "./editor/Editor";
+import Header from "./header/Header";
+import './App.css';
+import CourseList from "./course-list/CourseList";
 
 
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
@@ -26,18 +25,29 @@ const firebaseConfig = {
 // Initialize Firebase
 firebase.initializeApp(firebaseConfig);
 firebase.analytics();
-firebase.performance();
 
+const theme = createTheme({
+    palette: {
+        primary: {
+            main: '#4B5FAA',
+        },
+        secondary: {
+            main: '#37a4dc'
+        }
+    }
+});
 
 function App() {
     return (
-        <>
-            <div className="App">
-                <Content />
-                <Auth />
-            </div>
-            <Editor />
-        </>
+        <MuiThemeProvider theme={theme}>
+            <Header />
+            {/*<div className="App">*/}
+            {/*    <Content />*/}
+            {/*    <Auth />*/}
+            {/*</div>*/}
+            {/*<Editor />*/}
+            <CourseList />
+        </MuiThemeProvider>
     );
 }
 

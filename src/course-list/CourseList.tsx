@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useContext, useState} from 'react';
 import {Theme, createStyles, makeStyles} from '@material-ui/core/styles';
 import ImageList from '@material-ui/core/ImageList';
 import ImageListItem from '@material-ui/core/ImageListItem';
@@ -6,12 +6,12 @@ import ImageListItemBar from '@material-ui/core/ImageListItemBar';
 import IconButton from '@material-ui/core/IconButton';
 import InfoIcon from '@material-ui/icons/Info';
 
-import firebase from "firebase/app";
 import {Tooltip} from "@material-ui/core";
 
 import {Course} from '../models/courses';
 import {getAllCourses, getUserCourses} from "../services/courses";
 import useAsyncEffect from "use-async-effect";
+import {AuthContext} from "../App";
 
 const useStyles = makeStyles((theme: Theme) =>
     createStyles({
@@ -73,15 +73,9 @@ function CourseListView(props: CourseListProps) {
 
 function CourseList() {
     const classes = useStyles();
-    const [isSignedIn, setIsSignedIn] = useState(false);
     const [allCourses, setAllCourses] = useState<Course[]>([]);
     const [userCourses, setUserCourses] = useState<Course[]>([]);
-
-    // Listen to the Firebase Auth state and set the local state.
-    useEffect(() => {
-        const unregisterAuthObserver = firebase.auth().onAuthStateChanged(user => setIsSignedIn(!!user));
-        return () => unregisterAuthObserver(); // Make sure we un-register Firebase observers when the component unmounts.
-    }, []);
+    const auth = useContext(AuthContext);
 
     useAsyncEffect(async () => {
         const res = await getAllCourses();
@@ -89,20 +83,20 @@ function CourseList() {
     }, []);
 
     useAsyncEffect(async () => {
-        const user = firebase.auth().currentUser;
-        if(!isSignedIn || !user || !user.uid)
+        const user = auth?.currentUser;
+        if(!auth?.isSignedIn || !user || !user.uid)
             return;
 
         if(!user || !user.uid)return;
         console.log('user id:', user.uid);
         const res = await getUserCourses(user.uid);
         setUserCourses(res);
-    }, [isSignedIn]);
+    }, [auth]);
 
 
     return (
         <>
-            {(isSignedIn && userCourses.length > 0) &&
+            {(auth?.isSignedIn && userCourses.length > 0) &&
             <>
                 <br/><br/><br/><br/>
                 <h2 className={classes.title}>My Curriculum</h2>

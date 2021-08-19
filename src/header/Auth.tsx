@@ -1,10 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import React, {useContext, useEffect} from 'react';
 import StyledFirebaseAuth from 'react-firebaseui/StyledFirebaseAuth';
 import firebase from 'firebase/app';
 import 'firebase/auth';
 import './Auth.css';
 import Button from "@material-ui/core/Button";
 import {Avatar, createStyles, makeStyles, Theme} from "@material-ui/core";
+import {AuthContext} from "../App";
 
 
 // Configure FirebaseUI.
@@ -31,19 +32,26 @@ const useStyles = makeStyles((theme: Theme) =>
 );
 
 
-function Auth() {
+interface AuthProps {
+    showSignInOptions: boolean;
+}
+
+
+function Auth(props: AuthProps) {
     const classes = useStyles();
-    const [isSignedIn, setIsSignedIn] = useState(false); // Local signed-in state.
+    const auth = useContext(AuthContext);
 
     // Listen to the Firebase Auth state and set the local state.
     useEffect(() => {
         const unregisterAuthObserver = firebase.auth().onAuthStateChanged(user => {
-            setIsSignedIn(!!user);
+            auth?.setCurrentUser(user);
         });
         return () => unregisterAuthObserver(); // Make sure we un-register Firebase observers when the component unmounts.
-    }, []);
+    }, [auth]);
 
-    if (!isSignedIn) {
+    if (!auth?.isSignedIn) {
+        if(!props.showSignInOptions)
+            return (<></>)
         return (
             <div className="Auth-SignIn">
                 <h3>Sign in to continue</h3>

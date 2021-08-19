@@ -7,6 +7,7 @@ import IconButton from '@material-ui/core/IconButton';
 import InfoIcon from '@material-ui/icons/Info';
 
 import firebase from "firebase/app";
+import {Tooltip} from "@material-ui/core";
 
 const useStyles = makeStyles((theme: Theme) =>
     createStyles({
@@ -36,6 +37,7 @@ interface Course {
     img: string;
     title: string;
     author: string;
+    details: string;
 }
 
 function CourseList() {
@@ -56,11 +58,13 @@ function CourseList() {
                 img: 'https://firebasestorage.googleapis.com/v0/b/profound-academy.appspot.com/o/images%2Fcompetitive-programming-logo.jpg?alt=media&token=d836f31a-ccb8-41c7-901f-13b645525a9a',
                 title: 'Competitive Programming',
                 author: 'Martin & Edward',
+                details: 'From zero to advanced course to practice competitive programming',
             },
             {
                 img: 'https://firebasestorage.googleapis.com/v0/b/profound-academy.appspot.com/o/images%2Fml-logo.png?alt=media&token=d402197b-552a-4eab-889f-5d6bdc9c8336',
                 title: 'Introduction to Machine Learning',
                 author: 'Martin & Hrant',
+                details: 'From zero to advanced course to practice the basics of Machine Learning',
             }
         ])
     }, [])
@@ -79,7 +83,9 @@ function CourseList() {
                                 subtitle={<span>by: {item.author}</span>}
                                 actionIcon={
                                     <IconButton aria-label={`info about ${item.title}`} className={classes.icon}>
-                                        <InfoIcon/>
+                                        <Tooltip title={item.details} placement="top-start">
+                                            <div><InfoIcon fontSize='small'/></div>
+                                        </Tooltip>
                                     </IconButton>
                                 }
                             />

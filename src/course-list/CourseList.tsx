@@ -9,6 +9,10 @@ import InfoIcon from '@material-ui/icons/Info';
 import firebase from "firebase/app";
 import {Tooltip} from "@material-ui/core";
 
+import {Course} from '../models/courses';
+import {getAllCourses, getUserCourses} from "../services/courses";
+import useAsyncEffect from "use-async-effect";
+
 const useStyles = makeStyles((theme: Theme) =>
     createStyles({
         root: {
@@ -19,8 +23,8 @@ const useStyles = makeStyles((theme: Theme) =>
             backgroundColor: theme.palette.background.paper,
         },
         imageList: {
-            width: 500,
-            height: 450,
+            width: 600,
+            height: 400,
         },
         icon: {
             color: 'rgba(255, 255, 255, 0.54)',
@@ -33,46 +37,16 @@ const useStyles = makeStyles((theme: Theme) =>
 );
 
 
-interface Course {
-    img: string;
-    title: string;
-    author: string;
-    details: string;
+interface CourseListProps {
+    courses: Course[];
 }
 
-function CourseList() {
+function CourseListView(props: CourseListProps) {
     const classes = useStyles();
-    const [isSignedIn, setIsSignedIn] = useState(false);
-    const [courses, setCourses] = useState<Course[]>([]);
-
-    // Listen to the Firebase Auth state and set the local state.
-    useEffect(() => {
-        const unregisterAuthObserver = firebase.auth().onAuthStateChanged(user => setIsSignedIn(!!user));
-        return () => unregisterAuthObserver(); // Make sure we un-register Firebase observers when the component unmounts.
-    }, []);
-
-    useEffect(() => {
-        // TODO: Fetch the list from firestore
-        setCourses([
-            {
-                img: 'https://firebasestorage.googleapis.com/v0/b/profound-academy.appspot.com/o/images%2Fcompetitive-programming-logo.jpg?alt=media&token=d836f31a-ccb8-41c7-901f-13b645525a9a',
-                title: 'Competitive Programming',
-                author: 'Martin & Edward',
-                details: 'From zero to advanced course to practice competitive programming',
-            },
-            {
-                img: 'https://firebasestorage.googleapis.com/v0/b/profound-academy.appspot.com/o/images%2Fml-logo.png?alt=media&token=d402197b-552a-4eab-889f-5d6bdc9c8336',
-                title: 'Introduction to Machine Learning',
-                author: 'Martin & Hrant',
-                details: 'From zero to advanced course to practice the basics of Machine Learning',
-            }
-        ])
-    }, [])
+    const {courses} = props;
 
     return (
         <>
-            {isSignedIn && <div>My Curriculum</div>}
-            <h1 className={classes.title}>All Courses</h1>
             <div className={classes.root}>
                 <ImageList rowHeight={180} className={classes.imageList}>
                     {courses.map((item) => (
@@ -93,7 +67,50 @@ function CourseList() {
                     ))}
                 </ImageList>
             </div>
+        </>
+    )
+}
 
+function CourseList() {
+    const classes = useStyles();
+    const [isSignedIn, setIsSignedIn] = useState(false);
+    const [allCourses, setAllCourses] = useState<Course[]>([]);
+    const [userCourses, setUserCourses] = useState<Course[]>([]);
+
+    // Listen to the Firebase Auth state and set the local state.
+    useEffect(() => {
+        const unregisterAuthObserver = firebase.auth().onAuthStateChanged(user => setIsSignedIn(!!user));
+        return () => unregisterAuthObserver(); // Make sure we un-register Firebase observers when the component unmounts.
+    }, []);
+
+    useAsyncEffect(async () => {
+        const res = await getAllCourses();
+        setAllCourses(res);
+    }, []);
+
+    useAsyncEffect(async () => {
+        const user = firebase.auth().currentUser;
+        if(!isSignedIn || !user || !user.uid)
+            return;
+
+        if(!user || !user.uid)return;
+        console.log('user id:', user.uid);
+        const res = await getUserCourses(user.uid);
+        setUserCourses(res);
+    }, [isSignedIn]);
+
+
+    return (
+        <>
+            {(isSignedIn && userCourses.length > 0) &&
+            <>
+                <br/><br/><br/><br/>
+                <h2 className={classes.title}>My Curriculum</h2>
+                <CourseListView courses={userCourses}/>
+            </>}
+
+            <h2 className={classes.title}>All Courses</h2>
+            <CourseListView courses={allCourses}/>
         </>
     )
 }

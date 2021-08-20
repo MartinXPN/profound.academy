@@ -7,9 +7,9 @@ import {NotionRenderer} from 'react-notion-x'
 import 'react-notion-x/src/styles.css';     // core styles shared by all of react-notion-x (required)
 import 'prismjs/themes/prism-tomorrow.css'; // used for code syntax highlighting (optional)
 import 'rc-dropdown/assets/index.css';      // used for collection views (optional)
-import 'katex/dist/katex.min.css';
+import 'katex/dist/katex.min.css';          // used for rendering equations (optional)
 import useAsyncEffect from "use-async-effect";
-import {CircularProgress} from "@material-ui/core";          // used for rendering equations (optional)
+import {CircularProgress} from "@material-ui/core";
 
 import './Content.css';
 
@@ -24,7 +24,7 @@ function Content(props: ContentProps) {
     useAsyncEffect(async () => {
         const getPage = firebase.functions().httpsCallable('getNotionPage');
         const map = await getPage({pageId: props.notionPage});
-        console.log({map: map.data});
+        // console.log({map: map.data});
         // @ts-ignore
         setRecordMap(map.data);
     }, []);

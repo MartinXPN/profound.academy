@@ -1,5 +1,6 @@
 import {db} from "./db";
 import {Course} from "../models/courses";
+import firebase from "firebase/app";
 
 
 export const getAllCourses = async () => {
@@ -26,4 +27,13 @@ export const getUserCourses = async (userId: string) => {
     const courses: Course[] = await Promise.all(us.courses.map(x => getCourse(x.id)));
     console.log('courses:', courses);
     return courses;
+}
+
+export const startCourse = async (userId: string, courseId: string) => {
+    const course = db.courses.doc(courseId);
+    await db.users.doc(userId).update({
+        courses: firebase.firestore.FieldValue.arrayUnion(course)
+    });
+    console.log(course, 'added to user:', userId);
+    return userId;
 }

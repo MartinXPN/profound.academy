@@ -10,31 +10,36 @@ function Editor() {
     const [code, setCode] = useState('');
 
     return (
-        <AceEditor
-            placeholder="Start typing your code..."
-            mode="python"
-            theme="tomorrow"
-            width='100%'
-            onChange={(value) => {
-                console.log(value);
-                setCode(value);
-            }}
-            showPrintMargin
-            showGutter
-            highlightActiveLine
+        <div style={{height: '100%'}}>
+            <AceEditor
+                placeholder="Start typing your code..."
+                mode="python"
+                theme="tomorrow"
+                width='100%'
+                onChange={(value) => {
+                    console.log(value);
+                    setCode(value);
+                }}
+                showPrintMargin
+                showGutter
+                highlightActiveLine
 
-            name="editor_div"
-            value={code}
-            setOptions={{
-                useWorker: false,
-                enableBasicAutocompletion: true,
-                enableLiveAutocompletion: true,
-                enableSnippets: false,
-                showLineNumbers: true,
-                tabSize: 4,
-            }}
-            editorProps={{ $blockScrolling: false }}
-        />
+                name="editor_div"
+                value={code}
+                setOptions={{
+                    useWorker: false,
+                    enableBasicAutocompletion: true,
+                    enableLiveAutocompletion: true,
+                    enableSnippets: false,
+                    showLineNumbers: true,
+                    tabSize: 4,
+                }}
+                editorProps={{ $blockScrolling: false }}
+            />
+
+            <div>Submission results and outputs will appear here...</div>
+
+        </div>
     )
 }
 

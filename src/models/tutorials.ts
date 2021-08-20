@@ -1,6 +1,7 @@
 import {Course} from "./courses";
 
 export interface Tutorial {
+    id: string;
     title: string;      // title of the tutorial (Python types)
     course: Course;     // id of a course
     order: number;      // # in the course page

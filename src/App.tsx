@@ -32,11 +32,15 @@ export const AuthContext = createContext<AuthContextProps | null>(null);
 
 
 function App() {
-    const [currentUser, setCurrentUser] = useState<firebase.User | null>(null);
+    const [currentUser, setCurrentUser] = useState<firebase.User | null>(JSON.parse(localStorage.getItem('user') ?? 'null'));
+    const setUser = (user: firebase.User | null) => {
+        localStorage.setItem('user', JSON.stringify(user));
+        setCurrentUser(user);
+    }
 
     return (
         <MuiThemeProvider theme={theme}>
-        <AuthContext.Provider value={{isSignedIn: !!currentUser, currentUser: currentUser, setCurrentUser: setCurrentUser}}>
+        <AuthContext.Provider value={{isSignedIn: !!currentUser, currentUser: currentUser, setCurrentUser: setUser}}>
             <Header/>
             <CourseList/>
         </AuthContext.Provider>

@@ -4,4 +4,5 @@ export interface Course {
     title: string;
     author: string;
     details: string;
+    introduction: string; // notion id for the introduction page
 }

@@ -1,13 +1,15 @@
 import React, {createContext, useState} from 'react';
+import {BrowserRouter as Router, Switch, Route} from 'react-router-dom';
 
 import firebase from 'firebase/app';
 import './firebase';
 import 'firebase/analytics';
 import {MuiThemeProvider, createTheme} from '@material-ui/core/styles';
 
-import Header from "./header/Header";
-import CourseList from "./course-list/CourseList";
+import Home from "./home/Home";
 import './App.css';
+import Course from "./course/Course";
+
 
 firebase.analytics();
 const theme = createTheme({
@@ -39,12 +41,20 @@ function App() {
     }
 
     return (
+        <Router>
         <MuiThemeProvider theme={theme}>
         <AuthContext.Provider value={{isSignedIn: !!currentUser, currentUser: currentUser, setCurrentUser: setUser}}>
-            <Header/>
-            <CourseList/>
+        <Switch>
+            <Route exact path="/">
+                <Home />
+            </Route>
+            <Route path={'/courses/:id'}>
+                <Course />
+            </Route>
+        </Switch>
         </AuthContext.Provider>
         </MuiThemeProvider>
+        </Router>
     );
 }
 

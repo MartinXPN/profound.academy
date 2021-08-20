@@ -12,6 +12,7 @@ import {Course} from '../models/courses';
 import {getAllCourses, getUserCourses} from "../services/courses";
 import useAsyncEffect from "use-async-effect";
 import {AuthContext} from "../App";
+import {useHistory} from "react-router-dom";
 
 const useStyles = makeStyles((theme: Theme) =>
     createStyles({
@@ -42,6 +43,7 @@ interface CourseListProps {
 }
 
 function CourseListView(props: CourseListProps) {
+    const history = useHistory();
     const classes = useStyles();
     const {courses} = props;
 
@@ -50,7 +52,7 @@ function CourseListView(props: CourseListProps) {
             <div className={classes.root}>
                 <ImageList rowHeight={180} className={classes.imageList}>
                     {courses.map((item) => (
-                        <ImageListItem key={item.img}>
+                        <ImageListItem key={item.id} onClick={() => history.push(`/courses/${item.id}`)}>
                             <img src={item.img} alt={item.title}/>
                             <ImageListItemBar
                                 title={item.title}

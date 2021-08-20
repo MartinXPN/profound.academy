@@ -61,7 +61,7 @@ function Auth(props: AuthProps) {
     }
     const user = firebase.auth().currentUser;
     if (!user) {
-        return (<div>Error</div>);
+        return (<></>);
     }
     return (
         <div className="Auth-SignOut">

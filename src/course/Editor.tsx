@@ -14,6 +14,7 @@ function Editor() {
             placeholder="Start typing your code..."
             mode="python"
             theme="tomorrow"
+            width='100%'
             onChange={(value) => {
                 console.log(value);
                 setCode(value);
@@ -22,7 +23,7 @@ function Editor() {
             showGutter
             highlightActiveLine
 
-            name="UNIQUE_ID_OF_DIV"
+            name="editor_div"
             value={code}
             setOptions={{
                 useWorker: false,
@@ -32,7 +33,7 @@ function Editor() {
                 showLineNumbers: true,
                 tabSize: 4,
             }}
-            editorProps={{ $blockScrolling: true }}
+            editorProps={{ $blockScrolling: false }}
         />
     )
 }

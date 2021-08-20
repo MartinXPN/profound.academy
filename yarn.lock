@@ -3936,6 +3936,11 @@ commander@^4.1.1:
   resolved "https://registry.yarnpkg.com/commander/-/commander-4.1.1.tgz#9fd602bd936294e9e9ef46a3f4d6964044b18068"
   integrity sha512-NOKm8xhkzAjzFx8B2v5OAHT+u5pRQc2UCa2Vq9jYL/31o2wi9mxBA7LIFs3sV5VSC49z6pEhfbMULvShKj26WA==
 
+commander@^6.0.0:
+  version "6.2.1"
+  resolved "https://registry.yarnpkg.com/commander/-/commander-6.2.1.tgz#0792eb682dfbc325999bb2b84fddddba110ac73c"
+  integrity sha512-U7VdrJFnJgo4xjrHpTzu0yrHPGImdsmD95ZlgYSEajAn2JKzDhDTPG9kBTefmObL2w/ngeZnilk+OV9CG3d7UA==
+
 common-tags@^1.8.0:
   version "1.8.0"
   resolved "https://registry.yarnpkg.com/common-tags/-/common-tags-1.8.0.tgz#8e3153e542d4a39e9b10554434afaaf98956a937"
@@ -7719,6 +7724,13 @@ katex@^0.12.0:
   integrity sha512-y+8btoc/CK70XqcHqjxiGWBOeIL8upbS0peTPXTvgrh21n1RiWWcIpSWM+4uXq+IAgNh9YYQWdc7LVDPDAEEAg==
   dependencies:
     commander "^2.19.0"
+
+katex@^0.13.13:
+  version "0.13.13"
+  resolved "https://registry.yarnpkg.com/katex/-/katex-0.13.13.tgz#15a796e95516869bc6d483443b58b2df872ee40f"
+  integrity sha512-cCMcil4jwMm7behpXGiQfXJA29sko/Gd/26iCsr53Dv5Jn2iHbHyEb14dm9uVrIijUXx6Zz1WhlFhHE6DckvkQ==
+  dependencies:
+    commander "^6.0.0"
 
 killable@^1.0.1:
   version "1.0.1"

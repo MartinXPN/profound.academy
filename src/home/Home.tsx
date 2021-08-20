@@ -1,5 +1,5 @@
 import Header from "../header/Header";
-import CourseList from "../course-list/CourseList";
+import CourseList from "./CourseList";
 import React from "react";
 
 function Home() {

@@ -1,9 +1,9 @@
 import React, {useState} from "react";
 import {useParams} from "react-router-dom";
 import {getCourse} from "../services/courses";
-import Content from "../content/Content";
 import useAsyncEffect from "use-async-effect";
 import {Course} from "../models/courses";
+import LandingPage from "./LandingPage";
 
 interface CourseParams {
     id: string;
@@ -11,15 +11,17 @@ interface CourseParams {
 
 function CourseView() {
     const [course, setCourse] = useState<Course | null>(null);
-    const { id } = useParams<CourseParams>();
+    const {id} = useParams<CourseParams>();
 
     useAsyncEffect(async () => {
         const course = await getCourse(id);
         setCourse(course);
-    }, [id])
+    }, [id]);
+
+
     return (
         <>
-            {course && <Content notionPage={course.introduction} />}
+            {course && <LandingPage introPageId={course.introduction} onStartCourseClicked={() => {}}/>}
         </>
     )
 }

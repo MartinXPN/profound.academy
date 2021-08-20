@@ -6,7 +6,7 @@ export const getCourseTutorials = async (courseId: string) => {
     const course = db.courses.doc(courseId);
     const snapshot = await db.tutorials
         .where('course', '==', course)
-        .orderBy('order', 'asc')
+        .orderBy('order', 'desc')
         .get();
 
     const tutorials: Tutorial[] = snapshot.docs.map(x => x.data());

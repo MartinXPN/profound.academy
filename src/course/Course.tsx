@@ -28,7 +28,7 @@ import ChevronRightIcon from '@material-ui/icons/ChevronRight';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
-import zIndex from "@material-ui/core/styles/zIndex";
+import {Typography} from "@material-ui/core";
 
 const drawerWidth = 240;
 
@@ -202,7 +202,11 @@ function CurrentExercise(props: ExerciseProps) {
                            defaultSize={parseInt(localStorage.getItem('splitPos') ?? '50', 10)}
                            onChange={(size) => localStorage.setItem('splitPos', size.toString(10))}>
 
-                    <div style={{overflowY: 'scroll'}}><TutorialView tutorial={tutorial}/></div>
+                    <div style={{overflowY: 'scroll'}}>
+                        <TutorialView tutorial={tutorial}/>
+                        <br/><br/><br/>
+                        <Typography variant='h5'>The forum will appear here...</Typography>
+                    </div>
                     <div style={{marginTop: '80px', width: '100%'}}><Editor/></div>
                 </SplitPane>
             }
@@ -248,6 +252,7 @@ function CourseView() {
                 {course &&
                 <CurrentExercise course={course} tutorial={currentTutorial} moveForward={() => {
                     const current = parseInt(pageId ? pageId : '-1');
+                    console.log('setting the current page to:', current + 1);
                     setPageId((current + 1).toString());
                 }}
                  showSignIn={() => setShowSignIn(true)}
@@ -259,3 +264,13 @@ function CourseView() {
 }
 
 export default CourseView;
+// TODO:
+//  1. make the authentication view appear on the Toolbar
+//  2. add an image icon on the Toolbar to go to homepage
+//  3. add click listeners on drawer items to navigate to appropriate page
+//  4. make the solved exercises green
+//  5. implement run/submit => upload to firebase storage
+//  6. SplitPane for code/terminal + submit/run icons with absolute top-right positions
+//  7. implement the dashboard for best/all submissions for a given exercise
+//  8. implement editor configurations (font, language, theme)
+//  9. implement a simple forum

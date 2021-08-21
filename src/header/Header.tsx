@@ -3,13 +3,23 @@ import React, {useContext, useState} from "react";
 import Button from "@material-ui/core/Button";
 import {createStyles, makeStyles, Theme} from "@material-ui/core";
 
-import './Header.css';
 import {AppBarProfile, SignIn} from "./Auth";
 import {AuthContext} from "../App";
 
 
 const useStyles = makeStyles((theme: Theme) =>
     createStyles({
+        root: {
+            alignContent: 'center',
+            textAlign: 'center',
+            padding: '5%',
+        },
+        bigImage: {
+            display: 'block',
+            width: '40%',
+            marginLeft: 'auto',
+            marginRight: 'auto',
+        },
         button: {
             margin: theme.spacing(4),
             color: 'white',
@@ -23,7 +33,6 @@ const useStyles = makeStyles((theme: Theme) =>
     }),
 );
 
-
 function Header() {
     const classes = useStyles();
     const [showSignInOptions, setShowSignInOptions] = useState(false);
@@ -33,8 +42,8 @@ function Header() {
     return (
         <>
             {!auth?.isSignedIn ?
-                <div className='LandingPage'>
-                    <img src={landingPageImageURL} alt='Landing page cover' className='LandingPage-Image'/>
+                <div className={classes.root}>
+                    <img src={landingPageImageURL} alt='Landing page cover' className={classes.bigImage} />
                     {!showSignInOptions &&
                     <Button variant="contained" color="primary" size="large" className={classes.button}
                             onClick={() => setShowSignInOptions(true)}>GET STARTED</Button>}

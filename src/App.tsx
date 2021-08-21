@@ -10,7 +10,6 @@ import {MuiThemeProvider, createTheme} from '@material-ui/core/styles';
 
 import Home from "./home/Home";
 import Course from "./course/Course";
-import './App.css';
 
 
 firebase.analytics();

@@ -1,17 +1,6 @@
 import React, {useContext, useState} from "react";
 import {useParams} from "react-router-dom";
-import {getCourse, startCourse} from "../services/courses";
-import useAsyncEffect from "use-async-effect";
-import {Course} from "../models/courses";
-import LandingPage from "./LandingPage";
-import {AuthContext} from "../App";
 import SplitPane from 'react-split-pane';
-import {Tutorial} from "../models/tutorials";
-import {getCourseTutorials} from "../services/tutorials";
-import Auth from "../header/Auth";
-import Editor from "./Editor";
-import TutorialView from "./Tutorial";
-
 
 import clsx from 'clsx';
 import {createStyles, makeStyles, useTheme, Theme} from '@material-ui/core/styles';
@@ -29,6 +18,17 @@ import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
 import {Typography} from "@material-ui/core";
+
+import {getCourse, startCourse} from "../services/courses";
+import useAsyncEffect from "use-async-effect";
+import {Course} from "../models/courses";
+import LandingPage from "./LandingPage";
+import {AuthContext} from "../App";
+import {Tutorial} from "../models/tutorials";
+import {getCourseTutorials} from "../services/tutorials";
+import Editor from "./Editor";
+import TutorialView from "./Tutorial";
+import {AppBarProfile, SignIn} from "../header/Auth";
 
 const drawerWidth = 240;
 
@@ -93,6 +93,9 @@ const useStyles = makeStyles((theme: Theme) =>
             flexGrow: 1,
             padding: theme.spacing(0),
         },
+        authIcon: {
+            marginLeft: 'auto',
+        }
     }),
 );
 
@@ -119,8 +122,7 @@ function CourseWithDrawer(props: CourseDrawerProps) {
                 position="fixed"
                 className={clsx(classes.appBar, {
                     [classes.appBarShift]: open,
-                })}
-            >
+                })}>
                 <Toolbar>
                     <IconButton
                         color="inherit"
@@ -129,11 +131,14 @@ function CourseWithDrawer(props: CourseDrawerProps) {
                         edge="start"
                         className={clsx(classes.menuButton, {
                             [classes.hide]: open,
-                        })}
-                    >
+                        })}>
                         <MenuIcon/>
                     </IconButton>
+
+                    <div className={classes.authIcon}><AppBarProfile/></div>
                 </Toolbar>
+
+
             </AppBar>
             <Drawer
                 variant="permanent"
@@ -157,7 +162,7 @@ function CourseWithDrawer(props: CourseDrawerProps) {
                 <List>
                     {props.tutorials.map((tutorial, index) => (
                         <ListItem button key={tutorial.id}>
-                            <ListItemIcon><ListItemText primary={tutorial.order}/></ListItemIcon>
+                            <ListItemIcon><ListItemText primary={index}/></ListItemIcon>
                             <ListItemText primary={tutorial.title}/>
                         </ListItem>
                     ))}
@@ -255,9 +260,10 @@ function CourseView() {
                     console.log('setting the current page to:', current + 1);
                     setPageId((current + 1).toString());
                 }}
-                 showSignIn={() => setShowSignIn(true)}
+                                 showSignIn={() => setShowSignIn(true)}
                 />}
-                <Auth showSignInOptions={showSignIn}/>
+
+                {showSignIn && <SignIn/>}
             </main>
         </div>
     </>);
@@ -265,7 +271,7 @@ function CourseView() {
 
 export default CourseView;
 // TODO:
-//  1. make the authentication view appear on the Toolbar
+//  DONE 1. make the authentication view appear on the Toolbar
 //  2. add an image icon on the Toolbar to go to homepage
 //  3. add click listeners on drawer items to navigate to appropriate page
 //  4. make the solved exercises green

@@ -4,7 +4,7 @@ import Button from "@material-ui/core/Button";
 import {createStyles, makeStyles, Theme} from "@material-ui/core";
 
 import './Header.css';
-import Auth from "./Auth";
+import {AppBarProfile, SignIn} from "./Auth";
 import {AuthContext} from "../App";
 
 
@@ -14,6 +14,12 @@ const useStyles = makeStyles((theme: Theme) =>
             margin: theme.spacing(4),
             color: 'white',
         },
+        authProfile: {
+            position: 'absolute',
+            top: 0,
+            right: 0,
+            marginRight: theme.spacing(4),
+        }
     }),
 );
 
@@ -32,10 +38,10 @@ function Header() {
                     {!showSignInOptions &&
                     <Button variant="contained" color="primary" size="large" className={classes.button}
                             onClick={() => setShowSignInOptions(true)}>GET STARTED</Button>}
-                    <Auth showSignInOptions={showSignInOptions} />
+                    {showSignInOptions && <SignIn />}
                 </div>
                 :
-                <div><Auth showSignInOptions={false}/></div>
+                <div className={classes.authProfile}><AppBarProfile /></div>
             }
         </>
     )

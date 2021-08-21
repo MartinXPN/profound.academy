@@ -1,6 +1,6 @@
-import firebase from 'firebase/app';
-
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+import firebase from "firebase";
+
 export const firebaseConfig = {
     apiKey: "AIzaSyCoZzYEGYmfNgEwVN2thZcAmQ7NBqnzlBQ",
     authDomain: "profound-academy.firebaseapp.com",
@@ -11,5 +11,4 @@ export const firebaseConfig = {
     measurementId: "G-5EM92EE4GL"
 };
 
-// Initialize Firebase
 firebase.initializeApp(firebaseConfig);

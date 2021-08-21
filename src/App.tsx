@@ -1,14 +1,16 @@
-import React, {createContext, useState} from 'react';
+import React, {createContext, useEffect, useState} from 'react';
 import {BrowserRouter as Router, Switch, Route} from 'react-router-dom';
 
 import firebase from 'firebase/app';
-import './firebase';
+import 'firebase/auth';
 import 'firebase/analytics';
+import "./firebase";
+
 import {MuiThemeProvider, createTheme} from '@material-ui/core/styles';
 
 import Home from "./home/Home";
-import './App.css';
 import Course from "./course/Course";
+import './App.css';
 
 
 firebase.analytics();
@@ -39,6 +41,13 @@ function App() {
         localStorage.setItem('user', JSON.stringify(user));
         setCurrentUser(user);
     }
+
+    // Listen to the Firebase Auth state and set the local state.
+    useEffect(() => {
+        const unregisterAuthObserver = firebase.auth().onAuthStateChanged(setUser);
+        return () => unregisterAuthObserver(); // Make sure we un-register Firebase observers when the component unmounts.
+    }, []);
+
 
     return (
         <Router>

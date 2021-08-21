@@ -2,9 +2,7 @@ import React, {useContext, useEffect} from 'react';
 import StyledFirebaseAuth from 'react-firebaseui/StyledFirebaseAuth';
 import firebase from 'firebase/app';
 import 'firebase/auth';
-import './Auth.css';
-import Button from "@material-ui/core/Button";
-import {Avatar, createStyles, makeStyles, Theme} from "@material-ui/core";
+import {Avatar, IconButton, Menu, MenuItem, Typography} from "@material-ui/core";
 import {AuthContext} from "../App";
 
 
@@ -23,22 +21,8 @@ const uiConfig = {
     },
 };
 
-const useStyles = makeStyles((theme: Theme) =>
-    createStyles({
-        margin: {
-            margin: theme.spacing(1),
-        },
-    }),
-);
 
-
-interface AuthProps {
-    showSignInOptions: boolean;
-}
-
-
-function Auth(props: AuthProps) {
-    const classes = useStyles();
+export function SignIn() {
     const auth = useContext(AuthContext);
 
     // Listen to the Firebase Auth state and set the local state.
@@ -50,30 +34,56 @@ function Auth(props: AuthProps) {
     }, [auth]);
 
     if (!auth?.isSignedIn) {
-        if(!props.showSignInOptions)
-            return (<></>)
         return (
-            <div className="Auth-SignIn">
+            <div style={{left: '50%', textAlign: 'center'}}>
                 <h3>Sign in to continue</h3>
                 <StyledFirebaseAuth uiConfig={uiConfig} firebaseAuth={firebase.auth()} />
             </div>
         );
     }
-    const user = firebase.auth().currentUser;
-    if (!user) {
-        return (<></>);
-    }
-    return (
-        <div className="Auth-SignOut">
-            <p className="Auth-Name">{user.displayName}</p>
-            {
-                // @ts-ignore
-                <Avatar src={user.photoURL} alt={user.displayName} className={classes.margin}/>
-            }
-            <Button variant="outlined" onClick={() => firebase.auth().signOut()}>Sign Out</Button>
-        </div>
-    );
+
+    return(<></>);
 }
 
 
-export default Auth;
+export function AppBarProfile() {
+    const auth = useContext(AuthContext);
+    const user = auth?.currentUser;
+
+    const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+    const open = Boolean(anchorEl);
+
+    const handleMenu = (event: React.MouseEvent<HTMLElement>) => setAnchorEl(event.currentTarget);
+    const handleClose = () => setAnchorEl(null);
+
+
+    if (!user) {
+        return (<Typography variant='h6'>Login to continue</Typography>);
+    }
+
+    return (<>
+        {auth && (
+            <div>
+                <IconButton
+                    aria-label="account of current user"
+                    aria-controls="menu-appbar"
+                    aria-haspopup="true"
+                    onClick={handleMenu}
+                    edge="end">
+                    { /*@ts-ignore*/ }
+                    <Avatar src={user.photoURL} alt={user.displayName} />
+                </IconButton>
+                <Menu
+                    id="menu-appbar"
+                    anchorEl={anchorEl}
+                    anchorOrigin={{vertical: 'top',  horizontal: 'right'}}
+                    transformOrigin={{vertical: 'top', horizontal: 'right'}}
+                    keepMounted
+                    open={open}
+                    onClose={handleClose}>
+                    <MenuItem onClick={() => {handleClose(); firebase.auth().signOut();}}>Sign Out</MenuItem>
+                </Menu>
+            </div>
+        )}
+    </>)
+}

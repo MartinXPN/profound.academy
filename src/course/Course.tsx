@@ -101,20 +101,19 @@ const useStyles = makeStyles((theme: Theme) =>
 
 interface CourseDrawerProps {
     tutorials: Tutorial[];
+    currentTutorialId?: string;
+    onItemSelected: (index: number) => void;
 }
 
-function CourseWithDrawer(props: CourseDrawerProps) {
+function CourseDrawer(props: CourseDrawerProps) {
     const classes = useStyles();
     const theme = useTheme();
     const [open, setOpen] = React.useState(false);
 
-    const handleDrawerOpen = () => {
-        setOpen(true);
-    };
+    const handleDrawerOpen = () => setOpen(true);
+    const handleDrawerClose = () => setOpen(false);
 
-    const handleDrawerClose = () => {
-        setOpen(false);
-    };
+    console.log('drawer:', props);
 
     return (<>
             <CssBaseline/>
@@ -151,8 +150,8 @@ function CourseWithDrawer(props: CourseDrawerProps) {
                         [classes.drawerOpen]: open,
                         [classes.drawerClose]: !open,
                     }),
-                }}
-            >
+                }}>
+
                 <div className={classes.toolbar}>
                     <IconButton onClick={handleDrawerClose}>
                         {theme.direction === 'rtl' ? <ChevronRightIcon/> : <ChevronLeftIcon/>}
@@ -161,9 +160,11 @@ function CourseWithDrawer(props: CourseDrawerProps) {
                 <Divider/>
                 <List>
                     {props.tutorials.map((tutorial, index) => (
-                        <ListItem button key={tutorial.id}>
+                        <ListItem button key={tutorial.id} onClick={() => props.onItemSelected(index)}>
+                            {props.currentTutorialId === tutorial.id && <Divider />}
                             <ListItemIcon><ListItemText primary={index}/></ListItemIcon>
                             <ListItemText primary={tutorial.title}/>
+                            {props.currentTutorialId === tutorial.id && <Divider />}
                         </ListItem>
                     ))}
                 </List>
@@ -250,7 +251,9 @@ function CourseView() {
 
     return (<>
         <div className={classes.root}>
-            <CourseWithDrawer tutorials={tutorials}/>
+            <CourseDrawer tutorials={tutorials}
+                          currentTutorialId={currentTutorial?.id}
+                          onItemSelected={(index) => setPageId(index.toString())} />
 
             <main className={classes.content}>
                 <div className={classes.toolbar}/>
@@ -271,7 +274,7 @@ function CourseView() {
 
 export default CourseView;
 // TODO:
-//  DONE 1. make the authentication view appear on the Toolbar
+//  1. Track the progress and keep the last visited tutorialId instead of the pageId (through firebase)
 //  2. add an image icon on the Toolbar to go to homepage
 //  3. add click listeners on drawer items to navigate to appropriate page
 //  4. make the solved exercises green

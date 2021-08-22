@@ -203,8 +203,9 @@ function CurrentExercise(props: ExerciseProps) {
 
     return (
         <>
-            {/* Display the landing page with an option to start the course if it wasn't started yet */}
-            {(!tutorial || !auth?.isSignedIn) && <><LandingPage introPageId={course.introduction} onStartCourseClicked={() => {
+            {/* Display the landing page with an option to start the course if it wasn't started yet */
+            (!tutorial || !auth?.isSignedIn) &&
+            <><LandingPage introPageId={course.introduction} onStartCourseClicked={() => {
                 if (auth && auth.currentUser && auth.currentUser.uid) {
                     startCourse(auth.currentUser.uid, course.id).then(() => console.log('success'));
                     moveForward();
@@ -219,13 +220,13 @@ function CurrentExercise(props: ExerciseProps) {
             }
 
             {/* Display the tutorial of the course at the location where it was left off the last time*/
-                tutorial && auth?.isSignedIn && !showSignIn &&
-                <SplitPane split='vertical' defaultSize={splitPos} onChange={setSplitPos}>
-                    <div className={classes.tutorial}>
-                        <TutorialView tutorial={tutorial}/>
-                    </div>
-                    <div style={{width: '100%', height: '100%'}}><Editor/></div>
-                </SplitPane>
+            tutorial && auth?.isSignedIn && !showSignIn &&
+            <SplitPane split='vertical' defaultSize={splitPos} onChange={setSplitPos}>
+                <div className={classes.tutorial}>
+                    <TutorialView tutorial={tutorial}/>
+                </div>
+                <div style={{width: '100%', height: '100%'}}><Editor/></div>
+            </SplitPane>
             }
         </>
     )
@@ -274,7 +275,6 @@ function CourseView() {
 
 export default CourseView;
 // TODO:
-//  1. Track the progress and keep the last visited tutorialId instead of the pageId (through firebase)
 //  4. make the solved exercises green
 //  5. implement run/submit => upload to firebase storage
 //  6. SplitPane for code/terminal

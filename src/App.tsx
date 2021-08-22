@@ -10,6 +10,7 @@ import {MuiThemeProvider, createTheme} from '@material-ui/core/styles';
 
 import Home from "./home/Home";
 import Course from "./course/Course";
+import {useStickyState} from "./util";
 
 
 firebase.analytics();
@@ -35,23 +36,19 @@ export const AuthContext = createContext<AuthContextProps | null>(null);
 
 
 function App() {
-    const [currentUser, setCurrentUser] = useState<firebase.User | null>(JSON.parse(localStorage.getItem('user') ?? 'null'));
-    const setUser = (user: firebase.User | null) => {
-        localStorage.setItem('user', JSON.stringify(user));
-        setCurrentUser(user);
-    }
+    const [currentUser, setCurrentUser] = useStickyState<firebase.User | null>(null, 'user');
 
     // Listen to the Firebase Auth state and set the local state.
     useEffect(() => {
-        const unregisterAuthObserver = firebase.auth().onAuthStateChanged(setUser);
+        const unregisterAuthObserver = firebase.auth().onAuthStateChanged(setCurrentUser);
         return () => unregisterAuthObserver(); // Make sure we un-register Firebase observers when the component unmounts.
-    }, []);
+    }, [setCurrentUser]);
 
 
     return (
         <Router>
         <MuiThemeProvider theme={theme}>
-        <AuthContext.Provider value={{isSignedIn: !!currentUser, currentUser: currentUser, setCurrentUser: setUser}}>
+        <AuthContext.Provider value={{isSignedIn: !!currentUser, currentUser: currentUser, setCurrentUser: setCurrentUser}}>
         <Switch>
             <Route exact path="/">
                 <Home />

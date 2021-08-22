@@ -26,9 +26,10 @@ import LandingPage from "./LandingPage";
 import {AuthContext} from "../App";
 import {Tutorial} from "../models/tutorials";
 import {getCourseTutorials} from "../services/tutorials";
-import Editor from "./Editor";
+import Editor from "./editor/Editor";
 import TutorialView from "./Tutorial";
 import {AppBarProfile, SignIn} from "../header/Auth";
+import {useStickyState} from "../util";
 
 const drawerWidth = 240;
 
@@ -191,6 +192,7 @@ function CurrentExercise(props: ExerciseProps) {
     const auth = useContext(AuthContext);
     const {course, tutorial} = props;
     const pageKey = `progress-${auth?.currentUser?.uid}-${course.id}`;
+    const [splitPos, setSplitPos] = useStickyState(50, 'splitPos');
 
     return (
         <>
@@ -208,10 +210,7 @@ function CurrentExercise(props: ExerciseProps) {
 
             {/* Display the tutorial of the course at the location where it was left off the last time*/
                 tutorial &&
-                <SplitPane split='vertical'
-                           primary='first'
-                           defaultSize={parseInt(localStorage.getItem('splitPos') ?? '50', 10)}
-                           onChange={(size) => localStorage.setItem('splitPos', size.toString(10))}>
+                <SplitPane split='vertical' defaultSize={splitPos} onChange={setSplitPos}>
 
                     <div className={classes.tutorial}>
                         <TutorialView tutorial={tutorial}/>

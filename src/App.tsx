@@ -1,4 +1,4 @@
-import React, {createContext, useEffect, useState} from 'react';
+import React, {createContext, useEffect} from 'react';
 import {BrowserRouter as Router, Switch, Route} from 'react-router-dom';
 
 import firebase from 'firebase/app';
@@ -16,6 +16,10 @@ import {useStickyState} from "./util";
 firebase.analytics();
 const theme = createTheme({
     palette: {
+        background: {
+            default: 'white',
+            paper: 'white',
+        },
         primary: {
             main: '#4B5FAA',
         },

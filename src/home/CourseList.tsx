@@ -6,7 +6,7 @@ import ImageListItemBar from '@material-ui/core/ImageListItemBar';
 import IconButton from '@material-ui/core/IconButton';
 import InfoIcon from '@material-ui/icons/Info';
 
-import {Tooltip} from "@material-ui/core";
+import {Tooltip, Typography} from "@material-ui/core";
 
 import {Course} from '../models/courses';
 import {getAllCourses, getUserCourses} from "../services/courses";
@@ -101,11 +101,11 @@ function CourseList() {
             {(auth?.isSignedIn && userCourses.length > 0) &&
             <>
                 <br/><br/><br/><br/>
-                <h2 className={classes.title}>My Curriculum</h2>
+                <Typography variant='h5' className={classes.title}>My Curriculum</Typography>
                 <CourseListView courses={userCourses}/>
             </>}
 
-            <h2 className={classes.title}>All Courses</h2>
+            <Typography variant='h5' className={classes.title}>All Courses</Typography>
             <CourseListView courses={allCourses}/>
         </>
     )

@@ -274,7 +274,7 @@ export default CourseView;
 //  1. Track the progress and keep the last visited tutorialId instead of the pageId (through firebase)
 //  4. make the solved exercises green
 //  5. implement run/submit => upload to firebase storage
-//  6. SplitPane for code/terminal + submit/run icons with absolute top-right positions
+//  6. SplitPane for code/terminal
 //  7. implement the dashboard for best/all submissions for a given exercise
 //  8. implement editor configurations (font, language, theme)
 //  9. implement a simple forum

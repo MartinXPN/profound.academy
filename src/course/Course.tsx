@@ -17,7 +17,6 @@ import ChevronRightIcon from '@material-ui/icons/ChevronRight';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
-import {Typography} from "@material-ui/core";
 
 import {getCourse, startCourse} from "../services/courses";
 import useAsyncEffect from "use-async-effect";
@@ -184,12 +183,12 @@ interface ExerciseProps {
     course: Course;
     tutorial: Tutorial | null;
     moveForward: () => void;
-    showSignIn: () => void;
 }
 
 function CurrentExercise(props: ExerciseProps) {
     const classes = useStyles();
     const auth = useContext(AuthContext);
+    const [showSignIn, setShowSignIn] = useState(false);
     const {course, tutorial} = props;
     const pageKey = `progress-${auth?.currentUser?.uid}-${course.id}`;
     const [splitPos, setSplitPos] = useStickyState(50, 'splitPos');
@@ -197,25 +196,26 @@ function CurrentExercise(props: ExerciseProps) {
     return (
         <>
             {/* Display the landing page with an option to start the course if it wasn't started yet */}
-            {!tutorial && <><LandingPage introPageId={course.introduction} onStartCourseClicked={() => {
+            {(!tutorial || !auth?.isSignedIn) && <><LandingPage introPageId={course.introduction} onStartCourseClicked={() => {
                 if (auth && auth.currentUser && auth.currentUser.uid) {
                     startCourse(auth.currentUser.uid, course.id).then(() => console.log('success'));
                     localStorage.setItem(pageKey, '0');
                     props.moveForward();
                 } else {
-                    props.showSignIn();
+                    setShowSignIn(true);
                 }
             }}/>
             </>}
 
-            {/* Display the tutorial of the course at the location where it was left off the last time*/
-                tutorial &&
-                <SplitPane split='vertical' defaultSize={splitPos} onChange={setSplitPos}>
+            {/* Request for authentication if the user is not signed-in yet */
+                showSignIn && <SignIn />
+            }
 
+            {/* Display the tutorial of the course at the location where it was left off the last time*/
+                tutorial && auth?.isSignedIn && !showSignIn &&
+                <SplitPane split='vertical' defaultSize={splitPos} onChange={setSplitPos}>
                     <div className={classes.tutorial}>
                         <TutorialView tutorial={tutorial}/>
-                        <br/><br/><br/>
-                        <Typography variant='h5'>The forum will appear here...</Typography>
                     </div>
                     <div style={{width: '100%', height: '100%'}}><Editor/></div>
                 </SplitPane>
@@ -232,7 +232,6 @@ function CourseView() {
     const classes = useStyles();
     const {id} = useParams<CourseParams>();
     const auth = useContext(AuthContext);
-    const [showSignIn, setShowSignIn] = useState(false);
     const [course, setCourse] = useState<Course | null>(null);
     const [tutorials, setTutorials] = useState<Tutorial[]>([]);
     const pageKey = `progress-${auth?.currentUser?.uid}-${id}`;
@@ -267,10 +266,7 @@ function CourseView() {
                     console.log('setting the current page to:', current + 1);
                     setPageId((current + 1).toString());
                 }}
-                                 showSignIn={() => setShowSignIn(true)}
                 />}
-
-                {showSignIn && <SignIn/>}
             </main>
         </div>
     </>);

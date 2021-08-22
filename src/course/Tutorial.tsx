@@ -2,7 +2,7 @@ import Content from "./content/Content";
 import React, {useState} from "react";
 import {Tutorial} from '../models/tutorials';
 import Button from "@material-ui/core/Button";
-import {createStyles, makeStyles, Theme} from "@material-ui/core";
+import {createStyles, makeStyles, Theme, Typography} from "@material-ui/core";
 
 const useStyles = makeStyles((theme: Theme) =>
     createStyles({
@@ -42,6 +42,9 @@ function TutorialView(props: TutorialProps) {
             {currentTab === 'description' && <Content notionPage={tutorial.pageId}/>}
             {currentTab === 'bestSubmissions' && <div>Best submissions</div>}
             {currentTab === 'allSubmissions' && <div>All submissions</div>}
+
+            <br/><br/><br/>
+            <Typography variant='h5'>The forum will appear here...</Typography>
         </>
     );
 }

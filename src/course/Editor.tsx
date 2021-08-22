@@ -4,10 +4,15 @@ import AceEditor from "react-ace";
 import "ace-builds/src-noconflict/mode-python";
 import "ace-builds/src-noconflict/theme-tomorrow";
 import "ace-builds/src-noconflict/ext-language_tools";
+import SplitPane from "react-split-pane";
 
 
 function Editor() {
     const [code, setCode] = useState('');
+    const [editorRatio, setEditorRatio] = useState(0.7);
+    console.log('editor size:', localStorage.getItem('editorSplitPos'));
+    // console.log('editor size:', localStorage.getItem('editorSplitPos').split(',').map((size) => `${parseFloat(size).toFixed(2)}px`))
+    console.log('editor size:', editorRatio);
 
     return (
         <div style={{height: '100%'}}>
@@ -16,6 +21,7 @@ function Editor() {
                 mode="python"
                 theme="tomorrow"
                 width='100%'
+                height='70%'
                 onChange={(value) => {
                     console.log(value);
                     setCode(value);
@@ -34,11 +40,9 @@ function Editor() {
                     showLineNumbers: true,
                     tabSize: 4,
                 }}
-                editorProps={{ $blockScrolling: false }}
+                editorProps={{ $blockScrolling: true }}
             />
-
-            <div>Submission results and outputs will appear here...</div>
-
+            <div style={{height: '30%', backgroundColor: 'yellow'}}>Submission results and outputs will appear here...</div>
         </div>
     )
 }

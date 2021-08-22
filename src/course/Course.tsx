@@ -36,6 +36,7 @@ const useStyles = makeStyles((theme: Theme) =>
     createStyles({
         root: {
             display: 'flex',
+            height: 'calc(100vh - 64px)',
         },
         appBar: {
             zIndex: theme.zIndex.drawer + 1,
@@ -92,6 +93,10 @@ const useStyles = makeStyles((theme: Theme) =>
         content: {
             flexGrow: 1,
             padding: theme.spacing(0),
+        },
+        tutorial: {
+            overflowY: 'auto',
+            height: '100%',
         },
         authIcon: {
             marginLeft: 'auto',
@@ -182,6 +187,7 @@ interface ExerciseProps {
 }
 
 function CurrentExercise(props: ExerciseProps) {
+    const classes = useStyles();
     const auth = useContext(AuthContext);
     const {course, tutorial} = props;
     const pageKey = `progress-${auth?.currentUser?.uid}-${course.id}`;
@@ -204,16 +210,15 @@ function CurrentExercise(props: ExerciseProps) {
                 tutorial &&
                 <SplitPane split='vertical'
                            primary='first'
-                           style={{overflow: 'hidden'}}
                            defaultSize={parseInt(localStorage.getItem('splitPos') ?? '50', 10)}
                            onChange={(size) => localStorage.setItem('splitPos', size.toString(10))}>
 
-                    <div style={{overflowY: 'scroll'}}>
+                    <div className={classes.tutorial}>
                         <TutorialView tutorial={tutorial}/>
                         <br/><br/><br/>
                         <Typography variant='h5'>The forum will appear here...</Typography>
                     </div>
-                    <div style={{marginTop: '80px', width: '100%'}}><Editor/></div>
+                    <div style={{width: '100%', height: '100%'}}><Editor/></div>
                 </SplitPane>
             }
         </>

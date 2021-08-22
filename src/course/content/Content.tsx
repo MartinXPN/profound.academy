@@ -20,14 +20,16 @@ interface ContentProps {
 
 function Content(props: ContentProps) {
     const [recordMap, setRecordMap] = useState<ExtendedRecordMap | null>(null);
+    const {notionPage} = props;
 
     useAsyncEffect(async () => {
+        setRecordMap(null);
         const getPage = firebase.functions().httpsCallable('getNotionPage');
-        const map = await getPage({pageId: props.notionPage});
+        const map = await getPage({pageId: notionPage});
         // console.log({map: map.data});
         // @ts-ignore
         setRecordMap(map.data);
-    }, []);
+    }, [notionPage]);
 
     return (
         <>

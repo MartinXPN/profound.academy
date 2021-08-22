@@ -29,6 +29,7 @@ function TutorialView(props: TutorialProps) {
 
     const {tutorial} = props;
     const [currentTab, setCurrentTab] = useState('description'); // {description / allSubmissions / bestSubmissions}
+    console.log('Tutorial view:', tutorial);
 
     return (
         <>

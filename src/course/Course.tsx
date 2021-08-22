@@ -189,9 +189,9 @@ function CurrentExercise(props: ExerciseProps) {
     const classes = useStyles();
     const auth = useContext(AuthContext);
     const [showSignIn, setShowSignIn] = useState(false);
-    const {course, tutorial} = props;
-    const pageKey = `progress-${auth?.currentUser?.uid}-${course.id}`;
+    const {course, tutorial, moveForward} = props;
     const [splitPos, setSplitPos] = useStickyState(50, 'splitPos');
+    console.log('Current Exercise props:', props)
 
     return (
         <>
@@ -199,8 +199,7 @@ function CurrentExercise(props: ExerciseProps) {
             {(!tutorial || !auth?.isSignedIn) && <><LandingPage introPageId={course.introduction} onStartCourseClicked={() => {
                 if (auth && auth.currentUser && auth.currentUser.uid) {
                     startCourse(auth.currentUser.uid, course.id).then(() => console.log('success'));
-                    localStorage.setItem(pageKey, '0');
-                    props.moveForward();
+                    moveForward();
                 } else {
                     setShowSignIn(true);
                 }
@@ -234,9 +233,10 @@ function CourseView() {
     const auth = useContext(AuthContext);
     const [course, setCourse] = useState<Course | null>(null);
     const [tutorials, setTutorials] = useState<Tutorial[]>([]);
-    const pageKey = `progress-${auth?.currentUser?.uid}-${id}`;
-    const [pageId, setPageId] = useState(auth?.currentUser ? localStorage.getItem(pageKey) : null);
+    const [pageId, setPageId] = useStickyState(-1, `page-${auth?.currentUser?.uid}-${id}`);
 
+    const moveForward = () => setPageId(pageId + 1);
+    const currentTutorial = course && pageId >= 0 && tutorials && tutorials[parseInt(pageId)] ? tutorials[parseInt(pageId)] : null;
 
     useAsyncEffect(async () => {
         const course = await getCourse(id);
@@ -248,9 +248,6 @@ function CourseView() {
         setTutorials(tutorials);
     }, [id]);
 
-    const currentTutorial = course && pageId && tutorials && tutorials[parseInt(pageId)] ? tutorials[parseInt(pageId)] : null;
-    console.log('current tutorial:', currentTutorial);
-
 
     return (<>
         <div className={classes.root}>
@@ -260,13 +257,7 @@ function CourseView() {
 
             <main className={classes.content}>
                 <div className={classes.toolbar}/>
-                {course &&
-                <CurrentExercise course={course} tutorial={currentTutorial} moveForward={() => {
-                    const current = parseInt(pageId ? pageId : '-1');
-                    console.log('setting the current page to:', current + 1);
-                    setPageId((current + 1).toString());
-                }}
-                />}
+                {course && <CurrentExercise course={course} tutorial={currentTutorial} moveForward={moveForward}/>}
             </main>
         </div>
     </>);

@@ -9,6 +9,7 @@ import {useEffect, useState} from "react";
 export function useStickyState<T>(defaultValue: T, key: string) {
     const [value, setValue] = useState(() => {
         const stickyValue = localStorage.getItem(key);
+        console.log('GOT:', key, stickyValue);
         return stickyValue !== null
             ? JSON.parse(stickyValue)
             : defaultValue;

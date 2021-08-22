@@ -198,6 +198,9 @@ function CurrentExercise(props: ExerciseProps) {
     const {course, tutorial, moveForward} = props;
     const [splitPos, setSplitPos] = useStickyState(50, 'splitPos');
 
+    if(auth?.isSignedIn && showSignIn)
+        setShowSignIn(false);
+
     return (
         <>
             {/* Display the landing page with an option to start the course if it wasn't started yet */}

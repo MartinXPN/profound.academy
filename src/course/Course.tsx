@@ -1,5 +1,5 @@
 import React, {useContext, useState} from "react";
-import {useParams} from "react-router-dom";
+import {useHistory, useParams} from "react-router-dom";
 import SplitPane from 'react-split-pane';
 
 import clsx from 'clsx';
@@ -14,6 +14,7 @@ import IconButton from '@material-ui/core/IconButton';
 import MenuIcon from '@material-ui/icons/Menu';
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
 import ChevronRightIcon from '@material-ui/icons/ChevronRight';
+import Home from '@material-ui/icons/Home';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
@@ -113,12 +114,14 @@ interface CourseDrawerProps {
 function CourseDrawer(props: CourseDrawerProps) {
     const classes = useStyles();
     const theme = useTheme();
+    const history = useHistory();
     const [open, setOpen] = React.useState(false);
 
     const handleDrawerOpen = () => setOpen(true);
     const handleDrawerClose = () => setOpen(false);
+    const onHomeClicked = () => history.push('/');
 
-    console.log('drawer:', props);
+    const {tutorials, currentTutorialId, onItemSelected} = props;
 
     return (<>
             <CssBaseline/>
@@ -138,6 +141,7 @@ function CourseDrawer(props: CourseDrawerProps) {
                         })}>
                         <MenuIcon/>
                     </IconButton>
+                    <IconButton color='inherit' onClick={onHomeClicked}><Home/></IconButton>
 
                     <div className={classes.authIcon}><AppBarProfile/></div>
                 </Toolbar>
@@ -164,13 +168,15 @@ function CourseDrawer(props: CourseDrawerProps) {
                 </div>
                 <Divider/>
                 <List>
-                    {props.tutorials.map((tutorial, index) => (
-                        <ListItem button key={tutorial.id} onClick={() => props.onItemSelected(index)}>
-                            {props.currentTutorialId === tutorial.id && <Divider />}
+                    {tutorials.map((tutorial, index) => (
+                        <>
+                        {currentTutorialId === tutorial.id && <Divider />}
+                        <ListItem button key={tutorial.id} onClick={() => onItemSelected(index)}>
                             <ListItemIcon><ListItemText primary={index}/></ListItemIcon>
                             <ListItemText primary={tutorial.title}/>
-                            {props.currentTutorialId === tutorial.id && <Divider />}
                         </ListItem>
+                        {currentTutorialId === tutorial.id && <Divider />}
+                        </>
                     ))}
                 </List>
             </Drawer>
@@ -191,7 +197,6 @@ function CurrentExercise(props: ExerciseProps) {
     const [showSignIn, setShowSignIn] = useState(false);
     const {course, tutorial, moveForward} = props;
     const [splitPos, setSplitPos] = useStickyState(50, 'splitPos');
-    console.log('Current Exercise props:', props)
 
     return (
         <>
@@ -231,6 +236,7 @@ function CourseView() {
     const classes = useStyles();
     const {id} = useParams<CourseParams>();
     const auth = useContext(AuthContext);
+
     const [course, setCourse] = useState<Course | null>(null);
     const [tutorials, setTutorials] = useState<Tutorial[]>([]);
     const [pageId, setPageId] = useStickyState(-1, `page-${auth?.currentUser?.uid}-${id}`);
@@ -241,7 +247,7 @@ function CourseView() {
     useAsyncEffect(async () => {
         const course = await getCourse(id);
         setCourse(course);
-    }, [id]);
+    }, [id, auth]);
 
     useAsyncEffect(async () => {
         const tutorials = await getCourseTutorials(id);
@@ -266,8 +272,6 @@ function CourseView() {
 export default CourseView;
 // TODO:
 //  1. Track the progress and keep the last visited tutorialId instead of the pageId (through firebase)
-//  2. add an image icon on the Toolbar to go to homepage
-//  3. add click listeners on drawer items to navigate to appropriate page
 //  4. make the solved exercises green
 //  5. implement run/submit => upload to firebase storage
 //  6. SplitPane for code/terminal + submit/run icons with absolute top-right positions

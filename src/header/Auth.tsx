@@ -2,7 +2,7 @@ import React, {useContext, useEffect} from 'react';
 import StyledFirebaseAuth from 'react-firebaseui/StyledFirebaseAuth';
 import firebase from 'firebase/app';
 import 'firebase/auth';
-import {Avatar, IconButton, Menu, MenuItem, Typography} from "@material-ui/core";
+import {Avatar, IconButton, Menu, MenuItem} from "@material-ui/core";
 import {AuthContext} from "../App";
 
 
@@ -58,7 +58,7 @@ export function AppBarProfile() {
 
 
     if (!user) {
-        return (<Typography variant='h6'>Login to continue</Typography>);
+        return (<IconButton><Avatar/></IconButton>);
     }
 
     return (<>

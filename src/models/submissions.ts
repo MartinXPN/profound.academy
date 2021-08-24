@@ -1,4 +1,5 @@
 import {Exercise} from "./courses";
+import firebase from 'firebase/app';
 
 export type SubmissionStatus = 'Solved' | 'Wrong answer' | 'Time limit exceeded' | 'Runtime error' | 'Checking' | 'Unavailable';
 
@@ -29,6 +30,7 @@ export interface Submission {
     exercise: Exercise;
     submissionFileURL: string;
     language: keyof typeof LANGUAGES;
+    createdAt: firebase.firestore.FieldValue;
     isTestRun: boolean;
 }
 

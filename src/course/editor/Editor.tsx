@@ -3,6 +3,7 @@ import Code from "./Code";
 import {Button, createStyles, IconButton, makeStyles, Theme, Typography} from "@material-ui/core";
 import {Send, Done, Remove, Add} from "@material-ui/icons";
 import {useStickyState} from "../../util";
+import {Course} from "../../models/courses";
 
 
 const useStyles = makeStyles((theme: Theme) =>
@@ -36,11 +37,15 @@ const useStyles = makeStyles((theme: Theme) =>
 );
 
 
-function Editor() {
+interface EditorProps {
+    course: Course;
+}
+
+function Editor(props: EditorProps) {
     const classes = useStyles();
     const [code, setCode] = useState('');
-    const [theme, setTheme] = useState('tomorrow');
-    const [language, setLanguage] = useState('python');
+    const [theme, setTheme] = useStickyState('tomorrow', 'editorTheme');
+    const [language, setLanguage] = useStickyState(props.course.preferredLanguage.editorCode, `${props.course.id}-language`);
     const [fontSize, setFontSize] = useStickyState(14, 'fontSize');
 
     const decreaseFontSize = () => setFontSize(Math.max(fontSize - 1, 5));

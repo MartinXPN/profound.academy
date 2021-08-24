@@ -130,7 +130,7 @@ function CourseDrawer(props: CourseDrawerProps) {
             return classes.drawerItemNeutral;
 
         const p = progress[id];
-        if(['Wrong answer', 'Time limit exceeded', 'Runtime Error'].includes(p.status) )    return classes.drawerItemFail;
+        if(['Wrong answer', 'Time limit exceeded', 'Runtime error'].includes(p.status) )    return classes.drawerItemFail;
         if(p.status === 'Solved')                                                           return classes.drawerItemDone;
         if( p.status === 'Unavailable')                                                     return classes.drawerItemUnavailable;
     }

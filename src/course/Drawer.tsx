@@ -17,9 +17,11 @@ import Home from '@material-ui/icons/Home';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
+import ArrowRightIcon from '@material-ui/icons/ArrowRight';
 
 import {Exercise} from "../models/courses";
 import {AppBarProfile} from "../header/Auth";
+import {Progress} from "../models/users";
 
 
 const drawerWidth = 240;
@@ -70,6 +72,26 @@ const useStyles = makeStyles((theme: Theme) =>
                 width: theme.spacing(9) + 1,
             },
         },
+        drawerItemDone: {
+            "&,&:focus,&:hover": {
+                backgroundColor: "#00C02F",
+            }
+        },
+        drawerItemFail: {
+            "&,&:focus,&:hover": {
+                backgroundColor: "#F09A24",
+            }
+        },
+        drawerItemNeutral: {
+            "&,&:focus,&:hover": {
+                backgroundColor: "#fafafa",
+            }
+        },
+        drawerItemUnavailable: {
+            "&,&:focus,&:hover": {
+                backgroundColor: "#969696",
+            }
+        },
         toolbar: {
             display: 'flex',
             alignItems: 'center',
@@ -87,6 +109,7 @@ const useStyles = makeStyles((theme: Theme) =>
 interface CourseDrawerProps {
     exercises: Exercise[];
     currentExerciseId?: string;
+    progress: { [key: string]: Progress};
     onItemSelected: (index: number) => void;
 }
 
@@ -100,7 +123,18 @@ function CourseDrawer(props: CourseDrawerProps) {
     const handleDrawerClose = () => setOpen(false);
     const onHomeClicked = () => history.push('/');
 
-    const {exercises, currentExerciseId, onItemSelected} = props;
+
+    const {exercises, currentExerciseId, progress, onItemSelected} = props;
+    const getClassName = (id: string) => {
+        if( !progress.hasOwnProperty(id) )
+            return classes.drawerItemNeutral;
+
+        const p = progress[id];
+        if(['Wrong answer', 'Time limit exceeded', 'Runtime Error'].includes(p.status) )    return classes.drawerItemFail;
+        if(p.status === 'Solved')                                                           return classes.drawerItemDone;
+        if( p.status === 'Unavailable')                                                     return classes.drawerItemUnavailable;
+    }
+
 
     return (<>
             <CssBaseline/>
@@ -149,12 +183,10 @@ function CourseDrawer(props: CourseDrawerProps) {
                 <List>
                     {exercises.map((ex, index) => (
                         <>
-                            {currentExerciseId === ex.id && <Divider />}
-                            <ListItem button key={ex.id} onClick={() => onItemSelected(index)}>
-                                <ListItemIcon><ListItemText primary={index}/></ListItemIcon>
+                            <ListItem button key={ex.id} onClick={() => onItemSelected(index)} className={getClassName(ex.id)}>
+                                <ListItemIcon>{currentExerciseId === ex.id ? <ArrowRightIcon /> : <ListItemText primary={index}/>}</ListItemIcon>
                                 <ListItemText primary={ex.title}/>
                             </ListItem>
-                            {currentExerciseId === ex.id && <Divider />}
                         </>
                     ))}
                 </List>

@@ -15,6 +15,8 @@ import ExerciseView from "./Exercise";
 import {SignIn} from "../header/Auth";
 import {useStickyState} from "../util";
 import CourseDrawer from "./Drawer";
+import {getUserProgress} from "../services/users";
+import {Progress} from "../models/users";
 
 
 const useStyles = makeStyles((theme: Theme) =>
@@ -101,6 +103,7 @@ function CourseView() {
 
     const [course, setCourse] = useState<Course | null>(null);
     const [exercises, setExercises] = useState<Exercise[]>([]);
+    const [progress, setProgress] = useState<{[key: string]: Progress}>({});
     const [pageId, setPageId] = useStickyState(-1, `page-${auth?.currentUser?.uid}-${id}`);
 
     const launchCourse = () => setPageId(0);
@@ -116,10 +119,18 @@ function CourseView() {
         setExercises(exercises);
     }, [id]);
 
+    useAsyncEffect(async () => {
+        if( auth && auth.currentUser && auth.currentUser.uid ) {
+            const progress = await getUserProgress(auth?.currentUser.uid, id);
+            setProgress(progress);
+        }
+    }, [id, auth]);
+
 
     return (<>
         <div className={classes.root}>
             <CourseDrawer exercises={exercises}
+                          progress={progress}
                           currentExerciseId={currentExercise?.id}
                           onItemSelected={setPageId} />
 
@@ -133,7 +144,6 @@ function CourseView() {
 
 export default CourseView;
 // TODO:
-//  4. make the solved exercises green
 //  5. implement run/submit => upload to firebase storage
 //  6. SplitPane for code/terminal
 //  7. implement the dashboard for best/all submissions for a given exercise

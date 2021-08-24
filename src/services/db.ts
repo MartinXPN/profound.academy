@@ -1,6 +1,6 @@
 import firebase from 'firebase/app';
 import 'firebase/firestore';
-import {User} from "../models/users";
+import {Progress, User} from "../models/users";
 import {Course, Exercise} from "../models/courses";
 import _ from "lodash";
 
@@ -19,6 +19,7 @@ const db = {
     users: dataPoint<User>('users'),
     courses: dataPoint<Course>('courses'),
     exercises: (courseId: string) => dataPoint<Exercise>(`courses/${courseId}/exercises`),
+    progress: (userId: string, courseId: string) => dataPoint<Progress>(`users/${userId}/progress/${courseId}/private`),
 };
 
 export {db}

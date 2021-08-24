@@ -1,8 +1,8 @@
-import React, {useEffect} from "react";
+import React, {useState} from "react";
 import AceEditor from "react-ace";
 
 import "ace-builds/src-noconflict/ext-language_tools";
-import {Typography} from "@material-ui/core";
+import useAsyncEffect from "use-async-effect";
 
 export const languages = [
     "javascript",
@@ -45,21 +45,29 @@ interface Props {
 
 function Code(props: Props) {
     const {theme, language, fontSize, setCode} = props;
-    if(!languages.includes(language)) return <Typography>Language not supported!</Typography>
-    if(!themes.includes(theme)) return <Typography>Theme not supported!</Typography>
 
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    useEffect(() => {
-        require(`ace-builds/src-noconflict/mode-${language}`);
-        require(`ace-builds/src-noconflict/snippets/${language}`);
-        require(`ace-builds/src-noconflict/theme-${theme}`)
-    }, [language, theme]);
+    const [loadedTheme, setLoadedTheme] = useState('');
+    const [loadedLanguage, setLoadedLanguage] = useState('');
+
+    // load the language styles
+    useAsyncEffect(async () => {
+        await import(`ace-builds/src-noconflict/mode-${language}`);
+        await import(`ace-builds/src-noconflict/snippets/${language}`);
+        setLoadedLanguage(language);
+    }, [language]);
+
+    // load the theme styles
+    useAsyncEffect(async () => {
+        await import(`ace-builds/src-noconflict/theme-${theme}`);
+        setLoadedTheme(theme);
+    }, [theme]);
+
 
     return (
         <AceEditor
             placeholder="Start typing your code..."
-            mode={language}
-            theme={theme}
+            mode={loadedLanguage}
+            theme={loadedTheme}
             width='100%'
             height='100%'
             fontSize={fontSize}

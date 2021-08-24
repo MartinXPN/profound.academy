@@ -1,19 +1,5 @@
 {
   "indexes": [
-    {
-      "collectionGroup": "tutorials",
-      "queryScope": "COLLECTION",
-      "fields": [
-        {
-          "fieldPath": "course",
-          "order": "ASCENDING"
-        },
-        {
-          "fieldPath": "order",
-          "order": "ASCENDING"
-        }
-      ]
-    }
   ],
   "fieldOverrides": []
 }

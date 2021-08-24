@@ -85,3 +85,8 @@ typings/
 
 # Firebase
 .firebase/
+firebase/firebase-key.json
+
+# Python
+*.ipynb
+**/.ipynb_checkpoints/

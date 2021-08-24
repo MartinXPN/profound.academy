@@ -1,5 +1,5 @@
 import {db} from "./db";
-import {Course} from "../models/courses";
+import {Course, Exercise} from "../models/courses";
 import firebase from "firebase/app";
 
 
@@ -36,4 +36,15 @@ export const startCourse = async (userId: string, courseId: string) => {
     });
     console.log(course, 'added to user:', userId);
     return userId;
+}
+
+
+export const getCourseExercises = async (courseId: string) => {
+    const snapshot = await db.exercises(courseId)
+        .orderBy('order', 'asc')
+        .get();
+
+    const exercises: Exercise[] = snapshot.docs.map(x => x.data());
+    console.log('Got exercises:', exercises);
+    return exercises;
 }

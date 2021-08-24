@@ -1,3 +1,10 @@
+export interface Exercise {
+    id: string;
+    title: string;
+    pageId: string;
+    order: number;
+}
+
 export interface Course {
     id: string;
     img: string;
@@ -5,4 +12,5 @@ export interface Course {
     author: string;
     details: string;
     introduction: string; // notion id for the introduction page
+    exercises: Exercise[];
 }

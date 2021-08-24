@@ -1,8 +1,8 @@
 import Content from "./content/Content";
 import React, {useState} from "react";
-import {Tutorial} from '../models/tutorials';
 import Button from "@material-ui/core/Button";
 import {createStyles, makeStyles, Theme, Typography} from "@material-ui/core";
+import {Exercise} from "../models/courses";
 
 const useStyles = makeStyles((theme: Theme) =>
     createStyles({
@@ -20,16 +20,16 @@ const useStyles = makeStyles((theme: Theme) =>
 
 
 
-interface TutorialProps {
-    tutorial: Tutorial;
+interface ExerciseProps {
+    exercise: Exercise;
 }
 
-function TutorialView(props: TutorialProps) {
+function ExerciseView(props: ExerciseProps) {
     const classes = useStyles();
 
-    const {tutorial} = props;
+    const {exercise} = props;
     const [currentTab, setCurrentTab] = useState('description'); // {description / allSubmissions / bestSubmissions}
-    console.log('Tutorial view:', tutorial);
+    console.log('Tutorial view:', exercise);
 
     return (
         <>
@@ -40,7 +40,7 @@ function TutorialView(props: TutorialProps) {
             </div>
 
 
-            {currentTab === 'description' && <Content notionPage={tutorial.pageId}/>}
+            {currentTab === 'description' && <Content notionPage={exercise.pageId}/>}
             {currentTab === 'bestSubmissions' && <div>Best submissions</div>}
             {currentTab === 'allSubmissions' && <div>All submissions</div>}
 
@@ -50,4 +50,4 @@ function TutorialView(props: TutorialProps) {
     );
 }
 
-export default TutorialView;
+export default ExerciseView;

@@ -1,8 +1,7 @@
 import firebase from 'firebase/app';
 import 'firebase/firestore';
 import {User} from "../models/users";
-import {Course} from "../models/courses";
-import { Tutorial } from '../models/tutorials';
+import {Course, Exercise} from "../models/courses";
 import _ from "lodash";
 
 // Add ids when getting the data and removing when sending it
@@ -19,7 +18,7 @@ const dataPoint = <T>(collectionPath: string) => firebase.firestore()
 const db = {
     users: dataPoint<User>('users'),
     courses: dataPoint<Course>('courses'),
-    tutorials: dataPoint<Tutorial>('tutorials'),
+    exercises: (courseId: string) => dataPoint<Exercise>(`courses/${courseId}/exercises`),
 };
 
 export {db}

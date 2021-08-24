@@ -21,13 +21,12 @@ import ListItemText from '@material-ui/core/ListItemText';
 
 import {getCourse, startCourse} from "../services/courses";
 import useAsyncEffect from "use-async-effect";
-import {Course} from "../models/courses";
+import {Course, Exercise} from "../models/courses";
 import LandingPage from "./LandingPage";
 import {AuthContext} from "../App";
-import {Tutorial} from "../models/tutorials";
-import {getCourseTutorials} from "../services/tutorials";
+import {getCourseExercises} from "../services/courses";
 import Editor from "./editor/Editor";
-import TutorialView from "./Tutorial";
+import ExerciseView from "./Exercise";
 import {AppBarProfile, SignIn} from "../header/Auth";
 import {useStickyState} from "../util";
 
@@ -95,7 +94,7 @@ const useStyles = makeStyles((theme: Theme) =>
             flexGrow: 1,
             padding: theme.spacing(0),
         },
-        tutorial: {
+        exercise: {
             overflowY: 'auto',
             height: '100%',
         },
@@ -106,8 +105,8 @@ const useStyles = makeStyles((theme: Theme) =>
 );
 
 interface CourseDrawerProps {
-    tutorials: Tutorial[];
-    currentTutorialId?: string;
+    exercises: Exercise[];
+    currentExerciseId?: string;
     onItemSelected: (index: number) => void;
 }
 
@@ -121,7 +120,7 @@ function CourseDrawer(props: CourseDrawerProps) {
     const handleDrawerClose = () => setOpen(false);
     const onHomeClicked = () => history.push('/');
 
-    const {tutorials, currentTutorialId, onItemSelected} = props;
+    const {exercises, currentExerciseId, onItemSelected} = props;
 
     return (<>
             <CssBaseline/>
@@ -168,14 +167,14 @@ function CourseDrawer(props: CourseDrawerProps) {
                 </div>
                 <Divider/>
                 <List>
-                    {tutorials.map((tutorial, index) => (
+                    {exercises.map((ex, index) => (
                         <>
-                        {currentTutorialId === tutorial.id && <Divider />}
-                        <ListItem button key={tutorial.id} onClick={() => onItemSelected(index)}>
+                        {currentExerciseId === ex.id && <Divider />}
+                        <ListItem button key={ex.id} onClick={() => onItemSelected(index)}>
                             <ListItemIcon><ListItemText primary={index}/></ListItemIcon>
-                            <ListItemText primary={tutorial.title}/>
+                            <ListItemText primary={ex.title}/>
                         </ListItem>
-                        {currentTutorialId === tutorial.id && <Divider />}
+                        {currentExerciseId === ex.id && <Divider />}
                         </>
                     ))}
                 </List>
@@ -187,7 +186,7 @@ function CourseDrawer(props: CourseDrawerProps) {
 
 interface ExerciseProps {
     course: Course;
-    tutorial: Tutorial | null;
+    exercise: Exercise | null;
     moveForward: () => void;
 }
 
@@ -195,7 +194,7 @@ function CurrentExercise(props: ExerciseProps) {
     const classes = useStyles();
     const auth = useContext(AuthContext);
     const [showSignIn, setShowSignIn] = useState(false);
-    const {course, tutorial, moveForward} = props;
+    const {course, exercise, moveForward} = props;
     const [splitPos, setSplitPos] = useStickyState(50, 'splitPos');
 
     if(auth?.isSignedIn && showSignIn)
@@ -204,7 +203,7 @@ function CurrentExercise(props: ExerciseProps) {
     return (
         <>
             {/* Display the landing page with an option to start the course if it wasn't started yet */
-            (!tutorial || !auth?.isSignedIn) &&
+            (!exercise || !auth?.isSignedIn) &&
             <><LandingPage introPageId={course.introduction} onStartCourseClicked={() => {
                 if (auth && auth.currentUser && auth.currentUser.uid) {
                     startCourse(auth.currentUser.uid, course.id).then(() => console.log('success'));
@@ -219,11 +218,11 @@ function CurrentExercise(props: ExerciseProps) {
                 showSignIn && <SignIn />
             }
 
-            {/* Display the tutorial of the course at the location where it was left off the last time*/
-            tutorial && auth?.isSignedIn && !showSignIn &&
+            {/* Display the exercise of the course at the location where it was left off the last time*/
+            exercise && auth?.isSignedIn && !showSignIn &&
             <SplitPane split='vertical' defaultSize={splitPos} onChange={setSplitPos}>
-                <div className={classes.tutorial}>
-                    <TutorialView tutorial={tutorial}/>
+                <div className={classes.exercise}>
+                    <ExerciseView exercise={exercise}/>
                 </div>
                 <div style={{width: '100%', height: '100%'}}><Editor/></div>
             </SplitPane>
@@ -242,11 +241,11 @@ function CourseView() {
     const auth = useContext(AuthContext);
 
     const [course, setCourse] = useState<Course | null>(null);
-    const [tutorials, setTutorials] = useState<Tutorial[]>([]);
+    const [exercises, setExercises] = useState<Exercise[]>([]);
     const [pageId, setPageId] = useStickyState(-1, `page-${auth?.currentUser?.uid}-${id}`);
 
     const moveForward = () => setPageId(pageId + 1);
-    const currentTutorial = course && pageId >= 0 && tutorials && tutorials[parseInt(pageId)] ? tutorials[parseInt(pageId)] : null;
+    const currentExercise = course && pageId >= 0 && exercises && exercises[parseInt(pageId)] ? exercises[parseInt(pageId)] : null;
 
     useAsyncEffect(async () => {
         const course = await getCourse(id);
@@ -254,20 +253,20 @@ function CourseView() {
     }, [id, auth]);
 
     useAsyncEffect(async () => {
-        const tutorials = await getCourseTutorials(id);
-        setTutorials(tutorials);
+        const exercises = await getCourseExercises(id);
+        setExercises(exercises);
     }, [id]);
 
 
     return (<>
         <div className={classes.root}>
-            <CourseDrawer tutorials={tutorials}
-                          currentTutorialId={currentTutorial?.id}
+            <CourseDrawer exercises={exercises}
+                          currentExerciseId={currentExercise?.id}
                           onItemSelected={(index) => setPageId(index.toString())} />
 
             <main className={classes.content}>
                 <div className={classes.toolbar}/>
-                {course && <CurrentExercise course={course} tutorial={currentTutorial} moveForward={moveForward}/>}
+                {course && <CurrentExercise course={course} exercise={currentExercise} moveForward={moveForward}/>}
             </main>
         </div>
     </>);

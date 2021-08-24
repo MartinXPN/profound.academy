@@ -1,9 +1,8 @@
-import React from "react";
+import React, {useEffect} from "react";
 import AceEditor from "react-ace";
 
-import "ace-builds/src-noconflict/mode-python";
-import "ace-builds/src-noconflict/theme-tomorrow";
 import "ace-builds/src-noconflict/ext-language_tools";
+import {Typography} from "@material-ui/core";
 
 export const languages = [
     "javascript",
@@ -37,14 +36,6 @@ export const themes = [
     "terminal"
 ];
 
-languages.forEach(lang => {
-    require(`ace-builds/src-noconflict/mode-${lang}`);
-    require(`ace-builds/src-noconflict/snippets/${lang}`);
-});
-
-themes.forEach(theme => require(`ace-builds/src-noconflict/theme-${theme}`));
-
-
 interface Props {
     theme: string;
     language: string;
@@ -54,6 +45,15 @@ interface Props {
 
 function Code(props: Props) {
     const {theme, language, fontSize, setCode} = props;
+    if(!languages.includes(language)) return <Typography>Language not supported!</Typography>
+    if(!themes.includes(theme)) return <Typography>Theme not supported!</Typography>
+
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    useEffect(() => {
+        require(`ace-builds/src-noconflict/mode-${language}`);
+        require(`ace-builds/src-noconflict/snippets/${language}`);
+        require(`ace-builds/src-noconflict/theme-${theme}`)
+    }, [language, theme]);
 
     return (
         <AceEditor

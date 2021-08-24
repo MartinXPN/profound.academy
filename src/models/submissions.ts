@@ -14,13 +14,13 @@ export const LANGUAGES = {
 }
 
 export const LANGUAGE2EXTENSION = {
-    c: '.c',
-    cpp: '.cpp',
-    cpp11: '.cpp',
-    cpp14: '.cpp',
-    cpp17: '.cpp',
-    cpp20: '.cpp',
-    python: '.py',
+    c: 'c',
+    cpp: 'cpp',
+    cpp11: 'cpp',
+    cpp14: 'cpp',
+    cpp17: 'cpp',
+    cpp20: 'cpp',
+    python: 'py',
 }
 
 

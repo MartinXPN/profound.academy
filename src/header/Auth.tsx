@@ -2,7 +2,7 @@ import React, {useContext, useEffect} from 'react';
 import StyledFirebaseAuth from 'react-firebaseui/StyledFirebaseAuth';
 import firebase from 'firebase/app';
 import 'firebase/auth';
-import {Avatar, IconButton, Menu, MenuItem} from "@material-ui/core";
+import {Avatar, ClickAwayListener, Grow, IconButton, MenuItem, MenuList, Paper, Popper} from "@material-ui/core";
 import {AuthContext} from "../App";
 
 
@@ -63,7 +63,7 @@ export function AppBarProfile() {
 
     return (<>
         {auth && (
-            <div>
+            <>
                 <IconButton
                     aria-label="account of current user"
                     aria-controls="menu-appbar"
@@ -73,17 +73,23 @@ export function AppBarProfile() {
                     { /*@ts-ignore*/ }
                     <Avatar src={user.photoURL} alt={user.displayName} />
                 </IconButton>
-                <Menu
-                    id="menu-appbar"
-                    anchorEl={anchorEl}
-                    anchorOrigin={{vertical: 'top',  horizontal: 'right'}}
-                    transformOrigin={{vertical: 'top', horizontal: 'right'}}
-                    keepMounted
-                    open={open}
-                    onClose={handleClose}>
-                    <MenuItem onClick={() => {handleClose(); firebase.auth().signOut();}}>Sign Out</MenuItem>
-                </Menu>
-            </div>
+
+                <Popper open={open} anchorEl={anchorEl} role={undefined} transition disablePortal>
+                    {({ TransitionProps, placement }) => (
+                        <Grow
+                            {...TransitionProps}
+                            style={{ transformOrigin: placement === 'bottom' ? 'center top' : 'center bottom' }}>
+                            <Paper>
+                                <ClickAwayListener onClickAway={handleClose}>
+                                    <MenuList autoFocusItem={open} id="menu-list-grow">
+                                        <MenuItem onClick={() => {handleClose(); firebase.auth().signOut();}} key='sign-out'>Sign Out</MenuItem>
+                                    </MenuList>
+                                </ClickAwayListener>
+                            </Paper>
+                        </Grow>
+                    )}
+                </Popper>
+            </>
         )}
     </>)
 }

@@ -1,9 +1,10 @@
 import firebase from 'firebase/app';
 import {Course} from "./courses";
+import {SubmissionStatus} from './submissions';
 
 export interface Progress {
     id: string;
-    status: 'Solved' | 'Wrong answer' | 'Time limit exceeded' | 'Runtime error' | 'Checking' | 'Unavailable';
+    status: SubmissionStatus;
     updatedAt: firebase.firestore.FieldValue;
 }
 

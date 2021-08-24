@@ -85,7 +85,7 @@ function CurrentExercise(props: ExerciseProps) {
                 <div className={classes.exercise}>
                     <ExerciseView exercise={exercise}/>
                 </div>
-                <div style={{width: '100%', height: '100%'}}><Editor course={course}/></div>
+                <div style={{width: '100%', height: '100%'}}><Editor course={course} exercise={exercise}/></div>
             </SplitPane>
             }
         </>

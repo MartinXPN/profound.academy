@@ -1,9 +1,12 @@
-import React, {useState} from "react";
+import React, {useContext, useState} from "react";
 import Code from "./Code";
 import {Button, createStyles, IconButton, makeStyles, Theme, Typography} from "@material-ui/core";
 import {Send, Done, Remove, Add} from "@material-ui/icons";
 import {useStickyState} from "../../util";
-import {Course} from "../../models/courses";
+import {Course, Exercise} from "../../models/courses";
+import {getModeForPath} from 'ace-builds/src-noconflict/ext-modelist'
+import {submitSolution} from "../../services/submissions";
+import {AuthContext} from "../../App";
 
 
 const useStyles = makeStyles((theme: Theme) =>
@@ -39,17 +42,26 @@ const useStyles = makeStyles((theme: Theme) =>
 
 interface EditorProps {
     course: Course;
+    exercise: Exercise;
 }
 
 function Editor(props: EditorProps) {
+    const filename = `main.${props.course.preferredLanguage.extension}`
     const classes = useStyles();
+    const auth = useContext(AuthContext);
     const [code, setCode] = useState('');
     const [theme, setTheme] = useStickyState('tomorrow', 'editorTheme');
-    const [language, setLanguage] = useStickyState(props.course.preferredLanguage.editorCode, `${props.course.id}-language`);
+    const [language, setLanguage] = useStickyState(getModeForPath(filename).name, `${props.course.id}-language`);
     const [fontSize, setFontSize] = useStickyState(14, 'fontSize');
 
     const decreaseFontSize = () => setFontSize(Math.max(fontSize - 1, 5));
     const increaseFontSize = () => setFontSize(Math.min(fontSize + 1, 30));
+    const onSubmitClicked = async (testRun: boolean) => {
+        if( !auth || !auth.currentUser || !auth.currentUser.uid )
+            return;
+        // TODO: provide the language here
+        await submitSolution(auth.currentUser.uid, props.course.id, props.exercise.id, code, 'cpp', testRun);
+    }
 
     return (
         <div style={{height: '100%'}}>
@@ -68,6 +80,7 @@ function Editor(props: EditorProps) {
                         color="primary"
                         size='small'
                         className={classes.button}
+                        onClick={() => onSubmitClicked(true)}
                         endIcon={<Send />}>Send</Button>
 
                     <Button
@@ -75,6 +88,7 @@ function Editor(props: EditorProps) {
                         color="primary"
                         size='small'
                         className={classes.button}
+                        onClick={() => onSubmitClicked(false)}
                         endIcon={<Done />}>Submit</Button>
                 </div>
             </div>

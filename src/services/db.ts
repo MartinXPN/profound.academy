@@ -1,8 +1,10 @@
 import firebase from 'firebase/app';
 import 'firebase/firestore';
+import _ from "lodash";
+
 import {Progress, User} from "../models/users";
 import {Course, Exercise} from "../models/courses";
-import _ from "lodash";
+import {Submission} from "../models/submissions";
 
 // Add ids when getting the data and removing when sending it
 const converter = <T>() => ({
@@ -20,6 +22,7 @@ const db = {
     courses: dataPoint<Course>('courses'),
     exercises: (courseId: string) => dataPoint<Exercise>(`courses/${courseId}/exercises`),
     progress: (userId: string, courseId: string) => dataPoint<Progress>(`users/${userId}/progress/${courseId}/private`),
+    submissions: (userId: string) => dataPoint<Submission>(`submissionQueue/${userId}/private`),
 };
 
 export {db}

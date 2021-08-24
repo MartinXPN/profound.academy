@@ -1,3 +1,5 @@
+import {LANGUAGES} from "./submissions";
+
 export interface Exercise {
     id: string;
     title: string;
@@ -13,5 +15,9 @@ export interface Course {
     details: string;
     introduction: string; // notion id for the introduction page
     exercises: Exercise[];
-    preferredLanguage: {editorCode: string, displayName: string, extension: string};
+    preferredLanguage: {
+        languageCode: keyof typeof LANGUAGES,
+        displayName: string,
+        extension: string,
+    };
 }

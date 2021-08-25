@@ -4,40 +4,9 @@ import AceEditor from "react-ace";
 import "ace-builds/src-noconflict/ext-language_tools";
 import useAsyncEffect from "use-async-effect";
 
-export const languages = [
-    "javascript",
-    "java",
-    "python",
-    "xml",
-    "ruby",
-    "sass",
-    "markdown",
-    "mysql",
-    "json",
-    "html",
-    "handlebars",
-    "golang",
-    "csharp",
-    "elixir",
-    "typescript",
-    "css"
-];
-
-export const themes = [
-    "monokai",
-    "github",
-    "tomorrow",
-    "kuroir",
-    "twilight",
-    "xcode",
-    "textmate",
-    "solarized_dark",
-    "solarized_light",
-    "terminal"
-];
 
 interface Props {
-    theme: string;
+    theme: 'monokai' | 'github' | 'tomorrow' | 'kuroir' | 'twilight' | 'xcode' | 'textmate' | 'solarized_dark' | 'solarized_light' | 'terminal';
     language: string;
     fontSize: number;
     setCode: (code: string) => void;

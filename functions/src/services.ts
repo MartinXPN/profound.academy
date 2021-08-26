@@ -5,6 +5,8 @@ import * as admin from 'firebase-admin';
 import * as functions from 'firebase-functions';
 import * as needle from 'needle';
 
+const app = admin.initializeApp({credential: admin.credential.applicationDefault()});
+
 export const fetchNotionPage = async (pageId: string): Promise<ExtendedRecordMap> => {
     const notion = new NotionAPI();
     return await notion.getPage(pageId);
@@ -13,7 +15,6 @@ export const fetchNotionPage = async (pageId: string): Promise<ExtendedRecordMap
 
 export const submit = async (submission: Submission): Promise<void> => {
     const AWS_LAMBDA_URL = 'https://jz7y9k248f.execute-api.us-east-1.amazonaws.com/Prod/check/';
-    const app = admin.initializeApp({credential: admin.credential.applicationDefault()});
     functions.logger.info(`Firebase admin app: ${app.name}`);
 
     const data = {

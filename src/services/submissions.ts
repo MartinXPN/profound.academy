@@ -5,7 +5,8 @@ import 'firebase/storage';
 
 
 export const submitSolution = async (userId: string, courseId: string, exerciseId: string, code: string, language: keyof typeof LANGUAGES, isTestRun: boolean) => {
-    const ref = firebase.storage().ref(`submissions/${userId}/${exerciseId}/${new Date().toISOString()}/main.${LANGUAGE2EXTENSION[language]}`);
+    const extension = LANGUAGE2EXTENSION[LANGUAGES[language]];
+    const ref = firebase.storage().ref(`submissions/${userId}/${exerciseId}/${new Date().toISOString()}/main.${extension}`);
     await ref.putString(code, firebase.storage.StringFormat.RAW);
     const downloadURL = await ref.getDownloadURL();
 

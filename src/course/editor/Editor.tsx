@@ -60,7 +60,7 @@ function Editor(props: EditorProps) {
         if( !auth || !auth.currentUser || !auth.currentUser.uid )
             return;
         // TODO: provide the language here
-        await submitSolution(auth.currentUser.uid, props.course.id, props.exercise.id, code, 'cpp', testRun);
+        await submitSolution(auth.currentUser.uid, props.course.id, props.exercise.id, code, 'C++11', testRun);
     }
 
     return (

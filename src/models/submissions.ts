@@ -10,23 +10,23 @@ export type SubmissionStatus = 'Solved' |                   // OK => 100% score
                                 'Unavailable';              // Is not allowed to submit this problem
 
 export const LANGUAGES = {
-    c: 'C',
-    cpp: 'C++',
-    cpp11: 'C++11',
-    cpp14: 'C++14',
-    cpp17: 'C++17',
-    cpp20: 'C++20',
-    python: 'Python',
+    'C': 'c',
+    'C++': 'cpp11',
+    'C++11': 'cpp11',
+    'C++14': 'cpp14',
+    'C++17': 'cpp17',
+    'C++20': 'cpp20',
+    'python': 'python',
 }
 
-export const LANGUAGE2EXTENSION = {
-    c: 'c',
-    cpp: 'cpp',
-    cpp11: 'cpp',
-    cpp14: 'cpp',
-    cpp17: 'cpp',
-    cpp20: 'cpp',
-    python: 'py',
+export const LANGUAGE2EXTENSION: {[key: string]: string} = {
+    'c': 'c',
+    'cpp': 'cpp',
+    'cpp11': 'cpp',
+    'cpp14': 'cpp',
+    'cpp17': 'cpp',
+    'cpp20': 'cpp',
+    'python': 'py',
 }
 
 

@@ -96,7 +96,11 @@ function Editor(props: EditorProps) {
                 </div>}
 
                 {submissionResult &&
-                <Typography>{submissionResult.outputs}</Typography>}
+                <>
+                    <Typography>{submissionResult.status} in {submissionResult.time} seconds</Typography>
+                    {/*<Typography>{submissionResult.compileOutputs ?? ''}</Typography>*/}
+                    <Typography style={{whiteSpace: 'pre'}}>{submissionResult.outputs ?? ''}</Typography>
+                </>}
 
                 {!submitted && !submissionResult &&
                 <Typography>Send the program to see the output, Submit to evaluate</Typography>}

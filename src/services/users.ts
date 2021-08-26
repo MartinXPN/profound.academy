@@ -11,3 +11,13 @@ export const getUserProgress = async (userId: string, courseId: string) => {
     console.log('Got res:', res);
     return res;
 }
+
+export const onUserProgressUpdated = (userId: string, courseId: string, onUpdate: (p: {[key: string]: Progress }) => void) => {
+    const snapshot = db.progress(userId, courseId).onSnapshot(snapshot => {
+        const progresses: Progress[] = snapshot.docs.map(x => x.data());
+        const res = progresses.reduce((newObj, x) => ({...newObj, [x.id]: x}), {})
+        console.log('Got progresses:', progresses);
+        console.log('Got res:', res);
+        onUpdate(res);
+    });
+}

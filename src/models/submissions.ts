@@ -1,5 +1,6 @@
 import {Exercise} from "./courses";
 import firebase from 'firebase/app';
+import {Course} from "../../functions/src/models";
 
 export type SubmissionStatus = 'Solved' |                   // OK => 100% score
                                 'Wrong answer' |            // WA => partial score or 0
@@ -34,6 +35,7 @@ export interface Submission {
     id: string;
     userId: string;
     exercise: Exercise;
+    course: Course;
     submissionFileURL: string;
     language: keyof typeof LANGUAGES;
     createdAt: firebase.firestore.FieldValue;

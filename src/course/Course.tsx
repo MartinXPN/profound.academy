@@ -1,4 +1,4 @@
-import React, {useContext, useState} from "react";
+import React, {useContext, useEffect, useState} from "react";
 import {useParams} from "react-router-dom";
 import SplitPane from 'react-split-pane';
 
@@ -15,7 +15,7 @@ import ExerciseView from "./Exercise";
 import {SignIn} from "../header/Auth";
 import {useStickyState} from "../util";
 import CourseDrawer from "./Drawer";
-import {getUserProgress} from "../services/users";
+import {onUserProgressUpdated} from "../services/users";
 import {Progress} from "../models/users";
 
 
@@ -119,12 +119,18 @@ function CourseView() {
         setExercises(exercises);
     }, [id]);
 
-    useAsyncEffect(async () => {
+    useEffect(() => {
         if( auth && auth.currentUser && auth.currentUser.uid ) {
-            const progress = await getUserProgress(auth?.currentUser.uid, id);
-            setProgress(progress);
+            onUserProgressUpdated(auth.currentUser.uid, id, setProgress);
         }
     }, [id, auth]);
+
+    // useAsyncEffect(async () => {
+    //     if( auth && auth.currentUser && auth.currentUser.uid ) {
+    //         const progress = await getUserProgress(auth?.currentUser.uid, id);
+    //         setProgress(progress);
+    //     }
+    // }, [id, auth]);
 
 
     return (<>
@@ -144,7 +150,6 @@ function CourseView() {
 
 export default CourseView;
 // TODO:
-//  5. implement run/submit => upload to firebase storage
 //  6. SplitPane for code/terminal
 //  7. implement the dashboard for best/all submissions for a given exercise
 //  8. implement editor configurations (font, language, theme)

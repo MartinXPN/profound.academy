@@ -10,11 +10,13 @@ export const submitSolution = async (userId: string, courseId: string, exerciseI
     await ref.putString(code, firebase.storage.StringFormat.RAW);
     const downloadURL = await ref.getDownloadURL();
 
-    const exerciseRef = db.exercises(courseId).doc(exerciseId)
+    const courseRef = db.courses.doc(courseId);
+    const exerciseRef = db.exercises(courseId).doc(exerciseId);
     // @ts-ignore
     const submission = {
         id: '',
         userId: userId,
+        course: courseRef,
         exercise: exerciseRef,
         submissionFileURL: downloadURL,
         language: language,

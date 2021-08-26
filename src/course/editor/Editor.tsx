@@ -69,7 +69,7 @@ function Editor(props: EditorProps) {
         if( !auth || !auth.currentUser || !auth.currentUser.uid )
             return;
 
-        // TODO: provide the language here
+        // TODO: provide the language here and unsubscribe from the listener when needed
         setSubmitted(true);
         const submissionId = await submitSolution(auth.currentUser.uid, props.course.id, props.exercise.id, code, 'C++11', testRun);
         onSubmissionResultChanged(submissionId, (result) => {

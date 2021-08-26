@@ -28,7 +28,7 @@ export const submit = async (submission: Submission): Promise<void> => {
     };
     const res = await needle('post', AWS_LAMBDA_URL, JSON.stringify(data));
     functions.logger.info(`res: ${JSON.stringify(res.body)}`);
-    functions.logger.info(`exerciseId: ${submission.exercise.id}`)
+    functions.logger.info(`exerciseId: ${submission.exercise.id}`);
 
     const submissionResult = {
         ...res.body,
@@ -48,7 +48,7 @@ export const submit = async (submission: Submission): Promise<void> => {
         .collection('public')
         .doc(submission.userId);
     const bestContent = await bestUserSubmission.get();
-    if( bestContent.exists && bestContent.data()?.score >= submissionRes.score ) {
+    if (bestContent.exists && bestContent.data()?.score >= submissionRes.score) {
         functions.logger.info('Did not update the bestSubmissions list');
         return;
     }

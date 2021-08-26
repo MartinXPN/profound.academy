@@ -16,12 +16,9 @@ export const submit = async (submission: Submission): Promise<void> => {
     const app = admin.initializeApp({credential: admin.credential.applicationDefault()});
     functions.logger.info(`Firebase admin app: ${app.name}`);
 
-    // TODO:
-    //  1. Send the submission stored in submission.submissionFileURL to AWS Lambda to check against submission.exercise.id tests
-    //  2. Store the result in /submissions /bestSubmissions
     const data = {
-        problem: 'A.zip',
-        submission: '000017-A.cpp',
+        problem: submission.exercise.id,
+        submissionDownloadUrl: submission.submissionFileURL,
         language: submission.language,
         memoryLimit: 512,
         timeLimit: 5,
@@ -31,6 +28,7 @@ export const submit = async (submission: Submission): Promise<void> => {
     };
     const res = await needle('post', AWS_LAMBDA_URL, JSON.stringify(data));
     functions.logger.info(`res: ${JSON.stringify(res.body)}`);
+    functions.logger.info(`exerciseId: ${submission.exercise.id}`)
 
     const submissionResult = {
         ...res.body,
@@ -38,7 +36,22 @@ export const submit = async (submission: Submission): Promise<void> => {
     } as SubmissionResult;
     functions.logger.info(`submissionResult: ${JSON.stringify(submissionResult)}`);
 
+    // save the results to /submissions
     const submissions = app.firestore().collection('submissions');
     const {id, ...submissionRes} = submissionResult;
     await submissions.doc(id).set(submissionRes);
+
+    // save the results to /bestSubmissions
+    const bestUserSubmission = app.firestore()
+        .collection('bestSubmissions')
+        .doc(submission.exercise.id)
+        .collection('public')
+        .doc(submission.userId);
+    const bestContent = await bestUserSubmission.get();
+    if( bestContent.exists && bestContent.data()?.score >= submissionRes.score ) {
+        functions.logger.info('Did not update the bestSubmissions list');
+        return;
+    }
+    await bestUserSubmission.set(submissionResult);
+    functions.logger.info('Updated the bestSubmissions list!');
 };

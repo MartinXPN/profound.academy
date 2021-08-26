@@ -1,7 +1,13 @@
 import {Exercise} from "./courses";
 import firebase from 'firebase/app';
 
-export type SubmissionStatus = 'Solved' | 'Wrong answer' | 'Time limit exceeded' | 'Runtime error' | 'Checking' | 'Unavailable';
+export type SubmissionStatus = 'Solved' |                   // OK => 100% score
+                                'Wrong answer' |            // WA => partial score or 0
+                                'Time limit exceeded' |     // TLE => score 0
+                                'Runtime error' |           // RE => partial score or 0
+                                'Compilation error' |       // CE => score 0
+                                'Checking' |                // In progress...
+                                'Unavailable';              // Is not allowed to submit this problem
 
 export const LANGUAGES = {
     c: 'C',

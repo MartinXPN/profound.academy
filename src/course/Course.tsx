@@ -123,6 +123,10 @@ function CourseView() {
         if( auth && auth.currentUser && auth.currentUser.uid ) {
             onUserProgressUpdated(auth.currentUser.uid, id, setProgress);
         }
+
+        // TODO unsubscribe from the listener
+        return () => {
+        }
     }, [id, auth]);
 
     // useAsyncEffect(async () => {

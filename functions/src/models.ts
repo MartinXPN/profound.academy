@@ -7,11 +7,27 @@ export interface Exercise {
     order: number;
 }
 
+export interface Course {
+    id: string;
+    img: string;
+    title: string;
+    author: string;
+    details: string;
+    introduction: string; // notion id for the introduction page
+    exercises: Exercise[];
+    preferredLanguage: {
+        languageCode: string,
+        displayName: string,
+        extension: string,
+    };
+}
+
 
 export interface Submission {
     id: string;
     userId: string;
     exercise: Exercise;
+    course: Course;
     submissionFileURL: string;
     language: string;
     createdAt: firebase.firestore.FieldValue;

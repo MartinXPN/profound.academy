@@ -55,4 +55,14 @@ export const submit = async (submission: Submission): Promise<void> => {
     }
     await bestUserSubmission.set(submissionResult);
     functions.logger.info('Updated the bestSubmissions list!');
+
+    // update user progress
+    await app.firestore()
+        .collection(`users/${submission.userId}/progress/${submission.course.id}/private/`)
+        .doc(submission.exercise.id)
+        .set({
+            status: submissionResult.status,
+            updatedAt: submissionResult.createdAt,
+        });
+    functions.logger.info('Updated the user progress!');
 };

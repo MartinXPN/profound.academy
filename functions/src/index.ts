@@ -29,13 +29,13 @@ export const getNotionPage = functions.https
 
 export const submitSolution = functions.firestore
     .document('submissionQueue/{userId}/private/{submissionId}')
-    .onCreate(async (snapshot, context) => {
+    .onWrite(async (snapshot, context) => {
         const userId = context.params.userId;
         const submissionId = context.params.submissionId;
 
         const submission = {
-            id: snapshot.id,
-            ...snapshot.data(),
+            id: snapshot.after.id,
+            ...snapshot.after.data(),
         } as Submission;
 
         functions.logger.info(`submission created for user: ${userId} with submissionId: ${submissionId}`);

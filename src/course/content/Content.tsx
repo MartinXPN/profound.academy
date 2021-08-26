@@ -32,7 +32,7 @@ function Content(props: ContentProps) {
         setRecordMap(map.data);
 
         // TODO: Get the languages from record map obtained from getPage()
-        const languages = ['cpp', 'python'];
+        const languages = ['c', 'cpp', 'python'];
         await Promise.all(languages.map(l => import(`prismjs/components/prism-${l}.min`)));
         highlightAll();
     }, [notionPage]);

@@ -98,6 +98,9 @@ function Editor(props: EditorProps) {
                 {submissionResult &&
                 <Typography>{submissionResult.outputs}</Typography>}
 
+                {!submitted && !submissionResult &&
+                <Typography>Send the program to see the output, Submit to evaluate</Typography>}
+
                 <div className={classes.submissionRoot}>
                     <Button
                         variant="contained"

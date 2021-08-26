@@ -1,12 +1,13 @@
 import React, {useContext, useState} from "react";
 import Code from "./Code";
-import {Button, createStyles, IconButton, makeStyles, Theme, Typography} from "@material-ui/core";
+import {Button, CircularProgress, createStyles, IconButton, makeStyles, Theme, Typography} from "@material-ui/core";
 import {Send, Done, Remove, Add} from "@material-ui/icons";
 import {useStickyState} from "../../util";
 import {Course, Exercise} from "../../models/courses";
 import {getModeForPath} from 'ace-builds/src-noconflict/ext-modelist'
-import {submitSolution} from "../../services/submissions";
+import {onSubmissionResultChanged, submitSolution} from "../../services/submissions";
 import {AuthContext} from "../../App";
+import {SubmissionResult} from "../../models/submissions";
 
 
 const useStyles = makeStyles((theme: Theme) =>
@@ -35,7 +36,12 @@ const useStyles = makeStyles((theme: Theme) =>
             position: 'absolute',
             top: 0,
             right: 0,
-        }
+        },
+        center: {
+            width: '80%',
+            margin: '10%',
+            textAlign: 'center',
+        },
     }),
 );
 
@@ -54,13 +60,23 @@ function Editor(props: EditorProps) {
     const [language, setLanguage] = useStickyState(getModeForPath(filename).name, `${props.course.id}-language`);
     const [fontSize, setFontSize] = useStickyState(14, 'fontSize');
 
+    const [submissionResult, setSubmissionResult] = useState<SubmissionResult | undefined>(undefined);
+    const [submitted, setSubmitted] = useState(false);
+
     const decreaseFontSize = () => setFontSize(Math.max(fontSize - 1, 5));
     const increaseFontSize = () => setFontSize(Math.min(fontSize + 1, 30));
     const onSubmitClicked = async (testRun: boolean) => {
         if( !auth || !auth.currentUser || !auth.currentUser.uid )
             return;
+
         // TODO: provide the language here
-        await submitSolution(auth.currentUser.uid, props.course.id, props.exercise.id, code, 'C++11', testRun);
+        setSubmitted(true);
+        const submissionId = await submitSolution(auth.currentUser.uid, props.course.id, props.exercise.id, code, 'C++11', testRun);
+        onSubmissionResultChanged(submissionId, (result) => {
+            setSubmissionResult(result);
+            if(result)
+                setSubmitted(false);
+        });
     }
 
     return (
@@ -73,7 +89,15 @@ function Editor(props: EditorProps) {
                 </div>
             </div>
             <div className={classes.console}>
-                <Typography>Submission results and outputs will appear here...</Typography>
+                {submitted &&
+                <div className={classes.center}>
+                    <Typography>Running the program...</Typography>
+                    <CircularProgress />
+                </div>}
+
+                {submissionResult &&
+                <Typography>{submissionResult.outputs}</Typography>}
+
                 <div className={classes.submissionRoot}>
                     <Button
                         variant="contained"

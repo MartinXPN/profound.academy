@@ -4,7 +4,7 @@ import _ from "lodash";
 
 import {Progress, User} from "../models/users";
 import {Course, Exercise} from "../models/courses";
-import {Submission} from "../models/submissions";
+import {Submission, SubmissionResult} from "../models/submissions";
 
 // Add ids when getting the data and removing when sending it
 const converter = <T>() => ({
@@ -23,6 +23,7 @@ const db = {
     exercises: (courseId: string) => dataPoint<Exercise>(`courses/${courseId}/exercises`),
     progress: (userId: string, courseId: string) => dataPoint<Progress>(`users/${userId}/progress/${courseId}/private`),
     submissions: (userId: string) => dataPoint<Submission>(`submissionQueue/${userId}/private`),
+    submissionResult: (submissionId: string) => dataPoint<SubmissionResult>('submissions').doc(submissionId),
 };
 
 export {db}

@@ -40,14 +40,11 @@ export interface Submission {
     isTestRun: boolean;
 }
 
-export interface SubmissionResult {
-    id: string;
-    userId: string;
-    exercise: Exercise;
-    submissionFileURL: string;
-    language: keyof typeof LANGUAGES;
-    status: SubmissionStatus;
-    score: number;          // [0 - 100]
-    memory: number;         // in bytes
-    time: number;           // seconds
+export interface SubmissionResult extends Submission {
+    status: string;
+    memory: number;
+    time: number;
+    score: number;
+    outputs?: string;
+    compileOutputs?: string;
 }

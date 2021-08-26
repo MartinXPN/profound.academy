@@ -1,5 +1,5 @@
 import {db} from "./db";
-import {LANGUAGE2EXTENSION, LANGUAGES, Submission} from "../models/submissions";
+import {LANGUAGE2EXTENSION, LANGUAGES, Submission, SubmissionResult} from "../models/submissions";
 import firebase from "firebase/app";
 import 'firebase/storage';
 
@@ -23,7 +23,16 @@ export const submitSolution = async (userId: string, courseId: string, exerciseI
     } as Submission;
 
     const snapshot = await db.submissions(userId).add(submission);
-    const sub = await snapshot.get();
-    console.log(sub);
-    return sub;
+    console.log('submit document result:', snapshot);
+    return snapshot.id;
+}
+
+
+export const onSubmissionResultChanged = (submissionId: string, onChanged: (submissionResult: SubmissionResult | undefined) => void) => {
+    const resultSnapshot = db.submissionResult(submissionId);
+    resultSnapshot.onSnapshot(doc => {
+        const res = doc.data();
+        console.log('Submission result changed:', submissionId, res);
+        onChanged(res);
+    })
 }

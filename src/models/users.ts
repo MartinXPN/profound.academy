@@ -9,5 +9,6 @@ export interface Progress {
 }
 
 export interface User {
-    courses: Course[];
+    id: string;
+    courses?: Course[];
 }

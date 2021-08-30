@@ -19,9 +19,13 @@ const dataPoint = <T>(collectionPath: string) => firebase.firestore()
 
 const db = {
     users: dataPoint<User>('users'),
-    courses: dataPoint<Course>('courses'),
-    exercises: (courseId: string) => dataPoint<Exercise>(`courses/${courseId}/exercises`),
+    user: (userId: string) => dataPoint<User>('users').doc(userId),
     progress: (userId: string, courseId: string) => dataPoint<Progress>(`users/${userId}/progress/${courseId}/private`),
+
+    courses: dataPoint<Course>('courses'),
+    course: (courseId: string) => dataPoint<Course>('courses').doc(courseId),
+    exercises: (courseId: string) => dataPoint<Exercise>(`courses/${courseId}/exercises`),
+
     submissions: (userId: string) => dataPoint<Submission>(`submissionQueue/${userId}/private`),
     submissionResult: (submissionId: string) => dataPoint<SubmissionResult>('submissions').doc(submissionId),
 };

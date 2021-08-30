@@ -56,9 +56,9 @@ function Editor(props: EditorProps) {
     const classes = useStyles();
     const auth = useContext(AuthContext);
     const [code, setCode] = useState('');
-    const [theme, setTheme] = useStickyState('tomorrow', 'editorTheme');
-    const [language, setLanguage] = useStickyState(getModeForPath(filename).name, `${props.course.id}-language`);
-    const [fontSize, setFontSize] = useStickyState(14, 'fontSize');
+    const [theme, setTheme] = useStickyState('tomorrow', `editorTheme-${auth?.currentUser?.uid}`);
+    const [language, setLanguage] = useStickyState(getModeForPath(filename).name, `${props.course.id}-language-${auth?.currentUser?.uid}`);
+    const [fontSize, setFontSize] = useStickyState(14, `fontSize-${auth?.currentUser?.uid}`);
 
     const [submissionResult, setSubmissionResult] = useState<SubmissionResult | undefined>(undefined);
     const [submitted, setSubmitted] = useState(false);

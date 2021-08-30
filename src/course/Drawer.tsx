@@ -145,6 +145,7 @@ function CourseDrawer(props: CourseDrawerProps) {
                 })}>
                 <Toolbar>
                     <IconButton
+                        key="drawerOpen"
                         color="inherit"
                         aria-label="open drawer"
                         onClick={handleDrawerOpen}
@@ -154,9 +155,9 @@ function CourseDrawer(props: CourseDrawerProps) {
                         })}>
                         <MenuIcon/>
                     </IconButton>
-                    <IconButton color='inherit' onClick={onHomeClicked}><Home/></IconButton>
+                    <IconButton key="home" color="inherit" onClick={onHomeClicked}><Home/></IconButton>
 
-                    <div className={classes.authIcon}><AppBarProfile/></div>
+                    <div key="auth" className={classes.authIcon}><AppBarProfile/></div>
                 </Toolbar>
 
 
@@ -174,13 +175,13 @@ function CourseDrawer(props: CourseDrawerProps) {
                     }),
                 }}>
 
-                <div className={classes.toolbar}>
+                <div className={classes.toolbar} key="drawerClose">
                     <IconButton onClick={handleDrawerClose}>
                         {theme.direction === 'rtl' ? <ChevronRightIcon/> : <ChevronLeftIcon/>}
                     </IconButton>
                 </div>
-                <Divider/>
-                <List>
+                <Divider key="topDivider" />
+                <List key="exerciseList">
                     {exercises.map((ex, index) => (
                         <>
                             <ListItem button key={ex.id} onClick={() => onItemSelected(index)} className={getClassName(ex.id)}>

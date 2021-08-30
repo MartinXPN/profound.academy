@@ -56,7 +56,7 @@ function CurrentExercise(props: ExerciseProps) {
     const auth = useContext(AuthContext);
     const [showSignIn, setShowSignIn] = useState(false);
     const {course, exercise, launchCourse} = props;
-    const [splitPos, setSplitPos] = useStickyState(50, 'splitPos');
+    const [splitPos, setSplitPos] = useStickyState(50, `splitPos-${auth?.currentUser?.uid}`);
 
     if(auth?.isSignedIn && showSignIn)
         setShowSignIn(false);

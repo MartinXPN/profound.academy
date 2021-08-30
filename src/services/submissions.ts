@@ -32,7 +32,7 @@ export const submitSolution = async (userId: string, courseId: string, exerciseI
 
 export const onSubmissionResultChanged = (submissionId: string, onChanged: (submissionResult: SubmissionResult | undefined) => void) => {
     const resultSnapshot = db.submissionResult(submissionId);
-    resultSnapshot.onSnapshot(doc => {
+    return resultSnapshot.onSnapshot(doc => {
         const res = doc.data();
         console.log('Submission result changed:', submissionId, res);
         onChanged(res);

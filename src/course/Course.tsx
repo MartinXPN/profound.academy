@@ -120,21 +120,12 @@ function CourseView() {
     }, [id]);
 
     useEffect(() => {
-        if( auth && auth.currentUser && auth.currentUser.uid ) {
-            onUserProgressUpdated(auth.currentUser.uid, id, setProgress);
-        }
+        if( !auth || !auth.currentUser || !auth.currentUser.uid )
+            return;
 
-        // TODO unsubscribe from the listener
-        return () => {
-        }
+        const unsubscribe = onUserProgressUpdated(auth.currentUser.uid, id, setProgress);
+        return () => unsubscribe();
     }, [id, auth]);
-
-    // useAsyncEffect(async () => {
-    //     if( auth && auth.currentUser && auth.currentUser.uid ) {
-    //         const progress = await getUserProgress(auth?.currentUser.uid, id);
-    //         setProgress(progress);
-    //     }
-    // }, [id, auth]);
 
 
     return (<>
@@ -153,8 +144,3 @@ function CourseView() {
 }
 
 export default CourseView;
-// TODO:
-//  6. SplitPane for code/terminal
-//  7. implement the dashboard for best/all submissions for a given exercise
-//  8. implement editor configurations (font, language, theme)
-//  9. implement a simple forum

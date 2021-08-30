@@ -12,7 +12,7 @@ const useStyles = makeStyles((theme: Theme) =>
         root: {
             alignContent: 'center',
             textAlign: 'center',
-            padding: '5%',
+            paddingTop: theme.spacing(4),
         },
         bigImage: {
             display: 'block',

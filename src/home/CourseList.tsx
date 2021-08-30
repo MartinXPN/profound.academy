@@ -33,6 +33,8 @@ const useStyles = makeStyles((theme: Theme) =>
         title: {
             display: 'flex',
             justifyContent: 'center',
+            marginTop: theme.spacing(4),
+            marginBottom: theme.spacing(1),
         },
     }),
 );
@@ -89,7 +91,7 @@ function CourseList() {
         if(!auth?.isSignedIn || !user || !user.uid)
             return;
 
-        if(!user || !user.uid)return;
+        if(!user || !user.uid)  return;
         console.log('user id:', user.uid);
         const res = await getUserCourses(user.uid);
         setUserCourses(res);
@@ -100,7 +102,6 @@ function CourseList() {
         <>
             {(auth?.isSignedIn && userCourses.length > 0) &&
             <>
-                <br/><br/><br/><br/>
                 <Typography variant='h5' className={classes.title}>My Curriculum</Typography>
                 <CourseListView courses={userCourses}/>
             </>}

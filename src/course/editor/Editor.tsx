@@ -114,7 +114,7 @@ function Editor(props: EditorProps) {
                         size='small'
                         className={classes.button}
                         onClick={() => onSubmitClicked(true)}
-                        endIcon={<Send />}>Send</Button>
+                        endIcon={<Send />}>Run</Button>
 
                     <Button
                         variant="contained"

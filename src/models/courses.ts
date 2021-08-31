@@ -1,4 +1,4 @@
-import {LANGUAGES} from "./submissions";
+import {Language} from "./language";
 
 export interface Exercise {
     id: string;
@@ -15,9 +15,5 @@ export interface Course {
     details: string;
     introduction: string; // notion id for the introduction page
     exercises: Exercise[];
-    preferredLanguage: {
-        languageCode: keyof typeof LANGUAGES,
-        displayName: string,
-        extension: string,
-    };
+    preferredLanguage: Language;
 }

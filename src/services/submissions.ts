@@ -1,11 +1,12 @@
 import {db} from "./db";
-import {LANGUAGE2EXTENSION, LANGUAGES, Submission, SubmissionResult} from "../models/submissions";
+import {Submission, SubmissionResult} from "../models/submissions";
 import firebase from "firebase/app";
 import 'firebase/storage';
+import {Language} from "../models/language";
 
 
-export const submitSolution = async (userId: string, courseId: string, exerciseId: string, code: string, language: keyof typeof LANGUAGES, isTestRun: boolean) => {
-    const extension = LANGUAGE2EXTENSION[LANGUAGES[language]];
+export const submitSolution = async (userId: string, courseId: string, exerciseId: string, code: string, language: Language, isTestRun: boolean) => {
+    const extension = language.extension;
     const ref = firebase.storage().ref(`submissions/${userId}/${exerciseId}/${new Date().toISOString()}/main.${extension}`);
     await ref.putString(code, firebase.storage.StringFormat.RAW);
     const downloadURL = await ref.getDownloadURL();
@@ -19,7 +20,7 @@ export const submitSolution = async (userId: string, courseId: string, exerciseI
         course: courseRef,
         exercise: exerciseRef,
         submissionFileURL: downloadURL,
-        language: language,
+        language: language.languageCode,
         createdAt: firebase.firestore.FieldValue.serverTimestamp(),
         isTestRun: isTestRun,
     } as Submission;

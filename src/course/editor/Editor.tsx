@@ -52,26 +52,25 @@ interface EditorProps {
 }
 
 function Editor(props: EditorProps) {
-    const filename = `main.${props.course.preferredLanguage.extension}`
     const classes = useStyles();
     const auth = useContext(AuthContext);
     const [code, setCode] = useState('');
     const [theme, setTheme] = useStickyState('tomorrow', `editorTheme-${auth?.currentUser?.uid}`);
-    const [language, setLanguage] = useStickyState(getModeForPath(filename).name, `${props.course.id}-language-${auth?.currentUser?.uid}`);
+    const [language, setLanguage] = useStickyState(props.course.preferredLanguage, `${props.course.id}-language-${auth?.currentUser?.uid}`);
     const [fontSize, setFontSize] = useStickyState(14, `fontSize-${auth?.currentUser?.uid}`);
 
     const [submissionResult, setSubmissionResult] = useState<SubmissionResult | undefined>(undefined);
     const [submitted, setSubmitted] = useState(false);
 
+    const editorLanguage = getModeForPath(`main.${language.extension}`).name;
     const decreaseFontSize = () => setFontSize(Math.max(fontSize - 1, 5));
     const increaseFontSize = () => setFontSize(Math.min(fontSize + 1, 30));
     const onSubmitClicked = async (testRun: boolean) => {
         if( !auth || !auth.currentUser || !auth.currentUser.uid )
             return;
 
-        // TODO: provide the language here
         setSubmitted(true);
-        const submissionId = await submitSolution(auth.currentUser.uid, props.course.id, props.exercise.id, code, 'C++11', testRun);
+        const submissionId = await submitSolution(auth.currentUser.uid, props.course.id, props.exercise.id, code, language, testRun);
         const unsubscribe = onSubmissionResultChanged(submissionId, (result) => {
             setSubmissionResult(result);
             if(result)
@@ -84,7 +83,7 @@ function Editor(props: EditorProps) {
     return (
         <div style={{height: '100%'}}>
             <div className={classes.code}>
-                <Code theme={theme} language={language} fontSize={fontSize} setCode={setCode}/>
+                <Code theme={theme} language={editorLanguage} fontSize={fontSize} setCode={setCode}/>
                 <div className={classes.settings}>
                     <IconButton aria-label="decrease" onClick={decreaseFontSize}><Remove fontSize="small" /></IconButton>
                     <IconButton aria-label="increase" onClick={increaseFontSize}><Add fontSize="small" /></IconButton>

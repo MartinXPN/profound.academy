@@ -14,6 +14,7 @@ export type SubmissionStatus = 'Solved' |                   // OK => 100% score
 export interface Submission {
     id: string;
     userId: string;
+    userDisplayName: string;
     exercise: Exercise;
     course: Course;
     submissionFileURL: string;
@@ -23,6 +24,7 @@ export interface Submission {
 }
 
 export interface SubmissionResult extends Submission {
+    submissionId: string;
     status: string;
     memory: number;
     time: number;

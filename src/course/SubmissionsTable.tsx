@@ -13,6 +13,7 @@ import {Course, Exercise} from "../models/courses";
 import useAsyncEffect from "use-async-effect";
 import {getBestSubmissions, getSubmissions} from "../services/submissions";
 import {SubmissionResult} from "../models/submissions";
+import moment from "moment/moment";
 
 const useStyles = makeStyles({
     root: {
@@ -21,23 +22,22 @@ const useStyles = makeStyles({
 });
 
 interface Column {
-    id: '#' | 'userId' | 'status' | 'time' | 'memory' | 'language';
+    id: '#' | 'userDisplayName' | 'createdAt' | 'status' | 'time' | 'memory' | 'language';
     label: string;
     minWidth?: number;
     align?: 'right';
-    format?: (value: number) => string;
+    format?: (value: any) => string;
 }
 
 const columns: Column[] = [
-    { id: '#', label: '#', minWidth: 50 },
-    { id: 'userId', label: 'User', minWidth: 100 },
-    { id: 'status', label: 'Status', minWidth: 100 },
-    { id: 'time', label: 'Time (s)', minWidth: 100, align: 'right', format: (value: number) => value.toFixed(2) },
-    { id: 'memory', label: 'Memory (MB)', minWidth: 100, align: 'right', format: (value: number) => value.toFixed(1) },
-    { id: 'language', label: 'Language', minWidth: 100 },
+    { id: '#', label: '#', minWidth: 25 },
+    { id: 'userDisplayName', label: 'User', minWidth: 100 },
+    { id: 'createdAt', label: 'Date', minWidth: 100, format: (value) => moment(value.toDate()).format('YYYY MMMM Do, hh:mm:ss') },
+    { id: 'status', label: 'Status', minWidth: 75 },
+    { id: 'time', label: 'Time (s)', minWidth: 50, align: 'right', format: (value: number) => value ? value.toFixed(2) : '' },
+    { id: 'memory', label: 'Memory (MB)', minWidth: 50, align: 'right', format: (value: number) => value ? value.toFixed(1): '' },
+    { id: 'language', label: 'Language', minWidth: 50 },
 ];
-
-
 
 
 interface SubmissionsTableProps {
@@ -53,6 +53,8 @@ function SubmissionsTable(props: SubmissionsTableProps) {
     const handleChangePage = (event: unknown, newPage: number) => setPage(newPage);
     const rowsPerPage = 10;
     const [submissions, setSubmissions] = useState<SubmissionResult[]>([]);
+
+    console.log(moment.locale());
 
     useAsyncEffect(async () => {
         if( mode === 'all' ) {
@@ -98,7 +100,7 @@ function SubmissionsTable(props: SubmissionsTableProps) {
                                         const value = row[column.id];
                                         return (
                                             <TableCell key={column.id} align={column.align}>
-                                                {column.format && typeof value === 'number' ? column.format(value) : value}
+                                                {column.format ? column.format(value) : value}
                                             </TableCell>
                                         );
                                     })}

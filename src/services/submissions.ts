@@ -17,7 +17,7 @@ export const submitSolution = async (userId: string, userDisplayName: string | n
     const submission = {
         id: '',
         userId: userId,
-        user: userDisplayName,
+        userDisplayName: userDisplayName,
         course: courseRef,
         exercise: exerciseRef,
         submissionFileURL: downloadURL,

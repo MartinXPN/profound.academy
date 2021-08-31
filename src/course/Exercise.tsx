@@ -1,9 +1,10 @@
 import Content from "./content/Content";
 import React, {useState} from "react";
 import Button from "@material-ui/core/Button";
-import {createStyles, makeStyles, Theme, Typography} from "@material-ui/core";
+import {createStyles, makeStyles, Theme} from "@material-ui/core";
 import {Course, Exercise} from "../models/courses";
 import SubmissionsTable from "./SubmissionsTable";
+import Forum from "./Forum";
 
 const useStyles = makeStyles((theme: Theme) =>
     createStyles({
@@ -46,8 +47,7 @@ function ExerciseView(props: ExerciseProps) {
             {currentTab === 'bestSubmissions' && <SubmissionsTable course={course} exercise={exercise} mode="best" />}
             {currentTab === 'allSubmissions' && <SubmissionsTable course={course} exercise={exercise} mode="all" />}
 
-            <br/><br/><br/>
-            <Typography variant='h5'>The forum will appear here...</Typography>
+            <Forum course={course} exercise={exercise} />
         </>
     );
 }

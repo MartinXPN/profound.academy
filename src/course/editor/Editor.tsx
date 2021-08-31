@@ -70,7 +70,7 @@ function Editor(props: EditorProps) {
             return;
 
         setSubmitted(true);
-        const submissionId = await submitSolution(auth.currentUser.uid, props.course.id, props.exercise.id, code, language, testRun);
+        const submissionId = await submitSolution(auth.currentUser.uid, auth.currentUser.displayName, props.course.id, props.exercise.id, code, language, testRun);
         const unsubscribe = onSubmissionResultChanged(submissionId, (result) => {
             setSubmissionResult(result);
             if(result)

@@ -25,9 +25,13 @@ const db = {
     courses: dataPoint<Course>('courses'),
     course: (courseId: string) => dataPoint<Course>('courses').doc(courseId),
     exercises: (courseId: string) => dataPoint<Exercise>(`courses/${courseId}/exercises`),
+    exercise: (courseId: string, exerciseId: string) => dataPoint<Exercise>(`courses/${courseId}/exercises`).doc(exerciseId),
 
-    submissions: (userId: string) => dataPoint<Submission>(`submissionQueue/${userId}/private`),
+    submissionQueue: (userId: string) => dataPoint<Submission>(`submissionQueue/${userId}/private`),
+
+    submissionResults: dataPoint<SubmissionResult>('submissions'),
     submissionResult: (submissionId: string) => dataPoint<SubmissionResult>('submissions').doc(submissionId),
+    bestSubmissions: (exerciseId: string) => dataPoint<SubmissionResult>(`bestSubmissions/${exerciseId}/public`),
 };
 
 export {db}

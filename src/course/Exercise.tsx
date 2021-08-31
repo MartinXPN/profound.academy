@@ -2,7 +2,8 @@ import Content from "./content/Content";
 import React, {useState} from "react";
 import Button from "@material-ui/core/Button";
 import {createStyles, makeStyles, Theme, Typography} from "@material-ui/core";
-import {Exercise} from "../models/courses";
+import {Course, Exercise} from "../models/courses";
+import SubmissionsTable from "./SubmissionsTable";
 
 const useStyles = makeStyles((theme: Theme) =>
     createStyles({
@@ -21,15 +22,16 @@ const useStyles = makeStyles((theme: Theme) =>
 
 
 interface ExerciseProps {
+    course: Course;
     exercise: Exercise;
 }
 
 function ExerciseView(props: ExerciseProps) {
     const classes = useStyles();
 
-    const {exercise} = props;
+    const {course, exercise} = props;
     const [currentTab, setCurrentTab] = useState('description'); // {description / allSubmissions / bestSubmissions}
-    console.log('Tutorial view:', exercise);
+    console.log('ExerciseView:', exercise);
 
     return (
         <>
@@ -41,8 +43,8 @@ function ExerciseView(props: ExerciseProps) {
 
 
             {currentTab === 'description' && <Content notionPage={exercise.pageId}/>}
-            {currentTab === 'bestSubmissions' && <div>Best submissions</div>}
-            {currentTab === 'allSubmissions' && <div>All submissions</div>}
+            {currentTab === 'bestSubmissions' && <SubmissionsTable course={course} exercise={exercise} mode="best" />}
+            {currentTab === 'allSubmissions' && <SubmissionsTable course={course} exercise={exercise} mode="all" />}
 
             <br/><br/><br/>
             <Typography variant='h5'>The forum will appear here...</Typography>

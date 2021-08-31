@@ -27,6 +27,11 @@ const useStyles = makeStyles((theme: Theme) =>
             width: 600,
             height: 400,
         },
+        listItem: {
+            "&:focus,&:hover": {
+                cursor: 'pointer',
+            }
+        },
         icon: {
             color: 'rgba(255, 255, 255, 0.54)',
         },
@@ -54,7 +59,8 @@ function CourseListView(props: CourseListProps) {
             <div className={classes.root}>
                 <ImageList rowHeight={180} className={classes.imageList}>
                     {courses.map((item) => (
-                        <ImageListItem key={item.id} onClick={() => history.push(`/courses/${item.id}`)}>
+                        <ImageListItem className={classes.listItem} key={item.id}
+                                       onClick={() => history.push(`/courses/${item.id}`)}>
                             <img src={item.img} alt={item.title}/>
                             <ImageListItemBar
                                 title={item.title}

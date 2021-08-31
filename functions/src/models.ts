@@ -35,6 +35,7 @@ export interface Submission {
 }
 
 export interface SubmissionResult extends Submission {
+    submissionId: string;
     status: string;
     memory: number;
     time: number;

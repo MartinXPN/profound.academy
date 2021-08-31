@@ -35,6 +35,7 @@ export const submit = async (submission: Submission): Promise<void> => {
         ...res.body,
         ...submission,
     } as SubmissionResult;
+    submissionResult.submissionId = submission.id;
     functions.logger.info(`submissionResult: ${JSON.stringify(submissionResult)}`);
 
     // save the results to /submissions

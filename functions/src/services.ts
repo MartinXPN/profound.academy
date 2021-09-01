@@ -6,6 +6,8 @@ import * as functions from 'firebase-functions';
 import * as needle from 'needle';
 
 const app = admin.initializeApp({credential: admin.credential.applicationDefault()});
+const AWS_LAMBDA_URL = 'https://jz7y9k248f.execute-api.us-east-1.amazonaws.com/Prod/check/';
+
 
 export const fetchNotionPage = async (pageId: string): Promise<ExtendedRecordMap> => {
     const notion = new NotionAPI();
@@ -14,22 +16,19 @@ export const fetchNotionPage = async (pageId: string): Promise<ExtendedRecordMap
 
 
 export const submit = async (submission: Submission): Promise<void> => {
-    const AWS_LAMBDA_URL = 'https://jz7y9k248f.execute-api.us-east-1.amazonaws.com/Prod/check/';
-    functions.logger.info(`Firebase admin app: ${app.name}`);
-
     const data = {
-        problem: submission.exercise.id,
+        problem: submission.exercise.id + (submission.isTestRun ? '-public' : '-private'),
         submissionDownloadUrl: submission.submissionFileURL,
         language: submission.language,
         memoryLimit: 512,
-        timeLimit: 5,
+        timeLimit: 2,
         returnOutputs: submission.isTestRun,
         return_compile_outputs: true,
         stopOnFirstFail: !submission.isTestRun,
     };
+    functions.logger.info(`submitting data: ${JSON.stringify(data)}`);
     const res = await needle('post', AWS_LAMBDA_URL, JSON.stringify(data));
     functions.logger.info(`res: ${JSON.stringify(res.body)}`);
-    functions.logger.info(`exerciseId: ${submission.exercise.id}`);
 
     const submissionResult = {
         ...res.body,
@@ -37,6 +36,8 @@ export const submit = async (submission: Submission): Promise<void> => {
     } as SubmissionResult;
     submissionResult.submissionId = submission.id;
     functions.logger.info(`submissionResult: ${JSON.stringify(submissionResult)}`);
+
+    // TODO: if it's just test run - save it to /runs instead of updating /submissions and /progress
 
     // save the results to /submissions
     const submissions = app.firestore().collection('submissions');

@@ -1,6 +1,6 @@
 import {NotionAPI} from 'notion-client';
 import {ExtendedRecordMap} from 'notion-types';
-import {Submission, SubmissionResult} from './models';
+import {Submission, SubmissionResult} from './models/submissions';
 import * as admin from 'firebase-admin';
 import * as functions from 'firebase-functions';
 import * as needle from 'needle';

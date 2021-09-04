@@ -1,6 +1,6 @@
 import * as functions from 'firebase-functions';
 import {fetchNotionPage, submit} from './services';
-import {Submission} from './models';
+import {Submission} from './models/submissions';
 
 // Start writing Firebase Functions
 // https://firebase.google.com/docs/functions/typescript

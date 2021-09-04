@@ -1,6 +1,5 @@
-import {Exercise} from "./courses";
+import {Exercise, Course} from "./courses";
 import firebase from 'firebase/app';
-import {Course} from "../../functions/src/models";
 import {LANGUAGES} from "./language";
 
 export type SubmissionStatus = 'Solved' |                   // OK => 100% score

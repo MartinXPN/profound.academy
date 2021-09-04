@@ -3,9 +3,13 @@ import {Submission, SubmissionResult} from "../models/submissions";
 import firebase from "firebase/app";
 import 'firebase/storage';
 import {Language} from "../models/language";
+import {TestCase} from "../../functions/src/models/courses";
 
 
-export const submitSolution = async (userId: string, userDisplayName: string | null, courseId: string, exerciseId: string, code: string, language: Language, isTestRun: boolean) => {
+export const submitSolution = async (userId: string, userDisplayName: string | null,
+                                     courseId: string, exerciseId: string,
+                                     code: string, language: Language,
+                                     isTestRun: boolean, testCases?: TestCase[]) => {
     const extension = language.extension;
     const ref = firebase.storage().ref(`submissions/${userId}/${exerciseId}/${new Date().toISOString()}/main.${extension}`);
     await ref.putString(code, firebase.storage.StringFormat.RAW);
@@ -20,6 +24,7 @@ export const submitSolution = async (userId: string, userDisplayName: string | n
         userDisplayName: userDisplayName,
         course: courseRef,
         exercise: exerciseRef,
+        testCases: testCases,
         submissionFileURL: downloadURL,
         language: language.languageCode,
         createdAt: firebase.firestore.FieldValue.serverTimestamp(),
@@ -31,8 +36,19 @@ export const submitSolution = async (userId: string, userDisplayName: string | n
     return snapshot.id;
 }
 
+export const onRunResultChanged = (userId: string, submissionId: string,
+                                   onChanged: (submissionResult: SubmissionResult | undefined) => void) => {
+    const resultSnapshot = db.runResult(userId, submissionId);
+    return resultSnapshot.onSnapshot(doc => {
+        const res = doc.data();
+        console.log('Run result changed:', submissionId, res);
+        onChanged(res);
+    })
+}
 
-export const onSubmissionResultChanged = (submissionId: string, onChanged: (submissionResult: SubmissionResult | undefined) => void) => {
+
+export const onSubmissionResultChanged = (submissionId: string,
+                                          onChanged: (submissionResult: SubmissionResult | undefined) => void) => {
     const resultSnapshot = db.submissionResult(submissionId);
     return resultSnapshot.onSnapshot(doc => {
         const res = doc.data();

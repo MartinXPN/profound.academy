@@ -29,6 +29,9 @@ const db = {
 
     submissionQueue: (userId: string) => dataPoint<Submission>(`submissionQueue/${userId}/private`),
 
+    runs: (userId: string) => dataPoint<SubmissionResult>(`runs/${userId}/private`),
+    runResult: (userId: string, submissionId: string) => dataPoint<SubmissionResult>(`runs/${userId}/private`).doc(submissionId),
+
     submissionResults: dataPoint<SubmissionResult>('submissions'),
     submissionResult: (submissionId: string) => dataPoint<SubmissionResult>('submissions').doc(submissionId),
     bestSubmissions: (exerciseId: string) => dataPoint<SubmissionResult>(`bestSubmissions/${exerciseId}/public`),

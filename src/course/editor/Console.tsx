@@ -46,7 +46,7 @@ const useStyles = makeStyles((theme: Theme) =>
 interface Props {
     exercise: Exercise;
     onSubmitClicked: () => void;
-    onRunClicked: () => void;
+    onRunClicked: (tests: TestCase[]) => void;
     isProcessing: boolean;
     submissionResult: SubmissionResult | undefined;
 }
@@ -56,10 +56,11 @@ function Console(props: Props) {
     const classes = useStyles();
     const {exercise, onSubmitClicked, onRunClicked, isProcessing, submissionResult} = props;
 
-    // TODO: Change the API to get an array of submissionResults when submitting a RUN
-    const outputs = submissionResult && submissionResult.outputs ? submissionResult.outputs.split('-------------') : [];
+    const outputs = submissionResult && submissionResult.outputs ? submissionResult.outputs : [];
     const [selectedTest, setSelectedTest] = useState<number | null>(null);
     const [tests, setTests] = useState<TestCase[]>(exercise.testCases);
+
+    const handleRun = () => onRunClicked(tests);
 
     const onTestSelected = (event: React.MouseEvent<HTMLElement>, newTest: number | null) => setSelectedTest(newTest);
     const onSaveTest = (index: number, input: string, target: string) => {
@@ -112,7 +113,7 @@ function Console(props: Props) {
                     color="primary"
                     size='small'
                     className={classes.button}
-                    onClick={onRunClicked}
+                    onClick={handleRun}
                     endIcon={<Send />}>Run</Button>
             </div>
 

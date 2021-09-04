@@ -42,12 +42,18 @@ export const submit = async (submission: Submission): Promise<void> => {
     } as SubmissionResult;
     submissionResult.submissionId = submission.id;
     functions.logger.info(`submissionResult: ${JSON.stringify(submissionResult)}`);
+    const {id, ...submissionRes} = submissionResult;
 
-    // TODO: if it's just test run - save it to /runs instead of updating /submissions and /progress
+    if (submission.isTestRun) {
+        functions.logger.info(`Updating the run: ${id} with ${JSON.stringify(submissionRes)}`);
+
+        // save the results to /runs/userId/private/<submissionId>
+        await app.firestore().collection(`runs/${submission.userId}/private/`).doc(id).set(submissionRes);
+        return;
+    }
 
     // save the results to /submissions
     const submissions = app.firestore().collection('submissions');
-    const {id, ...submissionRes} = submissionResult;
     await submissions.doc(id).set(submissionRes);
 
     // save the results to /bestSubmissions

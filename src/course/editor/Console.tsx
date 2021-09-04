@@ -1,4 +1,4 @@
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import {Add, Done, Send} from "@material-ui/icons";
 import {Button, CircularProgress, createStyles, IconButton, makeStyles, Theme, Typography} from "@material-ui/core";
 import ToggleButton from '@material-ui/lab/ToggleButton';
@@ -58,7 +58,13 @@ function Console(props: Props) {
 
     const outputs = submissionResult && submissionResult.outputs ? submissionResult.outputs : [];
     const [selectedTest, setSelectedTest] = useState<number | null>(null);
-    const [tests, setTests] = useState<TestCase[]>(exercise.testCases);
+    const [tests, setTests] = useState<TestCase[]>([]);
+
+    useEffect(() => {
+        setTests(exercise.testCases);
+    }, [exercise]);
+    if(selectedTest && selectedTest > tests.length )
+        setSelectedTest(null);
 
     const handleRun = () => onRunClicked(tests);
 
@@ -72,12 +78,10 @@ function Console(props: Props) {
         setTests(newTests);
     };
     const addTest = () => {
-        const newTest = {
+        setTests([...tests, {
             input: '',
             target: '',
-        } as TestCase;
-
-        setTests([...tests, newTest]);
+        }]);
     }
 
     return (

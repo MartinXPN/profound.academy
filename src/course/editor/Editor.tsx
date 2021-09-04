@@ -11,27 +11,25 @@ import {AuthContext} from "../../App";
 import {SubmissionResult} from "../../models/submissions";
 
 
-const useStyles = makeStyles((theme: Theme) =>
-    createStyles({
-        code: {
-            position: 'relative',
-            height: '70%',
-            width: '100%',
-        },
-        settings: {
-            position: 'absolute',
-            top: 0,
-            right: 0,
-        },
-        console: {
-            height: '30%',
-            width: '100%',
-            backgroundColor: '#d9d9d9',
-            overflowY: 'auto',
-            padding: '10px',
-        },
-    }),
-);
+const useStyles = makeStyles({
+    code: {
+        position: 'relative',
+        height: '70%',
+        width: '100%',
+    },
+    settings: {
+        position: 'absolute',
+        top: 0,
+        right: 0,
+    },
+    console: {
+        height: '30%',
+        width: '100%',
+        backgroundColor: '#d9d9d9',
+        overflowY: 'auto',
+        padding: '10px',
+    },
+});
 
 
 interface EditorProps {

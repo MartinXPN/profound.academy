@@ -12,8 +12,14 @@ import {SubmissionResult} from "../../models/submissions";
 
 const useStyles = makeStyles((theme: Theme) =>
     createStyles({
+        tests: {
+            float: 'left',
+            borderRadius: '5em',
+            padding: '8px',
+        },
         button: {
             margin: theme.spacing(1),
+            float: 'right',
         },
         code: {
             position: 'relative',
@@ -27,15 +33,17 @@ const useStyles = makeStyles((theme: Theme) =>
         },
         console: {
             height: '30%',
+            width: '100%',
             backgroundColor: '#d9d9d9',
-            position: 'relative',
             overflowY: 'auto',
             padding: '10px',
         },
         submissionRoot: {
-            position: 'absolute',
-            top: 0,
-            right: 0,
+            width: '100%',
+            overflow: 'hidden',
+        },
+        content: {
+            width: '100%',
         },
         center: {
             width: '80%',
@@ -90,30 +98,12 @@ function Editor(props: EditorProps) {
                 </div>
             </div>
             <div className={classes.console}>
-                {submitted &&
-                <div className={classes.center}>
-                    <Typography>Running the program...</Typography>
-                    <CircularProgress />
-                </div>}
-
-                {submissionResult &&
-                <>
-                    <Typography>{submissionResult.status} in {submissionResult.time} seconds</Typography>
-                    {/*<Typography>{submissionResult.compileOutputs ?? ''}</Typography>*/}
-                    <Typography style={{whiteSpace: 'pre'}}>{submissionResult.outputs ?? ''}</Typography>
-                </>}
-
-                {!submitted && !submissionResult &&
-                <Typography>Send the program to see the output, Submit to evaluate</Typography>}
-
                 <div className={classes.submissionRoot}>
-                    <Button
-                        variant="contained"
-                        color="primary"
-                        size='small'
-                        className={classes.button}
-                        onClick={() => onSubmitClicked(true)}
-                        endIcon={<Send />}>Run</Button>
+                    <Typography className={classes.tests}>Test Cases: </Typography>
+                    {props.exercise.testCases.map((test, index) =>
+                        <Button variant="text" id={`${index}`} className={classes.tests}><Typography>{index + 1}</Typography></Button>
+                    )}
+                    <IconButton id="add-test" className={classes.tests}><Add /></IconButton>
 
                     <Button
                         variant="contained"
@@ -122,7 +112,35 @@ function Editor(props: EditorProps) {
                         className={classes.button}
                         onClick={() => onSubmitClicked(false)}
                         endIcon={<Done />}>Submit</Button>
+
+                    <Button
+                        variant="contained"
+                        color="primary"
+                        size='small'
+                        className={classes.button}
+                        onClick={() => onSubmitClicked(true)}
+                        endIcon={<Send />}>Run</Button>
                 </div>
+
+                <div className={classes.content}>
+
+                    {submitted &&
+                    <div className={classes.center}>
+                        <Typography>Running the program...</Typography>
+                        <CircularProgress />
+                    </div>}
+
+                    {submissionResult &&
+                    <>
+                        <Typography>{submissionResult.status} in {submissionResult.time} seconds</Typography>
+                        {/*<Typography>{submissionResult.compileOutputs ?? ''}</Typography>*/}
+                        <Typography style={{whiteSpace: 'pre'}}>{submissionResult.outputs ?? ''}</Typography>
+                    </>}
+
+                    {!submitted && !submissionResult &&
+                    <Typography>Run the program to see the output, Submit to evaluate</Typography>}
+                </div>
+
             </div>
         </div>
     )

@@ -185,7 +185,7 @@ function CourseDrawer(props: CourseDrawerProps) {
                     {exercises.map((ex, index) => (
                         <>
                             <ListItem button key={ex.id} onClick={() => onItemSelected(index)} className={getClassName(ex.id)}>
-                                <ListItemIcon>{currentExerciseId === ex.id ? <ArrowRightIcon /> : <ListItemText primary={index}/>}</ListItemIcon>
+                                <ListItemIcon>{currentExerciseId === ex.id ? <ArrowRightIcon /> : <ListItemText primary={index + 1}/>}</ListItemIcon>
                                 <ListItemText primary={ex.title}/>
                             </ListItem>
                         </>

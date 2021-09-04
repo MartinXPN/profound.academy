@@ -1,10 +1,16 @@
 import {Language} from "./language";
 
+export interface TestCase {
+    input: string;
+    target: string;
+}
+
 export interface Exercise {
     id: string;
     title: string;
     pageId: string;
     order: number;
+    testCases: TestCase[];
 }
 
 export interface Course {

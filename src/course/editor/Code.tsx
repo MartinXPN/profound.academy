@@ -20,6 +20,7 @@ function Code(props: Props) {
 
     // load the language styles
     useAsyncEffect(async () => {
+        console.log('Loading modes for Ace:', language);
         await import(`ace-builds/src-noconflict/mode-${language}`);
         await import(`ace-builds/src-noconflict/snippets/${language}`);
         setLoadedLanguage(language);

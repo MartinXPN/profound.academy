@@ -1,10 +1,11 @@
 import React, {useContext, useState} from "react";
-import Code from "./Code";
-import {Button, CircularProgress, createStyles, IconButton, makeStyles, Theme, Typography} from "@material-ui/core";
-import {Send, Done, Remove, Add} from "@material-ui/icons";
+import Code from "./Code";  // needs to be before getModeForPath so that Ace is loaded
+import Console from "./Console";
+import {getModeForPath} from 'ace-builds/src-noconflict/ext-modelist';
+import {createStyles, IconButton, makeStyles, Theme} from "@material-ui/core";
+import {Remove, Add} from "@material-ui/icons";
 import {useStickyState} from "../../util";
 import {Course, Exercise} from "../../models/courses";
-import {getModeForPath} from 'ace-builds/src-noconflict/ext-modelist'
 import {onSubmissionResultChanged, submitSolution} from "../../services/submissions";
 import {AuthContext} from "../../App";
 import {SubmissionResult} from "../../models/submissions";
@@ -12,15 +13,6 @@ import {SubmissionResult} from "../../models/submissions";
 
 const useStyles = makeStyles((theme: Theme) =>
     createStyles({
-        tests: {
-            float: 'left',
-            borderRadius: '5em',
-            padding: '8px',
-        },
-        button: {
-            margin: theme.spacing(1),
-            float: 'right',
-        },
         code: {
             position: 'relative',
             height: '70%',
@@ -37,18 +29,6 @@ const useStyles = makeStyles((theme: Theme) =>
             backgroundColor: '#d9d9d9',
             overflowY: 'auto',
             padding: '10px',
-        },
-        submissionRoot: {
-            width: '100%',
-            overflow: 'hidden',
-        },
-        content: {
-            width: '100%',
-        },
-        center: {
-            width: '80%',
-            margin: '10%',
-            textAlign: 'center',
         },
     }),
 );
@@ -97,50 +77,14 @@ function Editor(props: EditorProps) {
                     <IconButton aria-label="increase" onClick={increaseFontSize}><Add fontSize="small" /></IconButton>
                 </div>
             </div>
+
             <div className={classes.console}>
-                <div className={classes.submissionRoot}>
-                    <Typography className={classes.tests}>Test Cases: </Typography>
-                    {props.exercise.testCases.map((test, index) =>
-                        <Button variant="text" id={`${index}`} className={classes.tests}><Typography>{index + 1}</Typography></Button>
-                    )}
-                    <IconButton id="add-test" className={classes.tests}><Add /></IconButton>
-
-                    <Button
-                        variant="contained"
-                        color="primary"
-                        size='small'
-                        className={classes.button}
-                        onClick={() => onSubmitClicked(false)}
-                        endIcon={<Done />}>Submit</Button>
-
-                    <Button
-                        variant="contained"
-                        color="primary"
-                        size='small'
-                        className={classes.button}
-                        onClick={() => onSubmitClicked(true)}
-                        endIcon={<Send />}>Run</Button>
-                </div>
-
-                <div className={classes.content}>
-
-                    {submitted &&
-                    <div className={classes.center}>
-                        <Typography>Running the program...</Typography>
-                        <CircularProgress />
-                    </div>}
-
-                    {submissionResult &&
-                    <>
-                        <Typography>{submissionResult.status} in {submissionResult.time} seconds</Typography>
-                        {/*<Typography>{submissionResult.compileOutputs ?? ''}</Typography>*/}
-                        <Typography style={{whiteSpace: 'pre'}}>{submissionResult.outputs ?? ''}</Typography>
-                    </>}
-
-                    {!submitted && !submissionResult &&
-                    <Typography>Run the program to see the output, Submit to evaluate</Typography>}
-                </div>
-
+                <Console
+                    exercise={props.exercise}
+                    onSubmitClicked={() => onSubmitClicked(false)}
+                    onRunClicked={() => onSubmitClicked(true)}
+                    isProcessing={submitted}
+                    submissionResult={submissionResult} />
             </div>
         </div>
     )

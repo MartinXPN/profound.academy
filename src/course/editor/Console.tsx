@@ -4,8 +4,9 @@ import {Button, CircularProgress, createStyles, IconButton, makeStyles, Theme, T
 import ToggleButton from '@material-ui/lab/ToggleButton';
 import ToggleButtonGroup from '@material-ui/lab/ToggleButtonGroup';
 
-import {Exercise} from "../../models/courses";
+import {Exercise, TestCase} from "../../models/courses";
 import {SubmissionResult} from "../../models/submissions";
+import TestView from "./TestView";
 
 const useStyles = makeStyles((theme: Theme) =>
     createStyles({
@@ -54,7 +55,11 @@ interface Props {
 function Console(props: Props) {
     const classes = useStyles();
     const {exercise, onSubmitClicked, onRunClicked, isProcessing, submissionResult} = props;
+
+    // TODO: Change the API to get an array of submissionResults when submitting a RUN
+    const outputs = submissionResult && submissionResult.outputs ? submissionResult.outputs.split('-------------') : [];
     const [selectedTest, setSelectedTest] = useState<number | null>(null);
+    const [tests, setTests] = useState<TestCase[]>(exercise.testCases);
 
     const onTestSelected = (event: React.MouseEvent<HTMLElement>, newTest: number | null) => {
         setSelectedTest(newTest);
@@ -72,7 +77,7 @@ function Console(props: Props) {
                     aria-label="text alignment"
                     style={{float: 'left'}}>
 
-                    {exercise.testCases.map((test, index) =>
+                    {tests.map((test, index) =>
                         <ToggleButton value={index} id={`${index}`} className={classes.tests}>
                             <Typography>{index + 1}</Typography>
                         </ToggleButton>
@@ -107,13 +112,14 @@ function Console(props: Props) {
             {submissionResult &&
             <>
                 <Typography>{submissionResult.status} in {submissionResult.time} seconds</Typography>
-                {/*<Typography>{submissionResult.compileOutputs ?? ''}</Typography>*/}
-                <Typography className={classes.content}>{submissionResult.outputs ?? ''}</Typography>
+                <Typography>{submissionResult.compileOutputs ?? ''}</Typography>
             </>}
 
-            {!isProcessing && !submissionResult &&
+            {!isProcessing && !submissionResult && selectedTest === null &&
             <Typography>Run the program to see the output, Submit to evaluate</Typography>}
 
+            {selectedTest !== null &&
+            <TestView testCase={tests[selectedTest]} output={outputs[selectedTest]} />}
         </>
     )
 }

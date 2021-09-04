@@ -87,7 +87,7 @@ function Editor(props: EditorProps) {
                     submissionResult={submissionResult} />
             </div>
         </div>
-    )
+    );
 }
 
 export default Editor;

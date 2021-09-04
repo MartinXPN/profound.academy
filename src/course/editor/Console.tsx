@@ -61,8 +61,22 @@ function Console(props: Props) {
     const [selectedTest, setSelectedTest] = useState<number | null>(null);
     const [tests, setTests] = useState<TestCase[]>(exercise.testCases);
 
-    const onTestSelected = (event: React.MouseEvent<HTMLElement>, newTest: number | null) => {
-        setSelectedTest(newTest);
+    const onTestSelected = (event: React.MouseEvent<HTMLElement>, newTest: number | null) => setSelectedTest(newTest);
+    const onSaveTest = (index: number, input: string, target: string) => {
+        let newTests = [...tests];
+        newTests[index] = {
+            input: input,
+            target: target,
+        };
+        setTests(newTests);
+    };
+    const addTest = () => {
+        const newTest = {
+            input: '',
+            target: '',
+        } as TestCase;
+
+        setTests([...tests, newTest]);
     }
 
     return (
@@ -83,7 +97,7 @@ function Console(props: Props) {
                         </ToggleButton>
                     )}
                 </ToggleButtonGroup>
-                <IconButton id="add-test" className={classes.addTest}><Add /></IconButton>
+                <IconButton id="add-test" className={classes.addTest} onClick={addTest}><Add /></IconButton>
 
                 <Button
                     variant="contained"
@@ -119,7 +133,10 @@ function Console(props: Props) {
             <Typography>Run the program to see the output, Submit to evaluate</Typography>}
 
             {selectedTest !== null &&
-            <TestView testCase={tests[selectedTest]} output={outputs[selectedTest]} />}
+            <TestView
+                testCase={tests[selectedTest]}
+                output={outputs[selectedTest]}
+                onSaveTest={(input, target) => onSaveTest(selectedTest, input, target)} />}
         </>
     )
 }

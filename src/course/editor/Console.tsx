@@ -63,8 +63,9 @@ function Console(props: Props) {
     useEffect(() => {
         setTests(exercise.testCases);
     }, [exercise]);
-    if(selectedTest && selectedTest > tests.length )
+    if(selectedTest && selectedTest >= tests.length ) {
         setSelectedTest(null);
+    }
 
     const handleRun = () => onRunClicked(tests);
 
@@ -137,7 +138,7 @@ function Console(props: Props) {
             {!isProcessing && !submissionResult && selectedTest === null &&
             <Typography>Run the program to see the output, Submit to evaluate</Typography>}
 
-            {selectedTest !== null &&
+            {selectedTest !== null && selectedTest < tests.length &&
             <TestView
                 testCase={tests[selectedTest]}
                 output={outputs[selectedTest]}

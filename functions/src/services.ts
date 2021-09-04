@@ -16,8 +16,13 @@ export const fetchNotionPage = async (pageId: string): Promise<ExtendedRecordMap
 
 
 export const submit = async (submission: Submission): Promise<void> => {
+    const problem = submission.exercise.id + (submission.isTestRun ? '-public' : '-private');
+    if (!submission.isTestRun && submission.testCases) {
+        throw Error('Final submissions cannot have test cases');
+    }
     const data = {
-        problem: submission.exercise.id + (submission.isTestRun ? '-public' : '-private'),
+        problem: !submission.testCases ? problem : undefined,
+        testCases: submission.testCases,
         submissionDownloadUrl: submission.submissionFileURL,
         language: submission.language,
         memoryLimit: 512,
@@ -25,6 +30,7 @@ export const submit = async (submission: Submission): Promise<void> => {
         returnOutputs: submission.isTestRun,
         return_compile_outputs: true,
         stopOnFirstFail: !submission.isTestRun,
+        comparisonMode: 'token',
     };
     functions.logger.info(`submitting data: ${JSON.stringify(data)}`);
     const res = await needle('post', AWS_LAMBDA_URL, JSON.stringify(data));

@@ -1,4 +1,4 @@
-import {Exercise, Course} from './courses';
+import {Exercise, Course, TestCase} from './courses';
 import firebase from 'firebase/app';
 import {LANGUAGES} from './language';
 
@@ -15,6 +15,7 @@ export interface Submission {
     userId: string;
     userDisplayName: string;
     exercise: Exercise;
+    testCases?: TestCase[];
     course: Course;
     submissionFileURL: string;
     language: keyof typeof LANGUAGES; // the language code
@@ -28,6 +29,6 @@ export interface SubmissionResult extends Submission {
     memory: number;
     time: number;
     score: number;
-    outputs?: string;
+    outputs?: string | string[];
     compileOutputs?: string;
 }

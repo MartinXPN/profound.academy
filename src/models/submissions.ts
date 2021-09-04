@@ -1,6 +1,7 @@
 import {Exercise, Course} from "./courses";
 import firebase from 'firebase/app';
 import {LANGUAGES} from "./language";
+import {TestCase} from "../../functions/src/models/courses";
 
 export type SubmissionStatus = 'Solved' |                   // OK => 100% score
                                 'Wrong answer' |            // WA => partial score or 0
@@ -15,6 +16,7 @@ export interface Submission {
     userId: string;
     userDisplayName: string;
     exercise: Exercise;
+    testCases?: TestCase[];
     course: Course;
     submissionFileURL: string;
     language: keyof typeof LANGUAGES;       // the language code
@@ -28,6 +30,6 @@ export interface SubmissionResult extends Submission {
     memory: number;
     time: number;
     score: number;
-    outputs?: string;
+    outputs?: string | string[];
     compileOutputs?: string;
 }

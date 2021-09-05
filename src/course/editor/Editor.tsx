@@ -2,7 +2,7 @@ import React, {useContext, useState} from "react";
 import Code from "./Code";  // needs to be before getModeForPath so that Ace is loaded
 import Console from "./Console";
 import {getModeForPath} from 'ace-builds/src-noconflict/ext-modelist';
-import {createStyles, IconButton, makeStyles, Theme} from "@material-ui/core";
+import {IconButton, makeStyles} from "@material-ui/core";
 import {Remove, Add} from "@material-ui/icons";
 import {useStickyState} from "../../util";
 import {Course, Exercise, TestCase} from "../../models/courses";

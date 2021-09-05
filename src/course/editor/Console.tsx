@@ -79,10 +79,12 @@ function Console(props: Props) {
         setTests(newTests);
     };
     const addTest = () => {
+        const len = tests.length;
         setTests([...tests, {
             input: '',
             target: '',
         }]);
+        setSelectedTest(len);
     }
 
     return (

@@ -35,11 +35,19 @@ function TestView(props: Props) {
     return (
         <>
             <Typography className={classes.bold}>Input:</Typography>
-            <TextField required multiline fullWidth onChange={event => setInput(event.target.value)} value={input} InputProps={{ disableUnderline: true }} />
+            <TextField required multiline fullWidth
+                       placeholder="Start typing the input..."
+                       onChange={event => setInput(event.target.value)}
+                       value={input}
+                       InputProps={{ disableUnderline: true }} />
 
             <br/>
             <Typography className={classes.bold}>Expected output:</Typography>
-            <TextField required multiline fullWidth onChange={event => setTarget(event.target.value)} value={target} InputProps={{ disableUnderline: true }} />
+            <TextField required multiline fullWidth
+                       placeholder="Start typing the expected output..."
+                       onChange={event => setTarget(event.target.value)}
+                       value={target}
+                       InputProps={{ disableUnderline: true }} />
 
             {(input !== testCase.input || target !== testCase.target) &&
             <Button

@@ -35,9 +35,14 @@ const useStyles = makeStyles((theme: Theme) =>
         content: {
             whiteSpace: 'pre',
         },
+        status: {
+            fontWeight: 'bold',
+            paddingTop: '8px',
+            paddingBottom: '8px',
+        },
         center: {
-            width: '80%',
-            margin: '10%',
+            width: '90%',
+            margin: '5%',
             textAlign: 'center',
         },
     }),
@@ -63,9 +68,14 @@ function Console(props: Props) {
     useEffect(() => {
         setTests(exercise.testCases);
     }, [exercise]);
-    if(selectedTest && selectedTest >= tests.length ) {
+    if(selectedTest && selectedTest >= tests.length )
         setSelectedTest(null);
-    }
+
+    useEffect(() => {
+        if (selectedTest === null && submissionResult)
+            setSelectedTest(0);
+        // the dependency array does not include selectedTest on purpose
+    }, [submissionResult]);
 
     const handleRun = () => onRunClicked(tests);
 
@@ -127,18 +137,18 @@ function Console(props: Props) {
 
             {isProcessing &&
             <div className={classes.center}>
-                <Typography>Running the program...</Typography>
+                <Typography className={classes.status}>Running the program...</Typography>
                 <CircularProgress />
             </div>}
 
             {submissionResult &&
             <>
-                <Typography>{submissionResult.status} in {submissionResult.time} seconds</Typography>
-                <Typography>{submissionResult.compileOutputs ?? ''}</Typography>
+                <Typography className={classes.status} style={{color: submissionResult.status === 'Solved' ? '#198534' : '#F44336'}}>{submissionResult.status} in {submissionResult.time} seconds</Typography>
+                <Typography className={classes.content}>{submissionResult.compileOutputs ?? ''}</Typography>
             </>}
 
             {!isProcessing && !submissionResult && selectedTest === null &&
-            <Typography>Run the program to see the output, Submit to evaluate</Typography>}
+            <Typography className={classes.status}>Run the program to see the output, Submit to evaluate</Typography>}
 
             {selectedTest !== null && selectedTest < tests.length &&
             <TestView

@@ -10,6 +10,9 @@ const useStyles = makeStyles({
     save: {
         marginBottom: '2em',
     },
+    content: {
+        whiteSpace: 'pre',
+    },
 });
 
 
@@ -61,7 +64,7 @@ function TestView(props: Props) {
             <br/>
             {output && <>
                 <Typography className={classes.bold}>Program output:</Typography>
-                <Typography>{output}</Typography>
+                <Typography className={classes.content}>{output}</Typography>
             </>}
         </>
     );

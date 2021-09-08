@@ -41,8 +41,9 @@ const useStyles = makeStyles((theme: Theme) =>
             paddingBottom: '8px',
         },
         center: {
-            width: '90%',
-            margin: '5%',
+            width: '100%',
+            marginTop: '5%',
+            marginBottom: '5%',
             textAlign: 'center',
         },
     }),

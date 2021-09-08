@@ -14,8 +14,11 @@ function LandingPage(props: Props) {
         <>
             {introPageId && <Content notionPage={introPageId} />}
             <div style={{textAlign: 'center'}}>
-                <Button color="primary" variant="contained" onClick={() => onStartCourseClicked()}>START THE COURSE</Button>
-                {/*style={{ borderRadius: 50 }}*/}
+                <Button color="primary" variant="contained"
+                        onClick={onStartCourseClicked}
+                        style={{marginBottom: '3em'}}>
+                    START THE COURSE
+                </Button>
             </div>
         </>
     )

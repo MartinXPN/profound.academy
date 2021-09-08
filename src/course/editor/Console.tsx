@@ -76,6 +76,7 @@ function Console(props: Props) {
         if (selectedTest === null && submissionResult)
             setSelectedTest(0);
         // the dependency array does not include selectedTest on purpose
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [submissionResult]);
 
     const handleRun = () => onRunClicked(tests);

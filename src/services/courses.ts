@@ -18,7 +18,7 @@ export const getCourse = async (id: string) => {
 }
 
 export const getUserCourses = async (userId: string) => {
-    const snap = await db.users.doc(userId).get();
+    const snap = await db.user(userId).get();
     console.log('snap:', snap);
     const us = snap.data();
     if (!us || !us.courses)
@@ -31,9 +31,6 @@ export const getUserCourses = async (userId: string) => {
 
 export const startCourse = async (userId: string, courseId: string) => {
     const course = db.course(courseId);
-    const allUsers = await db.users.get();
-
-    console.log('All users:', allUsers.docs.map(d => d.data()));
     const user = (await db.user(userId).get()).data();
     console.log('User:', user);
     if( user && user.courses && user.courses.length > 0 ) {

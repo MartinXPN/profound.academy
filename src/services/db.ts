@@ -18,7 +18,6 @@ const dataPoint = <T>(collectionPath: string) => firebase.firestore()
 
 
 const db = {
-    users: dataPoint<User>('users'),
     user: (userId: string) => dataPoint<User>('users').doc(userId),
     progress: (userId: string, courseId: string) => dataPoint<Progress>(`users/${userId}/progress/${courseId}/private`),
 

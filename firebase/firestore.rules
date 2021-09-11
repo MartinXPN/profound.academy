@@ -2,8 +2,69 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     match /{document=**} {
-      allow read, write: if
-          request.time < timestamp.date(2021, 9, 12);
+      allow read, write: if false;
+    }
+
+    function isCurrentUser(request, userId) {
+      return request.auth != null && request.auth.uid == userId;
+    }
+
+    match /users/{userId} {
+      allow read: if isCurrentUser(request, userId);
+      // User can add courses
+      allow create, update: if isCurrentUser(request, userId) && request.resource.data.courses.size() > 0;
+
+
+      // Allow read for public fields for other users
+      match /{public=**} {
+        allow read: if request.auth != null;
+      }
+
+      // Only the backend should update the progress of the user
+      // The user should only be able to read the progress status
+      match /progress/{courseId}/private/{exerciseId} {
+        allow write: if false;
+      }
+    }
+
+
+    // All the courses are public
+    match /courses/{courseId} {
+      allow read;
+
+      // All the exercises are public
+      match /exercises/{exerciseId} {
+        allow read;
+      }
+    }
+
+
+    // The user can read and add to their submissionQueue
+    match /submissionQueue/{userId}/private/{submissionId} {
+      allow read, create: if isCurrentUser(request, userId);
+    }
+
+    // Users can read their runs
+    match /runs/{userId}/private/{runId} {
+      allow read: if isCurrentUser(request, userId);
+    }
+
+    // All authenticated users can see the submission results
+    match /submissions/{submissionId} {
+      allow read: if request.auth != null;
+    }
+    // submission can have private fields available for only the current user
+    match /submissions/{submissionId}/private/{userId} {
+      allow read: if isCurrentUser(request, userId);
+    }
+
+    // All authenticated users can see the bestSubmissions
+    match /bestSubmissions/{exerciseId}/public/{userId} {
+      allow read: if request.auth != null;
+    }
+    // All authenticated users can see the bestSubmissions
+    match /bestSubmissions/{exerciseId}/private/{userId} {
+      allow read: if isCurrentUser(request, userId);
     }
   }
 }

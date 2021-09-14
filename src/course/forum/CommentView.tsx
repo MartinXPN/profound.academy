@@ -5,7 +5,7 @@ import {ArrowDropDown, ArrowDropUp, Edit, Save, Reply as ReplyIcon} from '@mater
 import React, {useContext, useEffect, useState} from "react";
 import {AuthContext} from "../../App";
 import {Comment} from "../../models/forum";
-import {onCommentRepliesChanged, updateComment} from "../../services/forum";
+import {onCommentRepliesChanged, updateComment, vote} from "../../services/forum";
 import Reply from "./Reply";
 
 
@@ -35,11 +35,12 @@ const useStyles = makeStyles((theme: Theme) =>
 );
 
 
-function Score({score}: { score: number }) {
+function Score({commentId, score}: { commentId: string, score: number }) {
     const classes = useStyles();
+    const auth = useContext(AuthContext);
 
-    const upVote = () => console.log('Upvoted!');
-    const downVote = () => console.log('Downvoted!');
+    const upVote = async () => auth && auth.currentUser && auth.currentUser.uid && await vote(commentId, auth.currentUser.uid, 1);
+    const downVote = async () => auth && auth.currentUser && auth.currentUser.uid && await vote(commentId, auth.currentUser.uid, -1);
 
     return (
         <div className={classes.score}>
@@ -95,7 +96,7 @@ function CommentView({comment, allowReply}: {
     return (<>
         <ListItem key={comment.id} alignItems="flex-start">
             <div className={classes.userHeader}>
-                <div className={classes.userHeaderItem}><Score score={comment.score} /></div>
+                <div className={classes.userHeaderItem}><Score commentId={comment.id} score={comment.score} /></div>
                 <ListItemIcon className={classes.userHeaderItem}>
                     <Avatar alt={comment.displayName} src={comment.avatarUrl}/>
                 </ListItemIcon>

@@ -13,3 +13,7 @@ export interface Comment {
     score: number;
     text: string;
 }
+
+export interface Vote {
+    vote: number;
+}

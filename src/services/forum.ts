@@ -83,3 +83,32 @@ export const updateComment = async (commentId: string, text: string) => {
         text: text,
     });
 };
+
+export const vote = async (commentId: string, userId: string, vote: number) => {
+    if (![-1, 0, 1].includes(vote)) {
+        throw RangeError(`${vote} is not in the right range`);
+    }
+
+    const commentRef = db.forumComment(commentId);
+    const votersRef = db.forumCommentVotes(commentId, userId);
+    const userVoteRef = db.userVotes(commentId, userId);
+
+    console.log('0');
+    return await firebase.firestore().runTransaction(async transaction => {
+        const voter = await transaction.get(votersRef);
+        let currentVote = voter.exists && voter.data() ? voter.data()?.vote : 0;
+        currentVote = currentVote || 0;
+        console.log('currentVote:', currentVote, 'vote:', vote);
+        if( currentVote === vote )
+            return;
+
+        transaction.update(commentRef, {
+            score: firebase.firestore.FieldValue.increment(-currentVote),
+        });
+        transaction.update(commentRef, {
+            score: firebase.firestore.FieldValue.increment(vote),
+        });
+        transaction.set(votersRef, {vote: vote});
+        transaction.set(userVoteRef, {vote: vote});
+    });
+}

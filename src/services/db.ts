@@ -5,7 +5,7 @@ import _ from "lodash";
 import {Progress, User} from "../models/users";
 import {Course, Exercise} from "../models/courses";
 import {Submission, SubmissionResult} from "../models/submissions";
-import {Comment} from "../models/forum";
+import {Comment, Vote} from "../models/forum";
 
 // Add ids when getting the data and removing when sending it
 const converter = <T>() => ({
@@ -19,9 +19,8 @@ const dataPoint = <T>(collectionPath: string) => firebase.firestore()
 
 
 const db = {
-    transaction: firebase.firestore().runTransaction,
-
     user: (userId: string) => dataPoint<User>('users').doc(userId),
+    userVotes: (commentId: string, userId: string) => dataPoint<Vote>(`users/${userId}/votes`).doc(commentId),
     progress: (userId: string, courseId: string) => dataPoint<Progress>(`users/${userId}/progress/${courseId}/private`),
 
     courses: dataPoint<Course>('courses'),
@@ -31,6 +30,7 @@ const db = {
 
     forum: dataPoint<Comment>('forum'),
     forumComment: (commentId: string) => dataPoint<Comment>('forum').doc(commentId),
+    forumCommentVotes: (commentId: string, userId: string) => dataPoint<Vote>(`forum/${commentId}/voters`).doc(userId),
     submissionQueue: (userId: string) => dataPoint<Submission>(`submissionQueue/${userId}/private`),
 
     runs: (userId: string) => dataPoint<SubmissionResult>(`runs/${userId}/private`),

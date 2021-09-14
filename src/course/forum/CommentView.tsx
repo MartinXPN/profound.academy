@@ -128,7 +128,7 @@ function CommentView({comment, allowReply}: {
                     {comment.replies.length > 0 &&
                     <>
                         {!showReplies &&
-                        <Button endIcon={<ArrowDropDown/>} size="small" onClick={onShowReplies}>Show Replies</Button>}
+                        <Button endIcon={<ArrowDropDown/>} size="small" onClick={onShowReplies}>Show Replies ({comment.replies.length})</Button>}
 
                         {showReplies &&
                         <Button endIcon={<ArrowDropUp/>} size="small" onClick={onHideReplies}>Hide Replies</Button>}

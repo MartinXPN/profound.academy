@@ -11,6 +11,12 @@ import Reply from "./Reply";
 
 const useStyles = makeStyles((theme: Theme) =>
     createStyles({
+        userHeader: {
+            display: 'flex',
+        },
+        userHeaderItem: {
+            margin: 'auto',
+        },
         content: {
             width: '100%',
         },
@@ -31,11 +37,15 @@ const useStyles = makeStyles((theme: Theme) =>
 
 function Score({score}: { score: number }) {
     const classes = useStyles();
+
+    const upVote = () => console.log('Upvoted!');
+    const downVote = () => console.log('Downvoted!');
+
     return (
         <div className={classes.score}>
-            <IconButton><ArrowDropUp/></IconButton>
+            <IconButton onClick={upVote}><ArrowDropUp/></IconButton>
             <Typography>{score}</Typography>
-            <IconButton><ArrowDropDown/></IconButton>
+            <IconButton onClick={downVote}><ArrowDropDown/></IconButton>
         </div>
     )
 }
@@ -83,16 +93,25 @@ function CommentView({comment, allowReply}: {
     }
 
     return (<>
-        <ListItem key={comment.id}>
-            <Score score={comment.score}/>
-            <ListItemIcon>
-                <Avatar alt={comment.displayName} src={comment.avatarUrl}/>
-            </ListItemIcon>
+        <ListItem key={comment.id} alignItems="flex-start">
+            <div className={classes.userHeader}>
+                <div className={classes.userHeaderItem}><Score score={comment.score} /></div>
+                <ListItemIcon className={classes.userHeaderItem}>
+                    <Avatar alt={comment.displayName} src={comment.avatarUrl}/>
+                </ListItemIcon>
+            </div>
 
             <div className={classes.content}>
                 <ListItemText
-                    primary={comment.displayName}
+                    primary={
+                        <div>
+                            {comment.displayName}
+                            {auth && auth.currentUser && comment.userId === auth.currentUser.uid && !isEditing &&
+                            <IconButton onClick={onEdit}><Edit/></IconButton>}
+                        </div>
+                    }
                     secondary={
+                        <div style={{display: 'flex'}}>
                         <TextField
                             required multiline fullWidth
                             disabled={!isEditing}
@@ -100,6 +119,7 @@ function CommentView({comment, allowReply}: {
                             onChange={event => setText(event.target.value)}
                             value={text}
                             InputProps={{disableUnderline: true}}/>
+                        </div>
                     }/>
 
                 <div className={classes.actions}>
@@ -114,8 +134,6 @@ function CommentView({comment, allowReply}: {
                     </>}
                     {auth && auth.currentUser && comment.userId === auth.currentUser.uid && isEditing &&
                     <Button size="small" endIcon={<Save/>} onClick={onSave}>Save</Button>}
-                    {auth && auth.currentUser && comment.userId === auth.currentUser.uid && !isEditing &&
-                    <Button size="small" endIcon={<Edit/>} onClick={onEdit}>Edit</Button>}
                 </div>
 
                 {showReplies &&

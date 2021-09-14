@@ -5,7 +5,7 @@ export interface Comment {
     id: string;
     userId: string;
     displayName: string;
-    avatarUrl: string;
+    avatarUrl?: string;
     createdAt: firebase.firestore.FieldValue;
 
     repliedTo: Exercise | Comment;

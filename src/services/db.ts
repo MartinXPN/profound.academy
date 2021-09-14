@@ -19,6 +19,8 @@ const dataPoint = <T>(collectionPath: string) => firebase.firestore()
 
 
 const db = {
+    transaction: firebase.firestore().runTransaction,
+
     user: (userId: string) => dataPoint<User>('users').doc(userId),
     progress: (userId: string, courseId: string) => dataPoint<Progress>(`users/${userId}/progress/${courseId}/private`),
 
@@ -28,6 +30,7 @@ const db = {
     exercise: (courseId: string, exerciseId: string) => dataPoint<Exercise>(`courses/${courseId}/exercises`).doc(exerciseId),
 
     forum: dataPoint<Comment>('forum'),
+    forumComment: (commentId: string) => dataPoint<Comment>('forum').doc(commentId),
     submissionQueue: (userId: string) => dataPoint<Submission>(`submissionQueue/${userId}/private`),
 
     runs: (userId: string) => dataPoint<SubmissionResult>(`runs/${userId}/private`),

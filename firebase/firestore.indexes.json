@@ -1,6 +1,20 @@
 {
   "indexes": [
     {
+      "collectionGroup": "forum",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "repliedTo",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "createdAt",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
       "collectionGroup": "public",
       "queryScope": "COLLECTION",
       "fields": [

@@ -38,6 +38,15 @@ service cloud.firestore {
       }
     }
 
+    // The forum is available for authenticated users
+    match /forum/{commentId} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null;
+      allow update: if isCurrentUser(request, request.resource.data.userId)
+                       && (request.resource.data.score == resource.data.score);
+      allow delete: if request.auth != null && request.auth.uid == get(/forum/$(commentId)).userId;
+    }
+
 
     // The user can read and add to their submissionQueue
     match /submissionQueue/{userId}/private/{submissionId} {

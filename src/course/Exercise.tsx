@@ -4,7 +4,7 @@ import Button from "@material-ui/core/Button";
 import {createStyles, makeStyles, Theme} from "@material-ui/core";
 import {Course, Exercise} from "../models/courses";
 import SubmissionsTable from "./SubmissionsTable";
-import Forum from "./Forum";
+import Forum from "./forum/Forum";
 
 const useStyles = makeStyles((theme: Theme) =>
     createStyles({
@@ -43,11 +43,13 @@ function ExerciseView(props: ExerciseProps) {
             </div>
 
 
-            {currentTab === 'description' && <Content notionPage={exercise.pageId}/>}
+            {currentTab === 'description' && <>
+                <Content notionPage={exercise.pageId}/>
+                <Forum course={course} exercise={exercise} />
+            </>}
             {currentTab === 'bestSubmissions' && <SubmissionsTable course={course} exercise={exercise} mode="best" />}
             {currentTab === 'allSubmissions' && <SubmissionsTable course={course} exercise={exercise} mode="all" />}
 
-            <Forum course={course} exercise={exercise} />
         </>
     );
 }

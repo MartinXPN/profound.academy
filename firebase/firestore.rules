@@ -14,6 +14,11 @@ service cloud.firestore {
       // User can add courses
       allow create, update: if isCurrentUser(request, userId) && request.resource.data.courses.size() > 0;
 
+      // Allow recording the user's votes
+      match /votes/{commentId} {
+        allow read: if isCurrentUser(request, userId);
+        allow write: if isCurrentUser(request, userId);
+      }
 
       // Allow read for public fields for other users
       match /{public=**} {
@@ -39,13 +44,29 @@ service cloud.firestore {
     }
 
     // The forum is available for authenticated users
+    function isValidScore(score) {
+      // TODO: find a better way of handling the switch from positive to negative votes
+      return score == -2 || score == -1 || score == 0 || score == 1 || score == 2;
+    }
     match /forum/{commentId} {
       allow read: if request.auth != null;
-      allow create: if request.auth != null;
-      allow update: if isCurrentUser(request, request.resource.data.userId)
-                       && (request.resource.data.score == resource.data.score);
-      allow delete: if request.auth != null && request.auth.uid == get(/forum/$(commentId)).userId;
+      allow create: if isCurrentUser(request, request.resource.data.userId) && request.resource.data.score == 1;
+      allow update: if (isCurrentUser(request, request.resource.data.userId)
+                        && request.resource.data.score == resource.data.score)
+                       || (request.auth != null
+                           && request.auth.uid != request.resource.data.userId
+                           && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['score', 'replies'])
+                           && isValidScore(math.abs(resource.data.score - request.resource.data.score)));
+      allow delete: if request.auth != null && request.auth.uid == request.resource.data.userId;
+
+      match /voters/{userId} {
+        allow read: if isCurrentUser(request, userId);
+        allow delete: if isCurrentUser(request, userId);
+        allow create: if isCurrentUser(request, userId) && isValidScore(request.resource.data.vote);
+        allow update: if isCurrentUser(request, userId) && isValidScore(request.resource.data.vote);
+      }
     }
+
 
 
     // The user can read and add to their submissionQueue

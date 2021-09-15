@@ -1,10 +1,9 @@
-import React, {useContext, useEffect} from 'react';
+import React, {memo, useContext, useEffect, useState} from 'react';
+import {Avatar, ClickAwayListener, Grow, IconButton, MenuItem, MenuList, Paper, Popper} from "@material-ui/core";
 import StyledFirebaseAuth from 'react-firebaseui/StyledFirebaseAuth';
 import firebase from 'firebase/app';
 import 'firebase/auth';
-import {Avatar, ClickAwayListener, Grow, IconButton, MenuItem, MenuList, Paper, Popper} from "@material-ui/core";
 import {AuthContext} from "../App";
-
 
 // Configure FirebaseUI.
 const uiConfig = {
@@ -22,7 +21,7 @@ const uiConfig = {
 };
 
 
-export function SignIn() {
+export const SignIn = memo(function SignIn() {
     const auth = useContext(AuthContext);
 
     // Listen to the Firebase Auth state and set the local state.
@@ -37,59 +36,65 @@ export function SignIn() {
         return (
             <div style={{left: '50%', textAlign: 'center'}}>
                 <h3>Sign in to continue</h3>
-                <StyledFirebaseAuth uiConfig={uiConfig} firebaseAuth={firebase.auth()} />
+                <StyledFirebaseAuth uiCallback={ui => ui.disableAutoSignIn()} uiConfig={uiConfig} firebaseAuth={firebase.auth()} />
             </div>
         );
     }
 
     return(<></>);
-}
+});
 
 
 export function AppBarProfile() {
     const auth = useContext(AuthContext);
     const user = auth?.currentUser;
 
-    const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+    const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
     const open = Boolean(anchorEl);
 
     const handleMenu = (event: React.MouseEvent<HTMLElement>) => setAnchorEl(event.currentTarget);
     const handleClose = () => setAnchorEl(null);
 
-
-    if (!user) {
-        return (<IconButton><Avatar/></IconButton>);
+    const onSignOutClicked = async () => {
+        handleClose();
+        await firebase.auth().signOut();
     }
 
     return (<>
-        {auth && (
-            <>
-                <IconButton
-                    aria-label="account of current user"
-                    aria-controls="menu-appbar"
-                    aria-haspopup="true"
-                    onClick={handleMenu}
-                    edge="end">
-                    { /*@ts-ignore*/ }
-                    <Avatar src={user.photoURL} alt={user.displayName} />
-                </IconButton>
+        <IconButton
+            aria-label="account of current user"
+            aria-controls="menu-appbar"
+            aria-haspopup="true"
+            onClick={handleMenu}
+            edge="end">
+            { /*@ts-ignore*/ }
+            {user ? <Avatar src={user.photoURL} alt={user.displayName} /> : <Avatar/>}
 
-                <Popper open={open} anchorEl={anchorEl} role={undefined} transition disablePortal>
-                    {({ TransitionProps, placement }) => (
-                        <Grow
-                            {...TransitionProps}
-                            style={{ transformOrigin: placement === 'bottom' ? 'center top' : 'center bottom' }}>
-                            <Paper>
-                                <ClickAwayListener onClickAway={handleClose}>
-                                    <MenuList autoFocusItem={open} id="menu-list-grow">
-                                        <MenuItem onClick={() => {handleClose(); firebase.auth().signOut();}} key='sign-out'>Sign Out</MenuItem>
-                                    </MenuList>
-                                </ClickAwayListener>
-                            </Paper>
-                        </Grow>
-                    )}
-                </Popper>
-            </>
-        )}
+        </IconButton>
+
+        <Popper open={open} anchorEl={anchorEl} role={undefined} transition disablePortal>
+            {({ TransitionProps, placement }) => (
+                <Grow
+                    {...TransitionProps}
+                    style={{ transformOrigin: placement === 'bottom' ? 'center top' : 'center bottom' }}>
+                    <Paper>
+                        <ClickAwayListener onClickAway={handleClose}>
+                            {user
+                                ?
+                                <MenuList autoFocusItem={open} id="menu-list-grow">
+                                    <MenuItem onClick={onSignOutClicked} key='sign-out'>Sign Out</MenuItem>
+                                </MenuList>
+                                :
+                                <></>
+                                // Rendering multiple StyledFirebaseAuth components result in https://github.com/firebase/firebaseui-web-react/issues/59
+                                // <MenuList autoFocusItem={open} id="menu-list-grow" style={{width: '20em'}}>
+                                //     <MenuItem key='sign-in'><SignIn /></MenuItem>
+                                // </MenuList>
+                            }
+                        </ClickAwayListener>
+                    </Paper>
+                </Grow>
+            )}
+        </Popper>
     </>)
 }

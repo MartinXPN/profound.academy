@@ -42,7 +42,7 @@ export const submit = async (submission: Submission): Promise<void> => {
     } as SubmissionResult;
     submissionResult.submissionId = submission.id;
     functions.logger.info(`submissionResult: ${JSON.stringify(submissionResult)}`);
-    const {id, ...submissionRes} = submissionResult;
+    const {id, submissionFileURL, ...submissionRes} = submissionResult;
 
     if (submission.isTestRun) {
         functions.logger.info(`Updating the run: ${id} with ${JSON.stringify(submissionRes)}`);
@@ -55,6 +55,11 @@ export const submit = async (submission: Submission): Promise<void> => {
     // save the results to /submissions
     const submissions = app.firestore().collection('submissions');
     await submissions.doc(id).set(submissionRes);
+    // save the sensitive information to /submissions/${submissionId}/private/${userId}
+    const sensitiveData = {submissionFileURL: submissionFileURL};
+    await app.firestore().collection(`submissions/${id}/private`).doc(submission.userId).set(sensitiveData);
+    functions.logger.info(`Saved the submission file url: ${submissionFileURL}`);
+
 
     // save the results to /bestSubmissions
     const bestUserSubmission = app.firestore()
@@ -63,12 +68,20 @@ export const submit = async (submission: Submission): Promise<void> => {
         .collection('public')
         .doc(submission.userId);
     const bestContent = await bestUserSubmission.get();
-    if (bestContent.exists && bestContent.data()?.score >= submissionRes.score) {
-        functions.logger.info('Did not update the bestSubmissions list');
-        return;
+    if (bestContent.exists) {
+        const bestRecord = bestContent.data() as SubmissionResult;
+        if (bestRecord.score > submissionRes.score ||
+            bestRecord.score === submissionRes.score && bestRecord.time < submissionRes.time) {
+            functions.logger.info('Did not update the bestSubmissions list');
+            return;
+        }
     }
-    await bestUserSubmission.set(submissionResult);
+
+    await bestUserSubmission.set(submissionRes);
     functions.logger.info('Updated the bestSubmissions list!');
+    // save the sensitive information to /bestSubmissions/${exerciseId}/public/${userId}/private/data
+    await bestUserSubmission.collection('private').doc('data').set(sensitiveData);
+    functions.logger.info('Saved the submission file url to private/data');
 
     // update user progress
     await app.firestore()

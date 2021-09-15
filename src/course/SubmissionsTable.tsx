@@ -14,6 +14,7 @@ import useAsyncEffect from "use-async-effect";
 import {getBestSubmissions, getSubmissions} from "../services/submissions";
 import {SubmissionResult} from "../models/submissions";
 import moment from "moment/moment";
+import SubmissionBackdrop from "./SubmissionBackdrop";
 
 const useStyles = makeStyles({
     root: {
@@ -53,6 +54,13 @@ function SubmissionsTable(props: SubmissionsTableProps) {
     const handleChangePage = (event: unknown, newPage: number) => setPage(newPage);
     const rowsPerPage = 20;
     const [submissions, setSubmissions] = useState<SubmissionResult[]>([]);
+    const [displayedSubmission, setDisplayedSubmission] = useState<SubmissionResult | undefined>(undefined);
+
+    const onSubmissionClicked = async (submission: SubmissionResult) => {
+        console.log('clicked!', submission);
+        setDisplayedSubmission(submission);
+    }
+    const onCloseSubmission = () => setDisplayedSubmission(undefined);
 
     console.log('locale:', moment.locale());
     useAsyncEffect(async () => {
@@ -70,8 +78,9 @@ function SubmissionsTable(props: SubmissionsTableProps) {
 
     return (
         <Paper className={classes.root}>
+            {displayedSubmission && <SubmissionBackdrop submission={displayedSubmission} onClose={onCloseSubmission} mode={mode} />}
             <TableContainer>
-                <Table stickyHeader aria-label="sticky table">
+                <Table>
                     <TableHead>
                         <TableRow>
                             {columns.map((column) => (
@@ -86,7 +95,7 @@ function SubmissionsTable(props: SubmissionsTableProps) {
                     </TableHead>
                     <TableBody>
                         {submissions.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row, index) =>
-                            <TableRow hover role="checkbox" tabIndex={-1} key={row.id}>
+                            <TableRow hover role="checkbox" tabIndex={-1} key={row.id} onClick={() => onSubmissionClicked(row)}>
                                 {columns.map((column) => {
                                     if( column.id === '#' )
                                         return (

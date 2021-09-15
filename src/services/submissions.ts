@@ -78,3 +78,33 @@ export const getBestSubmissions = async (exerciseId: string) => {
     console.log('Got submissions for exercise:', exerciseId, submissions);
     return submissions;
 }
+
+export const codeFromUrl = async (url: string) => {
+    const getCode = firebase.functions().httpsCallable('getCodeFromUrl');
+    const code = (await getCode({url: url})).data.toString();
+
+    console.log('got:', code, 'from:', url);
+    return code;
+}
+
+export const getSubmissionCode = async (userId: string, submissionId: string) => {
+    const snapshot = await db.submissionSensitiveRecords(userId, submissionId).get();
+    const records = snapshot.data();
+
+    if( !records )
+        throw Error('The record does not exist!');
+
+    console.log('Got submission file:', records.submissionFileURL);
+    return await codeFromUrl(records.submissionFileURL);
+}
+
+export const getBestSubmissionCode = async (userId: string, exerciseId: string) => {
+    const snapshot = await db.bestSubmissionSensitiveRecords(userId, exerciseId).get();
+    const records = snapshot.data();
+
+    if( !records )
+        throw Error('The record does not exist!');
+
+    console.log('Got submission file:', records.submissionFileURL);
+    return await codeFromUrl(records.submissionFileURL);
+}

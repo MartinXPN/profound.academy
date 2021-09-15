@@ -1,5 +1,5 @@
 import * as functions from 'firebase-functions';
-import {fetchNotionPage, submit} from './services';
+import {fetchNotionPage, submit, textFromStorageUrl} from './services';
 import {Submission} from './models/submissions';
 
 // Start writing Firebase Functions
@@ -24,6 +24,12 @@ export const getNotionPage = functions.https
         const recordMap = await fetchNotionPage(pageId);
         functions.logger.info(`recordMap: ${JSON.stringify(recordMap)}`);
         return recordMap;
+    });
+
+export const getCodeFromUrl = functions.https
+    .onCall(async (data, context) => {
+        functions.logger.info(`data: ${JSON.stringify(data)}`);
+        return await textFromStorageUrl(data.url);
     });
 
 

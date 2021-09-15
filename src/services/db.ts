@@ -4,7 +4,7 @@ import _ from "lodash";
 
 import {Progress, User} from "../models/users";
 import {Course, Exercise} from "../models/courses";
-import {Submission, SubmissionResult} from "../models/submissions";
+import {Submission, SubmissionResult, SubmissionSensitiveRecords} from "../models/submissions";
 import {Comment, Vote} from "../models/forum";
 
 // Add ids when getting the data and removing when sending it
@@ -38,7 +38,9 @@ const db = {
 
     submissionResults: dataPoint<SubmissionResult>('submissions'),
     submissionResult: (submissionId: string) => dataPoint<SubmissionResult>('submissions').doc(submissionId),
+    submissionSensitiveRecords: (userId: string, submissionId: string) => dataPoint<SubmissionSensitiveRecords>(`/submissions/${submissionId}/private`).doc(userId),
     bestSubmissions: (exerciseId: string) => dataPoint<SubmissionResult>(`bestSubmissions/${exerciseId}/public`),
+    bestSubmissionSensitiveRecords: (userId: string, exerciseId: string) => dataPoint<SubmissionSensitiveRecords>(`bestSubmissions/${exerciseId}/private`).doc(userId),
 };
 
 export {db}

@@ -84,7 +84,7 @@ function Editor(props: EditorProps) {
     return (
         <div style={{height: '100%'}}>
             <div className={classes.code}>
-                <Code theme={theme} language={editorLanguage} fontSize={fontSize} setCode={setCode}/>
+                <Code theme={theme} readOnly={false} language={editorLanguage} fontSize={fontSize} setCode={setCode}/>
                 <div className={classes.settings}>
                     <IconButton aria-label="decrease" onClick={decreaseFontSize}><Remove fontSize="small" /></IconButton>
                     <IconButton aria-label="increase" onClick={increaseFontSize}><Add fontSize="small" /></IconButton>

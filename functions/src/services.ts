@@ -14,6 +14,10 @@ export const fetchNotionPage = async (pageId: string): Promise<ExtendedRecordMap
     return await notion.getPage(pageId);
 };
 
+export const textFromStorageUrl = async (url: string): Promise<string> => {
+    const response = await needle('get', url);
+    return response.raw.toString();
+};
 
 export const submit = async (submission: Submission): Promise<void> => {
     const problem = submission.exercise.id + (submission.isTestRun ? '-public' : '-private');

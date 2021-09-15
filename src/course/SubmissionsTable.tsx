@@ -51,11 +51,10 @@ function SubmissionsTable(props: SubmissionsTableProps) {
     const {course, exercise, mode} = props;
     const [page, setPage] = useState(0);
     const handleChangePage = (event: unknown, newPage: number) => setPage(newPage);
-    const rowsPerPage = 10;
+    const rowsPerPage = 20;
     const [submissions, setSubmissions] = useState<SubmissionResult[]>([]);
 
-    console.log(moment.locale());
-
+    console.log('locale:', moment.locale());
     useAsyncEffect(async () => {
         if( mode === 'all' ) {
             const submissions = await getSubmissions(course.id, exercise.id);
@@ -86,27 +85,26 @@ function SubmissionsTable(props: SubmissionsTableProps) {
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                        {submissions.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row, index) => {
-                            return (
-                                <TableRow hover role="checkbox" tabIndex={-1} key={row.id}>
-                                    {columns.map((column) => {
-                                        if( column.id === '#' )
-                                            return (
-                                                <TableCell key={column.id} align={column.align}>
-                                                    {page * rowsPerPage + index + 1}
-                                                </TableCell>
-                                            );
-
-                                        const value = row[column.id];
+                        {submissions.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row, index) =>
+                            <TableRow hover role="checkbox" tabIndex={-1} key={row.id}>
+                                {columns.map((column) => {
+                                    if( column.id === '#' )
                                         return (
                                             <TableCell key={column.id} align={column.align}>
-                                                {column.format ? column.format(value) : value}
+                                                {page * rowsPerPage + index + 1}
+                                                {/*<Button style={{margin: 0, padding: 0}} size="small" variant="text"></Button>*/}
                                             </TableCell>
                                         );
-                                    })}
-                                </TableRow>
-                            );
-                        })}
+
+                                    const value = row[column.id];
+                                    return (
+                                        <TableCell key={column.id} align={column.align}>
+                                            {column.format ? column.format(value) : value}
+                                        </TableCell>
+                                    );
+                                })}
+                            </TableRow>
+                        )}
                     </TableBody>
                 </Table>
             </TableContainer>

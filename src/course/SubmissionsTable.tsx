@@ -30,10 +30,10 @@ interface Column {
 }
 
 const columns: Column[] = [
-    { id: '#', label: '#', minWidth: 25 },
+    { id: '#', label: '#', minWidth: 20 },
     { id: 'userDisplayName', label: 'User', minWidth: 100 },
-    { id: 'createdAt', label: 'Date', minWidth: 100, format: (value) => moment(value.toDate()).format('YYYY MMMM Do, hh:mm:ss') },
-    { id: 'status', label: 'Status', minWidth: 75 },
+    { id: 'createdAt', label: 'Date', minWidth: 100, format: (value) => moment(value.toDate()).format('YYYY MMM Do, HH:mm:ss') },
+    { id: 'status', label: 'Status', minWidth: 50 },
     { id: 'time', label: 'Time (s)', minWidth: 50, align: 'right', format: (value: number) => value ? value.toFixed(2) : '' },
     { id: 'memory', label: 'Memory (MB)', minWidth: 50, align: 'right', format: (value: number) => value ? value.toFixed(1): '' },
     { id: 'language', label: 'Language', minWidth: 50 },

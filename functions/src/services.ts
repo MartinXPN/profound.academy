@@ -63,9 +63,7 @@ export const submit = async (submission: Submission): Promise<void> => {
 
     // save the results to /bestSubmissions
     const bestUserSubmission = app.firestore()
-        .collection('bestSubmissions')
-        .doc(submission.exercise.id)
-        .collection('public')
+        .collection(`bestSubmissions/${submission.exercise.id}/public`)
         .doc(submission.userId);
     const bestContent = await bestUserSubmission.get();
     if (bestContent.exists) {
@@ -80,7 +78,9 @@ export const submit = async (submission: Submission): Promise<void> => {
     await bestUserSubmission.set(submissionRes);
     functions.logger.info('Updated the bestSubmissions list!');
     // save the sensitive information to /bestSubmissions/${exerciseId}/public/${userId}/private/data
-    await bestUserSubmission.collection('private').doc('data').set(sensitiveData);
+    await app.firestore()
+        .collection(`bestSubmissions/${submission.exercise.id}/private`)
+        .doc(submission.userId).set(sensitiveData);
     functions.logger.info('Saved the submission file url to private/data');
 
     // update user progress

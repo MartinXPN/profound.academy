@@ -2,6 +2,12 @@ import {db} from "./db";
 import {Course, Exercise} from "../models/courses";
 import firebase from "firebase/app";
 
+export const getNotionPageMap = async (pageId: string) => {
+    const getPage = firebase.functions().httpsCallable('getNotionPage');
+    const map = await getPage({pageId: pageId});
+    return map.data;
+}
+
 
 export const getAllCourses = async () => {
     const snapshot = await db.courses.get();

@@ -1,6 +1,5 @@
 import React, {useRef, useState} from 'react';
-import firebase from 'firebase/app';
-import 'firebase/functions';
+import useAsyncEffect from "use-async-effect";
 
 import {ExtendedRecordMap} from "notion-types/src/maps";
 import {Code, Collection, CollectionRow, Equation, Modal, NotionRenderer} from 'react-notion-x'
@@ -9,10 +8,10 @@ import 'prismjs/themes/prism.css';          // used for code syntax highlighting
 import 'react-notion-x/src/styles.css';     // core styles shared by all of react-notion-x (required)
 import 'rc-dropdown/assets/index.css';      // used for collection views (optional)
 import 'katex/dist/katex.min.css';          // used for rendering equations (optional)
-import useAsyncEffect from "use-async-effect";
 import {CircularProgress} from "@material-ui/core";
 
 import './Content.css';
+import {getNotionPageMap} from "../../services/courses";
 
 
 interface ContentProps {
@@ -27,12 +26,11 @@ function Content(props: ContentProps) {
     useAsyncEffect(async () => {
         isMounted.current = true;
         setRecordMap(null);
-        const getPage = firebase.functions().httpsCallable('getNotionPage');
-        const map = await getPage({pageId: notionPage});
-        console.log({map: map.data});
+        const map = await getNotionPageMap(notionPage);
+        console.log({map: map});
 
         // @ts-ignore
-        isMounted.current && setRecordMap(map.data);
+        isMounted.current && setRecordMap(map);
 
         // TODO: Get the languages from record map obtained from getPage()
         const languages = ['c', 'cpp', 'python'];

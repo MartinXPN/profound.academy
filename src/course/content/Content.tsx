@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useRef, useState} from 'react';
 import firebase from 'firebase/app';
 import 'firebase/functions';
 
@@ -20,22 +20,25 @@ interface ContentProps {
 }
 
 function Content(props: ContentProps) {
-    const [recordMap, setRecordMap] = useState<ExtendedRecordMap | null>(null);
     const {notionPage} = props;
+    const isMounted = useRef(false)
+    const [recordMap, setRecordMap] = useState<ExtendedRecordMap | null>(null);
 
     useAsyncEffect(async () => {
+        isMounted.current = true;
         setRecordMap(null);
         const getPage = firebase.functions().httpsCallable('getNotionPage');
         const map = await getPage({pageId: notionPage});
         console.log({map: map.data});
+
         // @ts-ignore
-        setRecordMap(map.data);
+        isMounted.current && setRecordMap(map.data);
 
         // TODO: Get the languages from record map obtained from getPage()
         const languages = ['c', 'cpp', 'python'];
         await Promise.all(languages.map(l => import(`prismjs/components/prism-${l}.min`)));
         highlightAll();
-    }, [notionPage]);
+    }, () => isMounted.current = false, [notionPage]);
 
     return (
         <>

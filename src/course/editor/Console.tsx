@@ -112,7 +112,7 @@ function Console(props: Props) {
                     style={{float: 'left'}}>
 
                     {tests.map((test, index) =>
-                        <ToggleButton value={index} id={`${index}`} className={classes.tests}>
+                        <ToggleButton value={index} id={`${index}`} className={classes.tests} key={index.toString()}>
                             <Typography>{index + 1}</Typography>
                         </ToggleButton>
                     )}

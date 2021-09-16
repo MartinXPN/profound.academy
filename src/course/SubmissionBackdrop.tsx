@@ -1,6 +1,6 @@
 import {useContext, useState} from "react";
 import useAsyncEffect from "use-async-effect";
-import {Backdrop, Button, CircularProgress, ClickAwayListener, createStyles, Paper} from "@material-ui/core";
+import {Backdrop, CircularProgress, ClickAwayListener, createStyles, Paper} from "@material-ui/core";
 import {makeStyles, Theme} from "@material-ui/core/styles";
 import {SubmissionResult} from "../models/submissions";
 import {getBestSubmissionCode, getSubmissionCode} from "../services/submissions";
@@ -37,8 +37,8 @@ function SubmissionBackdrop({submission, onClose, mode}: {submission: Submission
         }
         try {
             const code = mode === 'all' ?
-                await getSubmissionCode(userId, submission.submissionId) :
-                await getBestSubmissionCode(userId, submission.exercise.id);
+                await getSubmissionCode(submission.userId, submission.submissionId) :
+                await getBestSubmissionCode(submission.userId, submission.exercise.id);
             console.log('Got submission code:', code);
             setSubmissionCode(code);
         }

@@ -15,6 +15,11 @@ const useStyles = makeStyles((theme: Theme) =>
             zIndex: theme.zIndex.drawer + 1,
             color: '#fff',
         },
+        content: {
+            position: 'relative',
+            height: '90%',
+            width: '70%',
+        },
     }),
 );
 
@@ -58,7 +63,7 @@ function SubmissionBackdrop({submission, onClose, mode}: {submission: Submission
                     ?
                     <CircularProgress color="inherit"/>
                     :
-                    <Paper style={{position: 'relative', height: '90%', width: '70%'}}>
+                    <Paper className={classes.content}>
                         <Code theme="tomorrow" fontSize={14}
                               language={editorLanguage}
                               readOnly

@@ -87,14 +87,5 @@ service cloud.firestore {
     match /submissions/{submissionId}/private/{userId} {
       allow read: if isCurrentUser(request, userId);
     }
-
-    // All authenticated users can see the bestSubmissions
-    match /bestSubmissions/{exerciseId}/public/{userId} {
-      allow read: if request.auth != null;
-    }
-    // All authenticated users can see the bestSubmissions
-    match /bestSubmissions/{exerciseId}/private/{userId} {
-      allow read: if isCurrentUser(request, userId);
-    }
   }
 }

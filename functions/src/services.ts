@@ -43,8 +43,8 @@ export const submit = async (submission: Submission): Promise<void> => {
     const submissionResult = {
         ...res.body,
         ...submission,
+        isBest: false,
     } as SubmissionResult;
-    submissionResult.submissionId = submission.id;
     functions.logger.info(`submissionResult: ${JSON.stringify(submissionResult)}`);
     const {id, submissionFileURL, ...submissionRes} = submissionResult;
 
@@ -56,36 +56,50 @@ export const submit = async (submission: Submission): Promise<void> => {
         return;
     }
 
+    // Update the best submissions
+    const bestUserSubmissionsSnapshot = await app.firestore()
+        .collection('submissions')
+        .where('isBest', '==', true)
+        .where('userId', '==', submission.userId)
+        .where('exercise', '==', submission.exercise)
+        .get();
+    const bestUserSubmissions = bestUserSubmissionsSnapshot.docs.map((s) =>s.data());
+    if (bestUserSubmissions.length > 1) {
+        throw Error(`
+        Found duplicate user best submissions: ${submission.userId} for exercise: ${submission.exercise.id}
+        `);
+    }
+    if (bestUserSubmissions.length === 0 ) {
+        functions.logger.info(`
+        Best submission for user: ${submission.userId}, exercise ${submission.exercise.id} does not exist
+        `);
+        submissionRes.isBest = true;
+    }
+    if (bestUserSubmissions.length === 1) {
+        const bestRecord = bestUserSubmissions[0] as SubmissionResult;
+        bestRecord.id = bestUserSubmissionsSnapshot.docs[0].id;
+
+        if (bestRecord.score < submissionRes.score ||
+            bestRecord.score === submissionRes.score && bestRecord.time > submissionRes.time) {
+            functions.logger.info(`Updating the previous best: ${JSON.stringify(bestRecord)}`);
+
+            await app.firestore()
+                .collection('submissions')
+                .doc(bestRecord.id)
+                .set({isBest: false}, {merge: true});
+            submissionRes.isBest = true;
+            functions.logger.info(`Updated the previous best: ${bestRecord.id}`);
+        } else {
+            functions.logger.info('Did not update the bestSubmissions list');
+        }
+    }
+
     // save the results to /submissions
-    const submissions = app.firestore().collection('submissions');
-    await submissions.doc(id).set(submissionRes);
+    await app.firestore().collection('submissions').doc(id).set(submissionRes, {merge: true});
     // save the sensitive information to /submissions/${submissionId}/private/${userId}
     const sensitiveData = {submissionFileURL: submissionFileURL};
     await app.firestore().collection(`submissions/${id}/private`).doc(submission.userId).set(sensitiveData);
     functions.logger.info(`Saved the submission file url: ${submissionFileURL}`);
-
-
-    // save the results to /bestSubmissions
-    const bestUserSubmission = app.firestore()
-        .collection(`bestSubmissions/${submission.exercise.id}/public`)
-        .doc(submission.userId);
-    const bestContent = await bestUserSubmission.get();
-    if (bestContent.exists) {
-        const bestRecord = bestContent.data() as SubmissionResult;
-        if (bestRecord.score > submissionRes.score ||
-            bestRecord.score === submissionRes.score && bestRecord.time < submissionRes.time) {
-            functions.logger.info('Did not update the bestSubmissions list');
-            return;
-        }
-    }
-
-    await bestUserSubmission.set(submissionRes);
-    functions.logger.info('Updated the bestSubmissions list!');
-    // save the sensitive information to /bestSubmissions/${exerciseId}/public/${userId}/private/data
-    await app.firestore()
-        .collection(`bestSubmissions/${submission.exercise.id}/private`)
-        .doc(submission.userId).set(sensitiveData);
-    functions.logger.info('Saved the submission file url to private/data');
 
     // update user progress
     await app.firestore()

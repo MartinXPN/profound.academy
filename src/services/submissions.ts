@@ -38,7 +38,7 @@ export const submitSolution = async (userId: string, userDisplayName: string | n
 
 export const onRunResultChanged = (userId: string, submissionId: string,
                                    onChanged: (submissionResult: SubmissionResult | undefined) => void) => {
-    const resultSnapshot = db.runResult(userId, submissionId);
+    const resultSnapshot = db.run(userId, submissionId);
     return resultSnapshot.onSnapshot(doc => {
         const res = doc.data();
         console.log('Run result changed:', submissionId, res);

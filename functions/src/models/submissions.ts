@@ -24,7 +24,7 @@ export interface Submission {
 }
 
 export interface SubmissionResult extends Submission {
-    submissionId: string;
+    isBest: boolean;
     status: string;
     memory: number;
     time: number;

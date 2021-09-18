@@ -33,7 +33,9 @@ function Content(props: ContentProps) {
         isMounted.current && setRecordMap(map);
 
         // TODO: Get the languages from record map obtained from getPage()
-        const languages = ['c', 'cpp', 'python'];
+        const languages = ['cpp', 'python'];
+        // @ts-ignore
+        await import('prismjs/components/prism-c.min');
         await Promise.all(languages.map(l => import(`prismjs/components/prism-${l}.min`)));
         highlightAll();
     }, () => isMounted.current = false, [notionPage]);

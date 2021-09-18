@@ -67,8 +67,11 @@ export const getSubmissions = async (courseId: string, exerciseId: string) => {
     return submissions;
 }
 
-export const getBestSubmissions = async (exerciseId: string) => {
-    const snapshot = await db.bestSubmissions(exerciseId)
+export const getBestSubmissions = async (courseId: string, exerciseId: string) => {
+    const exercise = db.exercise(courseId, exerciseId);
+    const snapshot = await db.submissionResults
+        .where('exercise', '==', exercise)
+        .where('isBest', '==', true)
         .where('status', '==', 'Solved')
         .orderBy('score', 'desc')
         .orderBy('time', 'asc')
@@ -79,14 +82,6 @@ export const getBestSubmissions = async (exerciseId: string) => {
     return submissions;
 }
 
-export const codeFromUrl = async (url: string) => {
-    const getCode = firebase.functions().httpsCallable('getCodeFromUrl');
-    const code = (await getCode({url: url})).data.toString();
-
-    console.log('got:', code, 'from:', url);
-    return code;
-}
-
 export const getSubmissionCode = async (userId: string, submissionId: string) => {
     const snapshot = await db.submissionSensitiveRecords(userId, submissionId).get();
     const records = snapshot.data();
@@ -94,17 +89,11 @@ export const getSubmissionCode = async (userId: string, submissionId: string) =>
     if( !records )
         throw Error('The record does not exist!');
 
-    console.log('Got submission file:', records.submissionFileURL);
-    return await codeFromUrl(records.submissionFileURL);
-}
+    const url = records.submissionFileURL;
+    console.log('Got submission file:', url);
+    const getCode = firebase.functions().httpsCallable('getCodeFromUrl');
+    const code = (await getCode({url: url})).data.toString();
 
-export const getBestSubmissionCode = async (userId: string, exerciseId: string) => {
-    const snapshot = await db.bestSubmissionSensitiveRecords(userId, exerciseId).get();
-    const records = snapshot.data();
-
-    if( !records )
-        throw Error('The record does not exist!');
-
-    console.log('Got submission file:', records.submissionFileURL);
-    return await codeFromUrl(records.submissionFileURL);
+    console.log('got:', code, 'from:', url);
+    return code;
 }

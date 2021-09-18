@@ -64,21 +64,17 @@ function SubmissionsTable(props: SubmissionsTableProps) {
 
     console.log('locale:', moment.locale());
     useAsyncEffect(async () => {
-        if( mode === 'all' ) {
-            const submissions = await getSubmissions(course.id, exercise.id);
-            setSubmissions(submissions);
-        }
-        else if( mode === 'best' ) {
-            const submissions = await getBestSubmissions(exercise.id);
-            setSubmissions(submissions);
-        }
+        const submissions = mode === 'best' ?
+            await getBestSubmissions(course.id, exercise.id) :
+            await getSubmissions(course.id, exercise.id);
+        setSubmissions(submissions);
     }, [course, exercise])
 
     console.log('SubmissionTable:', exercise);
 
     return (
         <Paper className={classes.root}>
-            {displayedSubmission && <SubmissionBackdrop submission={displayedSubmission} onClose={onCloseSubmission} mode={mode} />}
+            {displayedSubmission && <SubmissionBackdrop submission={displayedSubmission} onClose={onCloseSubmission} />}
             <TableContainer>
                 <Table>
                     <TableHead>

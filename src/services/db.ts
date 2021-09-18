@@ -39,8 +39,6 @@ const db = {
     submissionResults: dataPoint<SubmissionResult>('submissions'),
     submissionResult: (submissionId: string) => dataPoint<SubmissionResult>('submissions').doc(submissionId),
     submissionSensitiveRecords: (userId: string, submissionId: string) => dataPoint<SubmissionSensitiveRecords>(`/submissions/${submissionId}/private`).doc(userId),
-    bestSubmissions: (exerciseId: string) => dataPoint<SubmissionResult>(`bestSubmissions/${exerciseId}/public`),
-    bestSubmissionSensitiveRecords: (userId: string, exerciseId: string) => dataPoint<SubmissionSensitiveRecords>(`bestSubmissions/${exerciseId}/private`).doc(userId),
 };
 
 export {db}

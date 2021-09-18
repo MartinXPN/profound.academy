@@ -3,7 +3,7 @@ import useAsyncEffect from "use-async-effect";
 import {Backdrop, CircularProgress, ClickAwayListener, createStyles, Paper} from "@material-ui/core";
 import {makeStyles, Theme} from "@material-ui/core/styles";
 import {SubmissionResult} from "../models/submissions";
-import {getBestSubmissionCode, getSubmissionCode} from "../services/submissions";
+import {getSubmissionCode} from "../services/submissions";
 import {AuthContext} from "../App";
 import Code from "./editor/Code";
 import {LANGUAGES} from "../models/language";
@@ -23,7 +23,7 @@ const useStyles = makeStyles((theme: Theme) =>
     }),
 );
 
-function SubmissionBackdrop({submission, onClose, mode}: {submission: SubmissionResult, onClose: () => void, mode: 'all' | 'best'}) {
+function SubmissionBackdrop({submission, onClose}: {submission: SubmissionResult, onClose: () => void}) {
     const classes = useStyles();
     const auth = useContext(AuthContext);
 
@@ -41,9 +41,7 @@ function SubmissionBackdrop({submission, onClose, mode}: {submission: Submission
             return;
         }
         try {
-            const code = mode === 'all' ?
-                await getSubmissionCode(submission.userId, submission.submissionId) :
-                await getBestSubmissionCode(submission.userId, submission.exercise.id);
+            const code = await getSubmissionCode(submission.userId, submission.id);
             console.log('Got submission code:', code);
             setSubmissionCode(code);
         }
@@ -51,7 +49,7 @@ function SubmissionBackdrop({submission, onClose, mode}: {submission: Submission
             setSubmissionCode('# You are not allowed to view the submission');
         }
 
-    }, [submission, mode]);
+    }, [submission]);
 
     const language = LANGUAGES[submission.language];
     const editorLanguage = getModeForPath(`main.${language.extension}`).name;

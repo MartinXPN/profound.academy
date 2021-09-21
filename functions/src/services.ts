@@ -14,11 +14,6 @@ export const fetchNotionPage = async (pageId: string): Promise<ExtendedRecordMap
     return await notion.getPage(pageId);
 };
 
-export const textFromStorageUrl = async (url: string): Promise<string> => {
-    const response = await needle('get', url);
-    return response.raw.toString();
-};
-
 export const submit = async (submission: Submission): Promise<void> => {
     const problem = submission.exercise.id + (submission.isTestRun ? '-public' : '-private');
     if (!submission.isTestRun && submission.testCases) {
@@ -27,7 +22,7 @@ export const submit = async (submission: Submission): Promise<void> => {
     const data = {
         problem: !submission.testCases ? problem : undefined,
         testCases: submission.testCases,
-        submissionDownloadUrl: submission.submissionFileURL,
+        code: submission.code,
         language: submission.language,
         memoryLimit: 512,
         timeLimit: 2,
@@ -46,7 +41,7 @@ export const submit = async (submission: Submission): Promise<void> => {
         isBest: false,
     } as SubmissionResult;
     functions.logger.info(`submissionResult: ${JSON.stringify(submissionResult)}`);
-    const {id, submissionFileURL, ...submissionRes} = submissionResult;
+    const {id, code, ...submissionRes} = submissionResult;
 
     if (submission.isTestRun) {
         functions.logger.info(`Updating the run: ${id} with ${JSON.stringify(submissionRes)}`);
@@ -97,9 +92,9 @@ export const submit = async (submission: Submission): Promise<void> => {
     // save the results to /submissions
     await app.firestore().collection('submissions').doc(id).set(submissionRes, {merge: true});
     // save the sensitive information to /submissions/${submissionId}/private/${userId}
-    const sensitiveData = {submissionFileURL: submissionFileURL};
+    const sensitiveData = {code: code};
     await app.firestore().collection(`submissions/${id}/private`).doc(submission.userId).set(sensitiveData);
-    functions.logger.info(`Saved the submission file url: ${submissionFileURL}`);
+    functions.logger.info(`Saved the submission: ${JSON.stringify(code)}`);
 
     // update user progress
     await app.firestore()

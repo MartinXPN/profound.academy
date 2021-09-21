@@ -1,7 +1,6 @@
 import {db} from "./db";
 import {Submission, SubmissionResult} from "../models/submissions";
 import firebase from "firebase/app";
-import 'firebase/storage';
 import {Language} from "../models/language";
 import {TestCase} from "../../functions/src/models/courses";
 
@@ -11,9 +10,7 @@ export const submitSolution = async (userId: string, userDisplayName: string | n
                                      code: string, language: Language,
                                      isTestRun: boolean, testCases?: TestCase[]) => {
     const extension = language.extension;
-    const ref = firebase.storage().ref(`submissions/${userId}/${exerciseId}/${new Date().toISOString()}/main.${extension}`);
-    await ref.putString(code, firebase.storage.StringFormat.RAW);
-    const downloadURL = await ref.getDownloadURL();
+    const projectCode = {[`main.${extension}`]: code};
 
     const courseRef = db.courses.doc(courseId);
     const exerciseRef = db.exercises(courseId).doc(exerciseId);
@@ -25,7 +22,7 @@ export const submitSolution = async (userId: string, userDisplayName: string | n
         course: courseRef,
         exercise: exerciseRef,
         testCases: testCases,
-        submissionFileURL: downloadURL,
+        code: projectCode,
         language: language.languageCode,
         createdAt: firebase.firestore.FieldValue.serverTimestamp(),
         isTestRun: isTestRun,
@@ -88,12 +85,5 @@ export const getSubmissionCode = async (userId: string, submissionId: string) =>
 
     if( !records )
         throw Error('The record does not exist!');
-
-    const url = records.submissionFileURL;
-    console.log('Got submission file:', url);
-    const getCode = firebase.functions().httpsCallable('getCodeFromUrl');
-    const code = (await getCode({url: url})).data.toString();
-
-    console.log('got:', code, 'from:', url);
-    return code;
+    return records.code;
 }

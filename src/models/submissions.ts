@@ -18,7 +18,7 @@ export interface Submission {
     exercise: Exercise;
     testCases?: TestCase[];
     course: Course;
-    submissionFileURL?: string;
+    code?: { [key: string]: string };
     language: keyof typeof LANGUAGES;       // the language code
     createdAt: firebase.firestore.FieldValue;
     isTestRun: boolean;
@@ -36,5 +36,5 @@ export interface SubmissionResult extends Submission {
 
 export interface SubmissionSensitiveRecords {
     id: string;
-    submissionFileURL: string;
+    code: { [key: string]: string };
 }

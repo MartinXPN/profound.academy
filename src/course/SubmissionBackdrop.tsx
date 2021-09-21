@@ -43,7 +43,8 @@ function SubmissionBackdrop({submission, onClose}: {submission: SubmissionResult
         try {
             const code = await getSubmissionCode(submission.userId, submission.id);
             console.log('Got submission code:', code);
-            setSubmissionCode(code);
+            // TODO: support multi-file submissions (now just get the first value)
+            setSubmissionCode(code[Object.keys(code)[0]]);
         }
         catch (e) {
             setSubmissionCode('# You are not allowed to view the submission');

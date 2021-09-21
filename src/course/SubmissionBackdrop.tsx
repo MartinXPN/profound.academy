@@ -66,7 +66,7 @@ function SubmissionBackdrop({submission, onClose}: {submission: SubmissionResult
                         <Code theme="tomorrow" fontSize={14}
                               language={editorLanguage}
                               readOnly
-                              initialCode={submissionCode} />
+                              code={submissionCode} />
                     </Paper>
                 }
             </ClickAwayListener>

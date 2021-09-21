@@ -16,7 +16,6 @@
     "ace-builds": "^1.4.12",
     "firebase": "^8.9.1",
     "katex": "^0.13.13",
-    "lodash": "^4.17.21",
     "moment": "^2.29.1",
     "notion-types": "^4.8.2",
     "prismjs": "^1.24.1",
@@ -57,7 +56,6 @@
     ]
   },
   "devDependencies": {
-    "@types/lodash": "^4.14.172",
     "@types/prismjs": "^1.16.6",
     "@types/react-router-dom": "^5.1.8"
   }

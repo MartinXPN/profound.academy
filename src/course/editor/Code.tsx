@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from "react";
+import React, {memo, useState} from "react";
 import AceEditor from "react-ace";
 
 import "ace-builds/webpack-resolver";
@@ -11,14 +11,12 @@ interface Props {
     language: string;
     fontSize: number;
     setCode?: (code: string) => void;
+    code?: string;
     readOnly: boolean;
-    initialCode?: string;
 }
 
-function Code(props: Props) {
-    const {theme, language, fontSize, setCode, readOnly, initialCode} = props;
-
-    const [value, setValue] = useState('');
+const Code = memo(function Code(props: Props) {
+    const {theme, language, fontSize, setCode, code, readOnly} = props;
     const [loadedTheme, setLoadedTheme] = useState('');
     const [loadedLanguage, setLoadedLanguage] = useState('');
 
@@ -36,10 +34,6 @@ function Code(props: Props) {
         setLoadedTheme(theme);
     }, [theme]);
 
-    useEffect(() => {
-        setValue(initialCode ?? '');
-    }, [initialCode]);
-
 
     return (
         <AceEditor
@@ -47,13 +41,12 @@ function Code(props: Props) {
             mode={loadedLanguage}
             theme={loadedTheme}
             readOnly={readOnly}
-            value={value}
+            value={code}
             width='100%'
             height='100%'
             fontSize={fontSize}
             onChange={(value) => {
                 console.log(value);
-                setValue(value);
                 setCode && setCode(value);
             }}
             showPrintMargin
@@ -72,6 +65,6 @@ function Code(props: Props) {
             editorProps={{ $blockScrolling: true }}
         />
     )
-}
+});
 
 export default Code;

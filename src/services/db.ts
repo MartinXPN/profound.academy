@@ -1,6 +1,5 @@
 import firebase from 'firebase/app';
 import 'firebase/firestore';
-import _ from "lodash";
 
 import {Progress, User} from "../models/users";
 import {Course, Exercise} from "../models/courses";
@@ -9,8 +8,11 @@ import {Comment, Vote} from "../models/forum";
 
 // Add ids when getting the data and removing when sending it
 const converter = <T>() => ({
-    // @ts-ignore
-    toFirestore: (data: T) => _.omit(data, 'id'),
+    toFirestore: (data: T) => {
+        // @ts-ignore
+        const {id, ...res} = data;
+        return res;
+    },
     fromFirestore: (snap: firebase.firestore.QueryDocumentSnapshot) => Object.assign(snap.data(), {id: snap.id}) as unknown as T
 });
 const dataPoint = <T>(collectionPath: string) => firebase.firestore()

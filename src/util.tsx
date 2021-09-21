@@ -9,13 +9,17 @@ import {useEffect, useState} from "react";
 export function useStickyState<T>(defaultValue: T, key: string) {
     const [value, setValue] = useState(() => {
         const stickyValue = localStorage.getItem(key);
-        console.log('GOT:', key, stickyValue);
-        return stickyValue !== null
-            ? JSON.parse(stickyValue)
-            : defaultValue;
+        return stickyValue !== null ? JSON.parse(stickyValue) : defaultValue;
     });
     useEffect(() => {
+        let stickyValue = localStorage.getItem(key);
+        stickyValue = stickyValue !== null ? JSON.parse(stickyValue) : defaultValue;
+        localStorage.setItem(key, JSON.stringify(stickyValue));
+        setValue(stickyValue);
+    }, [defaultValue, key]);
+    useEffect(() => {
         localStorage.setItem(key, JSON.stringify(value));
-    }, [key, value]);
+        // intentionally not include the `key` parameter in deps so that the previous useEffect runs on-key-change
+    }, [value]);
     return [value, setValue];
 }

@@ -32,17 +32,12 @@ const useStyles = makeStyles({
 });
 
 
-interface EditorProps {
-    course: Course;
-    exercise: Exercise;
-}
-
-function Editor(props: EditorProps) {
+function Editor({course, exercise}: {course: Course, exercise: Exercise}) {
     const classes = useStyles();
     const auth = useContext(AuthContext);
-    const [code, setCode] = useState('');
+    const [code, setCode] = useStickyState('', `code-${auth?.currentUser?.uid}-${exercise.id}`);
     const [theme, setTheme] = useStickyState('tomorrow', `editorTheme-${auth?.currentUser?.uid}`);
-    const [language, setLanguage] = useStickyState(props.course.preferredLanguage, `${props.course.id}-language-${auth?.currentUser?.uid}`);
+    const [language, setLanguage] = useStickyState(course.preferredLanguage, `${course.id}-language-${auth?.currentUser?.uid}`);
     const [fontSize, setFontSize] = useStickyState(14, `fontSize-${auth?.currentUser?.uid}`);
 
     const [submissionResult, setSubmissionResult] = useState<SubmissionResult | undefined>(undefined);
@@ -56,7 +51,7 @@ function Editor(props: EditorProps) {
             return;
 
         setSubmitted(true);
-        const submissionId = await submitSolution(auth.currentUser.uid, auth.currentUser.displayName, props.course.id, props.exercise.id, code, language, false, undefined);
+        const submissionId = await submitSolution(auth.currentUser.uid, auth.currentUser.displayName, course.id, exercise.id, code, language, false, undefined);
         const unsubscribe = onSubmissionResultChanged(submissionId, (result) => {
             setSubmissionResult(result);
             if(result)
@@ -71,7 +66,7 @@ function Editor(props: EditorProps) {
             return;
 
         setSubmitted(true);
-        const runId = await submitSolution(auth.currentUser.uid, auth.currentUser.displayName, props.course.id, props.exercise.id, code, language, true, tests);
+        const runId = await submitSolution(auth.currentUser.uid, auth.currentUser.displayName, course.id, exercise.id, code, language, true, tests);
         const unsubscribe = onRunResultChanged(auth.currentUser.uid, runId, (result) => {
             setSubmissionResult(result);
             if(result)
@@ -84,7 +79,7 @@ function Editor(props: EditorProps) {
     return (
         <div style={{height: '100%'}}>
             <div className={classes.code}>
-                <Code theme={theme} readOnly={false} language={editorLanguage} fontSize={fontSize} setCode={setCode}/>
+                <Code theme={theme} readOnly={false} language={editorLanguage} fontSize={fontSize} setCode={setCode} code={code}/>
                 <div className={classes.settings}>
                     <IconButton aria-label="decrease" onClick={decreaseFontSize}><Remove fontSize="small" /></IconButton>
                     <IconButton aria-label="increase" onClick={increaseFontSize}><Add fontSize="small" /></IconButton>
@@ -93,7 +88,7 @@ function Editor(props: EditorProps) {
 
             <div className={classes.console}>
                 <Console
-                    exercise={props.exercise}
+                    exercise={exercise}
                     onSubmitClicked={onSubmitClicked}
                     onRunClicked={onRunClicked}
                     isProcessing={submitted}

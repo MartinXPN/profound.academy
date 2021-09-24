@@ -15,7 +15,7 @@ export const fetchNotionPage = async (pageId: string): Promise<ExtendedRecordMap
 };
 
 export const submit = async (submission: Submission): Promise<void> => {
-    const problem = submission.exercise.id + (submission.isTestRun ? '-public' : '-private');
+    const problem = submission.exercise.id;
     if (!submission.isTestRun && submission.testCases) {
         throw Error('Final submissions cannot have test cases');
     }
@@ -28,7 +28,6 @@ export const submit = async (submission: Submission): Promise<void> => {
         timeLimit: 2,
         returnOutputs: submission.isTestRun,
         return_compile_outputs: true,
-        stopOnFirstFail: !submission.isTestRun,
         comparisonMode: 'token',
     };
     functions.logger.info(`submitting data: ${JSON.stringify(data)}`);

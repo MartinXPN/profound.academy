@@ -37,6 +37,9 @@ const useStyles = makeStyles((theme: Theme) =>
             flexGrow: 1,
             padding: theme.spacing(0),
         },
+        exerciseRoot: {
+            paddingBottom: '12em',
+        },
         exercise: {
             overflowY: 'auto',
             height: '100%',
@@ -62,10 +65,10 @@ function CurrentExercise(props: ExerciseProps) {
         setShowSignIn(false);
 
     return (
-        <>
+        <div className={classes.exerciseRoot}>
             {/* Display the landing page with an option to start the course if it wasn't started yet */
             (!exercise || !auth?.isSignedIn) &&
-            <><LandingPage introPageId={course.introduction} onStartCourseClicked={() => {
+            <LandingPage introPageId={course.introduction} onStartCourseClicked={() => {
                 if (auth && auth.currentUser && auth.currentUser.uid) {
                     startCourse(auth.currentUser.uid, course.id).then(() => console.log('success'));
                     launchCourse();
@@ -73,7 +76,7 @@ function CurrentExercise(props: ExerciseProps) {
                     setShowSignIn(true);
                 }
             }}/>
-            </>}
+            }
 
             {/* Request for authentication if the user is not signed-in yet */
                 showSignIn && <SignIn />
@@ -88,7 +91,7 @@ function CurrentExercise(props: ExerciseProps) {
                 <div style={{width: '100%', height: '100%'}}><Editor course={course} exercise={exercise}/></div>
             </SplitPane>
             }
-        </>
+        </div>
     )
 }
 

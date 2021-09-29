@@ -40,7 +40,7 @@ function Editor({course, exercise}: {course: Course, exercise: Exercise}) {
     const [language, setLanguage] = useStickyState(course.preferredLanguage, `${course.id}-language-${auth?.currentUser?.uid}`);
     const [fontSize, setFontSize] = useStickyState(14, `fontSize-${auth?.currentUser?.uid}`);
 
-    const [submissionResult, setSubmissionResult] = useStickyState<SubmissionResult | undefined>(undefined, `submissionRes-${auth?.currentUser?.uid}-${exercise.id}`);
+    const [submissionResult, setSubmissionResult] = useStickyState<SubmissionResult | null>(null, `submissionRes-${auth?.currentUser?.uid}-${exercise.id}`);
     const [submitted, setSubmitted] = useState(false);
 
     const editorLanguage = getModeForPath(`main.${language.extension}`).name;

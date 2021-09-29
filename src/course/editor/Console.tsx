@@ -55,7 +55,7 @@ interface Props {
     onSubmitClicked: () => void;
     onRunClicked: (tests: TestCase[]) => void;
     isProcessing: boolean;
-    submissionResult: SubmissionResult | undefined;
+    submissionResult: SubmissionResult | null;
 }
 
 

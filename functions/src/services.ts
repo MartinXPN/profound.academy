@@ -26,6 +26,7 @@ export const submit = async (submission: Submission): Promise<void> => {
         language: submission.language,
         memoryLimit: 512,
         timeLimit: 2,
+        aggregateResults: !submission.isTestRun,
         returnOutputs: submission.isTestRun,
         return_compile_outputs: true,
         comparisonMode: 'token',

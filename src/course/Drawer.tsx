@@ -22,6 +22,7 @@ import ArrowRightIcon from '@material-ui/icons/ArrowRight';
 import {Exercise} from "../models/courses";
 import {AppBarProfile} from "../header/Auth";
 import {Progress} from "../models/users";
+import {useStatusToStyledBackground} from "./colors";
 
 
 const drawerWidth = 240;
@@ -72,26 +73,6 @@ const useStyles = makeStyles((theme: Theme) =>
                 width: theme.spacing(9) + 1,
             },
         },
-        drawerItemDone: {
-            "&,&:focus,&:hover": {
-                backgroundColor: "#00C02F",
-            }
-        },
-        drawerItemFail: {
-            "&,&:focus,&:hover": {
-                backgroundColor: "#F09A24",
-            }
-        },
-        drawerItemNeutral: {
-            "&,&:focus,&:hover": {
-                backgroundColor: "#fafafa",
-            }
-        },
-        drawerItemUnavailable: {
-            "&,&:focus,&:hover": {
-                backgroundColor: "#969696",
-            }
-        },
         toolbar: {
             display: 'flex',
             alignItems: 'center',
@@ -115,6 +96,7 @@ interface CourseDrawerProps {
 
 function CourseDrawer(props: CourseDrawerProps) {
     const classes = useStyles();
+    const statusToStyle = useStatusToStyledBackground();
     const theme = useTheme();
     const history = useHistory();
     const [open, setOpen] = React.useState(false);
@@ -125,14 +107,11 @@ function CourseDrawer(props: CourseDrawerProps) {
 
 
     const {exercises, currentExerciseId, progress, onItemSelected} = props;
-    const getClassName = (id: string) => {
-        if( !progress.hasOwnProperty(id) )
-            return classes.drawerItemNeutral;
-
-        const p = progress[id];
-        if(['Wrong answer', 'Time limit exceeded', 'Runtime error'].includes(p.status) )    return classes.drawerItemFail;
-        if(p.status === 'Solved')                                                           return classes.drawerItemDone;
-        if(p.status === 'Unavailable')                                                      return classes.drawerItemUnavailable;
+    const getStatusStyle = (id: string) => {
+        const status = progress.hasOwnProperty(id) ? progress[id].status : undefined;
+        if( !status )
+            return statusToStyle.undefined;
+        return statusToStyle[status];
     }
 
 
@@ -183,7 +162,7 @@ function CourseDrawer(props: CourseDrawerProps) {
                 <Divider key="topDivider" />
                 <List key="exerciseList">
                     {exercises.map((ex, index) =>
-                    <ListItem button key={ex.id} onClick={() => onItemSelected(index)} className={getClassName(ex.id)}>
+                    <ListItem button key={ex.id} onClick={() => onItemSelected(index)} className={getStatusStyle(ex.id)}>
                         <ListItemIcon>{currentExerciseId === ex.id ? <ArrowRightIcon /> : <ListItemText primary={index + 1}/>}</ListItemIcon>
                         <ListItemText primary={ex.title}/>
                     </ListItem>

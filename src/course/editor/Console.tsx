@@ -121,7 +121,7 @@ function Console(props: Props) {
                         return (
                             <ToggleButton value={index} id={`${index}`} key={index.toString()}
                                           className={classes.tests}
-                                          style={{color: statusToColor(currentStatus)}}>
+                                          style={{color: statusToColor(currentStatus, false)}}>
                                 <Typography>{index + 1}</Typography>
                             </ToggleButton>
                         )}

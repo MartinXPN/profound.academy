@@ -10,18 +10,19 @@ export const statusColors = {
     solved: '#1fb947',
     failed: '#F44336',
     neutral: '#fafafa',
+    neutralText: '#212121',
     unavailable: '#969696',
 };
 
-export const statusToColor = (status: SubmissionStatus | string | null | undefined) => {
+export const statusToColor = (status: SubmissionStatus | string | null | undefined, isBackground: boolean = true) => {
     if (status === 'Solved')                return statusColors.solved;
     if (status === 'Wrong answer')          return statusColors.failed;
     if (status === 'Time limit exceeded')   return statusColors.failed;
     if (status === 'Runtime error')         return statusColors.failed;
     if (status === 'Compilation error')     return statusColors.failed;
-    if (status === 'Checking')              return statusColors.neutral;
     if (status === 'Unavailable')           return statusColors.unavailable;
-    return statusColors.neutral;
+    // Checking and all other possible options
+    return isBackground ? statusColors.neutral : statusColors.neutralText;
 };
 
 const getStyle = (color: string) => {
@@ -48,16 +49,4 @@ export const useStatusToStyledBackground = makeStyles({
     'Unavailable': getStyle(statusToColor('Unavailable')),
     null: getStyle(statusToColor(null)),
     undefined: getStyle(statusToColor(undefined)),
-});
-
-export const useStatusToStyledColor = makeStyles({
-    'Solved': {color: statusToColor('Solved')},
-    'Wrong answer': {color: statusToColor('Wrong answer')},
-    'Time limit exceeded': {color: statusToColor('Time limit exceeded')},
-    'Runtime error': {color: statusToColor('Runtime error')},
-    'Compilation error': {color: statusToColor('Compilation error')},
-    'Checking': {color: statusToColor('Checking')},
-    'Unavailable': {color: statusToColor('Unavailable')},
-    null: {color: statusToColor(null)},
-    undefined: {color: statusToColor(undefined)},
 });

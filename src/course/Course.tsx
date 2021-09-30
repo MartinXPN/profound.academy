@@ -145,18 +145,18 @@ function CourseView() {
 
     return (
         <Switch>
-            <div className={classes.root}>
-                <Route path={`${match.path}/:exerciseId?`}>
-                    <CourseDrawer exercises={exercises}
-                          progress={progress}
-                          onItemSelected={setCurrentExerciseId} />
+        <div className={classes.root}>
+            <Route path={`${match.path}/:exerciseId?`}>
+                <CourseDrawer exercises={exercises}
+                      progress={progress}
+                      onItemSelected={setCurrentExerciseId} />
 
-                    <main className={classes.content}>
-                        <div className={classes.toolbar}/>
-                            {course && <CurrentExercise course={course} idToExercise={idToExercise} launchCourse={launchCourse}/>}
-                    </main>
-                </Route>
-            </div>
+                <main className={classes.content}>
+                    <div className={classes.toolbar}/>
+                    {course && <CurrentExercise course={course} idToExercise={idToExercise} launchCourse={launchCourse}/>}
+                </main>
+            </Route>
+        </div>
         </Switch>
     );
 }

@@ -1,5 +1,5 @@
 import React from "react";
-import {useHistory} from "react-router-dom";
+import {useHistory, useParams} from "react-router-dom";
 
 import clsx from 'clsx';
 import {createStyles, makeStyles, useTheme, Theme} from '@material-ui/core/styles';
@@ -89,13 +89,14 @@ const useStyles = makeStyles((theme: Theme) =>
 
 interface CourseDrawerProps {
     exercises: Exercise[];
-    currentExerciseId?: string;
     progress: { [key: string]: Progress};
-    onItemSelected: (index: number) => void;
+    onItemSelected: (exerciseId: string) => void;
 }
 
 function CourseDrawer(props: CourseDrawerProps) {
     const classes = useStyles();
+    const {exerciseId} = useParams<{ exerciseId?: string }>();
+
     const statusToStyle = useStatusToStyledBackground();
     const theme = useTheme();
     const history = useHistory();
@@ -106,7 +107,7 @@ function CourseDrawer(props: CourseDrawerProps) {
     const onHomeClicked = () => history.push('/');
 
 
-    const {exercises, currentExerciseId, progress, onItemSelected} = props;
+    const {exercises, progress, onItemSelected} = props;
     const getStatusStyle = (id: string) => {
         const status = progress.hasOwnProperty(id) ? progress[id].status : undefined;
         if( !status )
@@ -162,8 +163,8 @@ function CourseDrawer(props: CourseDrawerProps) {
                 <Divider key="topDivider" />
                 <List key="exerciseList">
                     {exercises.map((ex, index) =>
-                    <ListItem button key={ex.id} onClick={() => onItemSelected(index)} className={getStatusStyle(ex.id)}>
-                        <ListItemIcon>{currentExerciseId === ex.id ? <ArrowRightIcon /> : <ListItemText primary={index + 1}/>}</ListItemIcon>
+                    <ListItem button key={ex.id} onClick={() => onItemSelected(ex.id)} className={getStatusStyle(ex.id)}>
+                        <ListItemIcon>{exerciseId === ex.id ? <ArrowRightIcon /> : <ListItemText primary={index + 1}/>}</ListItemIcon>
                         <ListItemText primary={ex.title}/>
                     </ListItem>
                     )}

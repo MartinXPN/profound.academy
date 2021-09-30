@@ -57,7 +57,7 @@ function App() {
             <Route exact path="/">
                 <Home />
             </Route>
-            <Route path={'/courses/:id'}>
+            <Route path={'/:courseId'}>
                 <Course />
             </Route>
         </Switch>

@@ -1,5 +1,5 @@
 import React, {useContext, useEffect, useState} from "react";
-import {useParams} from "react-router-dom";
+import {Route, Switch, useHistory, useParams, useRouteMatch} from "react-router-dom";
 import SplitPane from 'react-split-pane';
 
 import {createStyles, makeStyles, Theme} from '@material-ui/core/styles';
@@ -48,17 +48,15 @@ const useStyles = makeStyles((theme: Theme) =>
 );
 
 
-interface ExerciseProps {
-    course: Course;
-    exercise: Exercise | null;
-    launchCourse: () => void;
-}
-
-function CurrentExercise(props: ExerciseProps) {
+function CurrentExercise({course, idToExercise, launchCourse}:
+                         {course: Course, idToExercise: {[key: string]: Exercise}, launchCourse: () => void}) {
     const classes = useStyles();
     const auth = useContext(AuthContext);
+    const {exerciseId} = useParams<{ exerciseId: string }>();
+    const exercise = idToExercise.hasOwnProperty(exerciseId) ? idToExercise[exerciseId] : undefined;
+    console.log('exerciseId', exerciseId, exercise);
+
     const [showSignIn, setShowSignIn] = useState(false);
-    const {course, exercise, launchCourse} = props;
     const [splitPos, setSplitPos] = useStickyState(50, `splitPos-${auth?.currentUser?.uid}`);
 
     if(auth?.isSignedIn && showSignIn)
@@ -69,9 +67,9 @@ function CurrentExercise(props: ExerciseProps) {
             {/* Display the landing page with an option to start the course if it wasn't started yet */
             (!exercise || !auth?.isSignedIn) &&
             <div className={classes.landingPage}>
-                <LandingPage introPageId={course.introduction} onStartCourseClicked={() => {
+                <LandingPage introPageId={course.introduction} onStartCourseClicked={async () => {
                     if (auth && auth.currentUser && auth.currentUser.uid) {
-                        startCourse(auth.currentUser.uid, course.id).then(() => console.log('success'));
+                        await startCourse(auth.currentUser.uid, course.id);
                         launchCourse();
                     } else {
                         setShowSignIn(true);
@@ -97,55 +95,70 @@ function CurrentExercise(props: ExerciseProps) {
     )
 }
 
-interface CourseParams {
-    id: string;
-}
 
 function CourseView() {
     const classes = useStyles();
-    const {id} = useParams<CourseParams>();
     const auth = useContext(AuthContext);
+    const history = useHistory();
+    let match = useRouteMatch();
+    const {courseId} = useParams<{ courseId: string }>();
 
     const [course, setCourse] = useState<Course | null>(null);
     const [exercises, setExercises] = useState<Exercise[]>([]);
+    const [idToExercise, setIdToExercise] = useState<{}>({});
     const [progress, setProgress] = useState<{[key: string]: Progress}>({});
-    const [pageId, setPageId] = useStickyState(-1, `page-${auth?.currentUser?.uid}-${id}`);
+    const [currentExerciseId, setCurrentExerciseId] = useStickyState<string>('', `ex-${auth?.currentUser?.uid}-${courseId}`);
 
-    const launchCourse = () => setPageId(0);
-    const currentExercise = course && pageId >= 0 && exercises && exercises[parseInt(pageId)] ? exercises[parseInt(pageId)] : null;
+    const launchCourse = () => {
+        if( exercises.length <= 0 )
+            return;
+        setCurrentExerciseId(exercises[0].id);
+    };
+    useEffect(() => {
+        const url = match.url.replace(/\/$/, '');
+        history.push(`${url}/${currentExerciseId}`);
+        // update the match.url whenever a new exercise is selected
+        // match.url is left out from deps intentionally
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [currentExerciseId]);
 
     useAsyncEffect(async () => {
-        const course = await getCourse(id);
+        const course = await getCourse(courseId);
         setCourse(course);
-    }, [id, auth]);
+    }, [courseId, auth]);
 
     useAsyncEffect(async () => {
-        const exercises = await getCourseExercises(id);
+        const exercises = await getCourseExercises(courseId);
+        const idToExercise = exercises.reduce((newObj, x) => ({...newObj, [x.id]: x}), {})
         setExercises(exercises);
-    }, [id]);
+        setIdToExercise(idToExercise);
+    }, [courseId]);
 
     useEffect(() => {
         if( !auth || !auth.currentUser || !auth.currentUser.uid )
             return;
 
-        const unsubscribe = onUserProgressUpdated(auth.currentUser.uid, id, setProgress);
+        const unsubscribe = onUserProgressUpdated(auth.currentUser.uid, courseId, setProgress);
         return () => unsubscribe();
-    }, [id, auth]);
+    }, [courseId, auth]);
 
 
-    return (<>
-        <div className={classes.root}>
-            <CourseDrawer exercises={exercises}
+    return (
+        <Switch>
+            <div className={classes.root}>
+                <Route path={`${match.path}/:exerciseId?`}>
+                    <CourseDrawer exercises={exercises}
                           progress={progress}
-                          currentExerciseId={currentExercise?.id}
-                          onItemSelected={setPageId} />
+                          onItemSelected={setCurrentExerciseId} />
 
-            <main className={classes.content}>
-                <div className={classes.toolbar}/>
-                {course && <CurrentExercise course={course} exercise={currentExercise} launchCourse={launchCourse}/>}
-            </main>
-        </div>
-    </>);
+                    <main className={classes.content}>
+                        <div className={classes.toolbar}/>
+                            {course && <CurrentExercise course={course} idToExercise={idToExercise} launchCourse={launchCourse}/>}
+                    </main>
+                </Route>
+            </div>
+        </Switch>
+    );
 }
 
 export default CourseView;

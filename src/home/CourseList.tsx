@@ -60,7 +60,7 @@ function CourseListView(props: CourseListProps) {
                 <ImageList rowHeight={180} className={classes.imageList}>
                     {courses.map((item) => (
                         <ImageListItem className={classes.listItem} key={item.id}
-                                       onClick={() => history.push(`/courses/${item.id}`)}>
+                                       onClick={() => history.push(`/${item.id}`)}>
                             <img src={item.img} alt={item.title}/>
                             <ImageListItemBar
                                 title={item.title}

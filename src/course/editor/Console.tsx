@@ -7,6 +7,7 @@ import ToggleButtonGroup from '@material-ui/lab/ToggleButtonGroup';
 import {Exercise, TestCase} from "../../models/courses";
 import {SubmissionResult} from "../../models/submissions";
 import TestView from "./TestView";
+import {statusColors, statusToColor} from "../colors";
 
 const useStyles = makeStyles((theme: Theme) =>
     createStyles({
@@ -54,7 +55,7 @@ interface Props {
     onSubmitClicked: () => void;
     onRunClicked: (tests: TestCase[]) => void;
     isProcessing: boolean;
-    submissionResult: SubmissionResult | undefined;
+    submissionResult: SubmissionResult | null;
 }
 
 
@@ -63,6 +64,9 @@ function Console(props: Props) {
     const {exercise, onSubmitClicked, onRunClicked, isProcessing, submissionResult} = props;
 
     const outputs = submissionResult && submissionResult.outputs ? submissionResult.outputs : [];
+    const status = submissionResult && submissionResult.status ? submissionResult.status : undefined;
+    const memory = submissionResult && submissionResult.memory ? submissionResult.memory : undefined;
+    const time = submissionResult && submissionResult.time ? submissionResult.time : undefined;
     const [selectedTest, setSelectedTest] = useState<number | null>(null);
     const [tests, setTests] = useState<TestCase[]>([]);
 
@@ -111,10 +115,16 @@ function Console(props: Props) {
                     aria-label="text alignment"
                     style={{float: 'left'}}>
 
-                    {tests.map((test, index) =>
-                        <ToggleButton value={index} id={`${index}`} className={classes.tests} key={index.toString()}>
-                            <Typography>{index + 1}</Typography>
-                        </ToggleButton>
+                    {tests.map((test, index) => {
+                        const currentStatus = Array.isArray(status) ? status[index] : status;
+                        console.log('index:', index, 'status:', currentStatus);
+                        return (
+                            <ToggleButton value={index} id={`${index}`} key={index.toString()}
+                                          className={classes.tests}
+                                          style={{color: statusToColor(currentStatus, false)}}>
+                                <Typography>{index + 1}</Typography>
+                            </ToggleButton>
+                        )}
                     )}
                 </ToggleButtonGroup>
                 <IconButton id="add-test" className={classes.addTest} onClick={addTest}><Add /></IconButton>
@@ -143,10 +153,10 @@ function Console(props: Props) {
                 <CircularProgress />
             </div>}
 
-            {submissionResult &&
+            {submissionResult && submissionResult.compileOutputs &&
             <>
-                <Typography className={classes.status} style={{color: submissionResult.status === 'Solved' ? '#198534' : '#F44336'}}>{submissionResult.status} in {submissionResult.time} seconds</Typography>
-                <Typography className={classes.content}>{submissionResult.compileOutputs ?? ''}</Typography>
+                <Typography className={classes.status} style={{color: statusColors.failed}}>{submissionResult.status}</Typography>
+                <Typography className={classes.content}>{submissionResult.compileOutputs}</Typography>
             </>}
 
             {!isProcessing && !submissionResult && selectedTest === null &&
@@ -156,6 +166,9 @@ function Console(props: Props) {
             <TestView
                 testCase={tests[selectedTest]}
                 output={outputs[selectedTest]}
+                status={Array.isArray(status) ? status[selectedTest] : status}
+                memory={Array.isArray(memory) ? memory[selectedTest] : memory}
+                time={Array.isArray(time) ? time[selectedTest] : time}
                 onSaveTest={(input, target) => onSaveTest(selectedTest, input, target)} />}
         </>
     )

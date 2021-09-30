@@ -26,9 +26,9 @@ export interface Submission {
 
 export interface SubmissionResult extends Submission {
     isBest: boolean;
-    status: string;
-    memory: number;
-    time: number;
+    status: string | string[];
+    memory: number | number[];
+    time: number | number[];
     score: number;
     outputs?: string | string[];
     compileOutputs?: string;

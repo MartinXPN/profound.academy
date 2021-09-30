@@ -1,7 +1,8 @@
 import {TestCase} from "../../models/courses";
 import {Button, makeStyles, TextField, Typography} from "@material-ui/core";
-import {useEffect, useState} from "react";
+import React, {useEffect, useState} from "react";
 import SaveIcon from '@material-ui/icons/Save';
+import {statusToColor} from "../colors";
 
 const useStyles = makeStyles({
     bold: {
@@ -9,6 +10,11 @@ const useStyles = makeStyles({
     },
     save: {
         marginBottom: '2em',
+    },
+    status: {
+        fontWeight: 'bold',
+        paddingTop: '8px',
+        paddingBottom: '8px',
     },
     content: {
         whiteSpace: 'pre',
@@ -19,12 +25,15 @@ const useStyles = makeStyles({
 interface Props {
     testCase: TestCase;
     output?: string;
+    status?: string;
+    memory?: number;
+    time?: number;
     onSaveTest: (input: string, target: string) => void;
 }
 
 function TestView(props: Props) {
     const classes = useStyles();
-    const {testCase, output, onSaveTest} = props;
+    const {testCase, output, status, memory, time, onSaveTest} = props;
 
     const [input, setInput] = useState('');
     const [target, setTarget] = useState('');
@@ -37,6 +46,11 @@ function TestView(props: Props) {
 
     return (
         <>
+            {status && time &&
+            <Typography className={classes.status} style={{color: statusToColor(status)}}>
+                {status} in {time.toFixed(2)} seconds, used {memory?.toFixed(1)}MB
+            </Typography>
+            }
             <Typography className={classes.bold}>Input:</Typography>
             <TextField required multiline fullWidth
                        placeholder="Start typing the input..."

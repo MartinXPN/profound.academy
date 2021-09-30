@@ -1,4 +1,4 @@
-import React, {memo, useState} from "react";
+import React, {memo, useState, useEffect} from "react";
 import AceEditor from "react-ace";
 
 import "ace-builds/webpack-resolver";
@@ -33,6 +33,21 @@ const Code = memo(function Code(props: Props) {
         await import(`ace-builds/src-noconflict/theme-${theme}`);
         setLoadedTheme(theme);
     }, [theme]);
+
+    // Handle ctrl/cmnd + s
+    useEffect(() => {
+        const onKeyDown = (e: any) => {
+            if ((window.navigator.platform.match("Mac") ? e.metaKey : e.ctrlKey)  && e.keyCode == 83) {
+                e.preventDefault();
+                // Process the event here (such as click on submit button)
+            }
+        }
+
+        document.addEventListener('keydown', onKeyDown, false);
+        return () => {
+            document.removeEventListener('keydown', onKeyDown);
+        }
+    }, []);
 
 
     return (

@@ -34,7 +34,7 @@ const useStyles = makeStyles((theme: Theme) =>
             float: 'right',
         },
         content: {
-            whiteSpace: 'pre',
+            whiteSpace: 'pre-wrap',
         },
         status: {
             fontWeight: 'bold',

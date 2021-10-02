@@ -6,7 +6,7 @@ import * as functions from 'firebase-functions';
 import * as needle from 'needle';
 
 const app = admin.initializeApp({credential: admin.credential.applicationDefault()});
-const AWS_LAMBDA_URL = 'https://8f8okoin8a.execute-api.us-east-1.amazonaws.com/Prod/check/';
+const AWS_LAMBDA_URL = 'https://l5nhpbb1bd.execute-api.us-east-1.amazonaws.com/Prod/check/';
 
 
 export const fetchNotionPage = async (pageId: string): Promise<ExtendedRecordMap> => {

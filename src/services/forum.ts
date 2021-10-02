@@ -93,7 +93,6 @@ export const vote = async (commentId: string, userId: string, vote: number) => {
     const votersRef = db.forumCommentVotes(commentId, userId);
     const userVoteRef = db.userVotes(commentId, userId);
 
-    console.log('0');
     return await firebase.firestore().runTransaction(async transaction => {
         const voter = await transaction.get(votersRef);
         let currentVote = voter.exists && voter.data() ? voter.data()?.vote : 0;
@@ -102,12 +101,8 @@ export const vote = async (commentId: string, userId: string, vote: number) => {
         if( currentVote === vote )
             return;
 
-        transaction.update(commentRef, {
-            score: firebase.firestore.FieldValue.increment(-currentVote),
-        });
-        transaction.update(commentRef, {
-            score: firebase.firestore.FieldValue.increment(vote),
-        });
+        transaction.update(commentRef, {score: firebase.firestore.FieldValue.increment(-currentVote)});
+        transaction.update(commentRef, {score: firebase.firestore.FieldValue.increment(vote)});
         transaction.set(votersRef, {vote: vote});
         transaction.set(userVoteRef, {vote: vote});
     });

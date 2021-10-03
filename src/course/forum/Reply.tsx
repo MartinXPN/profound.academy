@@ -26,9 +26,10 @@ function Reply({commentId, onReplySaved}: { commentId: string, onReplySaved: () 
 
     return (<>
         <TextField required multiline fullWidth placeholder="Type your reply here..."
+                   variant="standard"
                    onChange={event => setReplyText(event.target.value)}
                    value={replyText}
-                   InputProps={{disableUnderline: true}}/>
+                   InputProps={{disableUnderline: true}} />
 
         {replyText.length > 0 && <Button size="small" endIcon={<Save/>} onClick={onSave}>Save</Button>}
     </>);

@@ -17,9 +17,6 @@ const useStyles = makeStyles({
         paddingTop: '8px',
         paddingBottom: '8px',
     },
-    content: {
-        whiteSpace: 'pre',
-    },
 });
 
 
@@ -54,18 +51,18 @@ function TestView(props: Props) {
             }
             <Typography className={classes.bold}>Input:</Typography>
             <TextField required multiline fullWidth
+                       variant="outlined"
                        placeholder="Start typing the input..."
                        onChange={event => setInput(event.target.value)}
-                       value={input}
-                       InputProps={{ disableUnderline: true }} />
+                       value={input} />
 
             <br/>
             <Typography className={classes.bold}>Expected output:</Typography>
             <TextField required multiline fullWidth
+                       variant="outlined"
                        placeholder="Start typing the expected output..."
                        onChange={event => setTarget(event.target.value)}
-                       value={target}
-                       InputProps={{ disableUnderline: true }} />
+                       value={target} />
 
             {(input !== testCase.input || target !== testCase.target) &&
             <Button
@@ -79,7 +76,13 @@ function TestView(props: Props) {
             <br/>
             {output && <>
                 <Typography className={classes.bold}>Program output:</Typography>
-                <Typography className={classes.content}>{output}</Typography>
+                <TextField multiline fullWidth
+                           variant="outlined"
+                           defaultValue={target}
+                           onChange={event => setTarget(event.target.value)}
+                           inputProps={
+                               { readOnly: true, }
+                           }/>
             </>}
         </>
     );

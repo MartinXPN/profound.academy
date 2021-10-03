@@ -33,6 +33,9 @@ const useStyles = makeStyles((theme: Theme) =>
         replies: {
             marginLeft: theme.spacing(2),
         },
+        button: {
+            textTransform: 'none'
+        },
     }),
 );
 
@@ -122,19 +125,19 @@ function CommentView({comment, allowReply}: {
                             placeholder="Start typing here..."
                             onChange={event => setText(event.target.value)}
                             value={text}
-                            InputProps={{disableUnderline: true}}/>
+                            InputProps={{disableUnderline: true}} />
                         </div>
                     }/>
 
                 <div className={classes.actions}>
-                    {allowReply && <Button size="small" onClick={onReplyClicked} startIcon={<ReplyIcon/>} style={{textTransform: 'none'}}>Reply</Button>}
+                    {allowReply && <Button size="small" onClick={onReplyClicked} startIcon={<ReplyIcon/>} className={classes.button}>Reply</Button>}
                     {comment.replies.length > 0 &&
                     <>
                         {!showReplies &&
-                        <Button endIcon={<ArrowDropDown/>} size="small" onClick={onShowReplies} style={{textTransform: 'none'}}>Show Replies ({comment.replies.length})</Button>}
+                        <Button endIcon={<ArrowDropDown/>} size="small" onClick={onShowReplies} className={classes.button}>Show replies ({comment.replies.length})</Button>}
 
                         {showReplies &&
-                        <Button endIcon={<ArrowDropUp/>} size="small" onClick={onHideReplies} style={{textTransform: 'none'}}>Hide Replies</Button>}
+                        <Button endIcon={<ArrowDropUp/>} size="small" onClick={onHideReplies} className={classes.button}>Hide replies</Button>}
                     </>}
                     {auth && auth.currentUser && comment.userId === auth.currentUser.uid && isEditing &&
                     <Button size="small" endIcon={<Save/>} onClick={onSave}>Save</Button>}

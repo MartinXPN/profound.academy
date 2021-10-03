@@ -58,6 +58,7 @@ function Forum(props: ForumProps) {
                 {auth && auth.currentUser && auth.currentUser.displayName && auth.currentUser.uid &&
                 <>
                     <TextField required multiline fullWidth
+                               variant="standard"
                                placeholder="Start typing here..."
                                onChange={event => setNewComment(event.target.value)}
                                value={newComment}

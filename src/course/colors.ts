@@ -1,5 +1,5 @@
 import {SubmissionStatus} from "../models/submissions";
-import {makeStyles} from "@material-ui/core/styles";
+import makeStyles from '@mui/styles/makeStyles';
 
 function adjust(color: string, amount: number) {
     return '#' + color.replace(/^#/, '')

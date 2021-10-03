@@ -1,7 +1,10 @@
 import React, {useContext, useState} from "react";
 
-import Button from "@material-ui/core/Button";
-import {createStyles, makeStyles, Theme} from "@material-ui/core";
+import Button from "@mui/material/Button";
+import { Theme } from "@mui/material";
+
+import createStyles from '@mui/styles/createStyles';
+import makeStyles from '@mui/styles/makeStyles';
 
 import {AppBarProfile, SignIn} from "./Auth";
 import {AuthContext} from "../App";

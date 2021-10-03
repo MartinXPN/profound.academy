@@ -1,5 +1,6 @@
 import React, {memo, useContext, useEffect, useState} from 'react';
-import {Avatar, ClickAwayListener, Grow, IconButton, MenuItem, MenuList, Paper, Popper} from "@material-ui/core";
+import {Avatar, IconButton, MenuItem} from "@mui/material";
+import Menu from '@mui/material/Menu';
 import StyledFirebaseAuth from 'react-firebaseui/StyledFirebaseAuth';
 import firebase from 'firebase/app';
 import 'firebase/auth';
@@ -60,41 +61,42 @@ export function AppBarProfile() {
         await firebase.auth().signOut();
     }
 
-    return (<>
+    return <>
         <IconButton
             aria-label="account of current user"
             aria-controls="menu-appbar"
             aria-haspopup="true"
             onClick={handleMenu}
-            edge="end">
+            edge="end"
+            size="large">
             { /*@ts-ignore*/ }
             {user ? <Avatar src={user.photoURL} alt={user.displayName} /> : <Avatar/>}
-
         </IconButton>
 
-        <Popper open={open} anchorEl={anchorEl} role={undefined} transition disablePortal>
-            {({ TransitionProps, placement }) => (
-                <Grow
-                    {...TransitionProps}
-                    style={{ transformOrigin: placement === 'bottom' ? 'center top' : 'center bottom' }}>
-                    <Paper>
-                        <ClickAwayListener onClickAway={handleClose}>
-                            {user
-                                ?
-                                <MenuList autoFocusItem={open} id="menu-list-grow">
-                                    <MenuItem onClick={onSignOutClicked} key='sign-out'>Sign Out</MenuItem>
-                                </MenuList>
-                                :
-                                <></>
-                                // Rendering multiple StyledFirebaseAuth components result in https://github.com/firebase/firebaseui-web-react/issues/59
-                                // <MenuList autoFocusItem={open} id="menu-list-grow" style={{width: '20em'}}>
-                                //     <MenuItem key='sign-in'><SignIn /></MenuItem>
-                                // </MenuList>
-                            }
-                        </ClickAwayListener>
-                    </Paper>
-                </Grow>
-            )}
-        </Popper>
-    </>)
+        <Menu
+            anchorEl={anchorEl}
+            open={open}
+            onClose={handleClose}
+            onClick={handleClose}
+            PaperProps={{
+                elevation: 0,
+                sx: {
+                    overflow: 'visible',
+                    filter: 'drop-shadow(0px 2px 8px rgba(0,0,0,0.24))',
+                },
+            }}
+            transformOrigin={{ horizontal: 'right', vertical: 'top' }}
+            anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
+        >
+        {user ?
+            <MenuItem onClick={onSignOutClicked} key='sign-out'>Sign Out</MenuItem>
+            :
+            <></>
+            // Rendering multiple StyledFirebaseAuth components result in https://github.com/firebase/firebaseui-web-react/issues/59
+            // <MenuList autoFocusItem={open} id="menu-list-grow" style={{width: '20em'}}>
+            //     <MenuItem key='sign-in'><SignIn /></MenuItem>
+            // </MenuList>
+        }
+        </Menu>
+    </>;
 }

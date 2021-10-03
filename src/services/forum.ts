@@ -32,6 +32,16 @@ export const onCommentRepliesChanged = (commentId: string,
         });
 };
 
+export const getCommentReplies = async (commentId: string) => {
+    const comment = db.forumComment(commentId);
+    const snapshot = await db.forum
+        .where('repliedTo', '==', comment)
+        .orderBy('createdAt', 'asc').get();
+    const replies = snapshot.docs.map(r => r.data());
+    console.log('replies:', replies);
+    return replies;
+};
+
 export const saveComment = async (courseId: string, exerciseId: string,
                                   userId: string, displayName: string, avatarUrl: string | null,
                                   text: string) => {
@@ -83,6 +93,12 @@ export const updateComment = async (commentId: string, text: string) => {
         text: text,
     });
 };
+
+export const deleteComment = async (commentId: string) => {
+    const threadCommentIds = (await getCommentReplies(commentId)).map(c => c.id);
+    threadCommentIds.push(commentId);
+    return await Promise.all(threadCommentIds.map(id => db.forumComment(id).delete()));
+}
 
 export const vote = async (commentId: string, userId: string, vote: number) => {
     if (![-1, 0, 1].includes(vote)) {

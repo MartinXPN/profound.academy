@@ -1,8 +1,10 @@
 import React, {useEffect, useState} from "react";
-import {Add, Done, Send} from "@material-ui/icons";
-import {Button, CircularProgress, createStyles, IconButton, makeStyles, Theme, Typography} from "@material-ui/core";
-import ToggleButton from '@material-ui/lab/ToggleButton';
-import ToggleButtonGroup from '@material-ui/lab/ToggleButtonGroup';
+import {Add, Done, Send} from "@mui/icons-material";
+import { Button, CircularProgress, IconButton, Theme, Typography } from "@mui/material";
+import createStyles from '@mui/styles/createStyles';
+import makeStyles from '@mui/styles/makeStyles';
+import ToggleButton from '@mui/material/ToggleButton';
+import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 
 import {Exercise, TestCase} from "../../models/courses";
 import {SubmissionResult} from "../../models/submissions";
@@ -103,75 +105,73 @@ function Console(props: Props) {
         setSelectedTest(len);
     }
 
-    return (
-        <>
-            <div className={classes.root}>
-                <Typography className={classes.testText}>TESTS: </Typography>
-                <ToggleButtonGroup
-                    value={selectedTest}
-                    exclusive
-                    onChange={onTestSelected}
-                    size='small'
-                    aria-label="text alignment"
-                    style={{float: 'left'}}>
+    return <>
+        <div className={classes.root}>
+            <Typography className={classes.testText}>TESTS: </Typography>
+            <ToggleButtonGroup
+                value={selectedTest}
+                exclusive
+                onChange={onTestSelected}
+                size='small'
+                aria-label="text alignment"
+                style={{float: 'left'}}>
 
-                    {tests.map((test, index) => {
-                        const currentStatus = Array.isArray(status) ? status[index] : status;
-                        console.log('index:', index, 'status:', currentStatus);
-                        return (
-                            <ToggleButton value={index} id={`${index}`} key={index.toString()}
-                                          className={classes.tests}
-                                          style={{color: statusToColor(currentStatus, false)}}>
-                                <Typography>{index + 1}</Typography>
-                            </ToggleButton>
-                        )}
+                {tests.map((test, index) => {
+                    const currentStatus = Array.isArray(status) ? status[index] : status;
+                    console.log('index:', index, 'status:', currentStatus);
+                    return (
+                        <ToggleButton value={index} id={`${index}`} key={index.toString()}
+                                      className={classes.tests}
+                                      style={{color: statusToColor(currentStatus, false)}}>
+                            <Typography>{index + 1}</Typography>
+                        </ToggleButton>
                     )}
-                </ToggleButtonGroup>
-                <IconButton id="add-test" className={classes.addTest} onClick={addTest}><Add /></IconButton>
+                )}
+            </ToggleButtonGroup>
+            <IconButton id="add-test" className={classes.addTest} onClick={addTest} size="large"><Add /></IconButton>
 
-                <Button
-                    variant="contained"
-                    color="primary"
-                    size='small'
-                    className={classes.button}
-                    onClick={onSubmitClicked}
-                    endIcon={<Done />}>Submit</Button>
+            <Button
+                variant="contained"
+                color="primary"
+                size='small'
+                className={classes.button}
+                onClick={onSubmitClicked}
+                endIcon={<Done />}>Submit</Button>
 
-                <Button
-                    variant="contained"
-                    color="primary"
-                    size='small'
-                    className={classes.button}
-                    onClick={handleRun}
-                    endIcon={<Send />}>Run</Button>
-            </div>
+            <Button
+                variant="contained"
+                color="primary"
+                size='small'
+                className={classes.button}
+                onClick={handleRun}
+                endIcon={<Send />}>Run</Button>
+        </div>
 
 
-            {isProcessing &&
-            <div className={classes.center}>
-                <Typography className={classes.status}>Running the program...</Typography>
-                <CircularProgress />
-            </div>}
+        {isProcessing &&
+        <div className={classes.center}>
+            <Typography className={classes.status}>Running the program...</Typography>
+            <CircularProgress />
+        </div>}
 
-            {submissionResult && submissionResult.compileOutputs &&
-            <>
-                <Typography className={classes.status} style={{color: statusColors.failed}}>{submissionResult.status}</Typography>
-                <Typography className={classes.content}>{submissionResult.compileOutputs}</Typography>
-            </>}
+        {submissionResult && submissionResult.compileOutputs &&
+        <>
+            <Typography className={classes.status} style={{color: statusColors.failed}}>{submissionResult.status}</Typography>
+            <Typography className={classes.content}>{submissionResult.compileOutputs}</Typography>
+        </>}
 
-            {!isProcessing && !submissionResult && selectedTest === null &&
-            <Typography className={classes.status}>Run the program to see the output, Submit to evaluate</Typography>}
+        {!isProcessing && !submissionResult && selectedTest === null &&
+        <Typography className={classes.status}>Run the program to see the output, Submit to evaluate</Typography>}
 
-            {selectedTest !== null && selectedTest < tests.length &&
-            <TestView
-                testCase={tests[selectedTest]}
-                output={outputs[selectedTest]}
-                status={Array.isArray(status) ? status[selectedTest] : status}
-                memory={Array.isArray(memory) ? memory[selectedTest] : memory}
-                time={Array.isArray(time) ? time[selectedTest] : time}
-                onSaveTest={(input, target) => onSaveTest(selectedTest, input, target)} />}
-        </>
-    )
+        {selectedTest !== null && selectedTest < tests.length &&
+        <TestView
+            testCase={tests[selectedTest]}
+            output={outputs[selectedTest]}
+            status={Array.isArray(status) ? status[selectedTest] : status}
+            memory={Array.isArray(memory) ? memory[selectedTest] : memory}
+            time={Array.isArray(time) ? time[selectedTest] : time}
+            onSaveTest={(input, target) => onSaveTest(selectedTest, input, target)} />}
+    </>;
 }
 
 export default Console;

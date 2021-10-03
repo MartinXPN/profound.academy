@@ -1,5 +1,7 @@
 import React, {useContext, useEffect, useState} from "react";
-import {Button, createStyles, Divider, List, makeStyles, TextField, Theme, Typography} from "@material-ui/core";
+import { Button, Divider, List, TextField, Theme, Typography } from "@mui/material";
+import createStyles from '@mui/styles/createStyles';
+import makeStyles from '@mui/styles/makeStyles';
 import {Course, Exercise} from "../../models/courses";
 import {onExerciseCommentsChanged, saveComment} from "../../services/forum";
 import {Comment} from '../../models/forum';
@@ -56,6 +58,7 @@ function Forum(props: ForumProps) {
                 {auth && auth.currentUser && auth.currentUser.displayName && auth.currentUser.uid &&
                 <>
                     <TextField required multiline fullWidth
+                               variant="standard"
                                placeholder="Start typing here..."
                                onChange={event => setNewComment(event.target.value)}
                                value={newComment}

@@ -1,8 +1,8 @@
 import React, {useContext, useState} from "react";
 import {AuthContext} from "../../App";
 import {saveReply} from "../../services/forum";
-import {Button, TextField} from "@material-ui/core";
-import {Save} from "@material-ui/icons";
+import {Button, TextField} from "@mui/material";
+import {Save} from "@mui/icons-material";
 
 
 function Reply({commentId, onReplySaved}: { commentId: string, onReplySaved: () => void }) {
@@ -26,9 +26,10 @@ function Reply({commentId, onReplySaved}: { commentId: string, onReplySaved: () 
 
     return (<>
         <TextField required multiline fullWidth placeholder="Type your reply here..."
+                   variant="standard"
                    onChange={event => setReplyText(event.target.value)}
                    value={replyText}
-                   InputProps={{disableUnderline: true}}/>
+                   InputProps={{disableUnderline: true}} />
 
         {replyText.length > 0 && <Button size="small" endIcon={<Save/>} onClick={onSave}>Save</Button>}
     </>);

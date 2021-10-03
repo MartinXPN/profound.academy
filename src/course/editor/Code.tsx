@@ -37,7 +37,7 @@ const Code = memo(function Code(props: Props) {
     // Handle ctrl/cmnd + s
     useEffect(() => {
         const onKeyDown = (e: any) => {
-            if ((window.navigator.platform.match("Mac") ? e.metaKey : e.ctrlKey)  && e.keyCode == 83) {
+            if ((e.key === 's' || e.key === 'S' ) && (e.ctrlKey || e.metaKey)) {
                 e.preventDefault();
                 // Process the event here (such as click on submit button)
             }

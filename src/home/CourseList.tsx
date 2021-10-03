@@ -1,12 +1,9 @@
 import React, {useContext, useState} from 'react';
-import {Theme, createStyles, makeStyles} from '@material-ui/core/styles';
-import ImageList from '@material-ui/core/ImageList';
-import ImageListItem from '@material-ui/core/ImageListItem';
-import ImageListItemBar from '@material-ui/core/ImageListItemBar';
-import IconButton from '@material-ui/core/IconButton';
-import InfoIcon from '@material-ui/icons/Info';
-
-import {Tooltip, Typography} from "@material-ui/core";
+import {Theme} from '@mui/material/styles';
+import {createStyles, makeStyles} from '@mui/styles';
+import {ImageList, ImageListItem, ImageListItemBar, IconButton} from '@mui/material';
+import {Tooltip, Typography} from "@mui/material";
+import InfoIcon from '@mui/icons-material/Info';
 
 import {Course} from '../models/courses';
 import {getAllCourses, getUserCourses} from "../services/courses";
@@ -54,31 +51,33 @@ function CourseListView(props: CourseListProps) {
     const classes = useStyles();
     const {courses} = props;
 
-    return (
-        <>
-            <div className={classes.root}>
-                <ImageList rowHeight={180} className={classes.imageList}>
-                    {courses.map((item) => (
-                        <ImageListItem className={classes.listItem} key={item.id}
-                                       onClick={() => history.push(`/${item.id}`)}>
-                            <img src={item.img} alt={item.title}/>
-                            <ImageListItemBar
-                                title={item.title}
-                                subtitle={<span>by: {item.author}</span>}
-                                actionIcon={
-                                    <IconButton aria-label={`info about ${item.title}`} className={classes.icon}>
-                                        <Tooltip title={item.details} placement="top-start">
-                                            <div><InfoIcon fontSize='small'/></div>
-                                        </Tooltip>
-                                    </IconButton>
-                                }
-                            />
-                        </ImageListItem>
-                    ))}
-                </ImageList>
-            </div>
-        </>
-    )
+    return <>
+        <div className={classes.root}>
+            <ImageList rowHeight={180} className={classes.imageList}>
+                {courses.map((item) => (
+                    <ImageListItem className={classes.listItem} key={item.id}
+                                   onClick={() => history.push(`/${item.id}`)}>
+                        <img src={item.img} alt={item.title} loading="lazy" 
+                             style={{width: '100%', height: '100%', objectFit: 'cover'}} />
+                        <ImageListItemBar
+                            title={item.title}
+                            subtitle={<span>by: {item.author}</span>}
+                            actionIcon={
+                                <IconButton
+                                    aria-label={`info about ${item.title}`}
+                                    className={classes.icon}
+                                    size="large">
+                                    <Tooltip title={item.details} placement="top-start">
+                                        <div><InfoIcon fontSize='small'/></div>
+                                    </Tooltip>
+                                </IconButton>
+                            }
+                        />
+                    </ImageListItem>
+                ))}
+            </ImageList>
+        </div>
+    </>;
 }
 
 function CourseList() {
@@ -94,10 +93,10 @@ function CourseList() {
 
     useAsyncEffect(async () => {
         const user = auth?.currentUser;
-        if(!auth?.isSignedIn || !user || !user.uid)
+        if (!auth?.isSignedIn || !user || !user.uid)
             return;
 
-        if(!user || !user.uid)  return;
+        if (!user || !user.uid) return;
         console.log('user id:', user.uid);
         const res = await getUserCourses(user.uid);
         setUserCourses(res);

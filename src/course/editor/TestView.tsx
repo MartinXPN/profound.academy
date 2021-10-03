@@ -1,7 +1,8 @@
 import {TestCase} from "../../models/courses";
-import {Button, makeStyles, TextField, Typography} from "@material-ui/core";
+import { Button, TextField, Typography } from "@mui/material";
+import makeStyles from '@mui/styles/makeStyles';
 import React, {useEffect, useState} from "react";
-import SaveIcon from '@material-ui/icons/Save';
+import SaveIcon from '@mui/icons-material/Save';
 import {statusToColor} from "../colors";
 
 const useStyles = makeStyles({
@@ -15,9 +16,6 @@ const useStyles = makeStyles({
         fontWeight: 'bold',
         paddingTop: '8px',
         paddingBottom: '8px',
-    },
-    content: {
-        whiteSpace: 'pre',
     },
 });
 
@@ -53,18 +51,18 @@ function TestView(props: Props) {
             }
             <Typography className={classes.bold}>Input:</Typography>
             <TextField required multiline fullWidth
+                       variant="outlined"
                        placeholder="Start typing the input..."
                        onChange={event => setInput(event.target.value)}
-                       value={input}
-                       InputProps={{ disableUnderline: true }} />
+                       value={input} />
 
             <br/>
             <Typography className={classes.bold}>Expected output:</Typography>
             <TextField required multiline fullWidth
+                       variant="outlined"
                        placeholder="Start typing the expected output..."
                        onChange={event => setTarget(event.target.value)}
-                       value={target}
-                       InputProps={{ disableUnderline: true }} />
+                       value={target} />
 
             {(input !== testCase.input || target !== testCase.target) &&
             <Button
@@ -78,7 +76,13 @@ function TestView(props: Props) {
             <br/>
             {output && <>
                 <Typography className={classes.bold}>Program output:</Typography>
-                <Typography className={classes.content}>{output}</Typography>
+                <TextField multiline fullWidth
+                           variant="outlined"
+                           defaultValue={target}
+                           onChange={event => setTarget(event.target.value)}
+                           inputProps={
+                               { readOnly: true, }
+                           }/>
             </>}
         </>
     );

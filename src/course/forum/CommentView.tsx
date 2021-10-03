@@ -1,7 +1,9 @@
-import {Avatar, ListItem, ListItemIcon, ListItemText, IconButton, Button, List} from "@material-ui/core";
-import {Typography, TextField} from "@material-ui/core";
-import {createStyles, makeStyles, Theme} from "@material-ui/core";
-import {ArrowDropDown, ArrowDropUp, Edit, Save, Reply as ReplyIcon} from '@material-ui/icons';
+import {Avatar, ListItem, ListItemIcon, ListItemText, IconButton, Button, List} from "@mui/material";
+import {Typography, TextField} from "@mui/material";
+import { Theme } from "@mui/material";
+import createStyles from '@mui/styles/createStyles';
+import makeStyles from '@mui/styles/makeStyles';
+import {ArrowDropDown, ArrowDropUp, Edit, Save, Reply as ReplyIcon} from '@mui/icons-material';
 import React, {useContext, useEffect, useState} from "react";
 import {AuthContext} from "../../App";
 import {Comment} from "../../models/forum";
@@ -44,11 +46,11 @@ function Score({commentId, score}: { commentId: string, score: number }) {
 
     return (
         <div className={classes.score}>
-            <IconButton onClick={upVote}><ArrowDropUp/></IconButton>
+            <IconButton onClick={upVote} size="large"><ArrowDropUp/></IconButton>
             <Typography>{score}</Typography>
-            <IconButton onClick={downVote}><ArrowDropDown/></IconButton>
+            <IconButton onClick={downVote} size="large"><ArrowDropDown/></IconButton>
         </div>
-    )
+    );
 }
 
 
@@ -93,7 +95,7 @@ function CommentView({comment, allowReply}: {
         setIsEditing(false);
     }
 
-    return (<>
+    return <>
         <ListItem key={comment.id} alignItems="flex-start">
             <div className={classes.userHeader}>
                 <div className={classes.userHeaderItem}><Score commentId={comment.id} score={comment.score} /></div>
@@ -108,12 +110,13 @@ function CommentView({comment, allowReply}: {
                         <div>
                             {comment.displayName}
                             {auth && auth.currentUser && comment.userId === auth.currentUser.uid && !isEditing &&
-                            <IconButton onClick={onEdit}><Edit/></IconButton>}
+                            <IconButton onClick={onEdit} size="large"><Edit/></IconButton>}
                         </div>
                     }
                     secondary={
                         <div style={{display: 'flex'}}>
                         <TextField
+                            variant="standard"
                             required multiline fullWidth
                             disabled={!isEditing}
                             placeholder="Start typing here..."
@@ -124,14 +127,14 @@ function CommentView({comment, allowReply}: {
                     }/>
 
                 <div className={classes.actions}>
-                    {allowReply && <Button size="small" onClick={onReplyClicked} startIcon={<ReplyIcon/>}>Reply</Button>}
+                    {allowReply && <Button size="small" onClick={onReplyClicked} startIcon={<ReplyIcon/>} style={{textTransform: 'none'}}>Reply</Button>}
                     {comment.replies.length > 0 &&
                     <>
                         {!showReplies &&
-                        <Button endIcon={<ArrowDropDown/>} size="small" onClick={onShowReplies}>Show Replies ({comment.replies.length})</Button>}
+                        <Button endIcon={<ArrowDropDown/>} size="small" onClick={onShowReplies} style={{textTransform: 'none'}}>Show Replies ({comment.replies.length})</Button>}
 
                         {showReplies &&
-                        <Button endIcon={<ArrowDropUp/>} size="small" onClick={onHideReplies}>Hide Replies</Button>}
+                        <Button endIcon={<ArrowDropUp/>} size="small" onClick={onHideReplies} style={{textTransform: 'none'}}>Hide Replies</Button>}
                     </>}
                     {auth && auth.currentUser && comment.userId === auth.currentUser.uid && isEditing &&
                     <Button size="small" endIcon={<Save/>} onClick={onSave}>Save</Button>}
@@ -146,7 +149,7 @@ function CommentView({comment, allowReply}: {
             </div>
 
         </ListItem>
-    </>)
+    </>;
 }
 
 export default CommentView;

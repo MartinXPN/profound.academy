@@ -1,7 +1,9 @@
 import {useContext, useState} from "react";
 import useAsyncEffect from "use-async-effect";
-import {Backdrop, CircularProgress, ClickAwayListener, createStyles, Paper} from "@material-ui/core";
-import {makeStyles, Theme} from "@material-ui/core/styles";
+import { Backdrop, CircularProgress, ClickAwayListener, Paper } from "@mui/material";
+import createStyles from '@mui/styles/createStyles';
+import { Theme } from "@mui/material/styles";
+import makeStyles from '@mui/styles/makeStyles';
 import {SubmissionResult} from "../models/submissions";
 import {getSubmissionCode} from "../services/submissions";
 import {AuthContext} from "../App";

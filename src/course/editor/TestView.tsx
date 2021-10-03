@@ -1,7 +1,8 @@
 import {TestCase} from "../../models/courses";
-import {Button, makeStyles, TextField, Typography} from "@material-ui/core";
+import { Button, TextField, Typography } from "@mui/material";
+import makeStyles from '@mui/styles/makeStyles';
 import React, {useEffect, useState} from "react";
-import SaveIcon from '@material-ui/icons/Save';
+import SaveIcon from '@mui/icons-material/Save';
 import {statusToColor} from "../colors";
 
 const useStyles = makeStyles({

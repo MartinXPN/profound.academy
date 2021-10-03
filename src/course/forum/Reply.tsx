@@ -1,8 +1,8 @@
 import React, {useContext, useState} from "react";
 import {AuthContext} from "../../App";
 import {saveReply} from "../../services/forum";
-import {Button, TextField} from "@material-ui/core";
-import {Save} from "@material-ui/icons";
+import {Button, TextField} from "@mui/material";
+import {Save} from "@mui/icons-material";
 
 
 function Reply({commentId, onReplySaved}: { commentId: string, onReplySaved: () => void }) {

@@ -1,5 +1,5 @@
 import React, {memo, useContext, useEffect, useState} from 'react';
-import {Avatar, ClickAwayListener, Grow, IconButton, MenuItem, MenuList, Paper, Popper} from "@material-ui/core";
+import {Avatar, ClickAwayListener, Grow, IconButton, MenuItem, MenuList, Paper, Popper} from "@mui/material";
 import StyledFirebaseAuth from 'react-firebaseui/StyledFirebaseAuth';
 import firebase from 'firebase/app';
 import 'firebase/auth';
@@ -60,13 +60,14 @@ export function AppBarProfile() {
         await firebase.auth().signOut();
     }
 
-    return (<>
+    return <>
         <IconButton
             aria-label="account of current user"
             aria-controls="menu-appbar"
             aria-haspopup="true"
             onClick={handleMenu}
-            edge="end">
+            edge="end"
+            size="large">
             { /*@ts-ignore*/ }
             {user ? <Avatar src={user.photoURL} alt={user.displayName} /> : <Avatar/>}
 
@@ -96,5 +97,5 @@ export function AppBarProfile() {
                 </Grow>
             )}
         </Popper>
-    </>)
+    </>;
 }

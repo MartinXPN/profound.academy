@@ -6,7 +6,7 @@ import 'firebase/auth';
 import 'firebase/analytics';
 import "./firebase";
 
-import {MuiThemeProvider, createTheme} from '@material-ui/core/styles';
+import { ThemeProvider, StyledEngineProvider, createTheme } from '@mui/material/styles';
 
 import Home from "./home/Home";
 import Course from "./course/Course";
@@ -51,18 +51,20 @@ function App() {
 
     return (
         <Router>
-        <MuiThemeProvider theme={theme}>
-        <AuthContext.Provider value={{isSignedIn: !!currentUser, currentUser: currentUser, setCurrentUser: setCurrentUser}}>
-        <Switch>
-            <Route exact path="/">
-                <Home />
-            </Route>
-            <Route path={'/:courseId'}>
-                <Course />
-            </Route>
-        </Switch>
-        </AuthContext.Provider>
-        </MuiThemeProvider>
+        <StyledEngineProvider injectFirst>
+            <ThemeProvider theme={theme}>
+            <AuthContext.Provider value={{isSignedIn: !!currentUser, currentUser: currentUser, setCurrentUser: setCurrentUser}}>
+            <Switch>
+                <Route exact path="/">
+                    <Home />
+                </Route>
+                <Route path={'/:courseId'}>
+                    <Course />
+                </Route>
+            </Switch>
+            </AuthContext.Provider>
+            </ThemeProvider>
+        </StyledEngineProvider>
         </Router>
     );
 }

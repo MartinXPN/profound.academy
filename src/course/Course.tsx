@@ -2,7 +2,10 @@ import React, {useContext, useEffect, useState} from "react";
 import {Route, Switch, useHistory, useParams, useRouteMatch} from "react-router-dom";
 import SplitPane from 'react-split-pane';
 
-import {createStyles, makeStyles, Theme} from '@material-ui/core/styles';
+import { Theme } from '@mui/material/styles';
+
+import createStyles from '@mui/styles/createStyles';
+import makeStyles from '@mui/styles/makeStyles';
 
 import {getCourse, startCourse} from "../services/courses";
 import useAsyncEffect from "use-async-effect";

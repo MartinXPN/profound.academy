@@ -2,8 +2,9 @@ import React, {useContext, useState} from "react";
 import Code from "./Code";  // needs to be before getModeForPath so that Ace is loaded
 import Console from "./Console";
 import {getModeForPath} from 'ace-builds/src-noconflict/ext-modelist';
-import {IconButton, makeStyles} from "@material-ui/core";
-import {Remove, Add} from "@material-ui/icons";
+import { IconButton } from "@mui/material";
+import makeStyles from '@mui/styles/makeStyles';
+import {Remove, Add} from "@mui/icons-material";
 import {useStickyState} from "../../util";
 import {Course, Exercise, TestCase} from "../../models/courses";
 import {onRunResultChanged, onSubmissionResultChanged, submitSolution} from "../../services/submissions";
@@ -81,8 +82,8 @@ function Editor({course, exercise}: {course: Course, exercise: Exercise}) {
             <div className={classes.code}>
                 <Code theme={theme} readOnly={false} language={editorLanguage} fontSize={fontSize} setCode={setCode} code={code}/>
                 <div className={classes.settings}>
-                    <IconButton aria-label="decrease" onClick={decreaseFontSize}><Remove fontSize="small" /></IconButton>
-                    <IconButton aria-label="increase" onClick={increaseFontSize}><Add fontSize="small" /></IconButton>
+                    <IconButton aria-label="decrease" onClick={decreaseFontSize} size="large"><Remove fontSize="small" /></IconButton>
+                    <IconButton aria-label="increase" onClick={increaseFontSize} size="large"><Add fontSize="small" /></IconButton>
                 </div>
             </div>
 

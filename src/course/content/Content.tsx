@@ -8,7 +8,7 @@ import 'prismjs/themes/prism.css';          // used for code syntax highlighting
 import 'react-notion-x/src/styles.css';     // core styles shared by all of react-notion-x (required)
 import 'rc-dropdown/assets/index.css';      // used for collection views (optional)
 import 'katex/dist/katex.min.css';          // used for rendering equations (optional)
-import {CircularProgress} from "@material-ui/core";
+import {CircularProgress} from "@mui/material";
 
 import './Content.css';
 import {getNotionPageMap} from "../../services/courses";

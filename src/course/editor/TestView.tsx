@@ -6,9 +6,6 @@ import SaveIcon from '@mui/icons-material/Save';
 import {statusToColor} from "../colors";
 
 const useStyles = makeStyles({
-    bold: {
-        fontWeight: 'bold',
-    },
     save: {
         marginBottom: '2em',
     },
@@ -49,17 +46,17 @@ function TestView(props: Props) {
                 {status} in {time.toFixed(2)} seconds, used {memory?.toFixed(1)}MB
             </Typography>
             }
-            <Typography className={classes.bold}>Input:</Typography>
             <TextField required multiline fullWidth
                        variant="outlined"
+                       label="Input"
                        placeholder="Start typing the input..."
                        onChange={event => setInput(event.target.value)}
                        value={input} />
 
-            <br/>
-            <Typography className={classes.bold}>Expected output:</Typography>
+            <br/><br/>
             <TextField required multiline fullWidth
                        variant="outlined"
+                       label="Expected output"
                        placeholder="Start typing the expected output..."
                        onChange={event => setTarget(event.target.value)}
                        value={target} />
@@ -73,16 +70,14 @@ function TestView(props: Props) {
                 startIcon={<SaveIcon />}
                 onClick={onSaveClicked}>Save</Button>
             }
-            <br/>
+            <br/><br/>
             {output && <>
-                <Typography className={classes.bold}>Program output:</Typography>
                 <TextField multiline fullWidth
                            variant="outlined"
+                           label="Program output"
                            defaultValue={target}
                            onChange={event => setTarget(event.target.value)}
-                           inputProps={
-                               { readOnly: true, }
-                           }/>
+                           inputProps={{ readOnly: true }}/>
             </>}
         </>
     );

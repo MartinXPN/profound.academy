@@ -95,9 +95,7 @@ export const updateComment = async (commentId: string, text: string) => {
 };
 
 export const deleteComment = async (commentId: string) => {
-    const threadCommentIds = (await getCommentReplies(commentId)).map(c => c.id);
-    threadCommentIds.push(commentId);
-    return await Promise.all(threadCommentIds.map(id => db.forumComment(id).delete()));
+    return await db.forumComment(commentId).delete();
 }
 
 export const vote = async (commentId: string, userId: string, vote: number) => {

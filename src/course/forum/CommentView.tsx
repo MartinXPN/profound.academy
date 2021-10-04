@@ -1,14 +1,16 @@
-import {Avatar, ListItem, ListItemIcon, ListItemText, IconButton, Button, List} from "@mui/material";
+import {Avatar, ListItem, ListItemIcon, ListItemText, IconButton, Button, List, MenuItem} from "@mui/material";
 import {Typography, TextField} from "@mui/material";
 import { Theme } from "@mui/material";
 import createStyles from '@mui/styles/createStyles';
 import makeStyles from '@mui/styles/makeStyles';
-import {ArrowDropDown, ArrowDropUp, Edit, Save, Reply as ReplyIcon} from '@mui/icons-material';
+import {ArrowDropDown, ArrowDropUp, Edit, Save, Reply as ReplyIcon, Delete} from '@mui/icons-material';
 import React, {useContext, useEffect, useState} from "react";
 import {AuthContext} from "../../App";
 import {Comment} from "../../models/forum";
-import {onCommentRepliesChanged, updateComment, vote} from "../../services/forum";
+import {deleteComment, onCommentRepliesChanged, updateComment, vote} from "../../services/forum";
 import Reply from "./Reply";
+import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
+import Menu from "@mui/material/Menu";
 
 
 const useStyles = makeStyles((theme: Theme) =>
@@ -56,6 +58,48 @@ function Score({commentId, score}: { commentId: string, score: number }) {
     );
 }
 
+function CommentEditing({onEditClicked, onDeleteClicked}: {onEditClicked: () => void, onDeleteClicked: () => void}) {
+    const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+    const open = Boolean(anchorEl);
+
+    const handleMenu = (event: React.MouseEvent<HTMLElement>) => setAnchorEl(event.currentTarget);
+    const handleClose = () => setAnchorEl(null);
+
+    return <>
+        <IconButton
+            onClick={handleMenu}
+            edge="end"
+            size="small">
+            <MoreHorizIcon/>
+        </IconButton>
+
+        <Menu
+            anchorEl={anchorEl}
+            open={open}
+            onClose={handleClose}
+            onClick={handleClose}
+            PaperProps={{
+                elevation: 0,
+                sx: {
+                    overflow: 'visible',
+                    filter: 'drop-shadow(0px 2px 8px rgba(0,0,0,0.24))',
+                },
+            }}
+            transformOrigin={{ horizontal: 'right', vertical: 'top' }}
+            anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}>
+
+            <MenuItem onClick={onEditClicked}>
+                <ListItemIcon><Edit fontSize="small" /></ListItemIcon>
+                <ListItemText>Edit</ListItemText>
+            </MenuItem>
+            <MenuItem onClick={onDeleteClicked}>
+                <ListItemIcon><Delete fontSize="small" /></ListItemIcon>
+                <ListItemText>Delete</ListItemText>
+            </MenuItem>
+        </Menu>
+    </>
+}
+
 
 function CommentView({comment, allowReply}: {
     comment: Comment,
@@ -97,6 +141,10 @@ function CommentView({comment, allowReply}: {
         await updateComment(comment.id, text);
         setIsEditing(false);
     }
+    const onDelete = async () => {
+        await deleteComment(comment.id);
+        console.log('Removed the comment!!');
+    }
 
     return <>
         <ListItem key={comment.id} alignItems="flex-start">
@@ -113,7 +161,7 @@ function CommentView({comment, allowReply}: {
                         <div>
                             {comment.displayName}
                             {auth && auth.currentUser && comment.userId === auth.currentUser.uid && !isEditing &&
-                            <IconButton onClick={onEdit} size="large"><Edit/></IconButton>}
+                            <CommentEditing onEditClicked={onEdit} onDeleteClicked={onDelete} />}
                         </div>
                     }
                     secondary={

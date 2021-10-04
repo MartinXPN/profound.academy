@@ -8,6 +8,7 @@ import makeStyles from '@mui/styles/makeStyles';
 
 import {AppBarProfile, SignIn} from "./Auth";
 import {AuthContext} from "../App";
+import AppBarNotifications from "./Notifications";
 
 
 const useStyles = makeStyles((theme: Theme) =>
@@ -53,7 +54,10 @@ function Header() {
                     {showSignInOptions && <SignIn />}
                 </div>
                 :
-                <div className={classes.authProfile}><AppBarProfile /></div>
+                <div className={classes.authProfile}>
+                    <AppBarNotifications />
+                    <AppBarProfile />
+                </div>
             }
         </>
     )

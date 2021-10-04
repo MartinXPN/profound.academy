@@ -2,6 +2,7 @@ import firebase from 'firebase/app';
 import 'firebase/firestore';
 
 import {Progress, User} from "../models/users";
+import {Notification} from "../models/notifications";
 import {Course, Exercise} from "../models/courses";
 import {Submission, SubmissionResult, SubmissionSensitiveRecords} from "../models/submissions";
 import {Comment, Vote} from "../models/forum";
@@ -24,6 +25,8 @@ const db = {
     user: (userId: string) => dataPoint<User>('users').doc(userId),
     userVotes: (commentId: string, userId: string) => dataPoint<Vote>(`users/${userId}/votes`).doc(commentId),
     progress: (userId: string, courseId: string) => dataPoint<Progress>(`users/${userId}/progress/${courseId}/private`),
+    notifications: (userId: string) => dataPoint<Notification>(`users/${userId}/notifications/`),
+    notification: (userId: string, notificationId: string) => dataPoint<Notification>(`users/${userId}/notifications/`).doc(notificationId),
 
     courses: dataPoint<Course>('courses'),
     course: (courseId: string) => dataPoint<Course>('courses').doc(courseId),

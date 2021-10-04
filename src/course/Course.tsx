@@ -54,13 +54,28 @@ const useStyles = makeStyles((theme: Theme) =>
 function CurrentExercise({course, idToExercise, launchCourse}:
                          {course: Course, idToExercise: {[key: string]: Exercise}, launchCourse: () => void}) {
     const classes = useStyles();
+    const history = useHistory();
+    let match = useRouteMatch();
     const auth = useContext(AuthContext);
-    const {exerciseId} = useParams<{ exerciseId: string }>();
-    const exercise = idToExercise.hasOwnProperty(exerciseId) ? idToExercise[exerciseId] : undefined;
-    console.log('exerciseId', exerciseId, exercise);
 
+    // exercise management - sync localStorage with the URL
+    const [currentExerciseId, setCurrentExerciseId] = useStickyState<string>('', `ex-${auth?.currentUser?.uid}-${course.id}`);
+    const {exerciseId} = useParams<{ exerciseId: string }>();
+    if( exerciseId && currentExerciseId !== exerciseId ) {
+        setCurrentExerciseId(exerciseId);
+    }
+    else if (currentExerciseId && !exerciseId ) {
+        const url = match.url.replace(/\/$/, '');
+        history.push(`${url}/${currentExerciseId}`);
+    }
+
+    const [exercise, setExercise] = useState<Exercise | undefined>(undefined);
     const [showSignIn, setShowSignIn] = useState(false);
     const [splitPos, setSplitPos] = useStickyState(50, `splitPos-${auth?.currentUser?.uid}`);
+
+    useAsyncEffect(async () => {
+        idToExercise.hasOwnProperty(currentExerciseId) && setExercise(idToExercise[currentExerciseId]);
+    }, [idToExercise, currentExerciseId]);
 
     if(auth?.isSignedIn && showSignIn)
         setShowSignIn(false);
@@ -110,20 +125,14 @@ function CourseView() {
     const [exercises, setExercises] = useState<Exercise[]>([]);
     const [idToExercise, setIdToExercise] = useState<{}>({});
     const [progress, setProgress] = useState<{[key: string]: Progress}>({});
-    const [currentExerciseId, setCurrentExerciseId] = useStickyState<string>('', `ex-${auth?.currentUser?.uid}-${courseId}`);
 
-    const launchCourse = () => {
-        if( exercises.length <= 0 )
-            return;
-        setCurrentExerciseId(exercises[0].id);
-    };
-    useEffect(() => {
+    const openExercise = (exerciseId: string) => {
         const url = match.url.replace(/\/$/, '');
-        history.push(`${url}/${currentExerciseId}`);
-        // update the match.url whenever a new exercise is selected
-        // match.url is left out from deps intentionally
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [currentExerciseId]);
+        history.push(`${url}/${exerciseId}`);
+    };
+    const launchCourse = () => {
+        exercises.length > 0 && openExercise(exercises[0].id);
+    };
 
     useAsyncEffect(async () => {
         const course = await getCourse(courseId);
@@ -152,7 +161,7 @@ function CourseView() {
             <Route path={`${match.path}/:exerciseId?`}>
                 <CourseDrawer exercises={exercises}
                       progress={progress}
-                      onItemSelected={setCurrentExerciseId} />
+                      onItemSelected={openExercise} />
 
                 <main className={classes.content}>
                     <div className={classes.toolbar}/>

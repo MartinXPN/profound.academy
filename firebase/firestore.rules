@@ -30,6 +30,11 @@ service cloud.firestore {
       match /progress/{courseId}/private/{exerciseId} {
         allow write: if false;
       }
+
+      // Only the backend should create a notification, the user is allowed to update it
+      match /notifications/{notificationId} {
+        allow update: if isCurrentUser(request, userId);
+      }
     }
 
 

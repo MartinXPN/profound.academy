@@ -23,6 +23,7 @@ import {Exercise} from "../models/courses";
 import {AppBarProfile} from "../header/Auth";
 import {Progress} from "../models/users";
 import {useStatusToStyledBackground} from "./colors";
+import AppBarNotifications from "../header/Notifications";
 
 
 const drawerWidth = 240;
@@ -148,7 +149,10 @@ function CourseDrawer(props: CourseDrawerProps) {
                     </IconButton>
                     <IconButton key="home" color="inherit" onClick={onHomeClicked} size="large"><Home/></IconButton>
 
-                    <AuthDiv key="auth"><AppBarProfile/></AuthDiv>
+                    <AuthDiv key="auth">
+                        <AppBarNotifications />
+                        <AppBarProfile />
+                    </AuthDiv>
                 </Toolbar>
             </AppBar>
 

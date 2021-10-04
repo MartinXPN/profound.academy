@@ -1,5 +1,6 @@
 import React, {memo, useContext, useEffect, useState} from 'react';
-import {Avatar, IconButton, MenuItem} from "@mui/material";
+import {Avatar, IconButton, MenuItem, ListItemIcon, ListItemText} from "@mui/material";
+import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 import Menu from '@mui/material/Menu';
 import StyledFirebaseAuth from 'react-firebaseui/StyledFirebaseAuth';
 import firebase from 'firebase/app';
@@ -42,7 +43,7 @@ export const SignIn = memo(function SignIn() {
         );
     }
 
-    return(<></>);
+    return <></>;
 });
 
 
@@ -89,7 +90,10 @@ export function AppBarProfile() {
             anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
         >
         {user ?
-            <MenuItem onClick={onSignOutClicked} key='sign-out'>Sign Out</MenuItem>
+            <MenuItem onClick={onSignOutClicked} key='sign-out'>
+                <ListItemIcon><ExitToAppIcon fontSize="small" /></ListItemIcon>
+                <ListItemText>Logout</ListItemText>
+            </MenuItem>
             :
             <></>
             // Rendering multiple StyledFirebaseAuth components result in https://github.com/firebase/firebaseui-web-react/issues/59

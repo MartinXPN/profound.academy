@@ -57,7 +57,7 @@ service cloud.firestore {
                            && request.auth.uid != request.resource.data.userId
                            && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['score', 'replies'])
                            && isValidScore(math.abs(resource.data.score - request.resource.data.score)));
-      allow delete: if request.auth != null && request.auth.uid == request.resource.data.userId;
+      allow delete: if isCurrentUser(request, get(/databases/$(database)/documents/forum/$(commentId)).data.userId);
 
       match /voters/{userId} {
         allow read: if isCurrentUser(request, userId);

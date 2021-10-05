@@ -55,4 +55,3 @@ export const notifyComment = functions.firestore
 
         await notifyOnComment(comment);
     });
-// TODO: add the corresponding exercise

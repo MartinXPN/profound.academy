@@ -6,6 +6,7 @@ import {AuthContext} from "../App";
 import {Notification} from "../models/notifications";
 import {onNotificationsChanged, readNotification} from "../services/notifications";
 import {useHistory} from "react-router-dom";
+import {Done} from "@mui/icons-material";
 
 
 export default function AppBarNotifications() {
@@ -65,10 +66,16 @@ export default function AppBarNotifications() {
             transformOrigin={{ horizontal: 'right', vertical: 'top' }}
             anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}>
 
+            {notifications.length === 0 &&
+            <MenuItem key="empty">
+                <ListItemIcon><Done /></ListItemIcon>
+                <ListItemText style={{marginLeft: 10}}>You're all caught up!</ListItemText>
+            </MenuItem>}
+
             {notifications.map(n =>
             <MenuItem key={n.id} onClick={async () => await onNotificationClicked(n)}>
                 <ListItemIcon><Avatar src={n.imageUrl} /></ListItemIcon>
-                <ListItemText>{n.message}</ListItemText>
+                <ListItemText style={{marginLeft: 10}}>{n.message}</ListItemText>
             </MenuItem>
             )}
         </Menu>

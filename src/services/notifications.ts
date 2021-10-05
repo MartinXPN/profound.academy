@@ -5,7 +5,7 @@ import firebase from "firebase/app";
 export const onNotificationsChanged = (userId: string,
                                        onChanged: (notifications: Notification[]) => void) => {
     return db.notifications(userId)
-        .orderBy('createdAt', 'asc')
+        .orderBy('createdAt', 'desc')
         .limit(25)
         .onSnapshot(snapshot => {
             const notifications: Notification[] = snapshot.docs.map(x => x.data());

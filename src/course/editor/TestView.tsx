@@ -46,7 +46,7 @@ function TestView(props: Props) {
                 {status} in {time.toFixed(2)} seconds, used {memory?.toFixed(1)}MB
             </Typography>
             }
-            <TextField required multiline fullWidth
+            <TextField multiline fullWidth
                        variant="outlined"
                        label="Input"
                        placeholder="Start typing the input..."
@@ -54,7 +54,7 @@ function TestView(props: Props) {
                        value={input} />
 
             <br/><br/>
-            <TextField required multiline fullWidth
+            <TextField multiline fullWidth
                        variant="outlined"
                        label="Expected output"
                        placeholder="Start typing the expected output..."

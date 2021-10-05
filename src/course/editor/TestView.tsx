@@ -29,6 +29,7 @@ interface Props {
 function TestView(props: Props) {
     const classes = useStyles();
     const {testCase, output, status, memory, time, onSaveTest} = props;
+    console.log(testCase, '=>', output);
 
     const [input, setInput] = useState('');
     const [target, setTarget] = useState('');
@@ -71,14 +72,13 @@ function TestView(props: Props) {
                 onClick={onSaveClicked}>Save</Button>
             }
             <br/><br/>
-            {output && <>
-                <TextField multiline fullWidth
-                           variant="outlined"
-                           label="Program output"
-                           defaultValue={target}
-                           onChange={event => setTarget(event.target.value)}
-                           inputProps={{ readOnly: true }}/>
-            </>}
+            {output &&
+            <TextField multiline fullWidth
+                       variant="outlined"
+                       label="Program output"
+                       value={output}
+                       inputProps={{ readOnly: true }}/>
+            }
         </>
     );
 }

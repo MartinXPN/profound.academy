@@ -29,7 +29,6 @@ interface Props {
 function TestView(props: Props) {
     const classes = useStyles();
     const {testCase, output, status, memory, time, onSaveTest} = props;
-    console.log(testCase, '=>', output);
 
     const [input, setInput] = useState('');
     const [target, setTarget] = useState('');

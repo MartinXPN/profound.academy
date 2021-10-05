@@ -18,6 +18,7 @@ export interface Course {
     img: string;
     title: string;
     author: string;
+    instructors: string[],
     details: string;
     introduction: string; // notion id for the introduction page
     exercises: Exercise[];

@@ -1,6 +1,7 @@
 import * as functions from 'firebase-functions';
-import {fetchNotionPage, submit} from './services';
+import {fetchNotionPage, notifyOnComment, submit} from './services';
 import {Submission} from './models/submissions';
+import {Comment} from './models/forum';
 
 // Start writing Firebase Functions
 // https://firebase.google.com/docs/functions/typescript
@@ -34,7 +35,7 @@ export const submitSolution = functions.firestore
         const submissionId = context.params.submissionId;
 
         const submission = {
-            id: snapshot.after.id,
+            id: submissionId,
             ...snapshot.after.data(),
         } as Submission;
 
@@ -42,3 +43,16 @@ export const submitSolution = functions.firestore
         functions.logger.info(`process submission: ${JSON.stringify(submission)}`);
         await submit(submission);
     });
+
+export const notifyComment = functions.firestore
+    .document('forum/{commentId}')
+    .onWrite(async (snapshot, context) => {
+        const comment = {
+            id: snapshot.after.id,
+            ...snapshot.after.data(),
+        } as Comment;
+        functions.logger.info(`comment: ${JSON.stringify(comment)}`);
+
+        await notifyOnComment(comment);
+    });
+// TODO: add the corresponding exercise

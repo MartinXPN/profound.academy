@@ -1,6 +1,9 @@
 import {NotionAPI} from 'notion-client';
 import {ExtendedRecordMap} from 'notion-types';
 import {Submission, SubmissionResult} from './models/submissions';
+import {Comment} from './models/forum';
+import {Notification} from './models/notifications';
+
 import * as admin from 'firebase-admin';
 import * as functions from 'firebase-functions';
 import * as needle from 'needle';
@@ -58,13 +61,13 @@ export const submit = async (submission: Submission): Promise<void> => {
         .where('userId', '==', submission.userId)
         .where('exercise', '==', submission.exercise)
         .get();
-    const bestUserSubmissions = bestUserSubmissionsSnapshot.docs.map((s) =>s.data());
+    const bestUserSubmissions = bestUserSubmissionsSnapshot.docs.map((s) => s.data());
     if (bestUserSubmissions.length > 1) {
         throw Error(`
         Found duplicate user best submissions: ${submission.userId} for exercise: ${submission.exercise.id}
         `);
     }
-    if (bestUserSubmissions.length === 0 ) {
+    if (bestUserSubmissions.length === 0) {
         functions.logger.info(`
         Best submission for user: ${submission.userId}, exercise ${submission.exercise.id} does not exist
         `);
@@ -105,4 +108,88 @@ export const submit = async (submission: Submission): Promise<void> => {
             updatedAt: submissionResult.createdAt,
         });
     functions.logger.info('Updated the user progress!');
+};
+
+
+const notify = async (notification: Notification, userId: string) => {
+    const {id, ...notificationData} = notification;
+    const res = await app.firestore().collection(`users/${userId}/notifications`).add(notificationData);
+    functions.logger.info(`added notification for user: ${userId} with id: ${res.id}`);
+    return res;
+};
+
+export const notifyOnComment = async (comment: Comment): Promise<void> => {
+    const db = app.firestore();
+    const user = await admin.auth().getUser(comment.userId);
+    const threadUsers: string[] = [];
+    let parentComment = await db.doc(`forum/${comment.repliedTo.id}`).get();
+    let repliedTo = comment.repliedTo;
+
+    // Posted under another comment => notify everyone who posted under that comment including the author of the root comment
+    while (parentComment.exists) {
+        const data = parentComment.data();
+        if (!data) {
+            throw Error(`comment with id: ${parentComment.id} exists but does not have data`);
+        }
+        functions.logger.info(`parent comment: ${JSON.stringify(data)}`);
+
+        threadUsers.push(data.userId);
+        parentComment = await db.doc(`forum/${data.repliedTo.id}`).get();
+        repliedTo = data.repliedTo;
+    }
+
+    // get the corresponding exercise and the course
+    const exercise = await db.doc(repliedTo.path).get();
+    const exerciseData = exercise.data();
+    if (!exerciseData) {
+        throw Error(`exercise with id: ${exercise.id} exists but does not have data`);
+    }
+    functions.logger.info(`exercise: ${JSON.stringify(exerciseData)}`);
+
+    const coursePath = repliedTo.parent.parent?.path;
+    if (!coursePath) {
+        throw Error(`Course with ${coursePath} does not exist`);
+    }
+    const course = await db.doc(coursePath).get();
+    const courseData = course.data();
+    if (!courseData) {
+        throw Error(`Course with id: ${course.id} exists but does not have data`);
+    }
+    functions.logger.info(`course: ${JSON.stringify(courseData)}`);
+
+
+    // Posted under the exercise:
+    //  1. if the person is the instructor => notify all the students
+    //  2. if the person is a student => notify the instructors
+    if (threadUsers.length === 0) {
+        functions.logger.info('The post was made under an exercise');
+
+        if (courseData.instructors.includes(user.uid)) {
+            // 1. instructor
+            functions.logger.info('The commenter was an instructor');
+            const courseStudents = await db.collection('users')
+                .where('courses', 'array-contains', db.doc(coursePath))
+                .get();
+            threadUsers.push(...courseStudents.docs.map((d) => d.id));
+        } else {
+            // 2. student
+            functions.logger.info('The commenter was a student => notify the instructors');
+            threadUsers.push(...courseData.instructors);
+        }
+    }
+
+    const notification = {
+        id: '',
+        url: `/${course.id}/${exercise.id}`,
+        readAt: null,
+        createdAt: admin.firestore.FieldValue.serverTimestamp(),
+        imageUrl: comment.avatarUrl,
+        message: `${user.displayName} commented under ${exerciseData.title}`,
+    } as Notification;
+    functions.logger.info(`notification: ${JSON.stringify(notification)}`);
+
+    await Promise.all(threadUsers
+        .filter((userId) => userId !== comment.userId)
+        .map((userId) => notify(notification, userId))
+    );
 };

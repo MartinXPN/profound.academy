@@ -29,9 +29,10 @@ export const submit = async (submission: Submission): Promise<void> => {
         language: submission.language,
         memoryLimit: 512,
         timeLimit: 2,
+        floatPrecision: 0.001,
         aggregateResults: !submission.isTestRun,
         returnOutputs: submission.isTestRun,
-        return_compile_outputs: true,
+        returnCompileOutputs: true,
         comparisonMode: 'token',
     };
     functions.logger.info(`submitting data: ${JSON.stringify(data)}`);

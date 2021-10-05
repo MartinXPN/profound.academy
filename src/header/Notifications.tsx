@@ -73,7 +73,8 @@ export default function AppBarNotifications() {
             </MenuItem>}
 
             {notifications.map(n =>
-            <MenuItem key={n.id} onClick={async () => await onNotificationClicked(n)}>
+            <MenuItem key={n.id} onClick={async () => await onNotificationClicked(n)}
+                      style={{color: n.readAt ? 'grey' : 'inherit'}}>
                 <ListItemIcon><Avatar src={n.imageUrl} /></ListItemIcon>
                 <ListItemText style={{marginLeft: 10}}>{n.message}</ListItemText>
             </MenuItem>

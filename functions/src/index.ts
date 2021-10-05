@@ -46,12 +46,13 @@ export const submitSolution = functions.firestore
 
 export const notifyComment = functions.firestore
     .document('forum/{commentId}')
-    .onWrite(async (snapshot, context) => {
+    .onCreate(async (snapshot, context) => {
+        const commentId = context.params.commentId;
         const comment = {
-            id: snapshot.after.id,
-            ...snapshot.after.data(),
+            id: commentId,
+            ...snapshot.data(),
         } as Comment;
-        functions.logger.info(`comment: ${JSON.stringify(comment)}`);
 
+        functions.logger.info(`comment: ${JSON.stringify(comment)}`);
         await notifyOnComment(comment);
     });

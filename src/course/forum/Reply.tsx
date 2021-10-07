@@ -1,8 +1,7 @@
 import React, {useContext, useState} from "react";
 import {AuthContext} from "../../App";
 import {saveReply} from "../../services/forum";
-import {Button, TextField} from "@mui/material";
-import {Save} from "@mui/icons-material";
+import {TextField} from "@mui/material";
 
 
 function Reply({commentId, onReplySaved}: { commentId: string, onReplySaved: () => void }) {
@@ -29,9 +28,15 @@ function Reply({commentId, onReplySaved}: { commentId: string, onReplySaved: () 
                    variant="standard"
                    onChange={event => setReplyText(event.target.value)}
                    value={replyText}
-                   InputProps={{disableUnderline: true}} />
-
-        {replyText.length > 0 && <Button size="small" endIcon={<Save/>} onClick={onSave}>Save</Button>}
+                   InputProps={{disableUnderline: true}}
+                   onKeyPress={async (ev) => {
+                       if (ev.key === 'Enter' && !ev.shiftKey) {
+                           // Do code here
+                           ev.preventDefault();
+                           if( replyText.length > 0 )
+                               await onSave();
+                       }
+                   }} />
     </>);
 }
 

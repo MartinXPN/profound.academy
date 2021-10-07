@@ -15,6 +15,7 @@ import {getBestSubmissions, getSubmissions} from "../services/submissions";
 import {SubmissionResult} from "../models/submissions";
 import moment from "moment/moment";
 import SubmissionBackdrop from "./SubmissionBackdrop";
+import {statusToColor} from "./colors";
 
 const useStyles = makeStyles({
     root: {
@@ -102,8 +103,10 @@ function SubmissionsTable(props: SubmissionsTableProps) {
                                         );
 
                                     const value = row[column.id];
+                                    // @ts-ignore
+                                    const style = column.id === 'status' ? {color: statusToColor(value)} : {};
                                     return (
-                                        <TableCell key={column.id} align={column.align}>
+                                        <TableCell key={column.id} align={column.align} style={style}>
                                             {column.format ? column.format(value) : value}
                                         </TableCell>
                                     );

@@ -52,8 +52,8 @@ const closedMixin = (theme: Theme): CSSObject => ({
 const DrawerHeader = styled('div')(({ theme }) => ({
     display: 'flex',
     alignItems: 'center',
-    justifyContent: 'flex-end',
-    padding: theme.spacing(0, 1),
+    justifyContent: 'flex-start',
+    padding: theme.spacing(0, 2),
     // necessary for content to be below app bar
     ...theme.mixins.toolbar,
 }));
@@ -139,13 +139,10 @@ function CourseDrawer(props: CourseDrawerProps) {
                         key="drawerOpen"
                         color="inherit"
                         aria-label="open drawer"
-                        onClick={handleDrawerOpen}
+                        onClick={() => open ? handleDrawerClose(): handleDrawerOpen()}
                         edge="start"
-                        sx={{
-                            marginRight: '36px',
-                            ...(open && { display: 'none' }),
-                        }}>
-                        <MenuIcon/>
+                        sx={{marginRight: '36px'}}>
+                        {open ? (theme.direction === 'rtl' ? <ChevronRightIcon /> : <ChevronLeftIcon />) : <MenuIcon/>}
                     </IconButton>
                     <IconButton key="home" color="inherit" onClick={onHomeClicked} size="large"><Home/></IconButton>
 
@@ -157,12 +154,7 @@ function CourseDrawer(props: CourseDrawerProps) {
             </AppBar>
 
             <Drawer variant="permanent" open={open}>
-                <DrawerHeader>
-                    <IconButton onClick={handleDrawerClose}>
-                        {theme.direction === 'rtl' ? <ChevronRightIcon /> : <ChevronLeftIcon />}
-                    </IconButton>
-                </DrawerHeader>
-
+                <DrawerHeader><Box component="span" fontWeight="fontWeightMedium">Progress</Box></DrawerHeader>
                 <Divider key="topDivider" />
                 <List>
                     {exercises.map((ex, index) =>

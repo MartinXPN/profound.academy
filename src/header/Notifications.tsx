@@ -1,5 +1,5 @@
 import React, {useContext, useEffect, useState} from 'react';
-import {IconButton, MenuItem, ListItemIcon, ListItemText, Badge, Avatar} from "@mui/material";
+import {IconButton, MenuItem, ListItemIcon, ListItemText, Badge, Avatar, Typography} from "@mui/material";
 import Menu from '@mui/material/Menu';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import {AuthContext} from "../App";
@@ -59,7 +59,7 @@ export default function AppBarNotifications() {
             PaperProps={{
                 elevation: 0,
                 sx: {
-                    overflow: 'visible',
+                    maxHeight: '80%',
                     filter: 'drop-shadow(0px 2px 8px rgba(0,0,0,0.24))',
                 },
             }}
@@ -76,7 +76,7 @@ export default function AppBarNotifications() {
             <MenuItem key={n.id} onClick={async () => await onNotificationClicked(n)}
                       style={{color: n.readAt ? 'grey' : 'inherit'}}>
                 <ListItemIcon><Avatar src={n.imageUrl} /></ListItemIcon>
-                <ListItemText style={{marginLeft: 10}}>{n.message}</ListItemText>
+                <ListItemText style={{marginLeft: 10}}><Typography variant="inherit" noWrap>{n.message}</Typography></ListItemText>
             </MenuItem>
             )}
         </Menu>

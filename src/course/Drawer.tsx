@@ -108,8 +108,17 @@ function LevelList({levelNumber, exercises, progress, onItemSelected, isDrawerOp
                     onItemSelected: (exerciseId: string) => void,
                     isDrawerOpen: boolean}) {
     const {exerciseId} = useParams<{ exerciseId?: string }>();
-    const [open, setOpen] = useState(exercises.filter(e => e.id === exerciseId).length > 0);
+    const isExerciseInLevel = exercises.filter(e => e.id === exerciseId).length > 0;
+    const [open, setOpen] = useState(isExerciseInLevel);
     const statusToStyle = useStatusToStyledBackground();
+
+    useEffect(() => {
+        if( !open ) {
+            setOpen(isExerciseInLevel);
+        }
+        // open the level if the current exercise is in this level
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [exercises, isExerciseInLevel]);
 
     const onLevelClicked = () => setOpen(!open);
     const getStatusStyle = (id: string) => {

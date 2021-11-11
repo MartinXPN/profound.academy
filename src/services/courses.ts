@@ -10,7 +10,7 @@ export const getNotionPageMap = async (pageId: string) => {
 
 
 export const getAllCourses = async () => {
-    const snapshot = await db.courses.get();
+    const snapshot = await db.courses.where('visibility', '==', 'public').get();
     const courses: Course[] = snapshot.docs.map(x => x.data());
     console.log('Got courses:', courses);
     return courses;
@@ -31,7 +31,7 @@ export const getUserCourses = async (userId: string) => {
         return [];
 
     const courses: Course[] = await Promise.all(us.courses.map(x => getCourse(x.id)));
-    console.log('courses:', courses);
+    console.log('User courses:', courses);
     return courses;
 }
 

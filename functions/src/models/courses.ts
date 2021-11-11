@@ -16,6 +16,7 @@ export interface Exercise {
 export interface Course {
     id: string;
     img: string;
+    visibility: string;
     title: string;
     author: string;
     instructors: string[],

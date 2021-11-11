@@ -31,6 +31,13 @@ service cloud.firestore {
         allow write: if false;
       }
 
+      // Only the backend should update the activity of the user
+      // Other users can read the contents
+      match /activity/{activityId} {
+        allow write: if false;
+        allow read: if request.auth != null;
+      }
+
       // Only the backend should create a notification, the user is allowed to update it
       match /notifications/{notificationId} {
         allow update: if isCurrentUser(request, userId);

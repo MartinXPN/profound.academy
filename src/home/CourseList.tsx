@@ -22,7 +22,7 @@ const useStyles = makeStyles((theme: Theme) =>
         },
         imageList: {
             width: 600,
-            height: 400,
+            height: 350,
         },
         listItem: {
             "&:focus,&:hover": {
@@ -35,8 +35,7 @@ const useStyles = makeStyles((theme: Theme) =>
         title: {
             display: 'flex',
             justifyContent: 'center',
-            marginTop: theme.spacing(4),
-            marginBottom: theme.spacing(1),
+            marginTop: theme.spacing(2),
         },
     }),
 );

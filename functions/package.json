@@ -19,6 +19,7 @@
     "cors": "^2.8.5",
     "firebase-admin": "^9.11.1",
     "firebase-functions": "^3.14.1",
+    "moment": "^2.29.1",
     "needle": "^2.9.0",
     "notion-client": "^4.8.2"
   },

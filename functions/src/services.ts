@@ -3,10 +3,12 @@ import {ExtendedRecordMap} from 'notion-types';
 import {Submission, SubmissionResult} from './models/submissions';
 import {Comment} from './models/forum';
 import {Notification} from './models/notifications';
+import {Progress} from './models/users';
 
 import * as admin from 'firebase-admin';
 import * as functions from 'firebase-functions';
 import * as needle from 'needle';
+import * as moment from 'moment';
 
 const app = admin.initializeApp({credential: admin.credential.applicationDefault()});
 const AWS_LAMBDA_URL = 'https://l5nhpbb1bd.execute-api.us-east-1.amazonaws.com/Prod/check/';
@@ -63,6 +65,7 @@ export const submit = async (submission: Submission): Promise<void> => {
         .where('exercise', '==', submission.exercise)
         .get();
     const bestUserSubmissions = bestUserSubmissionsSnapshot.docs.map((s) => s.data());
+    let alreadySolved = false;
     if (bestUserSubmissions.length > 1) {
         throw Error(`
         Found duplicate user best submissions: ${submission.userId} for exercise: ${submission.exercise.id}
@@ -77,6 +80,9 @@ export const submit = async (submission: Submission): Promise<void> => {
     if (bestUserSubmissions.length === 1) {
         const bestRecord = bestUserSubmissions[0] as SubmissionResult;
         bestRecord.id = bestUserSubmissionsSnapshot.docs[0].id;
+        if (bestRecord.status === 'Solved') {
+            alreadySolved = true;
+        }
 
         if (bestRecord.score < submissionRes.score ||
             bestRecord.score === submissionRes.score && bestRecord.time > submissionRes.time) {
@@ -101,14 +107,33 @@ export const submit = async (submission: Submission): Promise<void> => {
     functions.logger.info(`Saved the submission: ${JSON.stringify(code)}`);
 
     // update user progress
+    const progress = {
+        status: submissionResult.status,
+        updatedAt: submissionResult.createdAt,
+    } as Progress;
     await app.firestore()
         .collection(`users/${submission.userId}/progress/${submission.course.id}/private/`)
         .doc(submission.exercise.id)
-        .set({
-            status: submissionResult.status,
-            updatedAt: submissionResult.createdAt,
-        });
+        .set(progress);
     functions.logger.info('Updated the user progress!');
+
+    // update user activity
+    if (!alreadySolved && submissionResult.status === 'Solved') {
+        functions.logger.info('Updating the user activity...');
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        const submissionDate = submissionResult.createdAt.toDate();
+        const submissionDay = moment(submissionDate).format('YYYY-MM-DD');
+
+        await app.firestore()
+            .collection(`users/${submission.userId}/activity`)
+            .doc(submissionDay)
+            .set({
+                count: admin.firestore.FieldValue.increment(1),
+                date: submissionDay,
+            }, {merge: true});
+        functions.logger.info('Updated the user activity!');
+    }
 };
 
 

@@ -1,5 +1,5 @@
 import {db} from "./db";
-import {Progress} from "../models/users";
+import {Activity, Progress} from "../models/users";
 
 export const getUserProgress = async (userId: string, courseId: string) => {
     const snapshot = await db.progress(userId, courseId).get();
@@ -20,4 +20,11 @@ export const onUserProgressUpdated = (userId: string, courseId: string, onUpdate
         console.log('Got res:', res);
         onUpdate(res);
     });
+}
+
+export const getUserActivity = async (userId: string) => {
+    const snapshot = await db.activity(userId).get();
+    const activity: Activity[] = snapshot.docs.map(x => x.data());
+    console.log('Got activity:', activity);
+    return activity;
 }

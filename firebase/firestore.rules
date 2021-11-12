@@ -58,7 +58,7 @@ service cloud.firestore {
       }
 
       match /ranking/{userId} {
-        allow read: if isCourseInstructor(request, courseId) || request.time > get(/databases/$(database)/documents/courses/$(courseId)).data.revealsAt;
+        allow read: if isCourseInstructor(request, courseId) || get(/databases/$(database)/documents/courses/$(courseId)).data.rankingVisibility == 'public';
       }
     }
 

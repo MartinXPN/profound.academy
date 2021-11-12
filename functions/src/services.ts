@@ -9,6 +9,7 @@ import * as admin from 'firebase-admin';
 import * as functions from 'firebase-functions';
 import * as needle from 'needle';
 import * as moment from 'moment';
+import {Course} from './models/courses';
 
 const app = admin.initializeApp({credential: admin.credential.applicationDefault()});
 const AWS_LAMBDA_URL = 'https://l5nhpbb1bd.execute-api.us-east-1.amazonaws.com/Prod/check/';
@@ -133,6 +134,34 @@ export const submit = async (submission: Submission): Promise<void> => {
                 date: submissionDay,
             }, {merge: true});
         functions.logger.info('Updated the user activity!');
+    }
+
+    // update ranking
+    let exercisePrevScore = 0;
+    const userRankingRef = app.firestore()
+        .collection(`courses/${submission.course.id}/ranking`)
+        .doc(submission.userId);
+    const userRanking = await userRankingRef.get();
+    if (!submission.isTestRun && userRanking.exists) {
+        const userRankingData = userRanking.data();
+        if (userRankingData && submissionRes.exercise.id in userRankingData.scores) {
+            exercisePrevScore = userRankingData.scores[submissionRes.exercise.id];
+        }
+    }
+
+    const course = await app.firestore().collection('courses').doc(submission.course.id).get();
+    const courseData = course.data() as Course;
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    if (exercisePrevScore <= submissionRes.score && courseData && courseData.freezeAt.toDate() > Date.now()) {
+        await userRankingRef.set({
+            userDisplayName: (await app.auth().getUser(submissionRes.userId)).displayName,
+            totalScore: admin.firestore.FieldValue.increment(submissionRes.score - exercisePrevScore),
+            scores: {
+                [submission.exercise.id]: submissionRes.score,
+            },
+        }, {merge: true});
+        console.log('Updated ranking!');
     }
 };
 

@@ -3,7 +3,7 @@ import 'firebase/firestore';
 
 import {Activity, Progress, User} from "../models/users";
 import {Notification} from "../models/notifications";
-import {Course, Exercise} from "../models/courses";
+import {Course, Exercise, UserRank} from "../models/courses";
 import {Submission, SubmissionResult, SubmissionSensitiveRecords} from "../models/submissions";
 import {Comment, Vote} from "../models/forum";
 
@@ -33,6 +33,7 @@ const db = {
     course: (courseId: string) => dataPoint<Course>('courses').doc(courseId),
     exercises: (courseId: string) => dataPoint<Exercise>(`courses/${courseId}/exercises`),
     exercise: (courseId: string, exerciseId: string) => dataPoint<Exercise>(`courses/${courseId}/exercises`).doc(exerciseId),
+    ranking: (courseId: string) => dataPoint<UserRank>(`courses/${courseId}/ranking`),
 
     forum: dataPoint<Comment>('forum'),
     forumComment: (commentId: string) => dataPoint<Comment>('forum').doc(commentId),

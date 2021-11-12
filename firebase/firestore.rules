@@ -56,6 +56,10 @@ service cloud.firestore {
       match /exercises/{exerciseId} {
         allow read: if isCourseInstructor(request, courseId) || request.time > get(/databases/$(database)/documents/courses/$(courseId)).data.revealsAt;
       }
+
+      match /ranking/{userId} {
+        allow read: if isCourseInstructor(request, courseId) || request.time > get(/databases/$(database)/documents/courses/$(courseId)).data.revealsAt;
+      }
     }
 
     // The forum is available for authenticated users

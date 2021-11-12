@@ -20,6 +20,7 @@ import {useStickyState} from "../util";
 import CourseDrawer from "./Drawer";
 import {onUserProgressUpdated} from "../services/users";
 import {Progress} from "../models/users";
+import RankingTable from "./RankingTable";
 
 
 const useStyles = makeStyles((theme: Theme) =>
@@ -104,7 +105,9 @@ function CurrentExercise({course, idToExercise, launchCourse}:
             exercise && auth?.isSignedIn && !showSignIn &&
             <SplitPane split='vertical' defaultSize={splitPos} onChange={setSplitPos}>
                 <div className={classes.exercise}>
-                    <ExerciseView course={course} exercise={exercise}/>
+                    {exerciseId === 'ranking' ?
+                        <RankingTable course={course} /> :
+                        <ExerciseView course={course} exercise={exercise}/>}
                 </div>
                 <div style={{width: '100%', height: '100%'}}><Editor course={course} exercise={exercise}/></div>
             </SplitPane>
@@ -129,6 +132,10 @@ function CourseView() {
     const openExercise = (exerciseId: string) => {
         const url = match.url.replace(/\/$/, '');
         history.push(`${url}/${exerciseId}`);
+    };
+    const openRanking = () => {
+        const url = match.url.replace(/\/$/, '');
+        history.push(`${url}/ranking`);
     };
     const launchCourse = () => {
         exercises.length > 0 && openExercise(exercises[0].id);
@@ -161,7 +168,9 @@ function CourseView() {
             <Route path={`${match.path}/:exerciseId?`}>
                 <CourseDrawer exercises={exercises}
                       progress={progress}
-                      onItemSelected={openExercise} />
+                      onItemSelected={openExercise}
+                      showRanking={course?.rankingVisibility === 'public'}
+                      onRankingClicked={openRanking} />
 
                 <main className={classes.content}>
                     <div className={classes.toolbar}/>

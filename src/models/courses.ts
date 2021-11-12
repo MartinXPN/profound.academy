@@ -29,3 +29,10 @@ export interface Course {
     exercises: Exercise[];
     preferredLanguage: Language;
 }
+
+export interface UserRank {
+    id: string;
+    userDisplayName: string;
+    totalScore: number;
+    scores: { [key: string]: number };
+}

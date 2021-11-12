@@ -1,5 +1,5 @@
 import {db} from "./db";
-import {Course, Exercise} from "../models/courses";
+import {Course, Exercise, UserRank} from "../models/courses";
 import firebase from "firebase/app";
 
 export const getNotionPageMap = async (pageId: string) => {
@@ -58,11 +58,17 @@ export const startCourse = async (userId: string, courseId: string) => {
 
 
 export const getCourseExercises = async (courseId: string) => {
-    const snapshot = await db.exercises(courseId)
-        .orderBy('order', 'asc')
-        .get();
+    const snapshot = await db.exercises(courseId).orderBy('order', 'asc').get();
 
     const exercises: Exercise[] = snapshot.docs.map(x => x.data());
     console.log('Got exercises:', exercises);
     return exercises;
+}
+
+
+export const getRanking = async (courseId: string) => {
+    const snapshot = await db.ranking(courseId).orderBy('totalScore', 'desc').get();
+    const ranks: UserRank[] = snapshot.docs.map(x => x.data());
+    console.log('Gor ranks:', ranks);
+    return ranks;
 }

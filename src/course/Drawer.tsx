@@ -17,6 +17,7 @@ import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
 import {Home, ArrowDropUp, ArrowDropDown, Equalizer} from "@mui/icons-material";
 import ArrowRightIcon from '@mui/icons-material/ArrowRight';
+import QueryStatsIcon from '@mui/icons-material/QueryStats';
 
 import {Exercise} from "../models/courses";
 import {AppBarProfile} from "../header/Auth";
@@ -163,6 +164,8 @@ interface CourseDrawerProps {
     exercises: Exercise[];
     progress: { [key: string]: Progress};
     onItemSelected: (exerciseId: string) => void;
+    showRanking: boolean;
+    onRankingClicked: () => void;
 }
 
 function CourseDrawer(props: CourseDrawerProps) {
@@ -174,7 +177,7 @@ function CourseDrawer(props: CourseDrawerProps) {
     const handleDrawerOpen = () => setOpen(true);
     const handleDrawerClose = () => setOpen(false);
     const onHomeClicked = () => history.push('/');
-    const {exercises, progress, onItemSelected} = props;
+    const {exercises, progress, onItemSelected, showRanking, onRankingClicked} = props;
 
     // split into levels
     useEffect(() => {
@@ -226,6 +229,12 @@ function CourseDrawer(props: CourseDrawerProps) {
                 <DrawerHeader>
                     <Box component="span" fontWeight="fontWeightMedium">My Progress</Box>
                 </DrawerHeader>
+
+                {showRanking &&
+                <ListItem button onClick={onRankingClicked}>
+                    <ListItemIcon><QueryStatsIcon/></ListItemIcon>
+                    <ListItemText primary="Ranking"/>
+                </ListItem>}
 
                 {levels.map((levelExercises, index) => <LevelList
                     levelNumber={index}

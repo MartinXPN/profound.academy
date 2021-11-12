@@ -30,7 +30,7 @@ interface Column {
 const columns: Column[] = [
     { id: '#', label: '#', minWidth: 20 },
     { id: 'userDisplayName', label: 'User', minWidth: 100 },
-    { id: 'totalScore', label: 'Total Score', minWidth: 50, align: 'right', format: (value: number) => value ? value.toFixed(1): '' },
+    { id: 'totalScore', label: 'Total Score', minWidth: 50, align: 'right', format: (value: number) => value ? value.toFixed(0): '-' },
 ];
 
 
@@ -40,10 +40,15 @@ function RankingTable({course}: {course: Course}) {
     const handleChangePage = (event: unknown, newPage: number) => setPage(newPage);
     const rowsPerPage = 20;
     const [ranks, setRanks] = useState<UserRank[]>([]);
+    const [exerciseIds, setExerciseIds] = useState<string[]>([]);
 
     useAsyncEffect(async () => {
-        const ranks = await getRanking(course.id);
+        const ranks: UserRank[] = await getRanking(course.id);
         setRanks(ranks);
+
+        // TODO: get ordered exercises
+        const exerciseIds = ranks.map(r => Object.keys(r.scores)).flat();
+        setExerciseIds([...new Set(exerciseIds)]);
     }, [course])
 
 
@@ -61,6 +66,11 @@ function RankingTable({course}: {course: Course}) {
                                     {column.label}
                                 </TableCell>
                             ))}
+                            {exerciseIds.map((id, index) =>
+                                <TableCell key={id} align="right" style={{minWidth: 50}}>
+                                    {index + 1}
+                                </TableCell>
+                            )}
                         </TableRow>
                     </TableHead>
                     <TableBody>
@@ -74,6 +84,7 @@ function RankingTable({course}: {course: Course}) {
                                             </TableCell>
                                         );
 
+                                    // @ts-ignore
                                     const value = row[column.id];
                                     return (
                                         <TableCell key={column.id} align={column.align}>
@@ -81,6 +92,11 @@ function RankingTable({course}: {course: Course}) {
                                         </TableCell>
                                     );
                                 })}
+                                {exerciseIds.map((id, index) =>
+                                    <TableCell key={id} align="right">
+                                        {row.scores.hasOwnProperty(id) ? row.scores[id] : '-'}
+                                    </TableCell>
+                                )}
                             </TableRow>
                         )}
                     </TableBody>

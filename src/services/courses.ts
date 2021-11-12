@@ -69,6 +69,6 @@ export const getCourseExercises = async (courseId: string) => {
 export const getRanking = async (courseId: string) => {
     const snapshot = await db.ranking(courseId).orderBy('totalScore', 'desc').get();
     const ranks: UserRank[] = snapshot.docs.map(x => x.data());
-    console.log('Gor ranks:', ranks);
+    console.log('Got ranks:', ranks);
     return ranks;
 }

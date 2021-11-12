@@ -85,7 +85,7 @@ function CurrentExercise({course, idToExercise, launchCourse}:
             {/* Display the landing page with an option to start the course if it wasn't started yet */
             (!exercise || !auth?.isSignedIn) &&
             <div className={classes.landingPage}>
-                <LandingPage introPageId={course.introduction} onStartCourseClicked={async () => {
+                <LandingPage course={course} introPageId={course.introduction} onStartCourseClicked={async () => {
                     if (auth && auth.currentUser && auth.currentUser.uid) {
                         await startCourse(auth.currentUser.uid, course.id);
                         launchCourse();

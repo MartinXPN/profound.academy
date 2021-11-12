@@ -45,13 +45,16 @@ service cloud.firestore {
     }
 
 
+    function isCourseInstructor(request, courseId) {
+      return request.auth != null && request.auth.uid in get(/databases/$(database)/documents/courses/$(courseId)).data.instructors;
+    }
     // All the courses are public
     match /courses/{courseId} {
       allow read;
 
-      // All the exercises are public
+      // All the exercises are public when they are revealed
       match /exercises/{exerciseId} {
-        allow read;
+        allow read: if isCourseInstructor(request, courseId) || request.time > get(/databases/$(database)/documents/courses/$(courseId)).data.revealsAt;
       }
     }
 

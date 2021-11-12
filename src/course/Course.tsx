@@ -75,7 +75,7 @@ function CurrentExercise({course, idToExercise, launchCourse}:
     const [splitPos, setSplitPos] = useStickyState(50, `splitPos-${auth?.currentUser?.uid}`);
 
     useAsyncEffect(async () => {
-        idToExercise.hasOwnProperty(currentExerciseId) && setExercise(idToExercise[currentExerciseId]);
+        currentExerciseId in idToExercise && setExercise(idToExercise[currentExerciseId]);
     }, [idToExercise, currentExerciseId]);
 
     if(auth?.isSignedIn && showSignIn)

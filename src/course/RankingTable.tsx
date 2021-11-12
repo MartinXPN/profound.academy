@@ -94,7 +94,7 @@ function RankingTable({course}: {course: Course}) {
                                 })}
                                 {exerciseIds.map((id, index) =>
                                     <TableCell key={id} align="right">
-                                        {row.scores.hasOwnProperty(id) ? row.scores[id] : '-'}
+                                        {id in row.scores ? row.scores[id].toFixed(0) : '-'}
                                     </TableCell>
                                 )}
                             </TableRow>

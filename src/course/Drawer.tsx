@@ -110,7 +110,11 @@ function LevelList({levelNumber, exercises, progress, onItemSelected, isDrawerOp
                     isDrawerOpen: boolean}) {
     const {exerciseId} = useParams<{ exerciseId?: string }>();
     const isExerciseInLevel = exercises.filter(e => e.id === exerciseId).length > 0;
-    const isSingleLevel = exercises.length <= 1 || exercises.map((e, i) => i === 0 ? 0 : Math.floor(e.order) - Math.floor(exercises[i-1].order)).some(x => x > 0);
+    console.log(exercises
+        .map((e, i) => i === 0 ? 0 : Math.floor(exercises[i].order) - Math.floor(exercises[i-1].order)));
+    const isSingleLevel = exercises.length <= 1 || exercises
+        .map((e, i) => i === 0 ? 0 : Math.floor(exercises[i].order) - Math.floor(exercises[i-1].order))
+        .every(x => x === 0);
     const [open, setOpen] = useState(isExerciseInLevel || isSingleLevel);
     const statusToStyle = useStatusToStyledBackground();
 
@@ -124,7 +128,7 @@ function LevelList({levelNumber, exercises, progress, onItemSelected, isDrawerOp
 
     const onLevelClicked = () => setOpen(!open);
     const getStatusStyle = (id: string) => {
-        const status = progress.hasOwnProperty(id) ? progress[id].status : undefined;
+        const status = id in progress ? progress[id].status : undefined;
         if( !status )
             return statusToStyle.undefined;
         return statusToStyle[status];

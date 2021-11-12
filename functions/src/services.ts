@@ -4,12 +4,12 @@ import {Submission, SubmissionResult} from './models/submissions';
 import {Comment} from './models/forum';
 import {Notification} from './models/notifications';
 import {Progress} from './models/users';
+import {Course} from './models/courses';
 
 import * as admin from 'firebase-admin';
 import * as functions from 'firebase-functions';
 import * as needle from 'needle';
 import * as moment from 'moment';
-import {Course} from './models/courses';
 
 const app = admin.initializeApp({credential: admin.credential.applicationDefault()});
 const AWS_LAMBDA_URL = 'https://l5nhpbb1bd.execute-api.us-east-1.amazonaws.com/Prod/check/';

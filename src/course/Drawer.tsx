@@ -102,21 +102,21 @@ const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== 'open' 
     }),
 );
 
-function LevelList({levelNumber, exercises, progress, onItemSelected, isDrawerOpen}:
+function LevelList({levelNumber, exercises, progress, onItemSelected, isDrawerOpen, isSingleLevel}:
                    {levelNumber: number,
                     exercises: Exercise[],
                     progress: { [key: string]: Progress},
                     onItemSelected: (exerciseId: string) => void,
-                    isDrawerOpen: boolean}) {
+                    isDrawerOpen: boolean,
+                    isSingleLevel: boolean}) {
     const {exerciseId} = useParams<{ exerciseId?: string }>();
     const isExerciseInLevel = exercises.filter(e => e.id === exerciseId).length > 0;
-    console.log(exercises
-        .map((e, i) => i === 0 ? 0 : Math.floor(exercises[i].order) - Math.floor(exercises[i-1].order)));
-    const isSingleLevel = exercises.length <= 1 || exercises
-        .map((e, i) => i === 0 ? 0 : Math.floor(exercises[i].order) - Math.floor(exercises[i-1].order))
-        .every(x => x === 0);
     const [open, setOpen] = useState(isExerciseInLevel || isSingleLevel);
     const statusToStyle = useStatusToStyledBackground();
+
+    useEffect(() => {
+        setOpen(!isSingleLevel);
+    }, [isSingleLevel]);
 
     useEffect(() => {
         if( !open ) {
@@ -245,7 +245,8 @@ function CourseDrawer(props: CourseDrawerProps) {
                     exercises={levelExercises}
                     progress={progress}
                     onItemSelected={onItemSelected}
-                    isDrawerOpen={open} />)}
+                    isDrawerOpen={open}
+                    isSingleLevel={levels.length <= 1}/>)}
             </Drawer>
         </Box>
     );

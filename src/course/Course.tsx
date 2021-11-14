@@ -81,39 +81,39 @@ function CurrentExercise({course, idToExercise, launchCourse}:
     if(auth?.isSignedIn && showSignIn)
         setShowSignIn(false);
 
-    return (
-        <>
-            {/* Display the landing page with an option to start the course if it wasn't started yet */
-            (!exercise || !auth?.isSignedIn) &&
-            <div className={classes.landingPage}>
-                <LandingPage course={course} introPageId={course.introduction} onStartCourseClicked={async () => {
-                    if (auth && auth.currentUser && auth.currentUser.uid) {
-                        await startCourse(auth.currentUser.uid, course.id);
-                        launchCourse();
-                    } else {
-                        setShowSignIn(true);
-                    }
-                }}/>
-
-                {/* Request for authentication if the user is not signed-in yet */
-                    showSignIn && <SignIn />
+    return <>
+        {/* Display the landing page with an option to start the course if it wasn't started yet */
+        ((!exercise && exerciseId !== 'ranking') || !auth?.isSignedIn) &&
+        <div className={classes.landingPage}>
+            <LandingPage course={course} introPageId={course.introduction} onStartCourseClicked={async () => {
+                if (auth && auth.currentUser && auth.currentUser.uid) {
+                    await startCourse(auth.currentUser.uid, course.id);
+                    launchCourse();
+                } else {
+                    setShowSignIn(true);
                 }
-            </div>
-            }
+            }}/>
 
-            {/* Display the exercise of the course at the location where it was left off the last time*/
-            exercise && auth?.isSignedIn && !showSignIn &&
+            {/* Request for authentication if the user is not signed-in yet */
+                showSignIn && <SignIn />
+            }
+        </div>
+        }
+
+        {/* Display the exercise of the course at the location where it was left off the last time*/}
+        {auth?.isSignedIn && !showSignIn && exercise && exerciseId !== 'ranking' &&
             <SplitPane split='vertical' defaultSize={splitPos} onChange={setSplitPos}>
-                <div className={classes.exercise}>
-                    {exerciseId === 'ranking' ?
-                        <RankingTable course={course} /> :
-                        <ExerciseView course={course} exercise={exercise}/>}
-                </div>
+                <div className={classes.exercise}><ExerciseView course={course} exercise={exercise}/></div>
                 <div style={{width: '100%', height: '100%'}}><Editor course={course} exercise={exercise}/></div>
             </SplitPane>
-            }
-        </>
-    )
+        }
+        {auth?.isSignedIn && !showSignIn && exerciseId === 'ranking' &&
+            <SplitPane split='vertical' defaultSize={splitPos} onChange={setSplitPos}>
+                <div className={classes.exercise}><RankingTable course={course} /></div>
+                <div style={{width: '100%', height: '100%'}} />
+            </SplitPane>
+        }
+    </>
 }
 
 

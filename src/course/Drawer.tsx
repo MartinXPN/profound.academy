@@ -182,6 +182,7 @@ function CourseDrawer(props: CourseDrawerProps) {
     const handleDrawerClose = () => setOpen(false);
     const onHomeClicked = () => history.push('/');
     const {exercises, progress, onItemSelected, showRanking, onRankingClicked} = props;
+    console.log('exercises in the drawer:', exercises);
 
     // split into levels
     useEffect(() => {

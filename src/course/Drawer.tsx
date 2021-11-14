@@ -117,6 +117,9 @@ function LevelList({levelNumber, exercises, progress, onItemSelected, isDrawerOp
     useEffect(() => {
         if( isSingleLevel )
             setOpen(true);
+        else if( !isSingleLevel && open && !isExerciseInLevel ) {
+            setOpen(false);
+        }
         else if( !open ) {
             setOpen(isExerciseInLevel);
         }

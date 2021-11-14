@@ -64,7 +64,7 @@ function ActivityHeatmap() {
                     currentDate.setDate(currentDate.getDate() + index - startDate.getDay());
                     const formattedDate = moment(currentDate).format('MMM Do, YYYY');
                     return (
-                        <Tooltip describeChild title={value && value.count
+                        <Tooltip key={formattedDate} describeChild title={value && value.count
                             ? `${value.count} solutions on ${formattedDate}` + ( value.count >= 10 ? '!' : '')
                             : `No solutions on ${formattedDate}`}>
                             {React.cloneElement(element)}

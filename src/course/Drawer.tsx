@@ -115,16 +115,14 @@ function LevelList({levelNumber, exercises, progress, onItemSelected, isDrawerOp
     const statusToStyle = useStatusToStyledBackground();
 
     useEffect(() => {
-        setOpen(!isSingleLevel);
-    }, [isSingleLevel]);
-
-    useEffect(() => {
-        if( !open ) {
+        if( isSingleLevel )
+            setOpen(true);
+        else if( !open ) {
             setOpen(isExerciseInLevel);
         }
         // open the level if the current exercise is in this level
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [exercises, isExerciseInLevel]);
+    }, [exercises, isExerciseInLevel, isSingleLevel]);
 
     const onLevelClicked = () => setOpen(!open);
     const getStatusStyle = (id: string) => {
@@ -145,7 +143,7 @@ function LevelList({levelNumber, exercises, progress, onItemSelected, isDrawerOp
     return <>
         <List disablePadding>
             {!isSingleLevel &&
-                <ListItem button onClick={onLevelClicked} className={levelClass}>
+                <ListItem button key={`level-${levelNumber}`} onClick={onLevelClicked} className={levelClass}>
                     <ListItemIcon>
                         <Equalizer/>
                         {!isDrawerOpen && <Typography variant="subtitle1">{levelNumber}</Typography>}
@@ -235,7 +233,7 @@ function CourseDrawer(props: CourseDrawerProps) {
                 </DrawerHeader>
 
                 {showRanking &&
-                <ListItem button onClick={onRankingClicked}>
+                <ListItem button onClick={onRankingClicked} key="ranking">
                     <ListItemIcon><QueryStatsIcon/></ListItemIcon>
                     <ListItemText primary="Ranking"/>
                 </ListItem>}

@@ -34,21 +34,16 @@ const columns: Column[] = [
 ];
 
 
-function RankingTable({course}: {course: Course}) {
+function RankingTable({course, exerciseIds}: {course: Course, exerciseIds: string[]}) {
     const classes = useStyles();
     const [page, setPage] = useState(0);
     const handleChangePage = (event: unknown, newPage: number) => setPage(newPage);
     const rowsPerPage = 20;
     const [ranks, setRanks] = useState<UserRank[]>([]);
-    const [exerciseIds, setExerciseIds] = useState<string[]>([]);
 
     useAsyncEffect(async () => {
         const ranks: UserRank[] = await getRanking(course.id);
         setRanks(ranks);
-
-        // TODO: get ordered exercises
-        const exerciseIds = ranks.map(r => Object.keys(r.scores)).flat();
-        setExerciseIds([...new Set(exerciseIds)]);
     }, [course])
 
 

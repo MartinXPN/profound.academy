@@ -52,8 +52,8 @@ const useStyles = makeStyles((theme: Theme) =>
 );
 
 
-function CurrentExercise({course, idToExercise, launchCourse}:
-                         {course: Course, idToExercise: {[key: string]: Exercise}, launchCourse: () => void}) {
+function CurrentExercise({course, exerciseIds, idToExercise, launchCourse}:
+                         {course: Course, exerciseIds: string[], idToExercise: {[key: string]: Exercise}, launchCourse: () => void}) {
     const classes = useStyles();
     const history = useHistory();
     let match = useRouteMatch();
@@ -81,39 +81,39 @@ function CurrentExercise({course, idToExercise, launchCourse}:
     if(auth?.isSignedIn && showSignIn)
         setShowSignIn(false);
 
-    return (
-        <>
-            {/* Display the landing page with an option to start the course if it wasn't started yet */
-            (!exercise || !auth?.isSignedIn) &&
-            <div className={classes.landingPage}>
-                <LandingPage course={course} introPageId={course.introduction} onStartCourseClicked={async () => {
-                    if (auth && auth.currentUser && auth.currentUser.uid) {
-                        await startCourse(auth.currentUser.uid, course.id);
-                        launchCourse();
-                    } else {
-                        setShowSignIn(true);
-                    }
-                }}/>
-
-                {/* Request for authentication if the user is not signed-in yet */
-                    showSignIn && <SignIn />
+    return <>
+        {/* Display the landing page with an option to start the course if it wasn't started yet */
+        ((!exercise && exerciseId !== 'ranking') || !auth?.isSignedIn) &&
+        <div className={classes.landingPage}>
+            <LandingPage course={course} introPageId={course.introduction} onStartCourseClicked={async () => {
+                if (auth && auth.currentUser && auth.currentUser.uid) {
+                    await startCourse(auth.currentUser.uid, course.id);
+                    launchCourse();
+                } else {
+                    setShowSignIn(true);
                 }
-            </div>
-            }
+            }}/>
 
-            {/* Display the exercise of the course at the location where it was left off the last time*/
-            exercise && auth?.isSignedIn && !showSignIn &&
+            {/* Request for authentication if the user is not signed-in yet */
+                showSignIn && <SignIn />
+            }
+        </div>
+        }
+
+        {/* Display the exercise of the course at the location where it was left off the last time*/}
+        {auth?.isSignedIn && !showSignIn && exercise && exerciseId !== 'ranking' &&
             <SplitPane split='vertical' defaultSize={splitPos} onChange={setSplitPos}>
-                <div className={classes.exercise}>
-                    {exerciseId === 'ranking' ?
-                        <RankingTable course={course} /> :
-                        <ExerciseView course={course} exercise={exercise}/>}
-                </div>
+                <div className={classes.exercise}><ExerciseView course={course} exercise={exercise}/></div>
                 <div style={{width: '100%', height: '100%'}}><Editor course={course} exercise={exercise}/></div>
             </SplitPane>
-            }
-        </>
-    )
+        }
+        {auth?.isSignedIn && !showSignIn && exerciseId === 'ranking' &&
+            <SplitPane split='vertical' defaultSize={splitPos} onChange={setSplitPos}>
+                <div className={classes.exercise}><RankingTable course={course} exerciseIds={exerciseIds} /></div>
+                <div style={{width: '100%', height: '100%'}} />
+            </SplitPane>
+        }
+    </>
 }
 
 
@@ -126,8 +126,10 @@ function CourseView() {
 
     const [course, setCourse] = useState<Course | null>(null);
     const [exercises, setExercises] = useState<Exercise[]>([]);
+    const [exerciseIds, setExerciseIds] = useState<string[]>([]);
     const [idToExercise, setIdToExercise] = useState<{}>({});
     const [progress, setProgress] = useState<{[key: string]: Progress}>({});
+    const [showRanking, setShowRanking] = useState<boolean>(false);
 
     const openExercise = (exerciseId: string) => {
         const url = match.url.replace(/\/$/, '');
@@ -148,8 +150,10 @@ function CourseView() {
 
     useAsyncEffect(async () => {
         const exercises = await getCourseExercises(courseId);
-        const idToExercise = exercises.reduce((newObj, x) => ({...newObj, [x.id]: x}), {})
+        const idToExercise = exercises.reduce((newObj, x) => ({...newObj, [x.id]: x}), {});
+        const exerciseIds = exercises.map(e => e.id);
         setExercises(exercises);
+        setExerciseIds(exerciseIds);
         setIdToExercise(idToExercise);
     }, [courseId]);
 
@@ -161,6 +165,17 @@ function CourseView() {
         return () => unsubscribe();
     }, [courseId, auth]);
 
+    useEffect(() => {
+        if( !auth || !auth.currentUser || !auth.currentUser.uid || !course ) {
+            setShowRanking(false);
+            return;
+        }
+
+        if (course.instructors.includes(auth.currentUser.uid) || course.rankingVisibility === 'public' )
+            setShowRanking(true);
+
+    }, [course, auth]);
+
 
     return (
         <Switch>
@@ -169,12 +184,17 @@ function CourseView() {
                 <CourseDrawer exercises={exercises}
                       progress={progress}
                       onItemSelected={openExercise}
-                      showRanking={course?.rankingVisibility === 'public'}
+                      showRanking={showRanking}
                       onRankingClicked={openRanking} />
 
                 <main className={classes.content}>
                     <div className={classes.toolbar}/>
-                    {course && <CurrentExercise course={course} idToExercise={idToExercise} launchCourse={launchCourse}/>}
+                    {course &&
+                    <CurrentExercise
+                        course={course}
+                        exerciseIds={exerciseIds}
+                        idToExercise={idToExercise}
+                        launchCourse={launchCourse}/>}
                 </main>
             </Route>
         </div>

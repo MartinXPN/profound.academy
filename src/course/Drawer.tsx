@@ -115,16 +115,14 @@ function LevelList({levelNumber, exercises, progress, onItemSelected, isDrawerOp
     const statusToStyle = useStatusToStyledBackground();
 
     useEffect(() => {
-        setOpen(!isSingleLevel);
-    }, [isSingleLevel]);
-
-    useEffect(() => {
-        if( !open ) {
+        if( isSingleLevel )
+            setOpen(true);
+        else if( !open ) {
             setOpen(isExerciseInLevel);
         }
         // open the level if the current exercise is in this level
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [exercises, isExerciseInLevel]);
+    }, [exercises, isExerciseInLevel, isSingleLevel]);
 
     const onLevelClicked = () => setOpen(!open);
     const getStatusStyle = (id: string) => {
@@ -182,7 +180,6 @@ function CourseDrawer(props: CourseDrawerProps) {
     const handleDrawerClose = () => setOpen(false);
     const onHomeClicked = () => history.push('/');
     const {exercises, progress, onItemSelected, showRanking, onRankingClicked} = props;
-    console.log('exercises in the drawer:', exercises);
 
     // split into levels
     useEffect(() => {

@@ -15,6 +15,7 @@ const uiConfig = {
     signInOptions: [
         firebase.auth.GoogleAuthProvider.PROVIDER_ID,
         firebase.auth.FacebookAuthProvider.PROVIDER_ID,
+        'microsoft.com',
     ],
     callbacks: {
         // Avoid redirects after sign-in.

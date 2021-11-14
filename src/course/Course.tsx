@@ -128,6 +128,7 @@ function CourseView() {
     const [exercises, setExercises] = useState<Exercise[]>([]);
     const [idToExercise, setIdToExercise] = useState<{}>({});
     const [progress, setProgress] = useState<{[key: string]: Progress}>({});
+    const [showRanking, setShowRanking] = useState<boolean>(false);
 
     const openExercise = (exerciseId: string) => {
         const url = match.url.replace(/\/$/, '');
@@ -161,6 +162,17 @@ function CourseView() {
         return () => unsubscribe();
     }, [courseId, auth]);
 
+    useEffect(() => {
+        if( !auth || !auth.currentUser || !auth.currentUser.uid || !course ) {
+            setShowRanking(false);
+            return;
+        }
+
+        if (course.instructors.includes(auth.currentUser.uid) || course.rankingVisibility === 'public' )
+            setShowRanking(true);
+
+    }, [course, auth]);
+
 
     return (
         <Switch>
@@ -169,7 +181,7 @@ function CourseView() {
                 <CourseDrawer exercises={exercises}
                       progress={progress}
                       onItemSelected={openExercise}
-                      showRanking={course?.rankingVisibility === 'public'}
+                      showRanking={showRanking}
                       onRankingClicked={openRanking} />
 
                 <main className={classes.content}>

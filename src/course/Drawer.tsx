@@ -145,7 +145,7 @@ function LevelList({levelNumber, exercises, progress, onItemSelected, isDrawerOp
     return <>
         <List disablePadding>
             {!isSingleLevel &&
-                <ListItem button onClick={onLevelClicked} className={levelClass}>
+                <ListItem button key={`level-${levelNumber}`} onClick={onLevelClicked} className={levelClass}>
                     <ListItemIcon>
                         <Equalizer/>
                         {!isDrawerOpen && <Typography variant="subtitle1">{levelNumber}</Typography>}
@@ -235,7 +235,7 @@ function CourseDrawer(props: CourseDrawerProps) {
                 </DrawerHeader>
 
                 {showRanking &&
-                <ListItem button onClick={onRankingClicked}>
+                <ListItem button onClick={onRankingClicked} key="ranking">
                     <ListItemIcon><QueryStatsIcon/></ListItemIcon>
                     <ListItemText primary="Ranking"/>
                 </ListItem>}

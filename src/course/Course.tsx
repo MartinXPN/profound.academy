@@ -52,8 +52,8 @@ const useStyles = makeStyles((theme: Theme) =>
 );
 
 
-function CurrentExercise({course, idToExercise, launchCourse}:
-                         {course: Course, idToExercise: {[key: string]: Exercise}, launchCourse: () => void}) {
+function CurrentExercise({course, exerciseIds, idToExercise, launchCourse}:
+                         {course: Course, exerciseIds: string[], idToExercise: {[key: string]: Exercise}, launchCourse: () => void}) {
     const classes = useStyles();
     const history = useHistory();
     let match = useRouteMatch();
@@ -109,7 +109,7 @@ function CurrentExercise({course, idToExercise, launchCourse}:
         }
         {auth?.isSignedIn && !showSignIn && exerciseId === 'ranking' &&
             <SplitPane split='vertical' defaultSize={splitPos} onChange={setSplitPos}>
-                <div className={classes.exercise}><RankingTable course={course} /></div>
+                <div className={classes.exercise}><RankingTable course={course} exerciseIds={exerciseIds} /></div>
                 <div style={{width: '100%', height: '100%'}} />
             </SplitPane>
         }
@@ -126,6 +126,7 @@ function CourseView() {
 
     const [course, setCourse] = useState<Course | null>(null);
     const [exercises, setExercises] = useState<Exercise[]>([]);
+    const [exerciseIds, setExerciseIds] = useState<string[]>([]);
     const [idToExercise, setIdToExercise] = useState<{}>({});
     const [progress, setProgress] = useState<{[key: string]: Progress}>({});
     const [showRanking, setShowRanking] = useState<boolean>(false);
@@ -149,8 +150,10 @@ function CourseView() {
 
     useAsyncEffect(async () => {
         const exercises = await getCourseExercises(courseId);
-        const idToExercise = exercises.reduce((newObj, x) => ({...newObj, [x.id]: x}), {})
+        const idToExercise = exercises.reduce((newObj, x) => ({...newObj, [x.id]: x}), {});
+        const exerciseIds = exercises.map(e => e.id);
         setExercises(exercises);
+        setExerciseIds(exerciseIds);
         setIdToExercise(idToExercise);
     }, [courseId]);
 
@@ -186,7 +189,12 @@ function CourseView() {
 
                 <main className={classes.content}>
                     <div className={classes.toolbar}/>
-                    {course && <CurrentExercise course={course} idToExercise={idToExercise} launchCourse={launchCourse}/>}
+                    {course &&
+                    <CurrentExercise
+                        course={course}
+                        exerciseIds={exerciseIds}
+                        idToExercise={idToExercise}
+                        launchCourse={launchCourse}/>}
                 </main>
             </Route>
         </div>

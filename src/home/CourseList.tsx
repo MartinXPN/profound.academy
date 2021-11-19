@@ -1,4 +1,4 @@
-import React, {useContext, useState} from 'react';
+import React, {useContext} from 'react';
 import {Theme} from '@mui/material/styles';
 import {createStyles, makeStyles} from '@mui/styles';
 import {ImageList, ImageListItem, ImageListItemBar, IconButton} from '@mui/material';
@@ -10,6 +10,7 @@ import {getAllCourses, getUserCourses} from "../services/courses";
 import useAsyncEffect from "use-async-effect";
 import {AuthContext} from "../App";
 import {useHistory} from "react-router-dom";
+import {useStickyState} from "../util";
 
 const useStyles = makeStyles((theme: Theme) =>
     createStyles({
@@ -80,10 +81,10 @@ function CourseListView(props: CourseListProps) {
 }
 
 function CourseList() {
-    const classes = useStyles();
-    const [allCourses, setAllCourses] = useState<Course[]>([]);
-    const [userCourses, setUserCourses] = useState<Course[]>([]);
     const auth = useContext(AuthContext);
+    const classes = useStyles();
+    const [allCourses, setAllCourses] = useStickyState<Course[] | null>(null, `allCourses`);
+    const [userCourses, setUserCourses] = useStickyState<Course[] | null>(null, `userCourses-${auth?.currentUser?.uid}`);
 
     useAsyncEffect(async () => {
         const res = await getAllCourses();
@@ -104,14 +105,14 @@ function CourseList() {
 
     return (
         <>
-            {(auth?.isSignedIn && userCourses.length > 0) &&
+            {(auth?.isSignedIn && userCourses && userCourses.length > 0) &&
             <>
                 <Typography variant='h5' className={classes.title}>My Curriculum</Typography>
                 <CourseListView courses={userCourses}/>
             </>}
 
             <Typography variant='h5' className={classes.title}>All Courses</Typography>
-            <CourseListView courses={allCourses}/>
+            <CourseListView courses={allCourses ?? []}/>
         </>
     )
 }

@@ -1,4 +1,4 @@
-import React, {useContext, useState} from 'react';
+import React, {useContext} from 'react';
 import CalendarHeatmap from 'react-calendar-heatmap';
 import 'react-calendar-heatmap/dist/styles.css';
 import {styled} from "@mui/material/styles";
@@ -9,6 +9,7 @@ import {AuthContext} from "../App";
 import useAsyncEffect from "use-async-effect";
 import {Activity} from "../models/users";
 import {getUserActivity} from "../services/users";
+import {useStickyState} from "../util";
 
 
 const useStyles = makeStyles({
@@ -28,14 +29,15 @@ const HeatmapDiv = styled('div')(({theme}) => ({
 
 
 function ActivityHeatmap() {
-    const classes = useStyles();
     const auth = useContext(AuthContext);
-    const [activity, setActivity] = useState<Activity[]>([]);
-    const [totalActivity, setTotalActivity] = useState<number | undefined>(undefined);
+    const classes = useStyles();
+    const [activity, setActivity] = useStickyState<Activity[] | null>(null, `activity-${auth?.currentUser?.uid}`);
+    const [totalActivity, setTotalActivity] = useStickyState<number | null>(null, `totalActivity-${auth?.currentUser?.uid}`);
 
     useAsyncEffect(async () => {
         if( auth && auth.currentUser && auth.currentUser.uid ) {
             const activity = await getUserActivity(auth.currentUser.uid);
+            console.log('Got activity:', activity);
             setActivity(activity);
             setTotalActivity(activity.reduce((sum, a) => sum + a.count, 0));
         }
@@ -51,7 +53,7 @@ function ActivityHeatmap() {
                 showMonthLabels
                 startDate={startDate}
                 endDate={endDate}
-                values={activity}
+                values={activity ?? []}
                 classForValue={(value) => {
                     if (!value || !value.count) return 'color-empty';
                     if( value.count < 3 )       return classes.colorScale1;

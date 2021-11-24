@@ -24,14 +24,14 @@ function LandingPage(props: Props) {
     const { introPageId, onStartCourseClicked, course } = props;
 
 
-    const renderer = ({ hours, minutes, seconds, milliseconds, completed }:
-                          {hours: number, minutes: number, seconds: number, milliseconds: number, completed: boolean}) => {
+    const renderer = ({ days, hours, minutes, seconds, milliseconds, completed }:
+                          {days: number, hours: number, minutes: number, seconds: number, milliseconds: number, completed: boolean}) => {
         return completed ?
             <Button color="primary" variant="contained" onClick={onStartCourseClicked}>START</Button> :
             <>
                 <br/><br/><br/>
                 <Typography variant="h5">Starts in</Typography>
-                <Typography variant="h2">{hours}:{minutes.toString().padStart(2, '0')}:{seconds.toString().padStart(2, '0')} : {milliseconds.toString().padStart(3, '0')}</Typography>
+                <Typography variant="h2">{days * 24 + hours}:{minutes.toString().padStart(2, '0')}:{seconds.toString().padStart(2, '0')} : {milliseconds.toString().padStart(3, '0')}</Typography>
             </>;
     };
 

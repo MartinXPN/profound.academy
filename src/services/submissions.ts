@@ -65,23 +65,33 @@ export const onSubmissionsChanged = async (courseId: string, exerciseId: string,
         query = query.orderBy('createdAt', 'desc');
     else
         query = query.where('isBest', '==', true)
-        .where('status', '==', 'Solved')
-        .orderBy('score', 'desc')
-        .orderBy('time', 'asc')
-        .orderBy('memory', 'asc');
+            .where('status', '==', 'Solved')
+            .orderBy('score', 'desc')
+            .orderBy('time', 'asc')
+            .orderBy('memory', 'asc');
 
     console.log('startAfterId:', startAfterId);
     if( startAfterId ) {
         const startAfterSubmission = await db.submissionResult(startAfterId).get();
         query = query.startAfter(startAfterSubmission);
+        query = query.limit(numItems);
     }
-    query = query.limit(numItems);
+    else {
+        const endAt = (await query.limit(numItems).get()).docs.at(-1)?.id;
+        if( endAt ) {
+            const endAtSubmission = await db.submissionResult(endAt).get();
+            query = query.endAt(endAtSubmission);
+        }
+        else {
+            query = query.limit(numItems);
+        }
+    }
 
     return query.onSnapshot(snapshot => {
         const submissions: SubmissionResult[] = snapshot.docs.map(d => d.data());
         console.log('Got submissions for exercise:', exerciseId, submissions);
-        onChanged(submissions, submissions.length === numItems);
-    })
+        onChanged(submissions, submissions.length >= numItems);
+    });
 }
 
 

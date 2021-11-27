@@ -1,4 +1,5 @@
-import React, {useEffect, useRef, useState} from "react";
+import React, {useEffect, useRef} from "react";
+import useState from 'react-usestateref';
 import Paper from '@mui/material/Paper';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -54,10 +55,10 @@ function Bottom({hasMore, loadMore}: {hasMore: boolean, loadMore: () => void}) {
 
 
 function SubmissionsTable({course, exercise, mode}: {course: Course, exercise: Exercise, mode: 'all' | 'best'}) {
-    const [page, setPage] = useState(0);
-    const [hasMore, setHasMore] = useState(true);
+    const [page, setPage, pageRef] = useState(0);
+    const [hasMore, setHasMore, moreRef] = useState(true);
     const rowsPerPage = 5;
-    const [pageSubmissions, setPageSubmissions] = useState<SubmissionResult[][]>([]);
+    const [pageSubmissions, setPageSubmissions, pageSubmissionsRef] = useState<SubmissionResult[][]>([]);
     const [updateSubscriptions, setUpdateSubscriptions] = useState<(() => void)[]>([]);
     const [displayedSubmission, setDisplayedSubmission] = useState<SubmissionResult | undefined>(undefined);
 
@@ -76,6 +77,7 @@ function SubmissionsTable({course, exercise, mode}: {course: Course, exercise: E
         }
     }, []);
     useEffect(() => {
+        console.log('unsubscribing from the previous exercise');
         for( const unsubscribe of updateSubscriptions )
             unsubscribe();
 
@@ -88,29 +90,32 @@ function SubmissionsTable({course, exercise, mode}: {course: Course, exercise: E
 
     const loadNextPage = async () => {
         console.log('Load more!');
-        const startId = page === 0 || !pageSubmissions[page - 1] ? null : pageSubmissions[page - 1].at(-1)?.id;
+        const startAfterId = page === 0 || !pageSubmissionsRef.current[page - 1]
+            ? null
+            : pageSubmissionsRef.current[page - 1].at(-1)?.id;
+
         if( updateSubscriptions[page] ) {
             console.log('Not loading as we have an active listener!');
             return;
         }
-        console.log('startAfter:', startId, 'for page:', page);
-        const currentPage = page;
+        console.log('startAfter:', startAfterId, 'for page:', page);
 
         const unsubscribe = await onSubmissionsChanged(
-            course.id, exercise.id, mode, startId ?? null, rowsPerPage,
-            ((submissions, hasMore) => {
-                console.log('setting the new submissions to page:', currentPage, 'while total page is:', page);
-                setHasMore(hasMore);
-                const currentSubscriptions = [...pageSubmissions];
-                currentSubscriptions[currentPage] = submissions;
+            course.id, exercise.id, mode, startAfterId ?? null, rowsPerPage,
+            ((submissions, more) => {
+                console.log('setting the new submissions to page:', page, 'while total page is:', pageRef.current);
+                setHasMore(hasMore && moreRef.current);
+                const currentSubscriptions = [...pageSubmissionsRef.current];
+                currentSubscriptions[page] = submissions;
                 setPageSubmissions(currentSubscriptions);
-                setPage(Math.max(page, currentPage + 1));
+                setPage(Math.max(pageRef.current, page + 1));
             }));
 
         setUpdateSubscriptions([...updateSubscriptions, unsubscribe]);
     };
 
     console.log('SubmissionTable:', exercise);
+    let orderNumber = 1;
     return (
         <Paper style={{width: '100%'}}>
             {displayedSubmission && <SubmissionBackdrop submission={displayedSubmission} onClose={onCloseSubmission} />}
@@ -135,7 +140,7 @@ function SubmissionsTable({course, exercise, mode}: {course: Course, exercise: E
                                 if( column.id === '#' )
                                     return (
                                         <TableCell key={column.id} align={column.align}>
-                                            {page * rowsPerPage + index + 1}
+                                            {orderNumber++}
                                         </TableCell>
                                     );
 

@@ -1,5 +1,5 @@
 import React from "react";
-import Content from "./content/Content";
+import Content from "./Content";
 import Button from "@mui/material/Button";
 import makeStyles from '@mui/styles/makeStyles';
 import {Course} from "../models/courses";

@@ -1,4 +1,4 @@
-import Content from "./content/Content";
+import Content from "./Content";
 import React, {useState} from "react";
 import Button from "@mui/material/Button";
 import { Theme } from "@mui/material";

@@ -10,8 +10,7 @@ import 'rc-dropdown/assets/index.css';      // used for collection views (option
 import 'katex/dist/katex.min.css';          // used for rendering equations (optional)
 import {CircularProgress} from "@mui/material";
 
-import './Content.css';
-import {getNotionPageMap} from "../../services/courses";
+import {getNotionPageMap} from "../services/courses";
 
 
 interface ContentProps {
@@ -40,27 +39,31 @@ function Content(props: ContentProps) {
         highlightAll();
     }, () => isMounted.current = false, [notionPage]);
 
-    return (
-        <>
-            {recordMap ?
-                <NotionRenderer
-                    recordMap={recordMap}
-                    fullPage={false}
-                    darkMode={false}
-                    components={{
-                        code: Code,
-                        collection: Collection,
-                        collectionRow: CollectionRow,
-                        modal: Modal,
-                        equation: Equation,
-                    }}
-                /> :
-                <div className='center'>
-                    <CircularProgress/>
-                </div>
+    return <>
+        {/*Fix issue where the user is prevented from selecting text: https://github.com/NotionX/react-notion-x/issues/81*/}
+        <style>{`
+            .notion-viewport {
+                z-index: -1;
             }
-        </>
-    );
+        `}</style>
+
+        {recordMap ?
+        <NotionRenderer
+            recordMap={recordMap}
+            fullPage={false}
+            darkMode={false}
+            components={{
+                code: Code,
+                collection: Collection,
+                collectionRow: CollectionRow,
+                modal: Modal,
+                equation: Equation,
+            }}
+        /> :
+        <div style={{width: '80%', margin: '10%', textAlign: 'center'}}>
+            <CircularProgress/>
+        </div>
+    }</>;
 }
 
 

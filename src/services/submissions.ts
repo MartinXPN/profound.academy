@@ -54,30 +54,36 @@ export const onSubmissionResultChanged = (submissionId: string,
     })
 }
 
-export const getSubmissions = async (courseId: string, exerciseId: string) => {
-    const exercise = db.exercise(courseId, exerciseId);
-    const snapshot = await db.submissionResults.where('exercise', '==', exercise)
-        .orderBy('createdAt', 'desc')
-        .get();
-    const submissions = snapshot.docs.map(d => d.data());
-    console.log('Got submissions for exercise:', exerciseId, submissions);
-    return submissions;
-}
 
-export const getBestSubmissions = async (courseId: string, exerciseId: string) => {
+export const onSubmissionsChanged = async (courseId: string, exerciseId: string, mode: 'all' | 'best',
+                                     startAfterId: string | null, numItems: number,
+                                     onChanged: (submissionResult: SubmissionResult[], hasMore: boolean) => void) => {
     const exercise = db.exercise(courseId, exerciseId);
-    const snapshot = await db.submissionResults
-        .where('exercise', '==', exercise)
-        .where('isBest', '==', true)
+    let query = db.submissionResults
+        .where('exercise', '==', exercise);
+    if( mode === 'all' )
+        query = query.orderBy('createdAt', 'desc');
+    else
+        query = query.where('isBest', '==', true)
         .where('status', '==', 'Solved')
         .orderBy('score', 'desc')
         .orderBy('time', 'asc')
-        .orderBy('memory', 'asc')
-        .get();
-    const submissions = snapshot.docs.map(d => d.data());
-    console.log('Got submissions for exercise:', exerciseId, submissions);
-    return submissions;
+        .orderBy('memory', 'asc');
+
+    console.log('startAfterId:', startAfterId);
+    if( startAfterId ) {
+        const startAfterSubmission = await db.submissionResult(startAfterId).get();
+        query = query.startAfter(startAfterSubmission);
+    }
+    query = query.limit(numItems);
+
+    return query.onSnapshot(snapshot => {
+        const submissions: SubmissionResult[] = snapshot.docs.map(d => d.data());
+        console.log('Got submissions for exercise:', exerciseId, submissions);
+        onChanged(submissions, submissions.length === numItems);
+    })
 }
+
 
 export const getSubmissionCode = async (userId: string, submissionId: string) => {
     const snapshot = await db.submissionSensitiveRecords(userId, submissionId).get();

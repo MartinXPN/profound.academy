@@ -104,7 +104,7 @@ function SubmissionsTable({course, exercise, mode}: {course: Course, exercise: E
             course.id, exercise.id, mode, startAfterId ?? null, rowsPerPage,
             ((submissions, more) => {
                 console.log('setting the new submissions to page:', page, 'while total page is:', pageRef.current);
-                setHasMore(hasMore && moreRef.current);
+                setHasMore(more && moreRef.current);
                 const currentSubscriptions = [...pageSubmissionsRef.current];
                 currentSubscriptions[page] = submissions;
                 setPageSubmissions(currentSubscriptions);

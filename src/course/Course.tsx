@@ -17,9 +17,7 @@ import Editor from "./editor/Editor";
 import ExerciseView from "./Exercise";
 import {SignIn} from "../header/Auth";
 import {useStickyState} from "../util";
-import CourseDrawer from "./Drawer";
-import {onUserProgressUpdated} from "../services/users";
-import {Progress} from "../models/users";
+import CourseDrawer from "./drawer/Drawer";
 import RankingTable from "./RankingTable";
 
 
@@ -128,7 +126,6 @@ function CourseView() {
     const [exercises, setExercises] = useState<Exercise[]>([]);
     const [exerciseIds, setExerciseIds] = useState<string[]>([]);
     const [idToExercise, setIdToExercise] = useState<{}>({});
-    const [progress, setProgress] = useState<{[key: string]: Progress}>({});
     const [showRanking, setShowRanking] = useState<boolean>(false);
 
     const openExercise = (exerciseId: string) => {
@@ -157,13 +154,6 @@ function CourseView() {
         setIdToExercise(idToExercise);
     }, [courseId]);
 
-    useEffect(() => {
-        if( !auth.currentUserId )
-            return;
-
-        const unsubscribe = onUserProgressUpdated(auth.currentUserId, courseId, setProgress);
-        return () => unsubscribe();
-    }, [courseId, auth]);
 
     useEffect(() => {
         if( !auth.currentUserId || !course ) {
@@ -181,16 +171,16 @@ function CourseView() {
         <Switch>
         <div className={classes.root}>
             <Route path={`${match.path}/:exerciseId?`}>
-                <CourseDrawer exercises={exercises}
-                      progress={progress}
-                      onItemSelected={openExercise}
-                      showRanking={showRanking}
-                      onRankingClicked={openRanking} />
+                <CourseDrawer
+                    course={course}
+                    exercises={exercises}
+                    onItemSelected={openExercise}
+                    showRanking={showRanking}
+                    onRankingClicked={openRanking} />
 
                 <main className={classes.content}>
                     <div className={classes.toolbar}/>
-                    {course &&
-                    <CurrentExercise
+                    {course && <CurrentExercise
                         course={course}
                         exerciseIds={exerciseIds}
                         idToExercise={idToExercise}

@@ -3,8 +3,9 @@ import 'firebase/firestore';
 
 import {Activity, Progress, User} from "../models/users";
 import {Notification} from "../models/notifications";
-import {Course, Exercise, UserRank} from "../models/courses";
-import {Submission, SubmissionResult, SubmissionSensitiveRecords} from "../models/submissions";
+import {Course, Exercise, ExerciseProgress, UserRank} from "../models/courses";
+import * as courses from "../models/courses";
+import {Submission, SubmissionResult, SubmissionSensitiveRecords, SubmissionStatus} from "../models/submissions";
 import {Comment, Vote} from "../models/forum";
 
 // Add ids when getting the data and removing when sending it
@@ -33,6 +34,8 @@ const db = {
     course: (courseId: string) => dataPoint<Course>('courses').doc(courseId),
     exercises: (courseId: string) => dataPoint<Exercise>(`courses/${courseId}/exercises`),
     exercise: (courseId: string, exerciseId: string) => dataPoint<Exercise>(`courses/${courseId}/exercises`).doc(exerciseId),
+    courseProgress: (courseId: string, userId: string) => dataPoint<courses.Progress>(`courses/${courseId}/progress`).doc(userId),
+    courseExerciseProgress: (courseId: string, userId: string, level: string) => dataPoint<ExerciseProgress<SubmissionStatus>>(`courses/${courseId}/progress/${userId}/exerciseSolved`).doc(level),
     ranking: (courseId: string) => dataPoint<UserRank>(`courses/${courseId}/ranking`),
 
     forum: dataPoint<Comment>('forum'),

@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from "react";
+import React, {useContext, useEffect, useState} from "react";
 import {useParams} from "react-router-dom";
 
 import List from '@mui/material/List';
@@ -8,24 +8,28 @@ import ListItemText from '@mui/material/ListItemText';
 import {ArrowDropUp, ArrowDropDown, Equalizer} from "@mui/icons-material";
 import ArrowRightIcon from '@mui/icons-material/ArrowRight';
 
-import {Exercise} from "../../models/courses";
-import {Progress} from "../../models/users";
+import {Exercise, ExerciseProgress} from "../../models/courses";
 import {useStatusToStyledBackground} from "../colors";
 import {Typography} from "@mui/material";
+import {onCourseExerciseProgressChanged} from "../../services/courses";
+import {AuthContext} from "../../App";
+import {SubmissionStatus} from "../../models/submissions";
 
 
-export default function LevelList({levelNumber, exercises, progress, onItemSelected, isDrawerOpen, isSingleLevel}:
+export default function LevelList({levelNumber, levelStatus, exercises, onItemSelected, isDrawerOpen, isSingleLevel}:
                        {
                            levelNumber: number,
+                           levelStatus: 'Solved' | 'In Progress' | 'Unavailable',
                            exercises: Exercise[],
-                           progress: { [key: string]: Progress },
                            onItemSelected: (exerciseId: string) => void,
                            isDrawerOpen: boolean,
                            isSingleLevel: boolean
                        }) {
+    const auth = useContext(AuthContext);
     const {exerciseId} = useParams<{ exerciseId?: string }>();
     const isExerciseInLevel = exercises.filter(e => e.id === exerciseId).length > 0;
     const [open, setOpen] = useState(isExerciseInLevel || isSingleLevel);
+    const [progress, setProgress] = useState<ExerciseProgress<SubmissionStatus> | null>(null);
     const statusToStyle = useStatusToStyledBackground();
 
     useEffect(() => {
@@ -41,22 +45,27 @@ export default function LevelList({levelNumber, exercises, progress, onItemSelec
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [exercises, isExerciseInLevel, isSingleLevel]);
 
+    useEffect(() => {
+        if( !open || !auth.currentUserId )
+            return;
+
+        return onCourseExerciseProgressChanged('competitive-contest-0002', auth.currentUserId, (levelNumber + 1).toString(), progress => {
+            setProgress(progress);
+        });
+    }, [open, levelNumber, auth]);
+
     const onLevelClicked = () => setOpen(!open);
     const getStatusStyle = (id: string) => {
-        const status = id in progress ? progress[id].status : undefined;
+        if( !progress )
+            return statusToStyle.undefined;
+
+        const status = id in progress.progress ? progress.progress[id] : undefined;
         if( !status )
             return statusToStyle.undefined;
         return statusToStyle[status];
     }
 
-    let levelClass = statusToStyle.Solved;
-    for( const e of exercises) {
-        if( getStatusStyle(e.id) !== levelClass ) {
-            levelClass = statusToStyle.undefined;
-            break;
-        }
-    }
-
+    const levelClass = levelStatus === 'Solved' ? statusToStyle.Solved : statusToStyle.undefined;
     return <>
         <List disablePadding>
             {!isSingleLevel &&

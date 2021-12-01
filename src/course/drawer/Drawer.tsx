@@ -17,13 +17,14 @@ import ListItemText from '@mui/material/ListItemText';
 import {Home} from "@mui/icons-material";
 import QueryStatsIcon from '@mui/icons-material/QueryStats';
 
-import {Course, Exercise} from "../../models/courses";
+import {Exercise} from "../../models/courses";
 import {AppBarProfile} from "../../header/Auth";
-import {Progress} from "../../models/users";
+import {Progress} from "../../models/courses";
 import AppBarNotifications from "../../header/Notifications";
 import LevelList from "./LevelList";
-import {onUserProgressUpdated} from "../../services/users";
 import {AuthContext} from "../../App";
+import {onUserProgressChanged} from "../../services/courses";
+import {CourseContext} from "../Course";
 
 
 const drawerWidth = 240;
@@ -102,20 +103,20 @@ const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== 'open' 
 );
 
 
-function CourseDrawer({course, exercises, onItemSelected, showRanking, onRankingClicked}:
+function CourseDrawer({exercises, onItemSelected, showRanking, onRankingClicked}:
                       {
-                          course: Course | null,
                           exercises: Exercise[],
                           onItemSelected: (exerciseId: string) => void,
                           showRanking: boolean,
                           onRankingClicked: () => void,
                       }) {
     const auth = useContext(AuthContext);
+    const {course} = useContext(CourseContext);
     const theme = useTheme();
     const history = useHistory();
     const [open, setOpen] = useState(false);
     const [levels, setLevels] = useState<Exercise[][]>([]);
-    const [progress, setProgress] = useState<{[key: string]: Progress}>({});
+    const [progress, setProgress] = useState<Progress | null>(null);
 
     const handleDrawerOpen = () => setOpen(true);
     const handleDrawerClose = () => setOpen(false);
@@ -145,7 +146,7 @@ function CourseDrawer({course, exercises, onItemSelected, showRanking, onRanking
         if( !auth.currentUserId || !course?.id )
             return;
 
-        const unsubscribe = onUserProgressUpdated(auth.currentUserId, course.id, setProgress);
+        const unsubscribe = onUserProgressChanged(course.id, auth.currentUserId, setProgress);
         return () => unsubscribe();
     }, [course?.id, auth]);
 
@@ -186,13 +187,17 @@ function CourseDrawer({course, exercises, onItemSelected, showRanking, onRanking
                     <ListItemText primary="Ranking"/>
                 </ListItem>}
 
-                {levels.map((levelExercises, index) => <LevelList
-                    levelNumber={index}
-                    exercises={levelExercises}
-                    progress={progress}
-                    onItemSelected={onItemSelected}
-                    isDrawerOpen={open}
-                    isSingleLevel={levels.length <= 1}/>)}
+                {levels.map((levelExercises, index) => {
+                    const numSolved = progress?.levelSolved[(index + 1).toString()] ?? 0;
+                    const isLevelSolved = levelExercises.length <= numSolved;
+                    return <LevelList
+                        levelNumber={index}
+                        levelStatus={isLevelSolved ? 'Solved' : 'In Progress'}
+                        exercises={levelExercises}
+                        onItemSelected={onItemSelected}
+                        isDrawerOpen={open}
+                        isSingleLevel={levels.length <= 1}/>
+                })}
             </Drawer>
         </Box>
     );

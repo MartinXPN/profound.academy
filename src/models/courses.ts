@@ -1,5 +1,6 @@
 import {Language} from "./language";
 import firebase from "firebase";
+import {SubmissionStatus} from "./submissions";
 
 export interface TestCase {
     input: string;
@@ -49,10 +50,10 @@ export interface Progress {
     id: string;                                 // userId
     userDisplayName: string;                    // how to show the user
     score: number;                              // total score for the course
-    levelScores: { [key: number]: number };     // {level: score}
+    levelScores: { [key: string]: number };     // {level: score}
     exerciseScores: ExerciseProgress<number>;   // progress = {exId: score}
 
     solved: number;                             // total solved exercises
-    levelSolved: { [key: number]: number };     // {level: #solved}
-    exerciseSolved: ExerciseProgress<string>;   // progress = {exId: status}
+    levelSolved: { [key: string]: number };     // {level: #solved}
+    exerciseSolved: ExerciseProgress<SubmissionStatus>;   // progress = {exId: status}
 }

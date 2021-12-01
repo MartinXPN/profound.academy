@@ -1,6 +1,7 @@
 import {db} from "./db";
-import {Course, Exercise, UserRank} from "../models/courses";
+import {Course, Exercise, ExerciseProgress, Progress, UserRank} from "../models/courses";
 import firebase from "firebase/app";
+import {SubmissionStatus} from "../models/submissions";
 
 export const getNotionPageMap = async (pageId: string) => {
     const getPage = firebase.functions().httpsCallable('getNotionPage');
@@ -63,6 +64,27 @@ export const getCourseExercises = async (courseId: string) => {
     const exercises: Exercise[] = snapshot.docs.map(x => x.data());
     console.log('Got exercises:', exercises);
     return exercises;
+}
+
+
+export const onUserProgressChanged = (courseId: string, userId: string, onChanged: (progress: Progress | null) => void) => {
+    console.log('Requesting user progress...');
+    return db.courseProgress(courseId, userId).onSnapshot(snapshot => {
+        const res = snapshot.data();
+        console.log('User progress updated:', res);
+        onChanged(res ?? null);
+    });
+}
+
+export const onCourseExerciseProgressChanged = (courseId: string,
+                                                userId: string,
+                                                level: string,
+                                                onChanged: (progress: ExerciseProgress<SubmissionStatus> | null) => void) => {
+    return db.courseExerciseProgress(courseId, userId, level).onSnapshot(snapshot => {
+        const res = snapshot.data();
+        console.log('Exercise Progress for level', level, ':', res);
+        onChanged(res ?? null);
+    });
 }
 
 

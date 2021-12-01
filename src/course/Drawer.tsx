@@ -103,12 +103,14 @@ const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== 'open' 
 );
 
 function LevelList({levelNumber, exercises, progress, onItemSelected, isDrawerOpen, isSingleLevel}:
-                   {levelNumber: number,
-                    exercises: Exercise[],
-                    progress: { [key: string]: Progress},
-                    onItemSelected: (exerciseId: string) => void,
-                    isDrawerOpen: boolean,
-                    isSingleLevel: boolean}) {
+                   {
+                       levelNumber: number,
+                       exercises: Exercise[],
+                       progress: { [key: string]: Progress },
+                       onItemSelected: (exerciseId: string) => void,
+                       isDrawerOpen: boolean,
+                       isSingleLevel: boolean
+                   }) {
     const {exerciseId} = useParams<{ exerciseId?: string }>();
     const isExerciseInLevel = exercises.filter(e => e.id === exerciseId).length > 0;
     const [open, setOpen] = useState(isExerciseInLevel || isSingleLevel);
@@ -165,15 +167,15 @@ function LevelList({levelNumber, exercises, progress, onItemSelected, isDrawerOp
     </>
 }
 
-interface CourseDrawerProps {
-    exercises: Exercise[];
-    progress: { [key: string]: Progress};
-    onItemSelected: (exerciseId: string) => void;
-    showRanking: boolean;
-    onRankingClicked: () => void;
-}
 
-function CourseDrawer(props: CourseDrawerProps) {
+function CourseDrawer({exercises, progress, onItemSelected, showRanking, onRankingClicked}:
+                      {
+                          exercises: Exercise[],
+                          progress: { [key: string]: Progress},
+                          onItemSelected: (exerciseId: string) => void,
+                          showRanking: boolean,
+                          onRankingClicked: () => void,
+                      }) {
     const theme = useTheme();
     const history = useHistory();
     const [open, setOpen] = useState(false);
@@ -182,7 +184,6 @@ function CourseDrawer(props: CourseDrawerProps) {
     const handleDrawerOpen = () => setOpen(true);
     const handleDrawerClose = () => setOpen(false);
     const onHomeClicked = () => history.push('/');
-    const {exercises, progress, onItemSelected, showRanking, onRankingClicked} = props;
 
     // split into levels
     useEffect(() => {

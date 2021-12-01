@@ -31,9 +31,9 @@ function Forum(props: ForumProps) {
     const [comments, setComments] = useState<Comment[]>([]);
 
     const onAskQuestion = async () => {
-        if( !auth || !auth.currentUser || !auth.currentUser.uid || !auth.currentUser.displayName)
+        if( !auth.currentUserId || !auth.currentUser || !auth.currentUser.displayName)
             return;
-        await saveComment(course.id, exercise.id, auth.currentUser.uid, auth.currentUser.displayName, auth?.currentUser?.photoURL, newComment);
+        await saveComment(course.id, exercise.id, auth.currentUserId, auth.currentUser.displayName, auth?.currentUser?.photoURL, newComment);
         setNewComment('');
     };
 

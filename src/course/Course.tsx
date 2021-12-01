@@ -158,20 +158,20 @@ function CourseView() {
     }, [courseId]);
 
     useEffect(() => {
-        if( !auth || !auth.currentUser || !auth.currentUser.uid )
+        if( !auth.currentUserId )
             return;
 
-        const unsubscribe = onUserProgressUpdated(auth.currentUser.uid, courseId, setProgress);
+        const unsubscribe = onUserProgressUpdated(auth.currentUserId, courseId, setProgress);
         return () => unsubscribe();
     }, [courseId, auth]);
 
     useEffect(() => {
-        if( !auth || !auth.currentUser || !auth.currentUser.uid || !course ) {
+        if( !auth.currentUserId || !course ) {
             setShowRanking(false);
             return;
         }
 
-        if (course.instructors.includes(auth.currentUser.uid) || course.rankingVisibility === 'public' )
+        if (course.instructors.includes(auth.currentUserId) || course.rankingVisibility === 'public' )
             setShowRanking(true);
 
     }, [course, auth]);

@@ -14,6 +14,7 @@ import {Typography} from "@mui/material";
 import {onCourseExerciseProgressChanged} from "../../services/courses";
 import {AuthContext} from "../../App";
 import {SubmissionStatus} from "../../models/submissions";
+import {CourseContext} from "../Course";
 
 
 export default function LevelList({levelNumber, levelStatus, exercises, onItemSelected, isDrawerOpen, isSingleLevel}:
@@ -26,6 +27,7 @@ export default function LevelList({levelNumber, levelStatus, exercises, onItemSe
                            isSingleLevel: boolean
                        }) {
     const auth = useContext(AuthContext);
+    const {course} = useContext(CourseContext);
     const {exerciseId} = useParams<{ exerciseId?: string }>();
     const isExerciseInLevel = exercises.filter(e => e.id === exerciseId).length > 0;
     const [open, setOpen] = useState(isExerciseInLevel || isSingleLevel);
@@ -46,13 +48,13 @@ export default function LevelList({levelNumber, levelStatus, exercises, onItemSe
     }, [exercises, isExerciseInLevel, isSingleLevel]);
 
     useEffect(() => {
-        if( !open || !auth.currentUserId )
+        if( !open || !auth.currentUserId || !course )
             return;
 
-        return onCourseExerciseProgressChanged('competitive-contest-0002', auth.currentUserId, (levelNumber + 1).toString(), progress => {
+        return onCourseExerciseProgressChanged(course.id, auth.currentUserId, (levelNumber + 1).toString(), progress => {
             setProgress(progress);
         });
-    }, [open, levelNumber, auth]);
+    }, [open, levelNumber, auth, course]);
 
     const onLevelClicked = () => setOpen(!open);
     const getStatusStyle = (id: string) => {

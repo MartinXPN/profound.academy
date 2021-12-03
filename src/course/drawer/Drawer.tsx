@@ -1,5 +1,5 @@
 import React, {useContext, useEffect, useState} from "react";
-import {useHistory} from "react-router-dom";
+import {useHistory, useParams} from "react-router-dom";
 
 import { styled, useTheme, Theme, CSSObject } from '@mui/material/styles';
 import Box from '@mui/material/Box';
@@ -23,8 +23,9 @@ import {Progress} from "../../models/courses";
 import AppBarNotifications from "../../header/Notifications";
 import LevelList from "./LevelList";
 import {AuthContext} from "../../App";
-import {onUserProgressChanged} from "../../services/courses";
+import {getExercise, onUserProgressChanged} from "../../services/courses";
 import {CourseContext} from "../Course";
+import useAsyncEffect from "use-async-effect";
 
 
 const drawerWidth = 240;
@@ -103,10 +104,9 @@ const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== 'open' 
 );
 
 
-function CourseDrawer({exercises, onItemSelected, showRanking, onRankingClicked}:
+function CourseDrawer({onItemSelected, showRanking, onRankingClicked}:
                       {
-                          exercises: Exercise[],
-                          onItemSelected: (exerciseId: string) => void,
+                          onItemSelected: (exercise: Exercise) => void,
                           showRanking: boolean,
                           onRankingClicked: () => void,
                       }) {
@@ -115,32 +115,26 @@ function CourseDrawer({exercises, onItemSelected, showRanking, onRankingClicked}
     const theme = useTheme();
     const history = useHistory();
     const [open, setOpen] = useState(false);
-    const [levels, setLevels] = useState<Exercise[][]>([]);
+    const {exerciseId} = useParams<{ exerciseId?: string }>();
+    const [currentExercise, setCurrentExercise] = useState<Exercise | null>(null);
     const [progress, setProgress] = useState<Progress | null>(null);
 
     const handleDrawerOpen = () => setOpen(true);
     const handleDrawerClose = () => setOpen(false);
     const onHomeClicked = () => history.push('/');
 
-    // split into levels
-    useEffect(() => {
-        const isNewLevel = (currentExercise: Exercise, previousExercise?: Exercise) => {
-            if (!previousExercise)
-                return true;
-            return Math.floor(currentExercise.order) - Math.floor(previousExercise.order) !== 0;
+    useAsyncEffect(async () => {
+        if( !course || !exerciseId )
+            return;
+        if( exerciseId === 'ranking' ) {
+            setCurrentExercise(null);
+            return;
         }
-        const levels = []
-        let lastIndex = 0;
-        exercises.forEach((ex, i) => {
-            if( i !== 0 && isNewLevel(ex, exercises[i - 1]) ) {
-                levels.push(exercises.slice(lastIndex, i));
-                lastIndex = i;
-            }
-        });
-        levels.push(exercises.slice(lastIndex));
 
-        setLevels(levels);
-    }, [exercises]);
+        const exercise = await getExercise(course.id, exerciseId);
+        console.log('setting the current exercise to:', exercise);
+        setCurrentExercise(exercise);
+    }, [course, exerciseId]);
 
     useEffect(() => {
         if( !auth.currentUserId || !course?.id )
@@ -150,7 +144,8 @@ function CourseDrawer({exercises, onItemSelected, showRanking, onRankingClicked}
         return () => unsubscribe();
     }, [course?.id, auth]);
 
-
+    if( !course )
+        return <></>
     return (
         <Box sx={{ display: 'flex' }}>
             <CssBaseline/>
@@ -187,18 +182,20 @@ function CourseDrawer({exercises, onItemSelected, showRanking, onRankingClicked}
                     <ListItemText primary="Ranking"/>
                 </ListItem>}
 
-                {levels.map((levelExercises, index) => {
-                    const levelName = (index + 1).toString();
+                {Object.entries(course.levelExercises).map(([levelName, numExercises]) => {
+                    const index = parseInt(levelName) - 1;
                     const numSolved = progress && progress.levelSolved && levelName in progress.levelSolved ? progress.levelSolved[levelName] : 0;
-                    const isLevelSolved = levelExercises.length <= numSolved;
+                    const isLevelSolved = numExercises <= numSolved;
+
                     return <LevelList
-                        levelNumber={index}
-                        levelStatus={isLevelSolved ? 'Solved' : 'In Progress'}
-                        exercises={levelExercises}
-                        onItemSelected={onItemSelected}
-                        isDrawerOpen={open}
-                        isSingleLevel={levels.length <= 1}/>
-                })}
+                            levelNumber={index}
+                            levelStatus={isLevelSolved ? 'Solved' : 'In Progress'}
+                            currentExercise={currentExercise}
+                            onItemSelected={onItemSelected}
+                            isDrawerOpen={open}
+                            isSingleLevel={course.levelExercises.length <= 1}/>
+                    }
+                )}
             </Drawer>
         </Box>
     );

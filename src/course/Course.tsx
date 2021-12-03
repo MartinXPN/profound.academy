@@ -6,13 +6,13 @@ import { Theme } from '@mui/material/styles';
 import createStyles from '@mui/styles/createStyles';
 import makeStyles from '@mui/styles/makeStyles';
 
-import {getCourse} from "../services/courses";
+import {getCourse, getExercise, getFirstExercise} from "../services/courses";
 import useAsyncEffect from "use-async-effect";
 import {Course, Exercise} from "../models/courses";
 import {AuthContext} from "../App";
-import {getCourseExercises} from "../services/courses";
 import CourseDrawer from "./drawer/Drawer";
 import CurrentExercise from "./CurrentExercise";
+import {useStickyState} from "../util";
 
 
 const useStyles = makeStyles((theme: Theme) =>
@@ -37,44 +37,39 @@ const useStyles = makeStyles((theme: Theme) =>
 );
 
 export const CourseContext = createContext<{ course: Course | null }>({course: null});
+export const CurrentExerciseContext = createContext<{ exercise: Exercise | null }>({exercise: null});
 
-function CourseView() {
+
+function CurrentCourseView({openPage}: {openPage: (page: string) => void}) {
     const classes = useStyles();
     const auth = useContext(AuthContext);
-    const history = useHistory();
-    let match = useRouteMatch();
-    const {courseId} = useParams<{ courseId: string }>();
-
-    const [course, setCourse] = useState<Course | null>(null);
-    const [exercises, setExercises] = useState<Exercise[]>([]);
-    const [idToExercise, setIdToExercise] = useState<{}>({});
+    const {course} = useContext(CourseContext);
     const [showRanking, setShowRanking] = useState<boolean>(false);
 
-    const openExercise = (exerciseId: string) => {
-        const url = match.url.replace(/\/$/, '');
-        history.push(`${url}/${exerciseId}`);
-    };
-    const openRanking = () => {
-        const url = match.url.replace(/\/$/, '');
-        history.push(`${url}/ranking`);
-    };
-    const launchCourse = () => {
-        exercises.length > 0 && openExercise(exercises[0].id);
-    };
+    const {exerciseId} = useParams<{ exerciseId: string }>();
+    const [currentExercise, setCurrentExercise] = useState<Exercise | null>(null);
+    const [currentExerciseId, setCurrentExerciseId] = useStickyState<string>('', `ex-${auth?.currentUserId}-${course?.id}`);
 
-    useAsyncEffect(async () => {
-        const course = await getCourse(courseId);
-        setCourse(course);
-    }, [courseId, auth]);
+    const openExercise = (exercise: Exercise) => openPage(exercise.id);
+    const openRanking = () => openPage('ranking');
+    const launchCourse = async () => {
+        console.log('Launching the course!');
+        if( course ) {
+            const firstExercise = await getFirstExercise(course.id);
+            if( firstExercise )
+                openPage(firstExercise.id);
+        }
+    }
+    console.log('exxxxxx:', exerciseId, currentExerciseId);
 
-    useAsyncEffect(async () => {
-        const exercises = await getCourseExercises(courseId);
-        const idToExercise = exercises.reduce((newObj, x) => ({...newObj, [x.id]: x}), {});
-        setExercises(exercises);
-        setIdToExercise(idToExercise);
-    }, [courseId]);
+    if( exerciseId && currentExerciseId !== exerciseId ) {
+        setCurrentExerciseId(exerciseId);
+    }
+    else if (currentExerciseId && !exerciseId ) {
+        openPage(currentExerciseId);
+    }
 
-
+    console.log('exercise:', exerciseId, currentExerciseId);
     useEffect(() => {
         if( !auth.currentUserId || !course ) {
             setShowRanking(false);
@@ -83,31 +78,64 @@ function CourseView() {
 
         if (course.instructors.includes(auth.currentUserId) || course.rankingVisibility === 'public' )
             setShowRanking(true);
-
     }, [course, auth]);
 
+    useAsyncEffect(async () => {
+        if( !course )
+            return;
 
-    return (
-        <Switch>
-        <CourseContext.Provider value={{course: course}}>
-        <div className={classes.root}>
-            <Route path={`${match.path}/:exerciseId?`}>
+        const currentExercise = await getExercise(course.id, currentExerciseId);
+        console.log('Updating current exercise to:', currentExercise);
+        setCurrentExercise(currentExercise);
+    }, [currentExerciseId, course]);
+
+    return <>
+            <CurrentExerciseContext.Provider value={{exercise: currentExercise}}>
                 <CourseDrawer
-                    exercises={exercises}
                     onItemSelected={openExercise}
                     showRanking={showRanking}
                     onRankingClicked={openRanking} />
 
                 <main className={classes.content}>
                     <div className={classes.toolbar}/>
-                    {course && <CurrentExercise
-                        idToExercise={idToExercise}
-                        launchCourse={launchCourse}/>}
+                    <CurrentExercise launchCourse={launchCourse}/>
                 </main>
+            </CurrentExerciseContext.Provider>
+    </>
+}
+
+
+function CourseView() {
+    const classes = useStyles();
+    const auth = useContext(AuthContext);
+    const history = useHistory();
+    const match = useRouteMatch();
+    const {courseId} = useParams<{ courseId: string }>();
+    const [course, setCourse] = useState<Course | null>(null);
+
+    useAsyncEffect(async () => {
+        const course = await getCourse(courseId);
+        setCourse(course);
+    }, [courseId, auth]);
+
+    const openPage = (pageId: string) => {
+        const url = match.url.replace(/\/$/, '');
+        history.push(`${url}/${pageId}`);
+    }
+
+    if( !course )
+        return <></>
+    return (
+        <CourseContext.Provider value={{course: course}}>
+        <Switch>
+            <Route path={`${match.path}/:exerciseId?`}>
+
+            <div className={classes.root}>
+                <CurrentCourseView openPage={openPage} />
+            </div>
             </Route>
-        </div>
-        </CourseContext.Provider>
         </Switch>
+        </CourseContext.Provider>
     );
 }
 

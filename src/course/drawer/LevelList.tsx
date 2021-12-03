@@ -1,5 +1,4 @@
 import React, {useContext, useEffect, useState} from "react";
-import {useParams} from "react-router-dom";
 
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
@@ -11,41 +10,47 @@ import ArrowRightIcon from '@mui/icons-material/ArrowRight';
 import {Exercise, ExerciseProgress} from "../../models/courses";
 import {useStatusToStyledBackground} from "../colors";
 import {Typography} from "@mui/material";
-import {onCourseExerciseProgressChanged} from "../../services/courses";
+import {getCourseLevelExercises, onCourseExerciseProgressChanged} from "../../services/courses";
 import {AuthContext} from "../../App";
 import {SubmissionStatus} from "../../models/submissions";
 import {CourseContext} from "../Course";
+import useAsyncEffect from "use-async-effect";
 
 
-export default function LevelList({levelNumber, levelStatus, exercises, onItemSelected, isDrawerOpen, isSingleLevel}:
+export default function LevelList({levelNumber, levelStatus, currentExercise, onItemSelected, isDrawerOpen, isSingleLevel}:
                        {
                            levelNumber: number,
                            levelStatus: 'Solved' | 'In Progress' | 'Unavailable',
-                           exercises: Exercise[],
-                           onItemSelected: (exerciseId: string) => void,
+                           currentExercise: Exercise | null,
+                           onItemSelected: (exercise: Exercise) => void,
                            isDrawerOpen: boolean,
                            isSingleLevel: boolean
                        }) {
     const auth = useContext(AuthContext);
     const {course} = useContext(CourseContext);
-    const {exerciseId} = useParams<{ exerciseId?: string }>();
-    const isExerciseInLevel = exercises.filter(e => e.id === exerciseId).length > 0;
-    const [open, setOpen] = useState(isExerciseInLevel || isSingleLevel);
+    const [levelExercises, setLevelExercises] = useState<Exercise[]>([]);
+    const [open, setOpen] = useState(false);
     const [progress, setProgress] = useState<ExerciseProgress<SubmissionStatus> | null>(null);
     const statusToStyle = useStatusToStyledBackground();
 
     useEffect(() => {
-        if( isSingleLevel )
+        if( !currentExercise )
+            return;
+        const isExerciseInLevel = levelNumber + 1 <= currentExercise.order && currentExercise.order < levelNumber + 2;
+
+        if( isSingleLevel && levelExercises.length > 0 )
             setOpen(true);
-        else if( !isSingleLevel && open && !isExerciseInLevel ) {
-            setOpen(false);
-        }
-        else if( !open ) {
+        else if( !open )
             setOpen(isExerciseInLevel);
-        }
-        // open the level if the current exercise is in this level
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [exercises, isExerciseInLevel, isSingleLevel]);
+
+    }, [levelExercises, currentExercise, open, isSingleLevel]);
+
+    useAsyncEffect(async () => {
+        if( !course || !open )
+            return;
+        const exercises = await getCourseLevelExercises(course.id, levelNumber + 1);
+        setLevelExercises(exercises);
+    }, [course, open, levelNumber]);
 
     useEffect(() => {
         if( !open || !auth.currentUserId || !course )
@@ -80,9 +85,9 @@ export default function LevelList({levelNumber, levelStatus, exercises, onItemSe
                     </ListItemIcon>
                 </ListItem>
             }
-            {open && exercises.map((ex, index) =>
-                <ListItem button key={ex.id} onClick={() => onItemSelected(ex.id)} className={getStatusStyle(ex.id)}>
-                    <ListItemIcon>{exerciseId === ex.id ? <ArrowRightIcon /> : <ListItemText primary={index + 1}/>}</ListItemIcon>
+            {open && levelExercises.map((ex, index) =>
+                <ListItem button key={ex.id} onClick={() => onItemSelected(ex)} className={getStatusStyle(ex.id)}>
+                    <ListItemIcon>{currentExercise?.id === ex.id ? <ArrowRightIcon /> : <ListItemText primary={index + 1}/>}</ListItemIcon>
                     <ListItemText primary={ex.title}/>
                 </ListItem>
             )}

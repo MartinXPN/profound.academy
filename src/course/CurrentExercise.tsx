@@ -1,9 +1,7 @@
-import {Exercise} from "../models/courses";
-import {useHistory, useParams, useRouteMatch} from "react-router-dom";
+import {useParams} from "react-router-dom";
 import React, {useContext, useState} from "react";
 import {AuthContext} from "../App";
 import {useStickyState} from "../util";
-import useAsyncEffect from "use-async-effect";
 import LandingPage from "./LandingPage";
 import {startCourse} from "../services/courses";
 import {SignIn} from "../header/Auth";
@@ -12,7 +10,7 @@ import ExerciseView from "./Exercise";
 import Editor from "./editor/Editor";
 import RankingTable from "./RankingTable";
 import makeStyles from "@mui/styles/makeStyles";
-import {CourseContext} from "./Course";
+import {CourseContext, CurrentExerciseContext} from "./Course";
 import Countdown from "react-countdown";
 import {Typography} from "@mui/material";
 
@@ -32,32 +30,15 @@ const useStyles = makeStyles({
     }
 });
 
-export default function CurrentExercise({idToExercise, launchCourse}:
-                             {idToExercise: {[key: string]: Exercise}, launchCourse: () => void}) {
+export default function CurrentExercise({launchCourse}: {launchCourse: () => void}) {
     const classes = useStyles();
-    const history = useHistory();
-    let match = useRouteMatch();
     const auth = useContext(AuthContext);
     const {course} = useContext(CourseContext);
+    const {exercise} = useContext(CurrentExerciseContext);
 
-    // exercise management - sync localStorage with the URL
-    const [currentExerciseId, setCurrentExerciseId] = useStickyState<string>('', `ex-${auth?.currentUser?.uid}-${course?.id}`);
     const {exerciseId} = useParams<{ exerciseId: string }>();
-    if( exerciseId && currentExerciseId !== exerciseId ) {
-        setCurrentExerciseId(exerciseId);
-    }
-    else if (currentExerciseId && !exerciseId ) {
-        const url = match.url.replace(/\/$/, '');
-        history.push(`${url}/${currentExerciseId}`);
-    }
-
-    const [exercise, setExercise] = useState<Exercise | undefined>(undefined);
     const [showSignIn, setShowSignIn] = useState(false);
     const [splitPos, setSplitPos] = useStickyState(50, `splitPos-${auth?.currentUser?.uid}`);
-
-    useAsyncEffect(async () => {
-        currentExerciseId in idToExercise && setExercise(idToExercise[currentExerciseId]);
-    }, [idToExercise, currentExerciseId]);
 
     if(auth?.isSignedIn && showSignIn)
         setShowSignIn(false);

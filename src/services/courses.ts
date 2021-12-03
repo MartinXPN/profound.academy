@@ -66,6 +66,17 @@ export const getCourseExercises = async (courseId: string) => {
     return exercises;
 }
 
+export const getExercise = async (courseId: string, exerciseId: string) => {
+    const exercise = await db.exercise(courseId, exerciseId).get();
+    return exercise.data() ?? null;
+}
+
+
+export const getFirstExercise = async (courseId: string) => {
+    const exercise = await db.exercises(courseId).orderBy("order", "asc").limit(1).get();
+    return exercise.docs?.[0]?.data() ?? null;
+}
+
 export const getCourseLevelExercises = async (courseId: string, level: number) => {
     const snapshot = await db.exercises(courseId)
         .orderBy('order', 'asc')

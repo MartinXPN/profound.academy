@@ -47,7 +47,6 @@ function CourseView() {
 
     const [course, setCourse] = useState<Course | null>(null);
     const [exercises, setExercises] = useState<Exercise[]>([]);
-    const [exerciseIds, setExerciseIds] = useState<string[]>([]);
     const [idToExercise, setIdToExercise] = useState<{}>({});
     const [showRanking, setShowRanking] = useState<boolean>(false);
 
@@ -71,9 +70,7 @@ function CourseView() {
     useAsyncEffect(async () => {
         const exercises = await getCourseExercises(courseId);
         const idToExercise = exercises.reduce((newObj, x) => ({...newObj, [x.id]: x}), {});
-        const exerciseIds = exercises.map(e => e.id);
         setExercises(exercises);
-        setExerciseIds(exerciseIds);
         setIdToExercise(idToExercise);
     }, [courseId]);
 
@@ -104,7 +101,6 @@ function CourseView() {
                 <main className={classes.content}>
                     <div className={classes.toolbar}/>
                     {course && <CurrentExercise
-                        exerciseIds={exerciseIds}
                         idToExercise={idToExercise}
                         launchCourse={launchCourse}/>}
                 </main>

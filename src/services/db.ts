@@ -35,7 +35,8 @@ const db = {
     progress: (courseId: string) => dataPoint<Progress>(`courses/${courseId}/progress`),
     userProgress: (courseId: string, userId: string) => dataPoint<Progress>(`courses/${courseId}/progress`).doc(userId),
     courseExerciseProgress: (courseId: string, userId: string, level: string) => dataPoint<ExerciseProgress<SubmissionStatus>>(`courses/${courseId}/progress/${userId}/exerciseSolved`).doc(level),
-    levelScores: (courseId: string) => firebase.firestore().collectionGroup('exerciseScore').withConverter(converter<ExerciseProgress<number>>()).where('courseId', '==', courseId),
+    levelExerciseProgress: <T>(courseId: string, level: string, metric: string) => firebase.firestore().collectionGroup(metric).withConverter(converter<ExerciseProgress<T>>())
+        .where('courseId', '==', courseId).where('level', '==', level),
 
     forum: dataPoint<Comment>('forum'),
     forumComment: (commentId: string) => dataPoint<Comment>('forum').doc(commentId),

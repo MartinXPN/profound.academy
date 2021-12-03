@@ -66,9 +66,20 @@ export const getCourseExercises = async (courseId: string) => {
     return exercises;
 }
 
+export const getCourseLevelExercises = async (courseId: string, level: number) => {
+    const snapshot = await db.exercises(courseId)
+        .orderBy('order', 'asc')
+        .where('order', '>=', level)
+        .where('order', '<', level + 1 )
+        .get();
+
+    const exercises: Exercise[] = snapshot.docs.map(x => x.data());
+    console.log(`Got level-${level} exercises`, exercises);
+    return exercises;
+}
+
 
 export const onProgressChanged = (courseId: string, metric: 'score' | 'solved' | 'upsolveScore', onChanged: (progress: Progress[]) => void ) => {
-    // const levelMetric = 'level' + metric.charAt(0).toUpperCase() + metric.slice(1);
 
     return db.progress(courseId).orderBy(metric, 'desc').onSnapshot(snapshot => {
         const res = snapshot.docs.map(d => d.data());
@@ -78,13 +89,28 @@ export const onProgressChanged = (courseId: string, metric: 'score' | 'solved' |
 }
 
 export const onUserProgressChanged = (courseId: string, userId: string, onChanged: (progress: Progress | null) => void) => {
-    console.log('Requesting user progress...');
     return db.userProgress(courseId, userId).onSnapshot(snapshot => {
         const res = snapshot.data();
         console.log('User progress updated:', res);
         onChanged(res ?? null);
     });
 }
+
+export const onLevelExerciseProgressChanged = <T>(courseId: string, level: string,
+                                                  metric: 'exerciseScore' | 'exerciseSolved' | 'exerciseUpsolveScore',
+                                                  onChanged: (userIdToProgress: { [key: string]: { [key: string]: T } }) => void) => {
+    return db.levelExerciseProgress(courseId, level, metric).onSnapshot(snapshot => {
+        // @ts-ignore
+        const res: ExerciseProgress<T>[] = snapshot.docs.map(d => d.data());
+        console.log('Level progress updated:', res);
+        const userIdToProgress = res.reduce((obj, item) => {
+            return {...obj, [item.userId]: item.progress}
+        }, {});
+        console.log(userIdToProgress);
+        onChanged(userIdToProgress);
+    })
+}
+
 
 export const onCourseExerciseProgressChanged = (courseId: string,
                                                 userId: string,

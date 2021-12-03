@@ -188,7 +188,8 @@ function CourseDrawer({exercises, onItemSelected, showRanking, onRankingClicked}
                 </ListItem>}
 
                 {levels.map((levelExercises, index) => {
-                    const numSolved = progress?.levelSolved[(index + 1).toString()] ?? 0;
+                    const levelName = (index + 1).toString();
+                    const numSolved = progress && progress.levelSolved && levelName in progress.levelSolved ? progress.levelSolved[levelName] : 0;
                     const isLevelSolved = levelExercises.length <= numSolved;
                     return <LevelList
                         levelNumber={index}

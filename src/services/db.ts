@@ -3,7 +3,7 @@ import 'firebase/firestore';
 
 import {Activity, User} from "../models/users";
 import {Notification} from "../models/notifications";
-import {Course, Exercise, ExerciseProgress, UserRank, Progress} from "../models/courses";
+import {Course, Exercise, ExerciseProgress, Progress} from "../models/courses";
 import {Submission, SubmissionResult, SubmissionSensitiveRecords, SubmissionStatus} from "../models/submissions";
 import {Comment, Vote} from "../models/forum";
 
@@ -32,9 +32,10 @@ const db = {
     course: (courseId: string) => dataPoint<Course>('courses').doc(courseId),
     exercises: (courseId: string) => dataPoint<Exercise>(`courses/${courseId}/exercises`),
     exercise: (courseId: string, exerciseId: string) => dataPoint<Exercise>(`courses/${courseId}/exercises`).doc(exerciseId),
-    progress: (courseId: string, userId: string) => dataPoint<Progress>(`courses/${courseId}/progress`).doc(userId),
+    progress: (courseId: string) => dataPoint<Progress>(`courses/${courseId}/progress`),
+    userProgress: (courseId: string, userId: string) => dataPoint<Progress>(`courses/${courseId}/progress`).doc(userId),
     courseExerciseProgress: (courseId: string, userId: string, level: string) => dataPoint<ExerciseProgress<SubmissionStatus>>(`courses/${courseId}/progress/${userId}/exerciseSolved`).doc(level),
-    ranking: (courseId: string) => dataPoint<UserRank>(`courses/${courseId}/ranking`),
+    levelScores: (courseId: string) => firebase.firestore().collectionGroup('exerciseScore').withConverter(converter<ExerciseProgress<number>>()).where('courseId', '==', courseId),
 
     forum: dataPoint<Comment>('forum'),
     forumComment: (commentId: string) => dataPoint<Comment>('forum').doc(commentId),

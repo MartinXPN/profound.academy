@@ -1,5 +1,5 @@
 import {db} from "./db";
-import {Course, Exercise, ExerciseProgress, Progress, UserRank} from "../models/courses";
+import {Course, Exercise, ExerciseProgress, Progress} from "../models/courses";
 import firebase from "firebase/app";
 import {SubmissionStatus} from "../models/submissions";
 
@@ -67,9 +67,19 @@ export const getCourseExercises = async (courseId: string) => {
 }
 
 
+export const onProgressChanged = (courseId: string, metric: 'score' | 'solved' | 'upsolveScore', onChanged: (progress: Progress[]) => void ) => {
+    // const levelMetric = 'level' + metric.charAt(0).toUpperCase() + metric.slice(1);
+
+    return db.progress(courseId).orderBy(metric, 'desc').onSnapshot(snapshot => {
+        const res = snapshot.docs.map(d => d.data());
+        console.log(`${metric} - progress changed:`, res);
+        onChanged(res ?? []);
+    })
+}
+
 export const onUserProgressChanged = (courseId: string, userId: string, onChanged: (progress: Progress | null) => void) => {
     console.log('Requesting user progress...');
-    return db.progress(courseId, userId).onSnapshot(snapshot => {
+    return db.userProgress(courseId, userId).onSnapshot(snapshot => {
         const res = snapshot.data();
         console.log('User progress updated:', res);
         onChanged(res ?? null);
@@ -85,12 +95,4 @@ export const onCourseExerciseProgressChanged = (courseId: string,
         console.log('Exercise Progress for level', level, ':', res);
         onChanged(res ?? null);
     });
-}
-
-
-export const getRanking = async (courseId: string) => {
-    const snapshot = await db.ranking(courseId).orderBy('totalScore', 'desc').get();
-    const ranks: UserRank[] = snapshot.docs.map(x => x.data());
-    console.log('Got ranks:', ranks);
-    return ranks;
 }

@@ -68,7 +68,7 @@ export default function CurrentExercise({exerciseIds, idToExercise, launchCourse
         if( !course )
             return <></>
         return completed ?
-            <RankingTable exerciseIds={exerciseIds}/> :
+            <RankingTable exerciseIds={exerciseIds} metric="upsolveScore" /> :
             <div style={{textAlign: 'center'}}>
                 <br/><br/><br/>
                 <Typography variant="h5">Freezes in</Typography>
@@ -107,7 +107,7 @@ export default function CurrentExercise({exerciseIds, idToExercise, launchCourse
         {auth?.isSignedIn && !showSignIn && exerciseId === 'ranking' && <>
         {course.freezeAt.toDate().getTime() - new Date().getTime() < 24 * 60 * 60 * 1000 ?
             <SplitPane split='vertical' defaultSize={splitPos} onChange={setSplitPos}>
-                <div className={classes.ranking}><RankingTable exerciseIds={exerciseIds}/></div>
+                <div className={classes.ranking}><RankingTable exerciseIds={exerciseIds} metric="score"/></div>
                 <Countdown
                     date={course.freezeAt.toDate()}
                     intervalDelay={0}
@@ -115,7 +115,7 @@ export default function CurrentExercise({exerciseIds, idToExercise, launchCourse
                     renderer={renderer}/>
             </SplitPane>
             :
-            <div className={classes.ranking}><RankingTable exerciseIds={exerciseIds}/></div>
+            <div className={classes.ranking}><RankingTable exerciseIds={exerciseIds} metric="score"/></div>
         }</>}
     </>
 }

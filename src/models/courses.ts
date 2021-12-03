@@ -18,8 +18,8 @@ export interface Exercise {
 export interface Course {
     id: string;
     img: string;
-    revealsAt: firebase.firestore.FieldValue;
-    freezeAt: firebase.firestore.FieldValue;
+    revealsAt: firebase.firestore.Timestamp;
+    freezeAt: firebase.firestore.Timestamp;
     visibility: string;
     rankingVisibility: string;
     title: string;

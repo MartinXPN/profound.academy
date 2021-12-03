@@ -13,6 +13,8 @@ import Editor from "./editor/Editor";
 import RankingTable from "./RankingTable";
 import makeStyles from "@mui/styles/makeStyles";
 import {CourseContext} from "./Course";
+import Countdown from "react-countdown";
+import {Typography} from "@mui/material";
 
 
 const useStyles = makeStyles({
@@ -22,6 +24,11 @@ const useStyles = makeStyles({
     exercise: {
         overflowY: 'auto',
         height: '100%',
+    },
+    ranking: {
+        overflow: 'auto',
+        height: '100%',
+        width: '100%',
     }
 });
 
@@ -55,6 +62,20 @@ export default function CurrentExercise({exerciseIds, idToExercise, launchCourse
     if(auth?.isSignedIn && showSignIn)
         setShowSignIn(false);
 
+
+    const renderer = ({ days, hours, minutes, seconds, milliseconds, completed }:
+                          {days: number, hours: number, minutes: number, seconds: number, milliseconds: number, completed: boolean}) => {
+        if( !course )
+            return <></>
+        return completed ?
+            <RankingTable exerciseIds={exerciseIds}/> :
+            <div style={{textAlign: 'center'}}>
+                <br/><br/><br/>
+                <Typography variant="h5">Freezes in</Typography>
+                <Typography variant="h2">{days * 24 + hours}:{minutes.toString().padStart(2, '0')}:{seconds.toString().padStart(2, '0')} : {milliseconds.toString().padStart(3, '0')}</Typography>
+            </div>;
+    };
+
     if( !course )
         return <></>
     return <>
@@ -83,11 +104,18 @@ export default function CurrentExercise({exerciseIds, idToExercise, launchCourse
                 <div style={{width: '100%', height: '100%'}}><Editor course={course} exercise={exercise}/></div>
             </SplitPane>
         }
-        {auth?.isSignedIn && !showSignIn && exerciseId === 'ranking' &&
+        {auth?.isSignedIn && !showSignIn && exerciseId === 'ranking' && <>
+        {course.freezeAt.toDate().getTime() - new Date().getTime() < 24 * 60 * 60 * 1000 ?
             <SplitPane split='vertical' defaultSize={splitPos} onChange={setSplitPos}>
-                <div className={classes.exercise}><RankingTable course={course} exerciseIds={exerciseIds} /></div>
-                <div style={{width: '100%', height: '100%'}} />
+                <div className={classes.ranking}><RankingTable exerciseIds={exerciseIds}/></div>
+                <Countdown
+                    date={course.freezeAt.toDate()}
+                    intervalDelay={0}
+                    precision={3}
+                    renderer={renderer}/>
             </SplitPane>
-        }
+            :
+            <div className={classes.ranking}><RankingTable exerciseIds={exerciseIds}/></div>
+        }</>}
     </>
 }

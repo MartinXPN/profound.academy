@@ -1,4 +1,4 @@
-import React, {useState} from "react";
+import React, {useContext, useState} from "react";
 import makeStyles from '@mui/styles/makeStyles';
 import Paper from '@mui/material/Paper';
 import Table from '@mui/material/Table';
@@ -9,9 +9,10 @@ import TableHead from '@mui/material/TableHead';
 import TablePagination from '@mui/material/TablePagination';
 import TableRow from '@mui/material/TableRow';
 
-import {Course, UserRank} from "../models/courses";
+import {UserRank} from "../models/courses";
 import useAsyncEffect from "use-async-effect";
 import {getRanking} from "../services/courses";
+import {CourseContext} from "./Course";
 
 const useStyles = makeStyles({
     root: {
@@ -34,14 +35,17 @@ const columns: Column[] = [
 ];
 
 
-function RankingTable({course, exerciseIds}: {course: Course, exerciseIds: string[]}) {
+function RankingTable({exerciseIds}: {exerciseIds: string[]}) {
     const classes = useStyles();
+    const {course} = useContext(CourseContext);
     const [page, setPage] = useState(0);
     const handleChangePage = (event: unknown, newPage: number) => setPage(newPage);
     const rowsPerPage = 20;
     const [ranks, setRanks] = useState<UserRank[]>([]);
 
     useAsyncEffect(async () => {
+        if( !course )
+            return;
         const ranks: UserRank[] = await getRanking(course.id);
         setRanks(ranks);
     }, [course])

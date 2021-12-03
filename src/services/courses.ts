@@ -69,7 +69,7 @@ export const getCourseExercises = async (courseId: string) => {
 
 export const onUserProgressChanged = (courseId: string, userId: string, onChanged: (progress: Progress | null) => void) => {
     console.log('Requesting user progress...');
-    return db.courseProgress(courseId, userId).onSnapshot(snapshot => {
+    return db.progress(courseId, userId).onSnapshot(snapshot => {
         const res = snapshot.data();
         console.log('User progress updated:', res);
         onChanged(res ?? null);

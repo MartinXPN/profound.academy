@@ -1,10 +1,9 @@
 import firebase from 'firebase/app';
 import 'firebase/firestore';
 
-import {Activity, Progress, User} from "../models/users";
+import {Activity, User} from "../models/users";
 import {Notification} from "../models/notifications";
-import {Course, Exercise, ExerciseProgress, UserRank} from "../models/courses";
-import * as courses from "../models/courses";
+import {Course, Exercise, ExerciseProgress, UserRank, Progress} from "../models/courses";
 import {Submission, SubmissionResult, SubmissionSensitiveRecords, SubmissionStatus} from "../models/submissions";
 import {Comment, Vote} from "../models/forum";
 
@@ -25,7 +24,6 @@ const dataPoint = <T>(collectionPath: string) => firebase.firestore()
 const db = {
     user: (userId: string) => dataPoint<User>('users').doc(userId),
     userVotes: (commentId: string, userId: string) => dataPoint<Vote>(`users/${userId}/votes`).doc(commentId),
-    progress: (userId: string, courseId: string) => dataPoint<Progress>(`users/${userId}/progress/${courseId}/private`),
     activity: (userId: string) => dataPoint<Activity>(`users/${userId}/activity`),
     notifications: (userId: string) => dataPoint<Notification>(`users/${userId}/notifications/`),
     notification: (userId: string, notificationId: string) => dataPoint<Notification>(`users/${userId}/notifications/`).doc(notificationId),
@@ -34,7 +32,7 @@ const db = {
     course: (courseId: string) => dataPoint<Course>('courses').doc(courseId),
     exercises: (courseId: string) => dataPoint<Exercise>(`courses/${courseId}/exercises`),
     exercise: (courseId: string, exerciseId: string) => dataPoint<Exercise>(`courses/${courseId}/exercises`).doc(exerciseId),
-    courseProgress: (courseId: string, userId: string) => dataPoint<courses.Progress>(`courses/${courseId}/progress`).doc(userId),
+    progress: (courseId: string, userId: string) => dataPoint<Progress>(`courses/${courseId}/progress`).doc(userId),
     courseExerciseProgress: (courseId: string, userId: string, level: string) => dataPoint<ExerciseProgress<SubmissionStatus>>(`courses/${courseId}/progress/${userId}/exerciseSolved`).doc(level),
     ranking: (courseId: string) => dataPoint<UserRank>(`courses/${courseId}/ranking`),
 

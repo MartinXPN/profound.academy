@@ -1,6 +1,4 @@
-import firebase from 'firebase/app';
 import {Course} from "./courses";
-import {SubmissionStatus} from './submissions';
 
 export interface Activity {
     id: string;

@@ -46,7 +46,6 @@ function RankingTable({metric}: {metric: 'score' | 'solved' | 'upsolveScore'}) {
             setMaxLevel(maxLevel);
 
             // single-level rankings should always be open
-            console.log('maxLevel:', maxLevel);
             if( maxLevel === 1 )
                 setLevelOpen({...levelOpen, '1': true});
         });
@@ -57,7 +56,6 @@ function RankingTable({metric}: {metric: 'score' | 'solved' | 'upsolveScore'}) {
         if( !course )
             return;
 
-        const current = {...levelExerciseProgress};
         const unsubscribe: {[key: string]: (() => void)} = {};
         for( const [level, isOpen] of Object.entries(levelOpen) ) {
             if( !isOpen )
@@ -71,17 +69,13 @@ function RankingTable({metric}: {metric: 'score' | 'solved' | 'upsolveScore'}) {
 
             console.log(`${level} is open! getting metric: ${exerciseMetric}`);
             unsubscribe[level] = onLevelExerciseProgressChanged<number>(course.id, level, exerciseMetric, userIdToProgress => {
+                const current: {[key: string]: {[key: string]: number}} = {};
                 Object.entries(userIdToProgress).forEach(([userId, progress]) => {
-                    if (!(level in current))
-                        current[level] = {}
-                    current[level][userId] = progress;
+                    current[userId] = progress;
                 });
+                setLevelExerciseProgress({...levelExerciseProgress, [level]: current});
             });
         }
-
-        console.log('current unsubscribe:', unsubscribe);
-        console.log('current exercise progress:', current);
-        setLevelExerciseProgress(current);
 
         return () => {
             Object.entries(unsubscribe).forEach(([level, u]) => {
@@ -141,18 +135,22 @@ function RankingTable({metric}: {metric: 'score' | 'solved' | 'upsolveScore'}) {
 
                             {(maxLevel >= 1) && Array(maxLevel).fill(1).map((_, level) => {
                                 const levelName = (level + 1).toString();
+                                // @ts-ignore
+                                const levelScore = row?.[levelMetric]?.[levelName];
                                 return <>
                                     {maxLevel >= 2 && <TableCell key={levelName} align="right">
-                                        { /* @ts-ignore */}
-                                        {levelMetric in row && levelName in row[levelMetric] ? row[levelMetric][levelName].toFixed(0) : '-'}
+                                        {levelScore ? levelScore.toFixed(0) : '-'}
                                     </TableCell>}
 
 
-                                    {levelOpen[(level + 1).toString()] && (level + 1).toString() in levelExercises && levelExercises[(level + 1).toString()].map(ex =>
-                                        <TableCell key={ex.id} align="right">
-                                            {levelName in levelExerciseProgress && row.id in levelExerciseProgress[levelName] && ex.id in levelExerciseProgress[levelName][row.id] ? levelExerciseProgress[levelName][row.id][ex.id].toFixed(0) : '-'}
-                                        </TableCell>)
-                                    }
+                                    {levelOpen[levelName] && levelName in levelExercises && levelExercises[levelName].map(ex => {
+                                        const exerciseScore = levelExerciseProgress?.[levelName]?.[row.id]?.[ex.id];
+                                        return <>
+                                            <TableCell key={ex.id} align="right">
+                                                {exerciseScore ? exerciseScore.toFixed(0) : '-'}
+                                            </TableCell>
+                                        </>
+                                    })}
                                 </>
                             })}
                         </TableRow>

@@ -45,9 +45,9 @@ export interface Progress {
     userDisplayName: string;                                // how to show the user
     score?: number;                                         // total score for the course
     levelScore?: { [key: string]: number };                 // {level: score}
-    exerciseScore?: ExerciseProgress<number>;               // progress = {exId: score}
+    exerciseScore?: ExerciseProgress<number>;               // [subcollection] progress = {exId: score}
 
     solved?: number;                                        // total solved exercises
     levelSolved?: { [key: string]: number };                // {level: #solved}
-    exerciseSolved?: ExerciseProgress<SubmissionStatus>;    // progress = {exId: status}
+    exerciseSolved?: ExerciseProgress<SubmissionStatus>;    // [subcollection] progress = {exId: status}
 }

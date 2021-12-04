@@ -29,7 +29,7 @@ export default function LevelList({levelNumber, levelStatus, onItemSelected, isD
     const {course} = useContext(CourseContext);
     const {exercise} = useContext(CurrentExerciseContext);
     const [levelExercises, setLevelExercises] = useState<Exercise[]>([]);
-    const [open, setOpen] = useState(false);
+    const [open, setOpen] = useState(isSingleLevel);
     const [progress, setProgress] = useState<ExerciseProgress<SubmissionStatus> | null>(null);
     const statusToStyle = useStatusToStyledBackground();
 
@@ -38,12 +38,9 @@ export default function LevelList({levelNumber, levelStatus, onItemSelected, isD
             return;
         const isExerciseInLevel = levelNumber + 1 <= exercise.order && exercise.order < levelNumber + 2;
 
-        if( isSingleLevel && levelExercises.length > 0 )
-            setOpen(true);
-        else if( !open )
+        if( !open )
             setOpen(isExerciseInLevel);
-
-    }, [levelExercises, exercise, open, isSingleLevel]);
+    }, [exercise, open, levelNumber]);
 
     useAsyncEffect(async () => {
         if( !course || !open )

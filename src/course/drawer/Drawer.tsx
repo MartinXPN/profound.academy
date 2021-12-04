@@ -177,7 +177,7 @@ function CourseDrawer({onItemSelected, showRanking, onRankingClicked}:
                             levelStatus={isLevelSolved ? 'Solved' : 'In Progress'}
                             onItemSelected={onItemSelected}
                             isDrawerOpen={open}
-                            isSingleLevel={course.levelExercises.length <= 1}/>
+                            isSingleLevel={Object.keys(course?.levelExercises ?? {}).length <= 1}/>
                     }
                 )}
             </Drawer>

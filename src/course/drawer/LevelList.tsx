@@ -13,37 +13,37 @@ import {Typography} from "@mui/material";
 import {getCourseLevelExercises, onCourseExerciseProgressChanged} from "../../services/courses";
 import {AuthContext} from "../../App";
 import {SubmissionStatus} from "../../models/submissions";
-import {CourseContext} from "../Course";
+import {CourseContext, CurrentExerciseContext} from "../Course";
 import useAsyncEffect from "use-async-effect";
 
 
-export default function LevelList({levelNumber, levelStatus, currentExercise, onItemSelected, isDrawerOpen, isSingleLevel}:
+export default function LevelList({levelNumber, levelStatus, onItemSelected, isDrawerOpen, isSingleLevel}:
                        {
                            levelNumber: number,
                            levelStatus: 'Solved' | 'In Progress' | 'Unavailable',
-                           currentExercise: Exercise | null,
                            onItemSelected: (exercise: Exercise) => void,
                            isDrawerOpen: boolean,
                            isSingleLevel: boolean
                        }) {
     const auth = useContext(AuthContext);
     const {course} = useContext(CourseContext);
+    const {exercise} = useContext(CurrentExerciseContext);
     const [levelExercises, setLevelExercises] = useState<Exercise[]>([]);
     const [open, setOpen] = useState(false);
     const [progress, setProgress] = useState<ExerciseProgress<SubmissionStatus> | null>(null);
     const statusToStyle = useStatusToStyledBackground();
 
     useEffect(() => {
-        if( !currentExercise )
+        if( !exercise )
             return;
-        const isExerciseInLevel = levelNumber + 1 <= currentExercise.order && currentExercise.order < levelNumber + 2;
+        const isExerciseInLevel = levelNumber + 1 <= exercise.order && exercise.order < levelNumber + 2;
 
         if( isSingleLevel && levelExercises.length > 0 )
             setOpen(true);
         else if( !open )
             setOpen(isExerciseInLevel);
 
-    }, [levelExercises, currentExercise, open, isSingleLevel]);
+    }, [levelExercises, exercise, open, isSingleLevel]);
 
     useAsyncEffect(async () => {
         if( !course || !open )
@@ -87,7 +87,7 @@ export default function LevelList({levelNumber, levelStatus, currentExercise, on
             }
             {open && levelExercises.map((ex, index) =>
                 <ListItem button key={ex.id} onClick={() => onItemSelected(ex)} className={getStatusStyle(ex.id)}>
-                    <ListItemIcon>{currentExercise?.id === ex.id ? <ArrowRightIcon /> : <ListItemText primary={index + 1}/>}</ListItemIcon>
+                    <ListItemIcon>{exercise?.id === ex.id ? <ArrowRightIcon /> : <ListItemText primary={index + 1}/>}</ListItemIcon>
                     <ListItemText primary={ex.title}/>
                 </ListItem>
             )}

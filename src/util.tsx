@@ -25,7 +25,6 @@ export function useStickyState<T>(defaultValue: T, key: string) {
         return safeParse(storageValue, defaultValue);
     });
     useEffect(() => {
-        console.log('key:', key)
         const storageValue = localStorage.getItem(key);
         const stickyValue = safeParse(storageValue, defaultValue);
         localStorage.setItem(key, JSON.stringify(stickyValue));

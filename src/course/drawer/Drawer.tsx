@@ -1,5 +1,5 @@
 import React, {useContext, useEffect, useState} from "react";
-import {useHistory, useParams} from "react-router-dom";
+import {useHistory} from "react-router-dom";
 
 import { styled, useTheme, Theme, CSSObject } from '@mui/material/styles';
 import Box from '@mui/material/Box';
@@ -23,9 +23,8 @@ import {Progress} from "../../models/courses";
 import AppBarNotifications from "../../header/Notifications";
 import LevelList from "./LevelList";
 import {AuthContext} from "../../App";
-import {getExercise, onUserProgressChanged} from "../../services/courses";
+import {onUserProgressChanged} from "../../services/courses";
 import {CourseContext} from "../Course";
-import useAsyncEffect from "use-async-effect";
 
 
 const drawerWidth = 240;
@@ -115,26 +114,12 @@ function CourseDrawer({onItemSelected, showRanking, onRankingClicked}:
     const theme = useTheme();
     const history = useHistory();
     const [open, setOpen] = useState(false);
-    const {exerciseId} = useParams<{ exerciseId?: string }>();
-    const [currentExercise, setCurrentExercise] = useState<Exercise | null>(null);
     const [progress, setProgress] = useState<Progress | null>(null);
 
     const handleDrawerOpen = () => setOpen(true);
     const handleDrawerClose = () => setOpen(false);
     const onHomeClicked = () => history.push('/');
 
-    useAsyncEffect(async () => {
-        if( !course || !exerciseId )
-            return;
-        if( exerciseId === 'ranking' ) {
-            setCurrentExercise(null);
-            return;
-        }
-
-        const exercise = await getExercise(course.id, exerciseId);
-        console.log('setting the current exercise to:', exercise);
-        setCurrentExercise(exercise);
-    }, [course, exerciseId]);
 
     useEffect(() => {
         if( !auth.currentUserId || !course?.id )
@@ -190,7 +175,6 @@ function CourseDrawer({onItemSelected, showRanking, onRankingClicked}:
                     return <LevelList
                             levelNumber={index}
                             levelStatus={isLevelSolved ? 'Solved' : 'In Progress'}
-                            currentExercise={currentExercise}
                             onItemSelected={onItemSelected}
                             isDrawerOpen={open}
                             isSingleLevel={course.levelExercises.length <= 1}/>

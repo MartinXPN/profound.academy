@@ -50,7 +50,10 @@ function CurrentCourseView({openPage}: {openPage: (page: string) => void}) {
     const [currentExercise, setCurrentExercise] = useState<Exercise | null>(null);
     const [currentExerciseId, setCurrentExerciseId] = useStickyState<string>('', `ex-${auth?.currentUserId}-${course?.id}`);
 
-    const openExercise = (exercise: Exercise) => openPage(exercise.id);
+    const openExercise = (exercise: Exercise) => {
+        setCurrentExercise(exercise);
+        openPage(exercise.id);
+    }
     const openRanking = () => openPage('ranking');
     const launchCourse = async () => {
         console.log('Launching the course!');
@@ -60,7 +63,6 @@ function CurrentCourseView({openPage}: {openPage: (page: string) => void}) {
                 openPage(firstExercise.id);
         }
     }
-    console.log('exxxxxx:', exerciseId, currentExerciseId);
 
     if( exerciseId && currentExerciseId !== exerciseId ) {
         setCurrentExerciseId(exerciseId);
@@ -69,7 +71,6 @@ function CurrentCourseView({openPage}: {openPage: (page: string) => void}) {
         openPage(currentExerciseId);
     }
 
-    console.log('exercise:', exerciseId, currentExerciseId);
     useEffect(() => {
         if( !auth.currentUserId || !course ) {
             setShowRanking(false);
@@ -83,10 +84,14 @@ function CurrentCourseView({openPage}: {openPage: (page: string) => void}) {
     useAsyncEffect(async () => {
         if( !course )
             return;
+        if( currentExercise && currentExercise.id === currentExerciseId ) {
+            console.log('Not loading the exercise as it is already the current one');
+            return;
+        }
 
-        const currentExercise = await getExercise(course.id, currentExerciseId);
-        console.log('Updating current exercise to:', currentExercise);
-        setCurrentExercise(currentExercise);
+        const ex = await getExercise(course.id, currentExerciseId);
+        console.log('Updating current exercise to:', ex);
+        setCurrentExercise(ex);
     }, [currentExerciseId, course]);
 
     return <>

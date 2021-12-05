@@ -1,6 +1,7 @@
-import {Language} from "./language";
-import firebase from "firebase";
-import {SubmissionStatus} from "./submissions";
+import {Language} from './language';
+import firebase from 'firebase';
+import {SubmissionStatus} from './submissions';
+
 
 export interface TestCase {
     input: string;
@@ -13,6 +14,10 @@ export interface Exercise {
     pageId: string;
     order: number;
     testCases: TestCase[];
+    memoryLimit?: number;
+    timeLimit?: number;
+    floatPrecision?: number;
+    comparisonMode?: string;
 }
 
 export interface Course {
@@ -27,7 +32,7 @@ export interface Course {
     instructors: string[],
     details: string;
     introduction: string; // notion id for the introduction page
-    levelExercises: {[key: string]: number};
+    levelExercises: { [key: string]: number };
     exercises: Exercise[];
     preferredLanguage: Language;
 }

@@ -65,7 +65,7 @@ const updateUserMetric = (
     res: number | string,
 ) => {
     const uppercaseMetric = metric.charAt(0).toUpperCase() + metric.slice(1);
-    if (cur > prev) {
+    if (cur >= prev) {
         functions.logger.info(`Updating metric: ${metric} with prev ${prev} to cur ${cur}`);
         transaction.set(db.userProgress(courseId, userId), {
             [metric]: firestore.FieldValue.increment(cur - prev),

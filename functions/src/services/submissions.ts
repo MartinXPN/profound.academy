@@ -69,7 +69,7 @@ const updateUserMetric = (
         functions.logger.info(`Updating metric: ${metric} with prev ${prev} to cur ${cur}`);
         transaction.set(db.userProgress(courseId, userId), {
             [metric]: firestore.FieldValue.increment(cur - prev),
-            [level]: {[`level${uppercaseMetric}`]: firestore.FieldValue.increment(cur - prev)},
+            [`level${uppercaseMetric}`]: {[level]: firestore.FieldValue.increment(cur - prev)},
         }, {merge: true});
         transaction.set(db.userProgress(courseId, userId).collection(`exercise${uppercaseMetric}`).doc(level), {
             'progress': {[exerciseId]: res},

@@ -6,8 +6,8 @@ import {Course, Exercise, ExerciseProgress, Progress} from '../models/courses';
 import {Submission, SubmissionResult, SubmissionSensitiveRecords, SubmissionStatus} from '../models/submissions';
 import {Comment, Vote} from '../models/forum';
 
-const app = admin.initializeApp({credential: admin.credential.applicationDefault()});
-export const firestore = app.firestore;
+admin.initializeApp({credential: admin.credential.applicationDefault()});
+export const firestore = admin.firestore;
 
 // Add ids when getting the data and removing when sending it
 const converter = <T>() => ({

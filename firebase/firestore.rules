@@ -60,7 +60,22 @@ service cloud.firestore {
       match /ranking/{userId} {
         allow read: if isCourseInstructor(request, courseId) || get(/databases/$(database)/documents/courses/$(courseId)).data.rankingVisibility == 'public';
       }
+
+      match /progress/{userId} {
+        allow read: if isCourseInstructor(request, courseId) || isCurrentUser(request, userId);
+
+        match /exerciseSolved/{level} {
+          allow read: if isCourseInstructor(request, courseId) || isCurrentUser(request, userId);
+        }
+      }
     }
+    match /{path=**}/exerciseScore/{level} {
+      allow read: if isCurrentUser(request, resource.data.userId) || isCourseInstructor(request, resource.data.courseId) || get(/databases/$(database)/documents/courses/$(resource.data.courseId)).data.rankingVisibility == 'public';
+    }
+    match /{path=**}/exerciseUpsolveScore/{level} {
+      allow read: if isCurrentUser(request, resource.data.userId) || isCourseInstructor(request, resource.data.courseId) || get(/databases/$(database)/documents/courses/$(resource.data.courseId)).data.rankingVisibility == 'public';
+    }
+
 
     // The forum is available for authenticated users
     function isValidScore(score) {

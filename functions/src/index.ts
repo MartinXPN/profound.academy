@@ -1,5 +1,8 @@
 import * as functions from 'firebase-functions';
-import {fetchNotionPage, notifyOnComment, submit} from './services';
+import {fetchNotionPage} from './services/notion';
+import {notifyOnComment} from './services/notifications';
+import {submit} from './services/submissions';
+
 import {Submission} from './models/submissions';
 import {Comment} from './models/forum';
 
@@ -16,12 +19,12 @@ export const getNotionPage = functions.https
     .onCall(async (data, context) => {
         functions.logger.info(`data: ${JSON.stringify(data)}`);
         const pageId = data.pageId;
-        if (!pageId) {
+        if (!pageId)
             throw new functions.https.HttpsError(
                 'invalid-argument',
                 'pageId needs to be provided in data'
             );
-        }
+
         const recordMap = await fetchNotionPage(pageId);
         functions.logger.info(`recordMap: ${JSON.stringify(recordMap)}`);
         return recordMap;

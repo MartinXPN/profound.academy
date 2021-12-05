@@ -36,10 +36,11 @@ const theme = createTheme({
 interface AuthContextProps {
     isSignedIn: boolean;
     currentUser: firebase.User | null;
+    currentUserId?: string;
     setCurrentUser: (user: firebase.User | null) => void;
 }
 
-export const AuthContext = createContext<AuthContextProps | null>(null);
+export const AuthContext = createContext<AuthContextProps>({isSignedIn: false, currentUser: null, setCurrentUser: () => {}});
 
 
 function App() {
@@ -56,7 +57,12 @@ function App() {
         <Router>
         <StyledEngineProvider injectFirst>
             <ThemeProvider theme={theme}>
-            <AuthContext.Provider value={{isSignedIn: !!currentUser, currentUser: currentUser, setCurrentUser: setCurrentUser}}>
+            <AuthContext.Provider value={{
+                isSignedIn: !!currentUser,
+                currentUser: currentUser,
+                currentUserId: currentUser?.uid ?? undefined,
+                setCurrentUser: setCurrentUser,
+            }}>
             <Switch>
                 <Route exact path="/">
                     <Home />

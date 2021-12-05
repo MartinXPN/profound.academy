@@ -1,11 +1,13 @@
-import firebase from 'firebase/app';
-import 'firebase/firestore';
+import * as admin from 'firebase-admin';
 
-import {Activity, User} from "../models/users";
-import {Notification} from "../models/notifications";
-import {Course, Exercise, ExerciseProgress, Progress} from "../models/courses";
-import {Submission, SubmissionResult, SubmissionSensitiveRecords, SubmissionStatus} from "../models/submissions";
-import {Comment, Vote} from "../models/forum";
+import {Activity, User} from '../models/users';
+import {Notification} from '../models/notifications';
+import {Course, Exercise, ExerciseProgress, Progress} from '../models/courses';
+import {Submission, SubmissionResult, SubmissionSensitiveRecords, SubmissionStatus} from '../models/submissions';
+import {Comment, Vote} from '../models/forum';
+
+admin.initializeApp({credential: admin.credential.applicationDefault()});
+export const firestore = admin.firestore;
 
 // Add ids when getting the data and removing when sending it
 const converter = <T>() => ({
@@ -14,14 +16,17 @@ const converter = <T>() => ({
         const {id, ...res} = data;
         return res;
     },
-    fromFirestore: (snap: firebase.firestore.QueryDocumentSnapshot) => Object.assign(snap.data(), {id: snap.id}) as unknown as T
+    // @ts-ignore
+    fromFirestore: (snapshot) => Object.assign(snapshot.data(), {id: snapshot.id}) as unknown as T,
 });
-const dataPoint = <T>(collectionPath: string) => firebase.firestore()
+const dataPoint = <T>(collectionPath: string) => firestore()
     .collection(collectionPath)
     .withConverter(converter<T>());
 
 
+/* eslint-disable max-len, @typescript-eslint/explicit-module-boundary-types */
 const db = {
+    users: dataPoint<User>('users'),
     user: (userId: string) => dataPoint<User>('users').doc(userId),
     userVotes: (commentId: string, userId: string) => dataPoint<Vote>(`users/${userId}/votes`).doc(commentId),
     activity: (userId: string) => dataPoint<Activity>(`users/${userId}/activity`),
@@ -35,7 +40,7 @@ const db = {
     progress: (courseId: string) => dataPoint<Progress>(`courses/${courseId}/progress`),
     userProgress: (courseId: string, userId: string) => dataPoint<Progress>(`courses/${courseId}/progress`).doc(userId),
     courseExerciseProgress: (courseId: string, userId: string, level: string) => dataPoint<ExerciseProgress<SubmissionStatus>>(`courses/${courseId}/progress/${userId}/exerciseSolved`).doc(level),
-    levelExerciseProgress: <T>(courseId: string, level: string, metric: string) => firebase.firestore().collectionGroup(metric).withConverter(converter<ExerciseProgress<T>>())
+    levelExerciseProgress: <T>(courseId: string, level: string, metric: string) => firestore().collectionGroup(metric).withConverter(converter<ExerciseProgress<T>>())
         .where('courseId', '==', courseId).where('level', '==', level),
 
     forum: dataPoint<Comment>('forum'),
@@ -50,5 +55,5 @@ const db = {
     submissionResult: (submissionId: string) => dataPoint<SubmissionResult>('submissions').doc(submissionId),
     submissionSensitiveRecords: (userId: string, submissionId: string) => dataPoint<SubmissionSensitiveRecords>(`/submissions/${submissionId}/private`).doc(userId),
 };
-
-export {db}
+/* eslint-enable max-len, @typescript-eslint/explicit-module-boundary-types */
+export {db};

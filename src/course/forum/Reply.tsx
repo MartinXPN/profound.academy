@@ -8,11 +8,11 @@ function Reply({commentId, onReplySaved}: { commentId: string, onReplySaved: () 
     const auth = useContext(AuthContext);
     const [replyText, setReplyText] = useState<string>('');
 
-    if (!auth || !auth.currentUser || !auth.currentUser.uid || !auth.currentUser.displayName)
+    if (!auth.currentUserId || !auth.currentUser || !auth.currentUser.displayName)
         return <></>;
 
     const onSave = async () => {
-        if (!auth || !auth.currentUser || !auth.currentUser.uid || !auth.currentUser.displayName)
+        if (!auth.currentUserId || !auth.currentUser || !auth.currentUser.displayName)
             return;
 
         onReplySaved();

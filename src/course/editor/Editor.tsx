@@ -48,11 +48,11 @@ function Editor({course, exercise}: {course: Course, exercise: Exercise}) {
     const decreaseFontSize = () => setFontSize(Math.max(fontSize - 1, 5));
     const increaseFontSize = () => setFontSize(Math.min(fontSize + 1, 30));
     const onSubmitClicked = async () => {
-        if( !auth || !auth.currentUser || !auth.currentUser.uid )
+        if( !auth.currentUserId || !auth.currentUser )
             return;
 
         setSubmitted(true);
-        const submissionId = await submitSolution(auth.currentUser.uid, auth.currentUser.displayName, course.id, exercise.id, code, language, false, undefined);
+        const submissionId = await submitSolution(auth.currentUserId, auth.currentUser.displayName, course.id, exercise.id, code, language, false, undefined);
         const unsubscribe = onSubmissionResultChanged(submissionId, (result) => {
             setSubmissionResult(result);
             if(result)
@@ -63,12 +63,12 @@ function Editor({course, exercise}: {course: Course, exercise: Exercise}) {
     }
 
     const onRunClicked = async (tests: TestCase[]) => {
-        if( !auth || !auth.currentUser || !auth.currentUser.uid )
+        if( !auth.currentUserId || !auth.currentUser )
             return;
 
         setSubmitted(true);
-        const runId = await submitSolution(auth.currentUser.uid, auth.currentUser.displayName, course.id, exercise.id, code, language, true, tests);
-        const unsubscribe = onRunResultChanged(auth.currentUser.uid, runId, (result) => {
+        const runId = await submitSolution(auth.currentUserId, auth.currentUser.displayName, course.id, exercise.id, code, language, true, tests);
+        const unsubscribe = onRunResultChanged(auth.currentUserId, runId, (result) => {
             setSubmissionResult(result);
             if(result)
                 setSubmitted(false);

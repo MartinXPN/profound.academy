@@ -32,9 +32,7 @@ export function useStickyState<T>(defaultValue: T, key: string) {
     }, [defaultValue, key]);
     useEffect(() => {
         localStorage.setItem(key, JSON.stringify(value));
-        // intentionally not include the `key` parameter in deps so that the previous useEffect runs on-key-change
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [value]);
+    }, [value, key]);
     return [value, setValue];
 }
 

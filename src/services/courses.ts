@@ -1,6 +1,7 @@
 import {db} from "./db";
-import {Course, Exercise, UserRank} from "../models/courses";
+import {Course, Exercise, ExerciseProgress, Progress} from "../models/courses";
 import firebase from "firebase/app";
+import {SubmissionStatus} from "../models/submissions";
 
 export const getNotionPageMap = async (pageId: string) => {
     const getPage = firebase.functions().httpsCallable('getNotionPage');
@@ -65,10 +66,82 @@ export const getCourseExercises = async (courseId: string) => {
     return exercises;
 }
 
+export const getExercise = async (courseId: string, exerciseId: string) => {
+    const exercise = await db.exercise(courseId, exerciseId).get();
+    return exercise.data() ?? null;
+}
 
-export const getRanking = async (courseId: string) => {
-    const snapshot = await db.ranking(courseId).orderBy('totalScore', 'desc').get();
-    const ranks: UserRank[] = snapshot.docs.map(x => x.data());
-    console.log('Got ranks:', ranks);
-    return ranks;
+
+export const getFirstExercise = async (courseId: string) => {
+    const exercise = await db.exercises(courseId).orderBy("order", "asc").limit(1).get();
+    return exercise.docs?.[0]?.data() ?? null;
+}
+
+export const getCourseLevelExercises = async (courseId: string, level: number) => {
+    const snapshot = await db.exercises(courseId)
+        .orderBy('order', 'asc')
+        .where('order', '>=', level)
+        .where('order', '<', level + 1 )
+        .get();
+
+    const exercises: Exercise[] = snapshot.docs.map(x => x.data());
+    console.log(`Got level-${level} exercises`, exercises);
+    return exercises;
+}
+
+export const onCourseLevelExercisesChanged = (courseId: string, level: number, onChanged: (exercises: Exercise[]) => void) => {
+    return db.exercises(courseId)
+        .orderBy('order', 'asc')
+        .where('order', '>=', level)
+        .where('order', '<', level + 1 )
+        .onSnapshot(snapshot => {
+            const exercises = snapshot.docs.map(d => d.data());
+            console.log(`Got level-${level} exercises`, exercises);
+            onChanged(exercises ?? []);
+        });
+}
+
+
+export const onProgressChanged = (courseId: string, metric: 'score' | 'solved' | 'upsolveScore', onChanged: (progress: Progress[]) => void ) => {
+
+    return db.progress(courseId).orderBy(metric, 'desc').onSnapshot(snapshot => {
+        const res = snapshot.docs.map(d => d.data());
+        console.log(`${metric} - progress changed:`, res);
+        onChanged(res ?? []);
+    })
+}
+
+export const onUserProgressChanged = (courseId: string, userId: string, onChanged: (progress: Progress | null) => void) => {
+    return db.userProgress(courseId, userId).onSnapshot(snapshot => {
+        const res = snapshot.data();
+        console.log('User progress updated:', res);
+        onChanged(res ?? null);
+    });
+}
+
+export const onLevelExerciseProgressChanged = <T>(courseId: string, level: string,
+                                                  metric: 'exerciseScore' | 'exerciseSolved' | 'exerciseUpsolveScore',
+                                                  onChanged: (userIdToProgress: { [key: string]: { [key: string]: T } }) => void) => {
+    return db.levelExerciseProgress(courseId, level, metric).onSnapshot(snapshot => {
+        // @ts-ignore
+        const res: ExerciseProgress<T>[] = snapshot.docs.map(d => d.data());
+        console.log('Level progress updated:', res);
+        const userIdToProgress = res.reduce((obj, item) => {
+            return {...obj, [item.userId]: item.progress}
+        }, {});
+        console.log(userIdToProgress);
+        onChanged(userIdToProgress);
+    })
+}
+
+
+export const onCourseExerciseProgressChanged = (courseId: string,
+                                                userId: string,
+                                                level: string,
+                                                onChanged: (progress: ExerciseProgress<SubmissionStatus> | null) => void) => {
+    return db.courseExerciseProgress(courseId, userId, level).onSnapshot(snapshot => {
+        const res = snapshot.data();
+        console.log('Exercise Progress for level', level, ':', res);
+        onChanged(res ?? null);
+    });
 }

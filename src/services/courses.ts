@@ -89,6 +89,18 @@ export const getCourseLevelExercises = async (courseId: string, level: number) =
     return exercises;
 }
 
+export const onCourseLevelExercisesChanged = (courseId: string, level: number, onChanged: (exercises: Exercise[]) => void) => {
+    return db.exercises(courseId)
+        .orderBy('order', 'asc')
+        .where('order', '>=', level)
+        .where('order', '<', level + 1 )
+        .onSnapshot(snapshot => {
+            const exercises = snapshot.docs.map(d => d.data());
+            console.log(`Got level-${level} exercises`, exercises);
+            onChanged(exercises ?? []);
+        });
+}
+
 
 export const onProgressChanged = (courseId: string, metric: 'score' | 'solved' | 'upsolveScore', onChanged: (progress: Progress[]) => void ) => {
 

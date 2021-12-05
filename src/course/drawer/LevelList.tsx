@@ -10,11 +10,10 @@ import ArrowRightIcon from '@mui/icons-material/ArrowRight';
 import {Exercise, ExerciseProgress} from "../../models/courses";
 import {useStatusToStyledBackground} from "../colors";
 import {Typography} from "@mui/material";
-import {getCourseLevelExercises, onCourseExerciseProgressChanged} from "../../services/courses";
+import {onCourseExerciseProgressChanged, onCourseLevelExercisesChanged} from "../../services/courses";
 import {AuthContext} from "../../App";
 import {SubmissionStatus} from "../../models/submissions";
 import {CourseContext, CurrentExerciseContext} from "../Course";
-import useAsyncEffect from "use-async-effect";
 
 
 export default function LevelList({levelNumber, levelStatus, onItemSelected, isDrawerOpen, isSingleLevel}:
@@ -42,11 +41,11 @@ export default function LevelList({levelNumber, levelStatus, onItemSelected, isD
             setOpen(isExerciseInLevel);
     }, [exercise, open, levelNumber]);
 
-    useAsyncEffect(async () => {
+    useEffect(() => {
         if( !course || !open )
             return;
-        const exercises = await getCourseLevelExercises(course.id, levelNumber + 1);
-        setLevelExercises(exercises);
+
+        return onCourseLevelExercisesChanged(course.id, levelNumber + 1, setLevelExercises);
     }, [course, open, levelNumber]);
 
     useEffect(() => {

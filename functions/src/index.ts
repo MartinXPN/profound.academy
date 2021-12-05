@@ -1,5 +1,8 @@
 import * as functions from 'firebase-functions';
-import {fetchNotionPage, notifyOnComment, submit} from './services';
+import {fetchNotionPage} from './services/notion';
+import {notifyOnComment} from './services/notifications';
+import {submit} from './services/submissions';
+
 import {Submission} from './models/submissions';
 import {Comment} from './models/forum';
 

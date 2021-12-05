@@ -28,6 +28,9 @@ module.exports = {
         'quotes': ['error', 'single'],
         'import/no-unresolved': 0,
         'indent': ['error', 4],
-        'max-len': ['error', 120, {'ignoreComments': true}],
+        'max-len': ['error', 120, {ignoreComments: true}],
+        'no-multi-spaces': ['error', {ignoreEOLComments: true}],
+        '@typescript-eslint/ban-ts-comment': 'off',
+        '@typescript-eslint/explicit-function-return-type': 'off',
     },
 };

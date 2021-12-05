@@ -1,18 +1,19 @@
-import {Submission, SubmissionResult} from '../models/submissions';
-
+import {firestore} from 'firebase-admin';
 import * as functions from 'firebase-functions';
 import * as needle from 'needle';
+import * as moment from 'moment';
+
 import {db} from './db';
-import {firestore} from 'firebase-admin';
+import {Submission, SubmissionResult} from '../models/submissions';
 
 const AWS_LAMBDA_URL = 'https://l5nhpbb1bd.execute-api.us-east-1.amazonaws.com/Prod/check/';
 
 
-const updateBest = async (
+const updateBest = (
     transaction: firestore.Transaction,
     submission: SubmissionResult,
     bestSubmission?: SubmissionResult,
-): Promise<void> => {
+) => {
     functions.logger.info('Updating the best submissions...');
     if (!bestSubmission) {
         submission.isBest = true;
@@ -30,6 +31,25 @@ const updateBest = async (
 
     // // save the results to /submissions
     transaction.set(db.submissionResult(submission.id), submission);
+};
+
+const updateActivity = (
+    transaction: firestore.Transaction,
+    submission: SubmissionResult,
+) => {
+    // update user activity
+    if (submission.status === 'Solved') {
+        functions.logger.info('Updating the user activity...');
+
+        const submissionDate = submission.createdAt.toDate();
+        const submissionDay = moment(submissionDate).format('YYYY-MM-DD');
+
+        transaction.set(db.activity(submission.userId).doc(submissionDay), {
+            count: firestore.FieldValue.increment(1),
+            date: submissionDay,
+        }, {merge: true});
+        functions.logger.info('Updated the user activity!');
+    }
 };
 
 
@@ -67,13 +87,56 @@ export const processSubmissionResult = async (
             alreadySolved = true;
         }
         console.log(`Already solved (${submissionResult.id}): ${alreadySolved}`);
-        await updateBest(transaction, submissionRes, currentBest);
+        updateBest(transaction, submissionRes, currentBest);
 
         // save the sensitive information to /submissions/${submissionId}/private/${userId}
         const sensitiveData = {code: code};
         transaction.set(db.submissionSensitiveRecords(submissionResult.userId, submissionResult.id), sensitiveData);
         functions.logger.info(`Saved the submission: ${JSON.stringify(code)}`);
+
+        if (!alreadySolved) {
+            updateActivity(transaction, submissionRes);
+        }
     });
+
+    // // update user progress
+    // const progress = {
+    //     status: submissionResult.status,
+    //     updatedAt: submissionResult.createdAt,
+    // } as Progress;
+    // await app.firestore()
+    //     .collection(`users/${submission.userId}/progress/${submission.course.id}/private/`)
+    //     .doc(submission.exercise.id)
+    //     .set(progress);
+    // functions.logger.info('Updated the user progress!');
+    //
+    // // update ranking
+    // let exercisePrevScore = 0;
+    // const userRankingRef = app.firestore()
+    //     .collection(`courses/${submission.course.id}/ranking`)
+    //     .doc(submission.userId);
+    // const userRanking = await userRankingRef.get();
+    // if (!submission.isTestRun && userRanking.exists) {
+    //     const userRankingData = userRanking.data();
+    //     if (userRankingData && submissionRes.exercise.id in userRankingData.scores) {
+    //         exercisePrevScore = userRankingData.scores[submissionRes.exercise.id];
+    //     }
+    // }
+    //
+    // const course = await app.firestore().collection('courses').doc(submission.course.id).get();
+    // const courseData = course.data() as Course;
+    // // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // // @ts-ignore
+    // if (exercisePrevScore <= submissionRes.score && courseData && courseData.freezeAt.toDate() > Date.now()) {
+    //     await userRankingRef.set({
+    //         userDisplayName: (await app.auth().getUser(submissionRes.userId)).displayName,
+    //         totalScore: admin.firestore.FieldValue.increment(submissionRes.score - exercisePrevScore),
+    //         scores: {
+    //             [submission.exercise.id]: submissionRes.score,
+    //         },
+    //     }, {merge: true});
+    //     console.log('Updated ranking!');
+    // }
 };
 
 
@@ -109,62 +172,5 @@ export const submit = async (submission: Submission): Promise<void> => {
     functions.logger.info(`submissionResult: ${JSON.stringify(submissionResult)}`);
 
     await processSubmissionResult(submissionResult, submission.isTestRun, submission.userId);
-
-    // // update user progress
-    // const progress = {
-    //     status: submissionResult.status,
-    //     updatedAt: submissionResult.createdAt,
-    // } as Progress;
-    // await app.firestore()
-    //     .collection(`users/${submission.userId}/progress/${submission.course.id}/private/`)
-    //     .doc(submission.exercise.id)
-    //     .set(progress);
-    // functions.logger.info('Updated the user progress!');
-    //
-    // // update user activity
-    // if (!alreadySolved && submissionResult.status === 'Solved') {
-    //     functions.logger.info('Updating the user activity...');
-    //     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    //     // @ts-ignore
-    //     const submissionDate = submissionResult.createdAt.toDate();
-    //     const submissionDay = moment(submissionDate).format('YYYY-MM-DD');
-    //
-    //     await app.firestore()
-    //         .collection(`users/${submission.userId}/activity`)
-    //         .doc(submissionDay)
-    //         .set({
-    //             count: admin.firestore.FieldValue.increment(1),
-    //             date: submissionDay,
-    //         }, {merge: true});
-    //     functions.logger.info('Updated the user activity!');
-    // }
-    //
-    // // update ranking
-    // let exercisePrevScore = 0;
-    // const userRankingRef = app.firestore()
-    //     .collection(`courses/${submission.course.id}/ranking`)
-    //     .doc(submission.userId);
-    // const userRanking = await userRankingRef.get();
-    // if (!submission.isTestRun && userRanking.exists) {
-    //     const userRankingData = userRanking.data();
-    //     if (userRankingData && submissionRes.exercise.id in userRankingData.scores) {
-    //         exercisePrevScore = userRankingData.scores[submissionRes.exercise.id];
-    //     }
-    // }
-    //
-    // const course = await app.firestore().collection('courses').doc(submission.course.id).get();
-    // const courseData = course.data() as Course;
-    // // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // // @ts-ignore
-    // if (exercisePrevScore <= submissionRes.score && courseData && courseData.freezeAt.toDate() > Date.now()) {
-    //     await userRankingRef.set({
-    //         userDisplayName: (await app.auth().getUser(submissionRes.userId)).displayName,
-    //         totalScore: admin.firestore.FieldValue.increment(submissionRes.score - exercisePrevScore),
-    //         scores: {
-    //             [submission.exercise.id]: submissionRes.score,
-    //         },
-    //     }, {merge: true});
-    //     console.log('Updated ranking!');
-    // }
 };
 

@@ -20,7 +20,7 @@ export interface Submission {
     course: Course;
     code?: { [key: string]: string };
     language: keyof typeof LANGUAGES; // the language code
-    createdAt: firebase.firestore.FieldValue;
+    createdAt: firebase.firestore.Timestamp;
     isTestRun: boolean;
 }
 

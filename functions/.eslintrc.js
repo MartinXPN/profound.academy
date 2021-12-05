@@ -25,6 +25,7 @@ module.exports = {
         'import',
     ],
     rules: {
+        'curly': ['error', 'multi', 'consistent'],
         'quotes': ['error', 'single'],
         'import/no-unresolved': 0,
         'indent': ['error', 4],

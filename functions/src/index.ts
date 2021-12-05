@@ -19,12 +19,12 @@ export const getNotionPage = functions.https
     .onCall(async (data, context) => {
         functions.logger.info(`data: ${JSON.stringify(data)}`);
         const pageId = data.pageId;
-        if (!pageId) {
+        if (!pageId)
             throw new functions.https.HttpsError(
                 'invalid-argument',
                 'pageId needs to be provided in data'
             );
-        }
+
         const recordMap = await fetchNotionPage(pageId);
         functions.logger.info(`recordMap: ${JSON.stringify(recordMap)}`);
         return recordMap;

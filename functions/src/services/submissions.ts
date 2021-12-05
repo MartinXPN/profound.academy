@@ -53,6 +53,31 @@ const updateActivity = (
 };
 
 
+const updateUserMetric = (
+    transaction: firestore.Transaction,
+    metric: string,
+    userId: string,
+    courseId: string,
+    exerciseId: string,
+    level: string,
+    prev: number,
+    cur: number,
+    res: number | string,
+) => {
+    const uppercaseMetric = metric.charAt(0).toUpperCase() + metric.slice(1);
+    if (cur > prev) {
+        functions.logger.info(`Updating metric: ${metric} with prev ${prev} to cur ${cur}`);
+        transaction.set(db.userProgress(courseId, userId), {
+            [metric]: firestore.FieldValue.increment(cur - prev),
+            [level]: {[`level${uppercaseMetric}`]: firestore.FieldValue.increment(cur - prev)},
+        }, {merge: true});
+        transaction.set(db.userProgress(courseId, userId).collection(`exercise${uppercaseMetric}`).doc(level), {
+            'progress': {[exerciseId]: res},
+        }, {merge: true});
+    }
+};
+
+
 export const processSubmissionResult = async (
     submissionResult: SubmissionResult,
     isTestRun: boolean,
@@ -79,13 +104,13 @@ export const processSubmissionResult = async (
         const bestUserSubmissions = (await transaction.get(bestUserSubmissionsRef)).docs.map((s) => s.data());
         let alreadySolved = false;
 
-        if (bestUserSubmissions.length > 1) {
+        if (bestUserSubmissions.length > 1)
             throw Error(`Duplicate user best: ${submissionRes.userId} for exercise: ${submissionRes.exercise.id}`);
-        }
+
         const currentBest = bestUserSubmissions.length === 1 ? bestUserSubmissions[0] : undefined;
-        if (currentBest?.status === 'Solved') {
+        if (currentBest?.status === 'Solved')
             alreadySolved = true;
-        }
+
         console.log(`Already solved (${submissionResult.id}): ${alreadySolved}`);
         updateBest(transaction, submissionRes, currentBest);
 
@@ -94,57 +119,52 @@ export const processSubmissionResult = async (
         transaction.set(db.submissionSensitiveRecords(submissionResult.userId, submissionResult.id), sensitiveData);
         functions.logger.info(`Saved the submission: ${JSON.stringify(code)}`);
 
-        if (!alreadySolved) {
+        if (!alreadySolved)
             updateActivity(transaction, submissionRes);
-        }
     });
 
-    // // update user progress
-    // const progress = {
-    //     status: submissionResult.status,
-    //     updatedAt: submissionResult.createdAt,
-    // } as Progress;
-    // await app.firestore()
-    //     .collection(`users/${submission.userId}/progress/${submission.course.id}/private/`)
-    //     .doc(submission.exercise.id)
-    //     .set(progress);
-    // functions.logger.info('Updated the user progress!');
-    //
-    // // update ranking
-    // let exercisePrevScore = 0;
-    // const userRankingRef = app.firestore()
-    //     .collection(`courses/${submission.course.id}/ranking`)
-    //     .doc(submission.userId);
-    // const userRanking = await userRankingRef.get();
-    // if (!submission.isTestRun && userRanking.exists) {
-    //     const userRankingData = userRanking.data();
-    //     if (userRankingData && submissionRes.exercise.id in userRankingData.scores) {
-    //         exercisePrevScore = userRankingData.scores[submissionRes.exercise.id];
-    //     }
-    // }
-    //
-    // const course = await app.firestore().collection('courses').doc(submission.course.id).get();
-    // const courseData = course.data() as Course;
-    // // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // // @ts-ignore
-    // if (exercisePrevScore <= submissionRes.score && courseData && courseData.freezeAt.toDate() > Date.now()) {
-    //     await userRankingRef.set({
-    //         userDisplayName: (await app.auth().getUser(submissionRes.userId)).displayName,
-    //         totalScore: admin.firestore.FieldValue.increment(submissionRes.score - exercisePrevScore),
-    //         scores: {
-    //             [submission.exercise.id]: submissionRes.score,
-    //         },
-    //     }, {merge: true});
-    //     console.log('Updated ranking!');
-    // }
+    // another transaction to update user metrics
+    const course = (await db.course(submissionResult.course.id).get()).data();
+    const exercise = (await db.exercise(submissionResult.course.id, submissionResult.exercise.id).get()).data();
+    if (!course)
+        throw Error(`Course with id ${submissionResult.course.id} does not exist`);
+    if (!exercise)
+        throw Error(`Exercise with id ${submissionResult.exercise.id} does not exist`);
+
+    const status = typeof submissionResult.status === 'string' ? submissionResult.status :
+        submissionResult.status.reduce((prev, cur) => cur === 'Solved' ? prev : cur, 'Solved');
+    const level = Math.floor(exercise.order).toString();
+
+    await firestore().runTransaction(async (transaction) => {
+        const prevSolved = (await transaction.get(db.userProgress(course.id, userId)
+            .collection('exerciseSolved').doc(level))).data();
+        functions.logger.info(`prevSolved: ${JSON.stringify(prevSolved)}`);
+
+        if (course.freezeAt > submissionResult.createdAt ) {
+            const prevScore = (await transaction.get(db.userProgress(course.id, userId)
+                .collection('exerciseScore').doc(level))).data();
+            functions.logger.info(`prevScore: ${JSON.stringify(prevScore)}`);
+            updateUserMetric(transaction, 'score', submissionResult.userId, course.id, exercise.id, level,
+                prevScore?.progress?.[exercise.id] ?? 0, submissionResult.score, submissionResult.score);
+        } else {
+            const prevScore = (await transaction.get(db.userProgress(course.id, userId)
+                .collection('exerciseUpsolveScore').doc(level))).data();
+            functions.logger.info(`prevScore: ${JSON.stringify(prevScore)}`);
+            updateUserMetric(transaction, 'upsolveScore', submissionResult.userId, course.id, exercise.id, level,
+                prevScore?.progress?.[exercise.id] ?? 0, submissionResult.score, submissionResult.score);
+        }
+
+        updateUserMetric(transaction, 'solved', submissionResult.userId, course.id, exercise.id, level,
+            prevSolved?.progress?.[exercise.id] === 'Solved' ? 1 : 0, status === 'Solved' ? 1 : 0, status);
+    });
 };
 
 
 export const submit = async (submission: Submission): Promise<void> => {
     const problem = submission.exercise.id;
-    if (!submission.isTestRun && submission.testCases) {
+    if (!submission.isTestRun && submission.testCases)
         throw Error('Final submissions cannot have test cases');
-    }
+
     const exercise = (await db.exercise(submission.course.id, submission.exercise.id).get()).data();
     functions.logger.info(`submission exercise: ${JSON.stringify(exercise)}`);
     const data = {
@@ -173,4 +193,3 @@ export const submit = async (submission: Submission): Promise<void> => {
 
     await processSubmissionResult(submissionResult, submission.isTestRun, submission.userId);
 };
-

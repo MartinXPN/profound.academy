@@ -1,4 +1,5 @@
 import {firestore} from 'firebase-admin';
+import * as admin from 'firebase-admin';
 import * as functions from 'firebase-functions';
 import * as needle from 'needle';
 import * as moment from 'moment';
@@ -94,16 +95,15 @@ export const processSubmissionResult = async (
     const {code, ...submissionRes} = submissionResult;
 
     if (isTestRun) {
-        functions.logger.info(`Updating the run: ${submissionResult.id} with ${JSON.stringify(submissionRes)}`);
-
         // save the results to /runs/userId/private/<submissionId>
+        functions.logger.info(`Updating the run: ${submissionResult.id} with ${JSON.stringify(submissionRes)}`);
         await db.run(userId, submissionResult.id).set(submissionRes);
         return;
     }
 
     functions.logger.info(`Updating the submission: ${submissionResult.id} with ${JSON.stringify(submissionResult)}`);
+    // Update the best submissions
     await firestore().runTransaction(async (transaction) => {
-        // Update the best submissions
         const bestUserSubmissionsRef = db.submissionResults
             .where('isBest', '==', true)
             .where('userId', '==', submissionResult.userId)
@@ -132,8 +132,13 @@ export const processSubmissionResult = async (
     });
 
     // another transaction to update user metrics
-    const course = (await db.course(submissionResult.course.id).get()).data();
-    const exercise = (await db.exercise(submissionResult.course.id, submissionResult.exercise.id).get()).data();
+    const [courseSnapshot, exerciseSnapshot, user] = await Promise.all([
+        db.course(submissionResult.course.id).get(),
+        db.exercise(submissionResult.course.id, submissionResult.exercise.id).get(),
+        admin.auth().getUser(submissionResult.userId),
+    ]);
+    const course = courseSnapshot.data();
+    const exercise = exerciseSnapshot.data();
     if (!course)
         throw Error(`Course with id ${submissionResult.course.id} does not exist`);
     if (!exercise)
@@ -164,6 +169,7 @@ export const processSubmissionResult = async (
 
         updateUserMetric(transaction, 'solved', submissionResult.userId, course.id, exercise.id, level,
             prevSolved?.progress?.[exercise.id] === 'Solved' ? 1 : 0, status === 'Solved' ? 1 : 0, status);
+        transaction.set(db.userProgress(course.id, user.uid), {userDisplayName: user.displayName}, {merge: true});
     });
 };
 

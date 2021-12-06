@@ -37,19 +37,20 @@ const updateActivity = (
     transaction: firestore.Transaction,
     submission: SubmissionResult,
 ) => {
-    // update user activity
-    if (submission.status === 'Solved') {
-        functions.logger.info('Updating the user activity...');
-
-        const submissionDate = submission.createdAt.toDate();
-        const submissionDay = moment(submissionDate).format('YYYY-MM-DD');
-
-        transaction.set(db.activity(submission.userId).doc(submissionDay), {
-            count: firestore.FieldValue.increment(1),
-            date: submissionDay,
-        }, {merge: true});
-        functions.logger.info('Updated the user activity!');
+    if (submission.status !== 'Solved') {
+        functions.logger.info(`Not updating user activity. Status: ${submission.status}`);
+        return;
     }
+
+    functions.logger.info('Updating the user activity...');
+    const submissionDate = submission.createdAt.toDate();
+    const submissionDay = moment(submissionDate).format('YYYY-MM-DD');
+
+    transaction.set(db.activity(submission.userId).doc(submissionDay), {
+        count: firestore.FieldValue.increment(1),
+        date: submissionDay,
+    }, {merge: true});
+    functions.logger.info('Updated the user activity!');
 };
 
 
@@ -64,17 +65,24 @@ const updateUserMetric = (
     cur: number,
     res: number | string,
 ) => {
-    const uppercaseMetric = metric.charAt(0).toUpperCase() + metric.slice(1);
-    if (cur >= prev) {
-        functions.logger.info(`Updating metric: ${metric} with prev ${prev} to cur ${cur}`);
-        transaction.set(db.userProgress(courseId, userId), {
-            [metric]: firestore.FieldValue.increment(cur - prev),
-            [`level${uppercaseMetric}`]: {[level]: firestore.FieldValue.increment(cur - prev)},
-        }, {merge: true});
-        transaction.set(db.userProgress(courseId, userId).collection(`exercise${uppercaseMetric}`).doc(level), {
-            'progress': {[exerciseId]: res},
-        }, {merge: true});
+    if (cur < prev) {
+        functions.logger.info(`Not updating: ${metric} prev: ${prev}, cur: ${cur}`);
+        return;
     }
+
+    const uppercaseMetric = metric.charAt(0).toUpperCase() + metric.slice(1);
+    functions.logger.info(`Updating metric: ${metric} with prev ${prev} to cur ${cur}`);
+    transaction.set(db.userProgress(courseId, userId), {
+        [metric]: firestore.FieldValue.increment(cur - prev),
+        [`level${uppercaseMetric}`]: {[level]: firestore.FieldValue.increment(cur - prev)},
+    }, {merge: true});
+    transaction.set(db.userProgress(courseId, userId).collection(`exercise${uppercaseMetric}`).doc(level), {
+        // workaround to be able to do Collection-Group queries
+        'userId': userId,
+        'courseId': courseId,
+        'level': level,
+        'progress': {[exerciseId]: res},
+    }, {merge: true});
 };
 
 
@@ -92,8 +100,8 @@ export const processSubmissionResult = async (
         await db.run(userId, submissionResult.id).set(submissionRes);
         return;
     }
-    functions.logger.info(`Updating the submission: ${submissionResult.id} with ${JSON.stringify(submissionResult)}`);
 
+    functions.logger.info(`Updating the submission: ${submissionResult.id} with ${JSON.stringify(submissionResult)}`);
     await firestore().runTransaction(async (transaction) => {
         // Update the best submissions
         const bestUserSubmissionsRef = db.submissionResults

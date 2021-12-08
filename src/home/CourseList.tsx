@@ -23,7 +23,7 @@ const useStyles = makeStyles((theme: Theme) =>
         },
         imageList: {
             width: 600,
-            height: 400,
+            minHeight: 400,
         },
         listItem: {
             "&:focus,&:hover": {

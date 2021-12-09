@@ -25,12 +25,6 @@ service cloud.firestore {
         allow read: if request.auth != null;
       }
 
-      // Only the backend should update the progress of the user
-      // The user should only be able to read the progress status
-      match /progress/{courseId}/private/{exerciseId} {
-        allow write: if false;
-      }
-
       // Only the backend should update the activity of the user
       // Other users can read the contents
       match /activity/{activityId} {
@@ -57,12 +51,8 @@ service cloud.firestore {
         allow read: if isCourseInstructor(request, courseId) || request.time > get(/databases/$(database)/documents/courses/$(courseId)).data.revealsAt;
       }
 
-      match /ranking/{userId} {
-        allow read: if isCourseInstructor(request, courseId) || get(/databases/$(database)/documents/courses/$(courseId)).data.rankingVisibility == 'public';
-      }
-
       match /progress/{userId} {
-        allow read: if isCourseInstructor(request, courseId) || isCurrentUser(request, userId);
+        allow read: if isCourseInstructor(request, courseId) || isCurrentUser(request, userId) || get(/databases/$(database)/documents/courses/$(courseId)).data.rankingVisibility == 'public';
 
         match /exerciseSolved/{level} {
           allow read: if isCourseInstructor(request, courseId) || isCurrentUser(request, userId);

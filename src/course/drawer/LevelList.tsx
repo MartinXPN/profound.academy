@@ -31,6 +31,7 @@ export default function LevelList({levelNumber, levelStatus, onItemSelected, isD
     const [open, setOpen] = useState(isSingleLevel);
     const [progress, setProgress] = useState<ExerciseProgress<SubmissionStatus> | null>(null);
     const statusToStyle = useStatusToStyledBackground();
+    const isCourseOpen = course && course.revealsAt.toDate() < new Date();
 
     useEffect(() => {
         if( !exercise )
@@ -39,23 +40,23 @@ export default function LevelList({levelNumber, levelStatus, onItemSelected, isD
 
         if( !open )
             setOpen(isExerciseInLevel);
-    }, [exercise, open, levelNumber]);
+        // intentionally leave out open - because we might want to close the level by clicking
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [exercise, levelNumber]);
 
     useEffect(() => {
         if( !course || !open )
             return;
 
         return onCourseLevelExercisesChanged(course.id, levelNumber + 1, setLevelExercises);
-    }, [course, open, levelNumber]);
+    }, [course, open, levelNumber, isCourseOpen]);
 
     useEffect(() => {
         if( !open || !auth.currentUserId || !course )
             return;
 
-        return onCourseExerciseProgressChanged(course.id, auth.currentUserId, (levelNumber + 1).toString(), progress => {
-            setProgress(progress);
-        });
-    }, [open, levelNumber, auth, course]);
+        return onCourseExerciseProgressChanged(course.id, auth.currentUserId, (levelNumber + 1).toString(), setProgress);
+    }, [open, levelNumber, auth, course, isCourseOpen]);
 
     const onLevelClicked = () => setOpen(!open);
     const getStatusStyle = (id: string) => {

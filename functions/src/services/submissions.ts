@@ -195,7 +195,7 @@ export const submit = async (submission: Submission): Promise<void> => {
         comparisonMode: exercise?.comparisonMode ?? 'token',
     };
     functions.logger.info(`submitting data: ${JSON.stringify(data)}`);
-    const res = await needle('post', AWS_LAMBDA_URL, JSON.stringify(data));
+    const res = await needle('post', AWS_LAMBDA_URL, JSON.stringify(data), {open_timeout: 100});
     functions.logger.info(`res: ${JSON.stringify(res.body)}`);
 
     const submissionResult = {

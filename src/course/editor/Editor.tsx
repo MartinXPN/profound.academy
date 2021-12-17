@@ -28,7 +28,6 @@ const useStyles = makeStyles({
         width: '100%',
         backgroundColor: '#d9d9d9',
         overflowY: 'auto',
-        padding: '10px',
     },
 });
 

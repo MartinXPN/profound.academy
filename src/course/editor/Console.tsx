@@ -1,6 +1,7 @@
 import React, {useEffect, useState} from "react";
 import {Add, Done, Send} from "@mui/icons-material";
-import { Button, CircularProgress, IconButton, Theme, Typography } from "@mui/material";
+import {Badge, Button, CircularProgress, IconButton, Theme, Typography} from "@mui/material";
+import HighlightOffTwoToneIcon from '@mui/icons-material/HighlightOffTwoTone';
 import createStyles from '@mui/styles/createStyles';
 import makeStyles from '@mui/styles/makeStyles';
 import ToggleButton from '@mui/material/ToggleButton';
@@ -16,6 +17,7 @@ const useStyles = makeStyles((theme: Theme) =>
         root: {
             width: '100%',
             overflow: 'hidden',
+            padding: '10px',
         },
         testText: {
             float: 'left',
@@ -29,7 +31,7 @@ const useStyles = makeStyles((theme: Theme) =>
         },
         addTest: {
             float: 'left',
-            padding: '8px',
+            padding: '12px',
         },
         button: {
             margin: theme.spacing(1),
@@ -87,7 +89,12 @@ function Console(props: Props) {
 
     const handleRun = () => onRunClicked(tests);
 
-    const onTestSelected = (event: React.MouseEvent<HTMLElement>, newTest: number | null) => setSelectedTest(newTest);
+    const onTestSelected = (newTest: number | null) => {
+        if( newTest === selectedTest )
+            setSelectedTest(null);
+        else
+            setSelectedTest(newTest);
+    }
     const onSaveTest = (index: number, input: string, target: string) => {
         let newTests = [...tests];
         newTests[index] = {
@@ -104,28 +111,35 @@ function Console(props: Props) {
         }]);
         setSelectedTest(len);
     }
+    const removeTest = (index: number) => {
+        const newTests = [...tests];
+        if( 0 <= index && index < newTests.length )
+            newTests.splice(index, 1);
+        setTests(newTests);
+    }
 
     return <>
         <div className={classes.root}>
             <Typography className={classes.testText}>TESTS: </Typography>
-            <ToggleButtonGroup
-                value={selectedTest}
-                exclusive
-                onChange={onTestSelected}
-                size='small'
-                aria-label="text alignment"
-                style={{float: 'left'}}>
+            <ToggleButtonGroup value={selectedTest} exclusive size='small' style={{float: 'left'}}>
 
                 {tests.map((test, index) => {
                     const currentStatus = Array.isArray(status) ? status[index] : status;
                     console.log('index:', index, 'status:', currentStatus);
-                    return (
-                        <ToggleButton value={index} id={`${index}`} key={index.toString()}
+                    return (<div key={index.toString()}>
+                        <Badge badgeContent={selectedTest === index
+                            ? <HighlightOffTwoToneIcon sx={{ color: '#515151', "&:focus,&:hover": {cursor: 'pointer'}}}
+                                                       fontSize="small"
+                                                       onClick={() => removeTest(index)}/>
+                            : 0}>
+                        <ToggleButton value={index} id={`${index}`}
+                                      onClick={() => onTestSelected(index)}
                                       className={classes.tests}
                                       style={{color: statusToColor(currentStatus, false)}}>
                             <Typography>{index + 1}</Typography>
                         </ToggleButton>
-                    )}
+                        </Badge>
+                    </div>)}
                 )}
             </ToggleButtonGroup>
             <IconButton id="add-test" className={classes.addTest} onClick={addTest} size="large"><Add /></IconButton>
@@ -154,23 +168,25 @@ function Console(props: Props) {
             <CircularProgress />
         </div>}
 
-        {submissionResult && submissionResult.compileOutputs &&
-        <>
-            <Typography className={classes.status} style={{color: statusColors.failed}}>{submissionResult.status}</Typography>
-            <Typography className={classes.content}>{submissionResult.compileOutputs}</Typography>
-        </>}
+        <div style={{padding: '10px'}}>
+            {submissionResult && submissionResult.compileOutputs &&
+            <>
+                <Typography className={classes.status} style={{color: statusColors.failed}}>{submissionResult.status}</Typography>
+                <Typography className={classes.content}>{submissionResult.compileOutputs}</Typography>
+            </>}
 
-        {!isProcessing && !submissionResult && selectedTest === null &&
-        <Typography className={classes.status}>Run the program to see the output, Submit to evaluate</Typography>}
+            {!isProcessing && !submissionResult && selectedTest === null &&
+            <Typography className={classes.status}>Run the program to see the output, Submit to evaluate</Typography>}
 
-        {selectedTest !== null && selectedTest < tests.length &&
-        <TestView
-            testCase={tests[selectedTest]}
-            output={outputs[selectedTest]}
-            status={Array.isArray(status) ? status[selectedTest] : status}
-            memory={Array.isArray(memory) ? memory[selectedTest] : memory}
-            time={Array.isArray(time) ? time[selectedTest] : time}
-            onSaveTest={(input, target) => onSaveTest(selectedTest, input, target)} />}
+            {selectedTest !== null && selectedTest < tests.length &&
+            <TestView
+                testCase={tests[selectedTest]}
+                output={outputs[selectedTest]}
+                status={Array.isArray(status) ? status[selectedTest] : status}
+                memory={Array.isArray(memory) ? memory[selectedTest] : memory}
+                time={Array.isArray(time) ? time[selectedTest] : time}
+                onSaveTest={(input, target) => onSaveTest(selectedTest, input, target)} />}
+        </div>
     </>;
 }
 

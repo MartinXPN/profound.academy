@@ -116,6 +116,7 @@ function Console(props: Props) {
         if( 0 <= index && index < newTests.length )
             newTests.splice(index, 1);
         setTests(newTests);
+        setSelectedTest(0 <= index - 1 && index - 1 < newTests.length ? index - 1 : null );
     }
 
     return <>

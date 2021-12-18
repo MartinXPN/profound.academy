@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from "react";
+import React, {memo, useCallback, useEffect, useState} from "react";
 import {Add, Done, Send} from "@mui/icons-material";
 import {Badge, Button, CircularProgress, IconButton, Theme, Typography} from "@mui/material";
 import HighlightOffTwoToneIcon from '@mui/icons-material/HighlightOffTwoTone';
@@ -54,23 +54,18 @@ const useStyles = makeStyles((theme: Theme) =>
     }),
 );
 
-interface Props {
-    exercise: Exercise;
-    onSubmitClicked: () => void;
-    onRunClicked: (tests: TestCase[]) => void;
-    isProcessing: boolean;
-    submissionResult: SubmissionResult | null;
-}
 
-
-function Console(props: Props) {
+function Console({exercise, onSubmitClicked, onRunClicked, isProcessing, submissionResult}: {
+    exercise: Exercise,
+    onSubmitClicked: () => void, onRunClicked: (tests: TestCase[]) => void,
+    isProcessing: boolean, submissionResult: SubmissionResult | null
+}) {
     const classes = useStyles();
-    const {exercise, onSubmitClicked, onRunClicked, isProcessing, submissionResult} = props;
 
-    const outputs = submissionResult && submissionResult.outputs ? submissionResult.outputs : [];
-    const status = submissionResult && submissionResult.status ? submissionResult.status : undefined;
-    const memory = submissionResult && submissionResult.memory ? submissionResult.memory : undefined;
-    const time = submissionResult && submissionResult.time ? submissionResult.time : undefined;
+    const outputs = submissionResult?.outputs ?? [];
+    const status = submissionResult?.status ?? undefined;
+    const memory = submissionResult?.memory ?? undefined;
+    const time = submissionResult?.time ?? undefined;
     const [selectedTest, setSelectedTest] = useState<number | null>(null);
     const [tests, setTests] = useState<TestCase[]>([]);
 
@@ -89,20 +84,20 @@ function Console(props: Props) {
 
     const handleRun = () => onRunClicked(tests);
 
-    const onTestSelected = (newTest: number | null) => {
+    const onTestSelected = useCallback((newTest: number | null) => {
         if( newTest === selectedTest )
             setSelectedTest(null);
         else
             setSelectedTest(newTest);
-    }
-    const onSaveTest = (index: number, input: string, target: string) => {
+    }, [selectedTest]);
+    const onSaveTest = useCallback((index: number, input: string, target: string) => {
         let newTests = [...tests];
         newTests[index] = {
             input: input,
             target: target,
         };
         setTests(newTests);
-    };
+    }, [tests]);
     const addTest = () => {
         const len = tests.length;
         setTests([...tests, {
@@ -191,4 +186,4 @@ function Console(props: Props) {
     </>;
 }
 
-export default Console;
+export default memo(Console);

@@ -1,7 +1,7 @@
 import {db} from "./db";
 import {LANGUAGES} from "../models/language";
 import firebase from "firebase";
-import {CodeDraft} from "../models/codeDrafts";
+import {CodeDraft, TextSelection} from "../models/codeDrafts";
 
 export const saveCode = async (
     courseId: string,
@@ -10,14 +10,14 @@ export const saveCode = async (
     userDisplayName: string,
     language: keyof typeof LANGUAGES,
     code?: { [key: string]: string },
-    cursor?: { start: number, end: number }
+    selection?: TextSelection
 ) => {
     await db.codeDraft(courseId, exerciseId, userId).set({
         userDisplayName: userDisplayName,
         language: language,
         updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
         code: code,
-        cursor: cursor,
+        selection: selection,
     }, {merge: true});
 }
 

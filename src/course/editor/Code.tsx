@@ -4,19 +4,19 @@ import AceEditor from "react-ace";
 import "ace-builds/webpack-resolver";
 import "ace-builds/src-noconflict/ext-language_tools";
 import useAsyncEffect from "use-async-effect";
+import {TextSelection} from "../../models/codeDrafts";
 
 
-interface Props {
-    theme: 'monokai' | 'github' | 'tomorrow' | 'kuroir' | 'twilight' | 'xcode' | 'textmate' | 'solarized_dark' | 'solarized_light' | 'terminal';
-    language: string;
-    fontSize: number;
-    setCode?: (code: string) => void;
-    code?: string;
-    readOnly: boolean;
-}
 
-const Code = memo(function Code(props: Props) {
-    const {theme, language, fontSize, setCode, code, readOnly} = props;
+const Code = function Code({theme, language, fontSize, setCode, code, readOnly, onSelectionChanged}: {
+    theme: 'monokai' | 'github' | 'tomorrow' | 'kuroir' | 'twilight' | 'xcode' | 'textmate' | 'solarized_dark' | 'solarized_light' | 'terminal',
+    language: string,
+    fontSize: number,
+    setCode?: (code: string) => void,
+    code?: string,
+    readOnly: boolean,
+    onSelectionChanged?: (selection: TextSelection) => void,
+}) {
     const [loadedTheme, setLoadedTheme] = useState('');
     const [loadedLanguage, setLoadedLanguage] = useState('');
 
@@ -64,6 +64,12 @@ const Code = memo(function Code(props: Props) {
                 console.log(value);
                 setCode && setCode(value);
             }}
+            onSelectionChange={(value, _) => {
+                onSelectionChanged && onSelectionChanged({
+                    start: {row: value.lead.row, column: value.lead.column},
+                    end: {row: value.anchor.row, column: value.anchor.column},
+                });
+            }}
             showPrintMargin
             showGutter
             highlightActiveLine
@@ -80,6 +86,6 @@ const Code = memo(function Code(props: Props) {
             editorProps={{ $blockScrolling: true }}
         />
     )
-});
+};
 
-export default Code;
+export default memo(Code);

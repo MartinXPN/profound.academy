@@ -7,11 +7,13 @@ export const saveCode = async (
     courseId: string,
     exerciseId: string,
     userId: string,
+    userDisplayName: string,
     language: keyof typeof LANGUAGES,
     code?: { [key: string]: string },
     cursor?: { start: number, end: number }
 ) => {
     await db.codeDraft(courseId, exerciseId, userId).set({
+        userDisplayName: userDisplayName,
         language: language,
         updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
         code: code,

@@ -49,14 +49,14 @@ function Editor({course, exercise}: {course: Course, exercise: Exercise}) {
     const increaseFontSize = () => setFontSize(Math.min(fontSize + 1, 30));
 
     useEffect(() => {
-        if( !auth.currentUserId )
+        if( !auth.currentUserId || !auth.currentUser )
             return;
 
         const timeOutId = setTimeout(() => {
             const extension = language.extension;
             const projectCode = {[`main.${extension}`]: code};
 
-            saveCode(course.id, exercise.id, auth.currentUserId!, language, projectCode, {start: 0, end: 0})
+            saveCode(course.id, exercise.id, auth.currentUserId!, auth.currentUser!.displayName!, language, projectCode, {start: 0, end: 0})
                 .then(() => console.log('successfully saved the code'));
         }, 500);
         return () => clearTimeout(timeOutId);

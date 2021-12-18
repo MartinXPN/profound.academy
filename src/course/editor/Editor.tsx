@@ -1,4 +1,4 @@
-import React, {useContext, useState} from "react";
+import React, {useContext, useEffect, useState} from "react";
 import Code from "./Code";  // needs to be before getModeForPath so that Ace is loaded
 import Console from "./Console";
 import {getModeForPath} from 'ace-builds/src-noconflict/ext-modelist';
@@ -10,6 +10,7 @@ import {Course, Exercise, TestCase} from "../../models/courses";
 import {onRunResultChanged, onSubmissionResultChanged, submitSolution} from "../../services/submissions";
 import {AuthContext} from "../../App";
 import {SubmissionResult} from "../../models/submissions";
+import {saveCode} from "../../services/codeDrafts";
 
 
 const useStyles = makeStyles({
@@ -46,6 +47,21 @@ function Editor({course, exercise}: {course: Course, exercise: Exercise}) {
     const editorLanguage = getModeForPath(`main.${language.extension}`).name;
     const decreaseFontSize = () => setFontSize(Math.max(fontSize - 1, 5));
     const increaseFontSize = () => setFontSize(Math.min(fontSize + 1, 30));
+
+    useEffect(() => {
+        if( !auth.currentUserId )
+            return;
+
+        const timeOutId = setTimeout(() => {
+            const extension = language.extension;
+            const projectCode = {[`main.${extension}`]: code};
+
+            saveCode(course.id, exercise.id, auth.currentUserId!, language, projectCode, {start: 0, end: 0})
+                .then(() => console.log('successfully saved the code'));
+        }, 500);
+        return () => clearTimeout(timeOutId);
+    }, [auth.currentUserId, course.id, exercise.id, code, language]);
+
     const onSubmitClicked = async () => {
         if( !auth.currentUserId || !auth.currentUser )
             return;

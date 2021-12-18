@@ -1,7 +1,7 @@
 import {TestCase} from "../../models/courses";
 import { TextField, Typography } from "@mui/material";
 import makeStyles from '@mui/styles/makeStyles';
-import React, {useEffect, useState} from "react";
+import React, {memo, useEffect, useState} from "react";
 import {statusToColor} from "../colors";
 
 const useStyles = makeStyles({
@@ -71,4 +71,4 @@ function TestView({testCase, output, status, memory, time, onSaveTest}:
     </>
 }
 
-export default TestView;
+export default memo(TestView);

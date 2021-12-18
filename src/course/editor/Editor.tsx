@@ -1,4 +1,4 @@
-import React, {useContext, useState} from "react";
+import React, {useCallback, useContext, useEffect, useState} from "react";
 import Code from "./Code";  // needs to be before getModeForPath so that Ace is loaded
 import Console from "./Console";
 import {getModeForPath} from 'ace-builds/src-noconflict/ext-modelist';
@@ -10,6 +10,8 @@ import {Course, Exercise, TestCase} from "../../models/courses";
 import {onRunResultChanged, onSubmissionResultChanged, submitSolution} from "../../services/submissions";
 import {AuthContext} from "../../App";
 import {SubmissionResult} from "../../models/submissions";
+import {saveCode} from "../../services/codeDrafts";
+import {TextSelection} from "../../models/codeDrafts";
 
 
 const useStyles = makeStyles({
@@ -36,6 +38,7 @@ function Editor({course, exercise}: {course: Course, exercise: Exercise}) {
     const classes = useStyles();
     const auth = useContext(AuthContext);
     const [code, setCode] = useStickyState('', `code-${auth?.currentUser?.uid}-${exercise.id}`);
+    const [selection, setSelection] = useState<TextSelection>({start: { row: 0, column: 0 }, end: { row: 0, column: 0 }});
     const [theme, setTheme] = useStickyState('tomorrow', `editorTheme-${auth?.currentUser?.uid}`);
     const [language, setLanguage] = useStickyState(course.preferredLanguage, `${course.id}-language-${auth?.currentUser?.uid}`);
     const [fontSize, setFontSize] = useStickyState(14, `fontSize-${auth?.currentUser?.uid}`);
@@ -46,40 +49,47 @@ function Editor({course, exercise}: {course: Course, exercise: Exercise}) {
     const editorLanguage = getModeForPath(`main.${language.extension}`).name;
     const decreaseFontSize = () => setFontSize(Math.max(fontSize - 1, 5));
     const increaseFontSize = () => setFontSize(Math.min(fontSize + 1, 30));
-    const onSubmitClicked = async () => {
+
+    useEffect(() => {
+        if( !auth.currentUserId || !auth.currentUser )
+            return;
+
+        const timeOutId = setTimeout(() => {
+            const extension = language.extension;
+            const projectCode = {[`main.${extension}`]: code};
+
+            saveCode(course.id, exercise.id, auth.currentUserId!, auth.currentUser!.displayName!, language, projectCode, selection)
+                .then(() => console.log('successfully saved the code'));
+        }, 500);
+        return () => clearTimeout(timeOutId);
+    }, [auth.currentUser, auth.currentUserId, course.id, exercise.id, code, language, selection]);
+
+
+    const onEvaluate = useCallback(async (mode: 'run' | 'submit', tests?: TestCase[]) => {
         if( !auth.currentUserId || !auth.currentUser )
             return;
 
         setSubmitted(true);
-        const submissionId = await submitSolution(auth.currentUserId, auth.currentUser.displayName, course.id, exercise.id, code, language, false, undefined);
-        const unsubscribe = onSubmissionResultChanged(submissionId, (result) => {
+        const submissionId = mode === 'submit'
+            ? await submitSolution(auth.currentUserId, auth.currentUser.displayName, course.id, exercise.id, code, language, false, tests)
+            : await submitSolution(auth.currentUserId, auth.currentUser.displayName, course.id, exercise.id, code, language, true, tests);
+
+        const onResultChanged = mode === 'submit' ? onSubmissionResultChanged: onRunResultChanged;
+        return onResultChanged(auth.currentUserId, submissionId, (result) => {
             setSubmissionResult(result);
             if(result)
                 setSubmitted(false);
         });
+    }, [auth.currentUserId, auth.currentUser, course.id, exercise.id, code, language, setSubmissionResult]);
+    const handleSubmit = useCallback(async () => onEvaluate('submit'), [onEvaluate]);
+    const handleRun = useCallback(async (tests) => onEvaluate('run', tests), [onEvaluate]);
 
-        return () => unsubscribe();
-    }
-
-    const onRunClicked = async (tests: TestCase[]) => {
-        if( !auth.currentUserId || !auth.currentUser )
-            return;
-
-        setSubmitted(true);
-        const runId = await submitSolution(auth.currentUserId, auth.currentUser.displayName, course.id, exercise.id, code, language, true, tests);
-        const unsubscribe = onRunResultChanged(auth.currentUserId, runId, (result) => {
-            setSubmissionResult(result);
-            if(result)
-                setSubmitted(false);
-        });
-
-        return () => unsubscribe();
-    };
 
     return (
         <div style={{height: '100%'}}>
             <div className={classes.code}>
-                <Code theme={theme} readOnly={false} language={editorLanguage} fontSize={fontSize} setCode={setCode} code={code}/>
+                <Code theme={theme} readOnly={false} language={editorLanguage} fontSize={fontSize}
+                      setCode={setCode} code={code} onSelectionChanged={setSelection}/>
                 <div className={classes.settings}>
                     <IconButton aria-label="decrease" onClick={decreaseFontSize} size="large"><Remove fontSize="small" /></IconButton>
                     <IconButton aria-label="increase" onClick={increaseFontSize} size="large"><Add fontSize="small" /></IconButton>
@@ -89,8 +99,8 @@ function Editor({course, exercise}: {course: Course, exercise: Exercise}) {
             <div className={classes.console}>
                 <Console
                     exercise={exercise}
-                    onSubmitClicked={onSubmitClicked}
-                    onRunClicked={onRunClicked}
+                    onSubmitClicked={handleSubmit}
+                    onRunClicked={handleRun}
                     isProcessing={submitted}
                     submissionResult={submissionResult} />
             </div>

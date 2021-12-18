@@ -1,4 +1,4 @@
-import React, {useContext} from 'react';
+import React, {memo, useContext} from 'react';
 import {Theme} from '@mui/material/styles';
 import {createStyles, makeStyles} from '@mui/styles';
 import {ImageList, ImageListItem, ImageListItemBar, IconButton} from '@mui/material';
@@ -41,15 +41,9 @@ const useStyles = makeStyles((theme: Theme) =>
     }),
 );
 
-
-interface CourseListProps {
-    courses: Course[];
-}
-
-function CourseListView(props: CourseListProps) {
+const ListView = ({courses}: {courses: Course[]}) => {
     const history = useHistory();
     const classes = useStyles();
-    const {courses} = props;
 
     return <>
         <div className={classes.root}>
@@ -79,6 +73,8 @@ function CourseListView(props: CourseListProps) {
         </div>
     </>;
 }
+const CourseListView = memo(ListView);
+
 
 function CourseList() {
     const auth = useContext(AuthContext);
@@ -92,29 +88,25 @@ function CourseList() {
     }, []);
 
     useAsyncEffect(async () => {
-        const user = auth?.currentUser;
-        if (!auth?.isSignedIn || !user || !user.uid)
+        if (!auth.currentUserId)
             return;
 
-        if (!user || !user.uid) return;
-        console.log('user id:', user.uid);
-        const res = await getUserCourses(user.uid);
+        console.log('user id:', auth.currentUserId);
+        const res = await getUserCourses(auth.currentUserId);
         setUserCourses(res);
-    }, [auth]);
+    }, [auth.currentUserId]);
 
 
-    return (
+    return <>
+        {(auth?.isSignedIn && userCourses && userCourses.length > 0) &&
         <>
-            {(auth?.isSignedIn && userCourses && userCourses.length > 0) &&
-            <>
-                <Typography variant='h5' className={classes.title}>My Curriculum</Typography>
-                <CourseListView courses={userCourses}/>
-            </>}
+            <Typography variant='h5' className={classes.title}>My Curriculum</Typography>
+            <CourseListView courses={userCourses}/>
+        </>}
 
-            <Typography variant='h5' className={classes.title}>All Courses</Typography>
-            <CourseListView courses={allCourses ?? []}/>
-        </>
-    )
+        <Typography variant='h5' className={classes.title}>All Courses</Typography>
+        <CourseListView courses={allCourses ?? []}/>
+    </>
 }
 
-export default CourseList;
+export default memo(CourseList);

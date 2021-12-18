@@ -115,5 +115,12 @@ service cloud.firestore {
     match /submissions/{submissionId}/private/{userId} {
       allow read: if isCurrentUser(request, userId) || isInstructor(request, submissionId);
     }
+
+
+    // CodeDrafts
+    match /codeDrafts/{courseId}/{exerciseId}/{userId} {
+      allow read: if isCurrentUser(request, userId) || isCourseInstructor(request, resource.data.courseId);
+      allow write: if isCurrentUser(request, userId);
+    }
   }
 }

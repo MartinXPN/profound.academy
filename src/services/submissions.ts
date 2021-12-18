@@ -34,17 +34,17 @@ export const submitSolution = async (userId: string, userDisplayName: string | n
 }
 
 export const onRunResultChanged = (userId: string, submissionId: string,
-                                   onChanged: (submissionResult: SubmissionResult | undefined) => void) => {
+                                   onChanged: (submissionResult: SubmissionResult | null) => void) => {
     const resultSnapshot = db.run(userId, submissionId);
     return resultSnapshot.onSnapshot(doc => {
         const res = doc.data();
         console.log('Run result changed:', submissionId, res);
-        onChanged(res);
+        onChanged(res ?? null);
     })
 }
 
 
-export const onSubmissionResultChanged = (submissionId: string,
+export const onSubmissionResultChanged = (userId: string, submissionId: string,
                                           onChanged: (submissionResult: SubmissionResult | null) => void) => {
     const resultSnapshot = db.submissionResult(submissionId);
     return resultSnapshot.onSnapshot(doc => {

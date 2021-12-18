@@ -6,6 +6,7 @@ import {Notification} from "../models/notifications";
 import {Course, Exercise, ExerciseProgress, Progress} from "../models/courses";
 import {Submission, SubmissionResult, SubmissionSensitiveRecords, SubmissionStatus} from "../models/submissions";
 import {Comment, Vote} from "../models/forum";
+import {CodeDraft} from "../models/codeDrafts";
 
 // Add ids when getting the data and removing when sending it
 const converter = <T>() => ({
@@ -49,6 +50,8 @@ const db = {
     submissionResults: dataPoint<SubmissionResult>('submissions'),
     submissionResult: (submissionId: string) => dataPoint<SubmissionResult>('submissions').doc(submissionId),
     submissionSensitiveRecords: (userId: string, submissionId: string) => dataPoint<SubmissionSensitiveRecords>(`/submissions/${submissionId}/private`).doc(userId),
+
+    codeDraft: (courseId: string, exerciseId: string, userId: string) => dataPoint<CodeDraft>(`codeDrafts/${courseId}/${exerciseId}`).doc(userId),
 };
 
 export {db}

@@ -43,24 +43,22 @@ function Header() {
     const auth = useContext(AuthContext);
     const landingPageImageURL = 'https://firebasestorage.googleapis.com/v0/b/profound-academy.appspot.com/o/images%2Fwebsite-landing.jpg?alt=media&token=a0d2a928-9de7-4886-a0ad-ca584a82b011';
 
-    return (
-        <>
-            {!auth?.isSignedIn ?
-                <div className={classes.root}>
-                    <img src={landingPageImageURL} alt='Landing page cover' className={classes.bigImage} />
-                    {!showSignInOptions &&
-                    <Button variant="contained" color="primary" size="large" className={classes.button}
-                            onClick={() => setShowSignInOptions(true)}>GET STARTED</Button>}
-                    {showSignInOptions && <SignIn />}
-                </div>
-                :
-                <div className={classes.authProfile}>
-                    <AppBarNotifications />
-                    <AppBarProfile />
-                </div>
-            }
-        </>
-    )
+    return <>
+        {!auth?.isSignedIn ?
+            <div className={classes.root}>
+                <img src={landingPageImageURL} alt='Landing page cover' className={classes.bigImage} />
+                {!showSignInOptions &&
+                <Button variant="contained" color="primary" size="large" className={classes.button}
+                        onClick={() => setShowSignInOptions(true)}>GET STARTED</Button>}
+                {showSignInOptions && <SignIn />}
+            </div>
+            :
+            <div className={classes.authProfile}>
+                <AppBarNotifications />
+                <AppBarProfile />
+            </div>
+        }
+    </>
 }
 
 export default Header;

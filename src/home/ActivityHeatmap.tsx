@@ -1,4 +1,4 @@
-import React, {useContext} from 'react';
+import React, {memo, useContext} from 'react';
 import CalendarHeatmap from 'react-calendar-heatmap';
 import 'react-calendar-heatmap/dist/styles.css';
 import {styled} from "@mui/material/styles";
@@ -19,12 +19,12 @@ const useStyles = makeStyles({
     colorScale4: {fill: '#1e6823'},
 });
 
-const HeatmapDiv = styled('div')(({theme}) => ({
+const HeatmapDiv = styled('div')({
     width: '50em',
     marginTop: '4em',
     marginLeft: 'auto',
     marginRight: 'auto',
-}));
+});
 
 
 
@@ -35,13 +35,13 @@ function ActivityHeatmap() {
     const [totalActivity, setTotalActivity] = useStickyState<number | null>(null, `totalActivity-${auth?.currentUser?.uid}`);
 
     useAsyncEffect(async () => {
-        if( auth && auth.currentUser && auth.currentUser.uid ) {
-            const activity = await getUserActivity(auth.currentUser.uid);
-            console.log('Got activity:', activity);
-            setActivity(activity);
-            setTotalActivity(activity.reduce((sum, a) => sum + a.count, 0));
-        }
-    }, [auth]);
+        if( !auth.currentUserId )
+            return;
+
+        const activity = await getUserActivity(auth.currentUserId);
+        setActivity(activity);
+        setTotalActivity(activity.reduce((sum, a) => sum + a.count, 0));
+    }, [auth.currentUserId]);
 
     const endDate = new Date();
     const startDate = new Date();
@@ -78,4 +78,4 @@ function ActivityHeatmap() {
     </>
 }
 
-export default ActivityHeatmap;
+export default memo(ActivityHeatmap);

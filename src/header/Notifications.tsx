@@ -22,24 +22,24 @@ export default function AppBarNotifications() {
     const [unreadNotifications, setUnreadNotifications] = useState(0);
 
     const onNotificationClicked = async (notification: Notification) => {
-        if( !auth?.currentUser?.uid )
+        if( !auth.currentUserId )
             return;
-        await readNotification(auth.currentUser.uid, notification.id);
+        await readNotification(auth.currentUserId, notification.id);
         history.push(notification.url);
     }
 
     useEffect(() => {
-        if( !auth?.currentUser ) {
+        if( !auth.currentUserId ) {
             setNotifications([]);
             return;
         }
-        const unsubscribe = onNotificationsChanged(auth.currentUser.uid, (notifs) => {
+        const unsubscribe = onNotificationsChanged(auth.currentUserId, (notifs) => {
             setUnreadNotifications(notifs.filter(n => !n.readAt).length);
             setNotifications(notifs);
         });
 
         return () => unsubscribe();
-    }, [auth]);
+    }, [auth.currentUserId]);
 
     if( !auth?.currentUser )
         return <></>

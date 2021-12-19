@@ -1,11 +1,10 @@
-import React, {memo, useContext} from 'react';
+import React, {memo} from 'react';
 import CalendarHeatmap from 'react-calendar-heatmap';
 import 'react-calendar-heatmap/dist/styles.css';
 import {styled} from "@mui/material/styles";
 import {Tooltip, Typography} from "@mui/material";
 import makeStyles from "@mui/styles/makeStyles";
 import moment from "moment/moment";
-import {AuthContext} from "../App";
 import useAsyncEffect from "use-async-effect";
 import {Activity} from "../models/users";
 import {getUserActivity} from "../services/users";
@@ -28,20 +27,16 @@ const HeatmapDiv = styled('div')({
 
 
 
-function ActivityHeatmap() {
-    const auth = useContext(AuthContext);
+function ActivityHeatmap({userId}: {userId: string}) {
     const classes = useStyles();
-    const [activity, setActivity] = useStickyState<Activity[] | null>(null, `activity-${auth?.currentUser?.uid}`);
-    const [totalActivity, setTotalActivity] = useStickyState<number | null>(null, `totalActivity-${auth?.currentUser?.uid}`);
+    const [activity, setActivity] = useStickyState<Activity[] | null>(null, `activity-${userId}`);
+    const [totalActivity, setTotalActivity] = useStickyState<number | null>(null, `totalActivity-${userId}`);
 
     useAsyncEffect(async () => {
-        if( !auth.currentUserId )
-            return;
-
-        const activity = await getUserActivity(auth.currentUserId);
+        const activity = await getUserActivity(userId);
         setActivity(activity);
         setTotalActivity(activity.reduce((sum, a) => sum + a.count, 0));
-    }, [auth.currentUserId]);
+    }, [userId]);
 
     const endDate = new Date();
     const startDate = new Date();

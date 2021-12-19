@@ -11,6 +11,7 @@ import { ThemeProvider, StyledEngineProvider, createTheme } from '@mui/material/
 import Home from "./home/Home";
 import Course from "./course/Course";
 import {useStickyState} from "./util";
+import UserProfile from "./profile/UserProfile";
 
 
 firebase.analytics();
@@ -64,12 +65,9 @@ function App() {
                 setCurrentUser: setCurrentUser,
             }}>
             <Switch>
-                <Route exact path="/">
-                    <Home />
-                </Route>
-                <Route path={'/:courseId'}>
-                    <Course />
-                </Route>
+                <Route exact path="/"><Home/></Route>
+                <Route exact path={'/users/:userId'}><UserProfile/></Route>
+                <Route path={'/:courseId'}><Course/></Route>
             </Switch>
             </AuthContext.Provider>
             </ThemeProvider>

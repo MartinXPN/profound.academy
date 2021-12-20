@@ -36,6 +36,18 @@ export const getUserCourses = async (userId: string) => {
     return courses;
 }
 
+export const getCompletedCourses = async (userId: string) => {
+    const snap = await db.user(userId).get();
+    console.log('snap:', snap);
+    const us = snap.data();
+    if (!us || !us.completed)
+        return [];
+
+    const courses: Course[] = await Promise.all(us.completed.map(x => getCourse(x.id)));
+    console.log('Completed courses:', courses);
+    return courses;
+}
+
 export const startCourse = async (userId: string, courseId: string) => {
     const course = db.course(courseId);
     const user = (await db.user(userId).get()).data();

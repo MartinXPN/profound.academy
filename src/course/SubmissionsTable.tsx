@@ -1,4 +1,4 @@
-import React, {useEffect, useRef} from "react";
+import React, {useCallback, useEffect, useRef} from "react";
 import useState from 'react-usestateref';
 import Paper from '@mui/material/Paper';
 import Table from '@mui/material/Table';
@@ -17,6 +17,7 @@ import {SubmissionResult} from "../models/submissions";
 import moment from "moment/moment";
 import SubmissionBackdrop from "./SubmissionBackdrop";
 import {statusToColor} from "./colors";
+import {useHistory} from "react-router-dom";
 
 interface Column {
     id: '#' | 'userDisplayName' | 'createdAt' | 'status' | 'time' | 'memory' | 'language';
@@ -61,12 +62,17 @@ function SubmissionsTable({course, exercise, mode}: {course: Course, exercise: E
     const [pageSubmissions, setPageSubmissions, pageSubmissionsRef] = useState<SubmissionResult[][]>([]);
     const [updateSubscriptions, setUpdateSubscriptions] = useState<(() => void)[]>([]);
     const [displayedSubmission, setDisplayedSubmission] = useState<SubmissionResult | undefined>(undefined);
+    const history = useHistory();
 
     const onSubmissionClicked = async (submission: SubmissionResult) => {
         console.log('clicked!', submission);
         setDisplayedSubmission(submission);
     }
     const onCloseSubmission = () => setDisplayedSubmission(undefined);
+
+    const onUserClicked = useCallback((userId: string) => {
+        history.push(`/users/${userId}`);
+    }, [history]);
 
     useEffect(() => {
         // unsubscribe from all the listeners
@@ -138,13 +144,12 @@ function SubmissionsTable({course, exercise, mode}: {course: Course, exercise: E
                         <TableRow hover role="checkbox" tabIndex={-1} key={row.id} onClick={() => onSubmissionClicked(row)}>
                             {columns.map((column) => {
                                 if( column.id === '#' )
-                                    return (
-                                        <TableCell key={column.id} align={column.align}>
-                                            {orderNumber++}
-                                        </TableCell>
-                                    );
+                                    return <TableCell key={column.id} align={column.align}>{orderNumber++}</TableCell>;
 
                                 const value = row[column.id];
+                                if( column.id === 'userDisplayName' )
+                                    return <TableCell key={column.id} align={column.align} sx={{"&:focus,&:hover": {cursor: 'pointer'}}} onClick={() => onUserClicked(row.userId)}>{value}</TableCell>
+
                                 // @ts-ignore
                                 const style = column.id === 'status' ? {color: statusToColor(value)} : {};
                                 return (

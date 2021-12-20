@@ -56,13 +56,13 @@ function Bottom({hasMore, loadMore}: {hasMore: boolean, loadMore: () => void}) {
 
 
 function SubmissionsTable({course, exercise, mode}: {course: Course, exercise: Exercise, mode: 'all' | 'best'}) {
+    const history = useHistory();
     const [page, setPage, pageRef] = useState(0);
     const [hasMore, setHasMore, moreRef] = useState(true);
     const rowsPerPage = 5;
     const [pageSubmissions, setPageSubmissions, pageSubmissionsRef] = useState<SubmissionResult[][]>([]);
     const [updateSubscriptions, setUpdateSubscriptions] = useState<(() => void)[]>([]);
     const [displayedSubmission, setDisplayedSubmission] = useState<SubmissionResult | undefined>(undefined);
-    const history = useHistory();
 
     const onSubmissionClicked = async (submission: SubmissionResult) => {
         console.log('clicked!', submission);

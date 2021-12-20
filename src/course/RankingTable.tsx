@@ -1,4 +1,4 @@
-import React, {useContext, useEffect, useState} from "react";
+import React, {useCallback, useContext, useEffect, useState} from "react";
 import Paper from '@mui/material/Paper';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -13,9 +13,11 @@ import {CourseContext} from "./Course";
 import {Equalizer} from "@mui/icons-material";
 import {Typography} from "@mui/material";
 import useAsyncEffect from "use-async-effect";
+import {useHistory} from "react-router-dom";
 
 
 function RankingTable({metric}: {metric: 'score' | 'solved' | 'upsolveScore'}) {
+    const history = useHistory();
     const {course} = useContext(CourseContext);
     const [page, setPage] = useState(0);
     const rowsPerPage = 20;
@@ -85,6 +87,10 @@ function RankingTable({metric}: {metric: 'score' | 'solved' | 'upsolveScore'}) {
         }
     }, [course, levelOpen, exerciseMetric]);
 
+    const onUserClicked = useCallback((userId: string) => {
+        history.push(`/users/${userId}`);
+    }, [history]);
+
 
     const onLevelClicked = (level: number) => {
         const levelName = (level + 1).toString();
@@ -129,7 +135,9 @@ function RankingTable({metric}: {metric: 'score' | 'solved' | 'upsolveScore'}) {
                         {progress.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row, index) =>
                         <TableRow hover role="checkbox" tabIndex={-1} key={row.id}>
                             <TableCell key="#" align="center">{page * rowsPerPage + index + 1}</TableCell>
-                            <TableCell key="userDisplayName" align="left">{row.userDisplayName}</TableCell>
+                            <TableCell key="userDisplayName" align="left"
+                                       sx={{"&:focus,&:hover": {cursor: 'pointer'}}}
+                                       onClick={() => onUserClicked(row.id)}>{row.userDisplayName}</TableCell>
                             { /* @ts-ignore */ }
                             <TableCell key="total" align="right">{metric in row ? row[metric].toFixed(0): '-' }</TableCell>
 

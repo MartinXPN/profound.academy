@@ -12,6 +12,7 @@ import Home from "./home/Home";
 import Course from "./course/Course";
 import {useStickyState} from "./util";
 import UserProfile from "./profile/UserProfile";
+import {updateUserInfo} from "./services/users";
 
 
 firebase.analytics();
@@ -49,8 +50,13 @@ function App() {
 
     // Listen to the Firebase Auth state and set the local state.
     useEffect(() => {
-        const unregisterAuthObserver = firebase.auth().onAuthStateChanged(setCurrentUser);
-        return () => unregisterAuthObserver(); // Make sure we un-register Firebase observers when the component unmounts.
+        return firebase.auth().onAuthStateChanged(user => {
+            console.log('auth state changed...', user);
+            if( user )
+                updateUserInfo(user.uid, user.displayName ?? undefined, user.photoURL ?? undefined)
+                    .then(() => console.log('Successfully updated user info'));
+            setCurrentUser(user);
+        });
     }, [setCurrentUser]);
 
 

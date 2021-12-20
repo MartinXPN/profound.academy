@@ -8,6 +8,7 @@ import firebase from 'firebase/app';
 import 'firebase/auth';
 import {AuthContext} from "../App";
 import {useHistory} from "react-router-dom";
+import useAsyncEffect from "use-async-effect";
 
 // Configure FirebaseUI.
 const uiConfig = {
@@ -31,10 +32,7 @@ export const SignIn = memo(function SignIn() {
 
     // Listen to the Firebase Auth state and set the local state.
     useEffect(() => {
-        const unregisterAuthObserver = firebase.auth().onAuthStateChanged(user => {
-            auth?.setCurrentUser(user);
-        });
-        return () => unregisterAuthObserver(); // Make sure we un-register Firebase observers when the component unmounts.
+        return firebase.auth().onAuthStateChanged(auth.setCurrentUser);
     }, [auth]);
 
     if (!auth?.isSignedIn) {
@@ -68,6 +66,10 @@ export function AppBarProfile() {
         if( auth.currentUserId )
             history.push(`/users/${auth.currentUserId}`);
     }
+
+    useAsyncEffect(async () => {
+
+    }, [auth.currentUser]);
 
     return <>
         <IconButton

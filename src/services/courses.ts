@@ -20,13 +20,11 @@ export const getAllCourses = async () => {
 export const getCourse = async (id: string) => {
     const snapshot = await db.course(id).get();
     const course: Course = snapshot.data() as Course;
-    console.log('Get course:', course);
     return course;
 }
 
 export const getUserCourses = async (userId: string) => {
     const snap = await db.user(userId).get();
-    console.log('snap:', snap);
     const us = snap.data();
     if (!us || !us.courses)
         return [];
@@ -38,7 +36,6 @@ export const getUserCourses = async (userId: string) => {
 
 export const getCompletedCourses = async (userId: string) => {
     const snap = await db.user(userId).get();
-    console.log('snap:', snap);
     const us = snap.data();
     if (!us || !us.completed)
         return [];

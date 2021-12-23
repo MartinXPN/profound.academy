@@ -52,7 +52,7 @@ const UploadBackground = styled(Paper)(() => ({
     background: 'rgba(50,50,50,0.50)',
 }));
 
-const fileTypes = ["jpeg", "jpg", "png"];
+const fileTypes = ['jpeg', 'jpg', 'png', 'webp'];
 
 function UserImage({user}: {user: User}) {
     const auth = useContext(AuthContext);

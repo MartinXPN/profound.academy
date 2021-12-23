@@ -1,5 +1,5 @@
 import React, {useContext, useEffect, useState} from "react";
-import {Avatar, Badge, Button, darken, IconButton, Paper, Stack, Typography} from "@mui/material";
+import {Avatar, Badge, Button, darken, IconButton, Paper, Stack, TextField, Typography} from "@mui/material";
 import {styled} from "@mui/material/styles";
 import CircularProgress from "@mui/material/CircularProgress";
 import Box from "@mui/material/Box";
@@ -7,7 +7,7 @@ import {Edit} from "@mui/icons-material";
 import {AuthContext} from "../App";
 import {FileUploader} from "react-drag-drop-files";
 import {User} from "../models/users";
-import {onUserInfoChanged, uploadProfilePicture} from "../services/users";
+import {onUserInfoChanged, updateUserInfo, uploadProfilePicture} from "../services/users";
 
 
 const UserInfoRoot = styled('div')(({theme}) => ({
@@ -109,6 +109,36 @@ function UserImage({user}: {user: User}) {
     </Stack>
 }
 
+function UserName({user}: {user: User}) {
+    const auth = useContext(AuthContext);
+    const [editing, setEditing] = useState(false);
+    const [name, setName] = useState(user.displayName);
+    useEffect(() => setName(user.displayName), [user.displayName]);
+
+    const onEditClicked = () => setEditing(true);
+    const onCancelClicked = () => setEditing(false);
+    const onSaveClicked = async () => {
+        await updateUserInfo(user.id, name);
+        setEditing(false);
+    };
+    const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setName(event.target.value);
+    };
+
+
+    return <Stack direction="row" sx={{paddingTop: '10px'}}>
+        {!editing && <Typography variant="h5" sx={{fontWeight: 600}}>{user.displayName}</Typography>}
+        {editing && <TextField required variant="outlined" label="First & Last name" size="medium" value={name} onChange={handleChange} sx={{fontWeight: 600}} />}
+        {auth.currentUserId === user.id && <>
+            {!editing && <IconButton color="inherit" onClick={onEditClicked}><Edit /></IconButton>}
+            {editing && <>
+                <Button variant="outlined" onClick={onSaveClicked}>Save</Button>
+                <Button variant="outlined" onClick={onCancelClicked}>Cancel</Button>
+            </>}
+        </>}
+    </Stack>
+}
+
 
 function UserInfo({userId}: {userId: string}) {
     const [user, setUser] = useState<User | null>(null);
@@ -124,7 +154,7 @@ function UserInfo({userId}: {userId: string}) {
                 {user ? <>
                     <UserImage user={user} />
                     <Stack spacing={2} sx={{flex: 1}}>
-                        <Typography variant="h5" sx={{fontWeight: 600}}>{user.displayName}</Typography>
+                        <UserName user={user} />
                         <Typography>Trophies and badges coming soon...</Typography>
                     </Stack>
                 </> :

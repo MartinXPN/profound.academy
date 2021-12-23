@@ -11,14 +11,16 @@ import { ThemeProvider, StyledEngineProvider, createTheme } from '@mui/material/
 import Home from "./home/Home";
 import Course from "./course/Course";
 import {useStickyState} from "./util";
+import UserProfile from "./profile/UserProfile";
+import {updateUserInfo} from "./services/users";
 
 
 firebase.analytics();
 const theme = createTheme({
     palette: {
         background: {
-            default: 'white',
-            paper: 'white',
+            default: '#ffffff',
+            paper: '#ffffff',
         },
         primary: {
             main: '#4B5FAA',
@@ -48,8 +50,13 @@ function App() {
 
     // Listen to the Firebase Auth state and set the local state.
     useEffect(() => {
-        const unregisterAuthObserver = firebase.auth().onAuthStateChanged(setCurrentUser);
-        return () => unregisterAuthObserver(); // Make sure we un-register Firebase observers when the component unmounts.
+        return firebase.auth().onAuthStateChanged(user => {
+            console.log('auth state changed...', user);
+            if( user )
+                updateUserInfo(user.uid, user.displayName ?? undefined, user.photoURL ?? undefined)
+                    .then(() => console.log('Successfully updated user info'));
+            setCurrentUser(user);
+        });
     }, [setCurrentUser]);
 
 
@@ -64,12 +71,9 @@ function App() {
                 setCurrentUser: setCurrentUser,
             }}>
             <Switch>
-                <Route exact path="/">
-                    <Home />
-                </Route>
-                <Route path={'/:courseId'}>
-                    <Course />
-                </Route>
+                <Route exact path="/"><Home/></Route>
+                <Route exact path={'/users/:userId'}><UserProfile/></Route>
+                <Route path={'/:courseId'}><Course/></Route>
             </Switch>
             </AuthContext.Provider>
             </ThemeProvider>

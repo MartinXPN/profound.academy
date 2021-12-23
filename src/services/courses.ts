@@ -20,19 +20,28 @@ export const getAllCourses = async () => {
 export const getCourse = async (id: string) => {
     const snapshot = await db.course(id).get();
     const course: Course = snapshot.data() as Course;
-    console.log('Get course:', course);
     return course;
 }
 
 export const getUserCourses = async (userId: string) => {
     const snap = await db.user(userId).get();
-    console.log('snap:', snap);
     const us = snap.data();
     if (!us || !us.courses)
         return [];
 
     const courses: Course[] = await Promise.all(us.courses.map(x => getCourse(x.id)));
     console.log('User courses:', courses);
+    return courses;
+}
+
+export const getCompletedCourses = async (userId: string) => {
+    const snap = await db.user(userId).get();
+    const us = snap.data();
+    if (!us || !us.completed)
+        return [];
+
+    const courses: Course[] = await Promise.all(us.completed.map(x => getCourse(x.id)));
+    console.log('Completed courses:', courses);
     return courses;
 }
 

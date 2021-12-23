@@ -95,17 +95,17 @@ function CurrentCourseView({openPage}: {openPage: (page: string) => void}) {
     }, [currentExerciseId, course]);
 
     return <>
-            <CurrentExerciseContext.Provider value={{exercise: currentExercise}}>
-                <CourseDrawer
-                    onItemSelected={openExercise}
-                    showRanking={showRanking}
-                    onRankingClicked={openRanking} />
+        <CurrentExerciseContext.Provider value={{exercise: currentExercise}}>
+            <CourseDrawer
+                onItemSelected={openExercise}
+                showRanking={showRanking}
+                onRankingClicked={openRanking} />
 
-                <main className={classes.content}>
-                    <div className={classes.toolbar}/>
-                    <CurrentExercise launchCourse={launchCourse}/>
-                </main>
-            </CurrentExerciseContext.Provider>
+            <main className={classes.content}>
+                <div className={classes.toolbar}/>
+                <CurrentExercise launchCourse={launchCourse}/>
+            </main>
+        </CurrentExerciseContext.Provider>
     </>
 }
 

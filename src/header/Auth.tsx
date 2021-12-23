@@ -1,11 +1,14 @@
 import React, {memo, useContext, useEffect, useState} from 'react';
 import {Avatar, IconButton, MenuItem, ListItemIcon, ListItemText} from "@mui/material";
 import ExitToAppIcon from '@mui/icons-material/ExitToApp';
+import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import Menu from '@mui/material/Menu';
 import StyledFirebaseAuth from 'react-firebaseui/StyledFirebaseAuth';
 import firebase from 'firebase/app';
 import 'firebase/auth';
 import {AuthContext} from "../App";
+import {useHistory} from "react-router-dom";
+import useAsyncEffect from "use-async-effect";
 
 // Configure FirebaseUI.
 const uiConfig = {
@@ -13,6 +16,10 @@ const uiConfig = {
     signInFlow: 'popup',
     // We will display Google and Facebook as auth providers.
     signInOptions: [
+        {
+            provider: firebase.auth.EmailAuthProvider.PROVIDER_ID,
+            requireDisplayName: true,
+        },
         firebase.auth.GoogleAuthProvider.PROVIDER_ID,
         firebase.auth.FacebookAuthProvider.PROVIDER_ID,
         'microsoft.com',
@@ -29,10 +36,7 @@ export const SignIn = memo(function SignIn() {
 
     // Listen to the Firebase Auth state and set the local state.
     useEffect(() => {
-        const unregisterAuthObserver = firebase.auth().onAuthStateChanged(user => {
-            auth?.setCurrentUser(user);
-        });
-        return () => unregisterAuthObserver(); // Make sure we un-register Firebase observers when the component unmounts.
+        return firebase.auth().onAuthStateChanged(auth.setCurrentUser);
     }, [auth]);
 
     if (!auth?.isSignedIn) {
@@ -50,7 +54,7 @@ export const SignIn = memo(function SignIn() {
 
 export function AppBarProfile() {
     const auth = useContext(AuthContext);
-    const user = auth?.currentUser;
+    const history = useHistory();
 
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
     const open = Boolean(anchorEl);
@@ -62,6 +66,14 @@ export function AppBarProfile() {
         handleClose();
         await firebase.auth().signOut();
     }
+    const onUserProfileClicked = () => {
+        if( auth.currentUserId )
+            history.push(`/users/${auth.currentUserId}`);
+    }
+
+    useAsyncEffect(async () => {
+
+    }, [auth.currentUser]);
 
     return <>
         <IconButton
@@ -72,10 +84,17 @@ export function AppBarProfile() {
             edge="end"
             size="large">
             { /*@ts-ignore*/ }
-            {user ? <Avatar src={user.photoURL} alt={user.displayName} /> : <Avatar/>}
+            {auth.currentUser ? <Avatar src={auth.currentUser.photoURL} alt={auth.currentUser.displayName} /> : <Avatar/>}
         </IconButton>
 
-        <Menu
+        {
+            // Rendering multiple StyledFirebaseAuth components result in https://github.com/firebase/firebaseui-web-react/issues/59
+            // <MenuList autoFocusItem={open} id="menu-list-grow" style={{width: '20em'}}>
+            //     <MenuItem key='sign-in'><SignIn /></MenuItem>
+            // </MenuList>
+        }
+
+        {auth.currentUser && <Menu
             anchorEl={anchorEl}
             open={open}
             onClose={handleClose}
@@ -85,23 +104,21 @@ export function AppBarProfile() {
                 sx: {
                     overflow: 'visible',
                     filter: 'drop-shadow(0px 2px 8px rgba(0,0,0,0.24))',
+                    minWidth: '10em',
                 },
             }}
             transformOrigin={{ horizontal: 'right', vertical: 'top' }}
             anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
         >
-        {user ?
+            <MenuItem onClick={onUserProfileClicked} key='user-profile'>
+                <ListItemIcon><AccountCircleIcon fontSize="medium" /></ListItemIcon>
+                <ListItemText>Profile</ListItemText>
+            </MenuItem>
+
             <MenuItem onClick={onSignOutClicked} key='sign-out'>
-                <ListItemIcon><ExitToAppIcon fontSize="small" /></ListItemIcon>
+                <ListItemIcon><ExitToAppIcon fontSize="medium" /></ListItemIcon>
                 <ListItemText>Logout</ListItemText>
             </MenuItem>
-            :
-            <></>
-            // Rendering multiple StyledFirebaseAuth components result in https://github.com/firebase/firebaseui-web-react/issues/59
-            // <MenuList autoFocusItem={open} id="menu-list-grow" style={{width: '20em'}}>
-            //     <MenuItem key='sign-in'><SignIn /></MenuItem>
-            // </MenuList>
-        }
-        </Menu>
+        </Menu>}
     </>;
 }

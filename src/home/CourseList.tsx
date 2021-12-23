@@ -1,4 +1,4 @@
-import React, {memo, useContext} from 'react';
+import React, {memo} from 'react';
 import {Theme} from '@mui/material/styles';
 import {createStyles, makeStyles} from '@mui/styles';
 import {ImageList, ImageListItem, ImageListItemBar, IconButton} from '@mui/material';
@@ -6,9 +6,8 @@ import {Tooltip, Typography} from "@mui/material";
 import InfoIcon from '@mui/icons-material/Info';
 
 import {Course} from '../models/courses';
-import {getAllCourses, getUserCourses} from "../services/courses";
+import {getAllCourses, getCompletedCourses, getUserCourses} from "../services/courses";
 import useAsyncEffect from "use-async-effect";
-import {AuthContext} from "../App";
 import {useHistory} from "react-router-dom";
 import {useStickyState} from "../util";
 
@@ -23,7 +22,7 @@ const useStyles = makeStyles((theme: Theme) =>
         },
         imageList: {
             width: 600,
-            minHeight: 400,
+            minHeight: 300,
         },
         listItem: {
             "&:focus,&:hover": {
@@ -41,14 +40,35 @@ const useStyles = makeStyles((theme: Theme) =>
     }),
 );
 
-const ListView = ({courses}: {courses: Course[]}) => {
+function CourseList({variant, title, userId}: {
+    variant: 'allCourses' | 'userCourses' | 'completedCourses', title: string, userId?: string
+}) {
     const history = useHistory();
     const classes = useStyles();
+    const [courses, setCourses] = useStickyState<Course[] | null>(null, `${variant}-${userId}`);
 
+    useAsyncEffect(async () => {
+        if( variant === 'allCourses' ) {
+            const res = await getAllCourses();
+            setCourses(res);
+            return;
+        }
+        if (!userId)
+            return;
+        console.log('user id:', userId);
+
+        const res = variant === 'userCourses' ? await getUserCourses(userId) : await getCompletedCourses(userId);
+        setCourses(res);
+    }, [variant, userId]);
+
+
+    if( !courses || courses.length === 0 )
+        return <></>
     return <>
+        <Typography variant='h5' className={classes.title}>{title}</Typography>
         <div className={classes.root}>
             <ImageList rowHeight={180} className={classes.imageList}>
-                {courses.map((item) => (
+                {courses.map((item: Course) => (
                     <ImageListItem className={classes.listItem} key={item.id}
                                    onClick={() => history.push(`/${item.id}`)}>
                         <img src={item.img} alt={item.title} loading="lazy" 
@@ -72,41 +92,6 @@ const ListView = ({courses}: {courses: Course[]}) => {
             </ImageList>
         </div>
     </>;
-}
-const CourseListView = memo(ListView);
-
-
-function CourseList() {
-    const auth = useContext(AuthContext);
-    const classes = useStyles();
-    const [allCourses, setAllCourses] = useStickyState<Course[] | null>(null, `allCourses`);
-    const [userCourses, setUserCourses] = useStickyState<Course[] | null>(null, `userCourses-${auth?.currentUser?.uid}`);
-
-    useAsyncEffect(async () => {
-        const res = await getAllCourses();
-        setAllCourses(res);
-    }, []);
-
-    useAsyncEffect(async () => {
-        if (!auth.currentUserId)
-            return;
-
-        console.log('user id:', auth.currentUserId);
-        const res = await getUserCourses(auth.currentUserId);
-        setUserCourses(res);
-    }, [auth.currentUserId]);
-
-
-    return <>
-        {(auth?.isSignedIn && userCourses && userCourses.length > 0) &&
-        <>
-            <Typography variant='h5' className={classes.title}>My Curriculum</Typography>
-            <CourseListView courses={userCourses}/>
-        </>}
-
-        <Typography variant='h5' className={classes.title}>All Courses</Typography>
-        <CourseListView courses={allCourses ?? []}/>
-    </>
 }
 
 export default memo(CourseList);

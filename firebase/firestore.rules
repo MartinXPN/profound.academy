@@ -11,8 +11,7 @@ service cloud.firestore {
 
     match /users/{userId} {
       allow read: if isCurrentUser(request, userId);
-      // User can add courses
-      allow create, update: if isCurrentUser(request, userId) && request.resource.data.courses.size() > 0;
+      allow create, update: if isCurrentUser(request, userId);
 
       // Allow recording the user's votes
       match /votes/{commentId} {

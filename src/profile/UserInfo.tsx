@@ -1,11 +1,13 @@
-import useAsyncEffect from "use-async-effect";
-import {getUserInfo} from "../services/users";
-import React, {useState} from "react";
-import {User} from "../models/users";
-import {Avatar, Stack, Typography} from "@mui/material";
+import React, {useContext, useEffect, useState} from "react";
+import {Avatar, Badge, Button, darken, IconButton, Paper, Stack, Typography} from "@mui/material";
 import {styled} from "@mui/material/styles";
 import CircularProgress from "@mui/material/CircularProgress";
 import Box from "@mui/material/Box";
+import {Edit} from "@mui/icons-material";
+import {AuthContext} from "../App";
+import {FileUploader} from "react-drag-drop-files";
+import {User} from "../models/users";
+import {onUserInfoChanged, uploadProfilePicture} from "../services/users";
 
 
 const UserInfoRoot = styled('div')(({theme}) => ({
@@ -27,29 +29,109 @@ const UserInfoContents = styled('div')({
     gap: '3em',
 });
 
+const EditImageButton = styled(IconButton)(({theme}) => ({
+    background: theme.palette.background.default,
+    '&:hover': {
+        background: darken(theme.palette.background.default, 0.2),
+    },
+    filter: 'drop-shadow(0px 1px 1px rgba(0,0,0,0.2))',
+}));
+
+const UploadBackground = styled(Paper)(() => ({
+    width: 150,
+    height: 150,
+    border: '2px solid lightgray',
+    gridColumn: 1,
+    gridRow: 1,
+    zIndex: 10,
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: '50%',
+    background: 'rgba(50,50,50,0.50)',
+}));
+
+const fileTypes = ["jpeg", "jpg", "png"];
+
+function UserImage({user}: {user: User}) {
+    const auth = useContext(AuthContext);
+    const [state, setState] = useState<'open' | 'editing' | 'uploading'>('open');
+    const onEditClicked = () => setState('editing');
+    const onCancelClicked = () => setState('open');
+    const handleChange = async (file: File) => {
+        setState('uploading');
+        await uploadProfilePicture(user.id, file);
+        setState('open');
+    };
+
+    return <Stack direction="column">
+        <Badge
+            overlap="circular"
+            anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+            invisible={auth.currentUserId !== user.id}
+            badgeContent={<>{state === 'open' &&
+                <EditImageButton color="inherit" onClick={onEditClicked}>
+                    <Edit />
+                </EditImageButton>}
+            </>
+            }>
+
+            {state === 'open' && <Avatar
+                src={user.imageUrl}
+                sx={{width: 150, height: 150, border: '2px solid lightgray'}} />}
+
+            {state !== 'open' && <FileUploader
+                handleChange={handleChange}
+                minSize={0.01}
+                maxSize={1}
+                name="file"
+                types={fileTypes}>
+
+                <div style={{display: 'grid'}}>
+                    <Avatar
+                        src={user.imageUrl}
+                        sx={{width: 150, height: 150, border: '2px solid lightgray', gridColumn: 1, gridRow: 1}} />
+                    <UploadBackground>
+                        {state === 'editing'
+                        ? <>
+                            <Typography color="common.white" align="center">Drag & Drop here</Typography>
+                            <Typography color="common.white" align="center">Or click to select</Typography>
+                        </>
+                        : <>
+                            <CircularProgress />
+                        </>}
+                    </UploadBackground>
+                </div>
+            </FileUploader>}
+        </Badge>
+        {state === 'editing' && <Button color="inherit" variant="text" onClick={onCancelClicked}>Cancel</Button>}
+    </Stack>
+}
 
 
 function UserInfo({userId}: {userId: string}) {
     const [user, setUser] = useState<User | null>(null);
-    useAsyncEffect(async () => {
-        const user = await getUserInfo(userId);
-        setUser(user);
+    useEffect(() => {
+        return onUserInfoChanged(userId, (user) => {
+            setUser(user);
+        })
     }, [userId]);
 
     return <>
         <UserInfoRoot>
             <UserInfoContents>
                 {user ? <>
-                    <Avatar src={user.imageUrl} sx={{width: 150, height: 150, border: '2px solid lightgray'}}/>
-                    <Stack spacing={2}>
-                        <Typography variant="h5" sx={{fontWeight: 600}}>{user.displayName ?? 'Name'}</Typography>
+                    <UserImage user={user} />
+                    <Stack spacing={2} sx={{flex: 1}}>
+                        <Typography variant="h5" sx={{fontWeight: 600}}>{user.displayName}</Typography>
                         <Typography>Trophies and badges coming soon...</Typography>
                     </Stack>
-                </> : <>
-                    <Box sx={{width: 150, height: 150, display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
-                        <CircularProgress/>
-                    </Box>
-                </>}
+                </> :
+                <Box sx={{width: 150, height: 150, display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
+                    <CircularProgress/>
+                </Box>
+                }
             </UserInfoContents>
         </UserInfoRoot>
     </>

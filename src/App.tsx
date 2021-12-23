@@ -19,8 +19,8 @@ firebase.analytics();
 const theme = createTheme({
     palette: {
         background: {
-            default: 'white',
-            paper: 'white',
+            default: '#ffffff',
+            paper: '#ffffff',
         },
         primary: {
             main: '#4B5FAA',

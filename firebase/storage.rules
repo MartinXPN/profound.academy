@@ -9,10 +9,10 @@ service firebase.storage {
       return request.auth != null && request.auth.uid == userId;
     }
 
-    // Allow users to upload submissions under their directories
-    match /submissions/{userId}/{exerciseId}/{submissionPath=**} {
-      allow create: if isCurrentUser(request, userId);
-      allow read: if isCurrentUser(request, userId);
+    // Allow users to upload profile pictures under their directories
+    match /profilePictures/{userId}/{filename} {
+      allow write: if isCurrentUser(request, userId);
+      allow read;
     }
   }
 }

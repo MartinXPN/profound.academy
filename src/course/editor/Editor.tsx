@@ -13,12 +13,13 @@ import {SubmissionResult} from "../../models/submissions";
 import {saveCode} from "../../services/codeDrafts";
 import {TextSelection} from "../../models/codeDrafts";
 import {CourseContext, CurrentExerciseContext} from "../Course";
+import {SplitPane} from "react-multi-split-pane";
 
 
 const useStyles = makeStyles({
     code: {
         position: 'relative',
-        height: '70%',
+        height: '100%',
         width: '100%',
     },
     settings: {
@@ -27,7 +28,7 @@ const useStyles = makeStyles({
         right: 0,
     },
     console: {
-        height: '30%',
+        height: '100%',
         width: '100%',
         backgroundColor: '#d9d9d9',
         overflowY: 'auto',
@@ -46,6 +47,7 @@ function Editor() {
     const [theme, setTheme] = useStickyState('tomorrow', `editorTheme-${auth?.currentUser?.uid}`);
     const [language, setLanguage] = useStickyState(course?.preferredLanguage, `${course?.id}-language-${auth?.currentUser?.uid}`);
     const [fontSize, setFontSize] = useStickyState(14, `fontSize-${auth?.currentUser?.uid}`);
+    const [splitPos, setSplitPos] = useStickyState<number[] | null>(null, `consoleSplitPos-${auth?.currentUserId}`);
 
     const [submissionResult, setSubmissionResult] = useStickyState<SubmissionResult | null>(null, `submissionRes-${auth?.currentUser?.uid}-${exercise?.id}`);
     const [submitted, setSubmitted] = useState(false);
@@ -53,6 +55,12 @@ function Editor() {
     const editorLanguage = getModeForPath(`main.${language.extension}`).name;
     const decreaseFontSize = () => setFontSize(Math.max(fontSize - 1, 5));
     const increaseFontSize = () => setFontSize(Math.min(fontSize + 1, 30));
+
+    const onSplitChanged = useCallback((newSplit) => {
+        console.log('split:', newSplit);
+        setSplitPos(newSplit);
+    }, [setSplitPos]);
+
 
     useEffect(() => {
         if( !auth.currentUserId || !auth.currentUser || !course || !exercise )
@@ -89,8 +97,8 @@ function Editor() {
     const handleRun = useCallback(async (tests) => onEvaluate('run', tests), [onEvaluate]);
 
 
-    return (
-        <div style={{height: '100%'}}>
+    return <>
+        <SplitPane split="horizontal" defaultSizes={splitPos ?? [3, 1]} onDragFinished={onSplitChanged}>
             <div className={classes.code}>
                 <Code theme={theme} readOnly={false} language={editorLanguage} fontSize={fontSize}
                       setCode={setCode} code={code} onSelectionChanged={setSelection}/>
@@ -107,8 +115,8 @@ function Editor() {
                     isProcessing={submitted}
                     submissionResult={submissionResult} />
             </div>
-        </div>
-    );
+        </SplitPane>
+    </>
 }
 
 export default Editor;

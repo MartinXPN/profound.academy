@@ -126,7 +126,7 @@ export default function Exercise({launchCourse}: {launchCourse: () => void}) {
                 </div>
             </SplitPane>
         }
-        {auth?.isSignedIn && !showSignIn && exerciseId === 'ranking' && <>
+        {auth?.isSignedIn && exerciseId === 'ranking' && <>
         {course.freezeAt.toDate().getTime() - new Date().getTime() < 24 * 60 * 60 * 1000 ?
             <SplitPane split="vertical" defaultSizes={splitPos ?? [1, 1]} onDragFinished={onSplitChanged}>
                 <div className={classes.ranking}><RankingTable metric="score"/></div>

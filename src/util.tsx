@@ -2,7 +2,7 @@ import {MutableRefObject, useEffect, useState} from "react";
 
 
 
-function safeParse<T>(str: string | null, defaultValue: T) {
+export function safeParse<T>(str: string | null, defaultValue: T) {
     if( !str )
         return defaultValue;
     try {

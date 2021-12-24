@@ -1,53 +1,134 @@
-import Content from "./Content";
+import {useParams} from "react-router-dom";
 import React, {useContext, useState} from "react";
-import Button from "@mui/material/Button";
-import { Theme } from "@mui/material";
-import createStyles from '@mui/styles/createStyles';
+import {AuthContext} from "../App";
+import {useStickyState} from "../util";
+import LandingPage from "./LandingPage";
+import {startCourse} from "../services/courses";
+import {SignIn} from "../header/Auth";
+import SplitPane from "react-split-pane";
+import Editor from "./editor/Editor";
+import RankingTable from "./RankingTable";
 import makeStyles from '@mui/styles/makeStyles';
-import SubmissionsTable from "./SubmissionsTable";
-import Forum from "./forum/Forum";
 import {CourseContext, CurrentExerciseContext} from "./Course";
-
-const useStyles = makeStyles((theme: Theme) =>
-    createStyles({
-        tabChooser: {
-            textAlign: 'center',
-            padding: '10px'
-        },
-        button: {
-            margin: theme.spacing(1),
-            borderRadius: 50,
-            size: 'large',
-        },
-    }),
-);
+import Countdown from "react-countdown";
+import {Stack, Theme, Typography} from "@mui/material";
+import Button from "@mui/material/Button";
+import Content from "./Content";
+import Forum from "./forum/Forum";
+import SubmissionsTable from "./SubmissionsTable";
 
 
+const useStyles = makeStyles((theme: Theme) =>({
+    landingPage: {
+        paddingBottom: '12em',
+    },
+    exercise: {
+        overflowY: 'auto',
+        height: '100%',
+    },
+    tabChooser: {
+        textAlign: 'center',
+        padding: '10px'
+    },
+    button: {
+        margin: theme.spacing(1),
+        borderRadius: 50,
+        size: 'large',
+    },
+    ranking: {
+        overflow: 'auto',
+        height: '100%',
+        width: '100%',
+    }
+}));
 
-function ExerciseView() {
+export default function Exercise({launchCourse}: {launchCourse: () => void}) {
     const classes = useStyles();
+    const auth = useContext(AuthContext);
     const {course} = useContext(CourseContext);
     const {exercise} = useContext(CurrentExerciseContext);
+    console.log('exercise:', exercise);
 
-    const [currentTab, setCurrentTab] = useState('description'); // {description / allSubmissions / bestSubmissions}
-    console.log('ExerciseView:', exercise);
+    const {exerciseId} = useParams<{ exerciseId: string }>();
+    const [showSignIn, setShowSignIn] = useState(false);
+    const [splitPos, setSplitPos] = useStickyState(50, `splitPos-${auth?.currentUser?.uid}`);
+    const [currentTab, setCurrentTab] = useState<'description' | 'allSubmissions' | 'bestSubmissions'>('description');
 
-    if( !course || !exercise )
+    if(auth?.isSignedIn && showSignIn)
+        setShowSignIn(false);
+
+
+    const renderer = ({ days, hours, minutes, seconds, completed }:
+                          {days: number, hours: number, minutes: number, seconds: number, completed: boolean}) => {
+        if( !course )
+            return <></>
+        return completed ?
+            <RankingTable metric="upsolveScore" /> :
+            <div style={{textAlign: 'center'}}>
+                <br/><br/><br/>
+                <Typography variant="h5">Freezes in</Typography>
+                <Typography variant="h2">{days * 24 + hours}:{minutes.toString().padStart(2, '0')}:{seconds.toString().padStart(2, '0')}</Typography>
+            </div>;
+    };
+
+    if( !course )
         return <></>
     return <>
-        <div className={classes.tabChooser}>
-            <Button className={classes.button} variant={currentTab === 'description' ? 'contained' : 'outlined'} onClick={() => setCurrentTab('description')}>Description</Button>
-            <Button className={classes.button} variant={currentTab === 'bestSubmissions' ? 'contained' : 'outlined'} onClick={() => setCurrentTab('bestSubmissions')}>Best Submissions</Button>
-            <Button className={classes.button} variant={currentTab === 'allSubmissions' ? 'contained' : 'outlined'} onClick={() => setCurrentTab('allSubmissions')}>All Submissions</Button>
-        </div>
+        {/* Display the landing page with an option to start the course if it wasn't started yet */
+            !exerciseId &&
+            <div className={classes.landingPage}>
+                <LandingPage course={course} introPageId={course.introduction} onStartCourseClicked={async () => {
+                    if (auth && auth.currentUser && auth.currentUser.uid) {
+                        await startCourse(auth.currentUser.uid, course.id);
+                        launchCourse();
+                    } else {
+                        setShowSignIn(true);
+                    }
+                }}/>
 
-        {currentTab === 'description' && <>
-            <Content notionPage={exercise.pageId}/>
-            <Forum />
-        </>}
-        {currentTab === 'bestSubmissions' && <SubmissionsTable course={course} exercise={exercise} mode="best" />}
-        {currentTab === 'allSubmissions' && <SubmissionsTable course={course} exercise={exercise} mode="all" />}
+                {showSignIn && <SignIn />}
+            </div>
+        }
+
+        {/* Display the exercise of the course at the location where it was left off the last time*/}
+        {exercise && exerciseId !== 'ranking' &&
+            <SplitPane split='vertical' defaultSize={splitPos} onChange={setSplitPos}>
+                <div className={classes.exercise}>
+                    <div className={classes.tabChooser}>
+                        <Button className={classes.button} variant={currentTab === 'description' ? 'contained' : 'outlined'} onClick={() => setCurrentTab('description')}>Description</Button>
+                        <Button className={classes.button} variant={currentTab === 'bestSubmissions' ? 'contained' : 'outlined'} onClick={() => setCurrentTab('bestSubmissions')}>Best Submissions</Button>
+                        <Button className={classes.button} variant={currentTab === 'allSubmissions' ? 'contained' : 'outlined'} onClick={() => setCurrentTab('allSubmissions')}>All Submissions</Button>
+                    </div>
+
+                    {currentTab === 'description' && <>
+                        <Content notionPage={exercise.pageId}/>
+                        {auth.isSignedIn && <Forum/>}
+                    </>}
+                    {currentTab === 'bestSubmissions' && <SubmissionsTable course={course} exercise={exercise} mode="best" />}
+                    {currentTab === 'allSubmissions' && <SubmissionsTable course={course} exercise={exercise} mode="all" />}
+                </div>
+                <div style={{width: '100%', height: '100%'}}>
+                    {auth.isSignedIn && <Editor/>}
+                    {!auth.isSignedIn && <Stack direction="column" alignItems="center">
+                        <br/><br/><br/><br/><br/><br/>
+                        <Typography variant="subtitle2">To check your solution you need to sign in</Typography>
+                        <SignIn />
+                    </Stack>}
+                </div>
+            </SplitPane>
+        }
+        {auth?.isSignedIn && !showSignIn && exerciseId === 'ranking' && <>
+        {course.freezeAt.toDate().getTime() - new Date().getTime() < 24 * 60 * 60 * 1000 ?
+            <SplitPane split='vertical' defaultSize={splitPos} onChange={setSplitPos}>
+                <div className={classes.ranking}><RankingTable metric="score"/></div>
+                <Countdown
+                    date={course.freezeAt.toDate()}
+                    intervalDelay={0}
+                    precision={3}
+                    renderer={renderer}/>
+            </SplitPane>
+            :
+            <div className={classes.ranking}><RankingTable metric="score"/></div>
+        }</>}
     </>
 }
-
-export default ExerciseView;

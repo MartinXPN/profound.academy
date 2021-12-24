@@ -1,5 +1,5 @@
 import React, {memo, useCallback, useContext, useEffect, useState} from 'react';
-import {Avatar, IconButton, MenuItem, ListItemIcon, ListItemText} from "@mui/material";
+import {Avatar, IconButton, MenuItem, ListItemIcon, ListItemText, Typography} from "@mui/material";
 import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import Menu from '@mui/material/Menu';
@@ -42,7 +42,7 @@ export const SignIn = memo(function SignIn() {
     if (!auth?.isSignedIn) {
         return (
             <div style={{left: '50%', textAlign: 'center'}}>
-                <h3>Sign in to continue</h3>
+                <Typography variant="h6">Sign in to continue</Typography>
                 <StyledFirebaseAuth uiCallback={ui => ui.disableAutoSignIn()} uiConfig={uiConfig} firebaseAuth={firebase.auth()} />
             </div>
         );

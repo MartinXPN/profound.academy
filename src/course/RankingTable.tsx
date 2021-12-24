@@ -42,13 +42,13 @@ function RankingTable({metric}: {metric: 'score' | 'solved' | 'upsolveScore'}) {
             const maxLevel = progress.map(p => levelMetric in p ? p[levelMetric] as number : {'1': 0})
                 .map(scores => scores ? Object.keys(scores)
                     .map(level => parseInt(level))
-                    .reduce((prev, cur) => Math.max(prev, cur)) : 0)
-                .reduce((prev, cur) => Math.max(prev, cur));
+                    .reduce((prev, cur) => Math.max(prev, cur), 0) : 0)
+                .reduce((prev, cur) => Math.max(prev, cur), 0);
 
             setMaxLevel(maxLevel);
 
             // single-level rankings should always be open
-            if( maxLevel === 1 )
+            if( maxLevel <= 1 )
                 setLevelOpen({...levelOpen, '1': true});
         });
     }, [course, metric, levelMetric]);

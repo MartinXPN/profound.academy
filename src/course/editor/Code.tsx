@@ -50,7 +50,7 @@ const Code = function Code({theme, language, fontSize, setCode, code, readOnly, 
     }, []);
 
 
-    return (
+    return <>
         <AceEditor
             placeholder="Start typing your code..."
             mode={loadedLanguage}
@@ -84,8 +84,15 @@ const Code = function Code({theme, language, fontSize, setCode, code, readOnly, 
                 tabSize: 4,
             }}
             editorProps={{ $blockScrolling: true }}
+            onLoad={editorInstance => {
+                editorInstance.container.style.resize = "both";
+                // mouseup = css resize end
+                document.addEventListener("mouseup", e => (
+                    editorInstance.resize()
+                ));
+            }}
         />
-    )
+    </>
 };
 
 export default memo(Code);

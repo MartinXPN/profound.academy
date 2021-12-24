@@ -1,11 +1,10 @@
 import {useParams} from "react-router-dom";
-import React, {useContext, useState} from "react";
+import React, {useCallback, useContext, useState} from "react";
 import {AuthContext} from "../App";
 import {useStickyState} from "../util";
 import LandingPage from "./LandingPage";
 import {startCourse} from "../services/courses";
 import {SignIn} from "../header/Auth";
-import SplitPane from "react-split-pane";
 import Editor from "./editor/Editor";
 import RankingTable from "./RankingTable";
 import makeStyles from '@mui/styles/makeStyles';
@@ -16,6 +15,8 @@ import Button from "@mui/material/Button";
 import Content from "./Content";
 import Forum from "./forum/Forum";
 import SubmissionsTable from "./SubmissionsTable";
+import {SplitPane} from "react-multi-split-pane";
+import "./SplitPane.css";
 
 
 const useStyles = makeStyles((theme: Theme) =>({
@@ -25,6 +26,7 @@ const useStyles = makeStyles((theme: Theme) =>({
     exercise: {
         overflowY: 'auto',
         height: '100%',
+        width: '100%',
     },
     tabChooser: {
         textAlign: 'center',
@@ -51,11 +53,17 @@ export default function Exercise({launchCourse}: {launchCourse: () => void}) {
 
     const {exerciseId} = useParams<{ exerciseId: string }>();
     const [showSignIn, setShowSignIn] = useState(false);
-    const [splitPos, setSplitPos] = useStickyState(50, `splitPos-${auth?.currentUser?.uid}`);
+    const [splitPos, setSplitPos] = useStickyState<number[] | null>(null, `splitPos-${auth?.currentUserId}`);
     const [currentTab, setCurrentTab] = useState<'description' | 'allSubmissions' | 'bestSubmissions'>('description');
 
     if(auth?.isSignedIn && showSignIn)
         setShowSignIn(false);
+
+    console.log(splitPos);
+    const onSplitChanged = useCallback((newSplit) => {
+        console.log('split:', newSplit);
+        setSplitPos(newSplit);
+    }, [setSplitPos]);
 
 
     const renderer = ({ days, hours, minutes, seconds, completed }:
@@ -92,7 +100,7 @@ export default function Exercise({launchCourse}: {launchCourse: () => void}) {
 
         {/* Display the exercise of the course at the location where it was left off the last time*/}
         {exercise && exerciseId !== 'ranking' &&
-            <SplitPane split='vertical' defaultSize={splitPos} onChange={setSplitPos}>
+            <SplitPane split="vertical" defaultSizes={splitPos ?? [1, 1]} onDragFinished={onSplitChanged}>
                 <div className={classes.exercise}>
                     <div className={classes.tabChooser}>
                         <Button className={classes.button} variant={currentTab === 'description' ? 'contained' : 'outlined'} onClick={() => setCurrentTab('description')}>Description</Button>
@@ -107,6 +115,7 @@ export default function Exercise({launchCourse}: {launchCourse: () => void}) {
                     {currentTab === 'bestSubmissions' && <SubmissionsTable course={course} exercise={exercise} mode="best" />}
                     {currentTab === 'allSubmissions' && <SubmissionsTable course={course} exercise={exercise} mode="all" />}
                 </div>
+
                 <div style={{width: '100%', height: '100%'}}>
                     {auth.isSignedIn && <Editor/>}
                     {!auth.isSignedIn && <Stack direction="column" alignItems="center">
@@ -119,7 +128,7 @@ export default function Exercise({launchCourse}: {launchCourse: () => void}) {
         }
         {auth?.isSignedIn && !showSignIn && exerciseId === 'ranking' && <>
         {course.freezeAt.toDate().getTime() - new Date().getTime() < 24 * 60 * 60 * 1000 ?
-            <SplitPane split='vertical' defaultSize={splitPos} onChange={setSplitPos}>
+            <SplitPane split="vertical" defaultSizes={splitPos ?? [1, 1]} onDragFinished={onSplitChanged}>
                 <div className={classes.ranking}><RankingTable metric="score"/></div>
                 <Countdown
                     date={course.freezeAt.toDate()}

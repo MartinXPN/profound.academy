@@ -8,10 +8,10 @@ import makeStyles from '@mui/styles/makeStyles';
 
 import {getCourse, getExercise, getFirstExercise} from "../services/courses";
 import useAsyncEffect from "use-async-effect";
-import {Course, Exercise} from "../models/courses";
+import {Course, Exercise as ExerciseModel} from "../models/courses";
 import {AuthContext} from "../App";
 import CourseDrawer from "./drawer/Drawer";
-import CurrentExercise from "./CurrentExercise";
+import Exercise from "./Exercise";
 import {useStickyState} from "../util";
 
 
@@ -37,7 +37,7 @@ const useStyles = makeStyles((theme: Theme) =>
 );
 
 export const CourseContext = createContext<{ course: Course | null }>({course: null});
-export const CurrentExerciseContext = createContext<{ exercise: Exercise | null }>({exercise: null});
+export const CurrentExerciseContext = createContext<{ exercise: ExerciseModel | null }>({exercise: null});
 
 
 function CurrentCourseView({openPage}: {openPage: (page: string) => void}) {
@@ -47,10 +47,10 @@ function CurrentCourseView({openPage}: {openPage: (page: string) => void}) {
     const [showRanking, setShowRanking] = useState<boolean>(false);
 
     const {exerciseId} = useParams<{ exerciseId: string }>();
-    const [currentExercise, setCurrentExercise] = useState<Exercise | null>(null);
+    const [currentExercise, setCurrentExercise] = useState<ExerciseModel | null>(null);
     const [currentExerciseId, setCurrentExerciseId] = useStickyState<string>('', `ex-${auth?.currentUserId}-${course?.id}`);
 
-    const openExercise = useCallback((exercise: Exercise) => {
+    const openExercise = useCallback((exercise: ExerciseModel) => {
         setCurrentExercise(exercise);
         openPage(exercise.id);
     }, [openPage]);
@@ -85,14 +85,14 @@ function CurrentCourseView({openPage}: {openPage: (page: string) => void}) {
         if( !course || !currentExerciseId )
             return;
         if( currentExercise && currentExercise.id === currentExerciseId ) {
-            console.log('Not loading the exercise as it is already the current one');
+            console.log('Not loading the exercise as it is already the current one', currentExercise.id, currentExerciseId, currentExercise);
             return;
         }
 
         const ex = await getExercise(course.id, currentExerciseId);
         console.log('Updating current exercise to:', ex);
         setCurrentExercise(ex);
-    }, [currentExerciseId, course]);
+    }, [currentExerciseId, currentExercise, course]);
 
     return <>
         <CurrentExerciseContext.Provider value={{exercise: currentExercise}}>
@@ -103,7 +103,7 @@ function CurrentCourseView({openPage}: {openPage: (page: string) => void}) {
 
             <main className={classes.content}>
                 <div className={classes.toolbar}/>
-                <CurrentExercise launchCourse={launchCourse}/>
+                <Exercise launchCourse={launchCourse}/>
             </main>
         </CurrentExerciseContext.Provider>
     </>

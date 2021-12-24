@@ -12,7 +12,7 @@ import {Course, Exercise as ExerciseModel} from "../models/courses";
 import {AuthContext} from "../App";
 import CourseDrawer from "./drawer/Drawer";
 import Exercise from "./Exercise";
-import {useStickyState} from "../util";
+import {safeParse} from "../util";
 
 
 const useStyles = makeStyles((theme: Theme) =>
@@ -40,6 +40,12 @@ export const CourseContext = createContext<{ course: Course | null }>({course: n
 export const CurrentExerciseContext = createContext<{ exercise: ExerciseModel | null }>({exercise: null});
 
 
+export const lastExerciseId = (userId?: string, courseId?: string) => {
+    const key = `ex-${userId}-${courseId}`;
+    const storageValue = localStorage.getItem(key);
+    return safeParse(storageValue, '');
+};
+
 function CurrentCourseView({openPage}: {openPage: (page: string) => void}) {
     const classes = useStyles();
     const auth = useContext(AuthContext);
@@ -48,7 +54,11 @@ function CurrentCourseView({openPage}: {openPage: (page: string) => void}) {
 
     const {exerciseId} = useParams<{ exerciseId: string }>();
     const [currentExercise, setCurrentExercise] = useState<ExerciseModel | null>(null);
-    const [currentExerciseId, setCurrentExerciseId] = useStickyState<string>('', `ex-${auth?.currentUserId}-${course?.id}`);
+
+    useEffect(() => {
+        const key = `ex-${auth?.currentUserId}-${course?.id}`;
+        localStorage.setItem(key, JSON.stringify(exerciseId));
+    }, [exerciseId, auth?.currentUserId, course?.id]);
 
     const openExercise = useCallback((exercise: ExerciseModel) => {
         setCurrentExercise(exercise);
@@ -64,13 +74,6 @@ function CurrentCourseView({openPage}: {openPage: (page: string) => void}) {
         }
     }, [course, openPage]);
 
-    if( exerciseId && currentExerciseId !== exerciseId ) {
-        setCurrentExerciseId(exerciseId);
-    }
-    else if (currentExerciseId && !exerciseId ) {
-        openPage(currentExerciseId);
-    }
-
     useEffect(() => {
         if( !auth.currentUserId || !course ) {
             setShowRanking(false);
@@ -82,17 +85,17 @@ function CurrentCourseView({openPage}: {openPage: (page: string) => void}) {
     }, [course, auth]);
 
     useAsyncEffect(async () => {
-        if( !course || !currentExerciseId )
+        if( !course || !exerciseId )
             return;
-        if( currentExercise && currentExercise.id === currentExerciseId ) {
-            console.log('Not loading the exercise as it is already the current one', currentExercise.id, currentExerciseId, currentExercise);
+        if( currentExercise && currentExercise.id === exerciseId ) {
+            console.log('Not loading the exercise as it is already the current one', currentExercise.id, exerciseId, currentExercise);
             return;
         }
 
-        const ex = await getExercise(course.id, currentExerciseId);
+        const ex = await getExercise(course.id, exerciseId);
         console.log('Updating current exercise to:', ex);
         setCurrentExercise(ex);
-    }, [currentExerciseId, currentExercise, course]);
+    }, [exerciseId, currentExercise, course]);
 
     return <>
         <CurrentExerciseContext.Provider value={{exercise: currentExercise}}>

@@ -1,4 +1,4 @@
-import React, {memo} from 'react';
+import React, {memo, useCallback, useContext} from 'react';
 import {Theme} from '@mui/material/styles';
 import {createStyles, makeStyles} from '@mui/styles';
 import {ImageList, ImageListItem, ImageListItemBar, IconButton} from '@mui/material';
@@ -10,6 +10,8 @@ import {getAllCourses, getCompletedCourses, getUserCourses} from "../services/co
 import useAsyncEffect from "use-async-effect";
 import {useHistory} from "react-router-dom";
 import {useStickyState} from "../util";
+import {lastExerciseId} from "../course/Course";
+import {AuthContext} from "../App";
 
 const useStyles = makeStyles((theme: Theme) =>
     createStyles({
@@ -43,6 +45,7 @@ const useStyles = makeStyles((theme: Theme) =>
 function CourseList({variant, title, userId}: {
     variant: 'allCourses' | 'userCourses' | 'completedCourses', title: string, userId?: string
 }) {
+    const auth = useContext(AuthContext);
     const history = useHistory();
     const classes = useStyles();
     const [courses, setCourses] = useStickyState<Course[] | null>(null, `${variant}-${userId}`);
@@ -61,6 +64,12 @@ function CourseList({variant, title, userId}: {
         setCourses(res);
     }, [variant, userId]);
 
+    const onCourseSelected = useCallback((courseId: string) => {
+        const lastEx = lastExerciseId(auth?.currentUserId, courseId);
+        if( lastEx )    history.push(`/${courseId}/${lastEx}`);
+        else            history.push(`/${courseId}`);
+    }, [auth?.currentUserId, history]);
+
 
     if( !courses || courses.length === 0 )
         return <></>
@@ -69,8 +78,7 @@ function CourseList({variant, title, userId}: {
         <div className={classes.root}>
             <ImageList rowHeight={180} className={classes.imageList}>
                 {courses.map((item: Course) => (
-                    <ImageListItem className={classes.listItem} key={item.id}
-                                   onClick={() => history.push(`/${item.id}`)}>
+                    <ImageListItem className={classes.listItem} key={item.id} onClick={() => onCourseSelected(item.id)}>
                         <img src={item.img} alt={item.title} loading="lazy" 
                              style={{width: '100%', height: '100%', objectFit: 'cover'}} />
                         <ImageListItemBar

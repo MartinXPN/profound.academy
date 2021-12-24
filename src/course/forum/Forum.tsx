@@ -1,55 +1,52 @@
-import React, {useContext, useEffect, useState} from "react";
-import { Button, Divider, List, TextField, Theme, Typography } from "@mui/material";
-import createStyles from '@mui/styles/createStyles';
-import makeStyles from '@mui/styles/makeStyles';
-import {Course, Exercise} from "../../models/courses";
+import React, {useCallback, useContext, useEffect, useState} from "react";
+import { Button, Divider, List, TextField, Typography } from "@mui/material";
 import {onExerciseCommentsChanged, saveComment} from "../../services/forum";
 import {Comment} from '../../models/forum';
 import CommentView from "./CommentView";
 import {AuthContext} from "../../App";
+import { styled } from '@mui/material/styles';
+import {CourseContext, CurrentExerciseContext} from "../Course";
 
 
-const useStyles = makeStyles((theme: Theme) =>
-    createStyles({
-        root: {
-            margin: theme.spacing(4),
-        }
-    }),
-);
+const RootContainer = styled('div')(({theme}) => ({
+    margin: theme.spacing(4),
+}));
 
 
-interface ForumProps {
-    course: Course;
-    exercise: Exercise;
-}
-
-function Forum(props: ForumProps) {
-    const classes = useStyles();
+function Forum() {
     const auth = useContext(AuthContext);
-    const {course, exercise} = props;
+    const {course} = useContext(CourseContext);
+    const {exercise} = useContext(CurrentExerciseContext);
+
     const [newComment, setNewComment] = useState('');
     const [comments, setComments] = useState<Comment[]>([]);
 
-    const onAskQuestion = async () => {
+    const onAskQuestion = useCallback(async () => {
+        if( !course?.id || !exercise?.id )
+            return;
+
         if( !auth.currentUserId || !auth.currentUser || !auth.currentUser.displayName)
             return;
         await saveComment(course.id, exercise.id, auth.currentUserId, auth.currentUser.displayName, auth?.currentUser?.photoURL, newComment);
         setNewComment('');
-    };
+    }, [auth.currentUser, auth.currentUserId, course?.id, exercise?.id, newComment]);
 
     useEffect(() => {
-        const unsubscribe = onExerciseCommentsChanged(course.id, exercise.id, (comments) => {
+        if( !course?.id || !exercise?.id ) {
+            setComments([]);
+            return;
+        }
+
+        return onExerciseCommentsChanged(course.id, exercise.id, (comments) => {
             console.log('got comments in the forum:', comments);
             if (comments)
                 setComments(comments);
         });
-
-        return () => unsubscribe();
-    }, [course.id, exercise.id]);
+    }, [course?.id, exercise?.id]);
 
 
     return (
-        <div className={classes.root}>
+        <RootContainer>
             <Typography variant='h5'>Ask & answer questions</Typography>
             <List>
                 {comments.map(c => <CommentView comment={c} key={c.id} allowReply={true}/>)}
@@ -68,7 +65,7 @@ function Forum(props: ForumProps) {
                     </Button>}
                 </>}
             </List>
-        </div>
+        </RootContainer>
     );
 }
 

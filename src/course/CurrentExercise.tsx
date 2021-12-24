@@ -44,8 +44,8 @@ export default function CurrentExercise({launchCourse}: {launchCourse: () => voi
         setShowSignIn(false);
 
 
-    const renderer = ({ days, hours, minutes, seconds, milliseconds, completed }:
-                          {days: number, hours: number, minutes: number, seconds: number, milliseconds: number, completed: boolean}) => {
+    const renderer = ({ days, hours, minutes, seconds, completed }:
+                          {days: number, hours: number, minutes: number, seconds: number, completed: boolean}) => {
         if( !course )
             return <></>
         return completed ?
@@ -53,7 +53,7 @@ export default function CurrentExercise({launchCourse}: {launchCourse: () => voi
             <div style={{textAlign: 'center'}}>
                 <br/><br/><br/>
                 <Typography variant="h5">Freezes in</Typography>
-                <Typography variant="h2">{days * 24 + hours}:{minutes.toString().padStart(2, '0')}:{seconds.toString().padStart(2, '0')} : {milliseconds.toString().padStart(3, '0')}</Typography>
+                <Typography variant="h2">{days * 24 + hours}:{minutes.toString().padStart(2, '0')}:{seconds.toString().padStart(2, '0')}</Typography>
             </div>;
     };
 
@@ -81,8 +81,8 @@ export default function CurrentExercise({launchCourse}: {launchCourse: () => voi
         {/* Display the exercise of the course at the location where it was left off the last time*/}
         {auth?.isSignedIn && !showSignIn && exercise && exerciseId !== 'ranking' &&
             <SplitPane split='vertical' defaultSize={splitPos} onChange={setSplitPos}>
-                <div className={classes.exercise}><ExerciseView course={course} exercise={exercise}/></div>
-                <div style={{width: '100%', height: '100%'}}><Editor course={course} exercise={exercise}/></div>
+                <div className={classes.exercise}><ExerciseView /></div>
+                <div style={{width: '100%', height: '100%'}}><Editor/></div>
             </SplitPane>
         }
         {auth?.isSignedIn && !showSignIn && exerciseId === 'ranking' && <>

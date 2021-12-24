@@ -13,12 +13,7 @@ import {CircularProgress} from "@mui/material";
 import {getNotionPageMap} from "../services/courses";
 
 
-interface ContentProps {
-    notionPage: string;
-}
-
-function Content(props: ContentProps) {
-    const {notionPage} = props;
+function Content({notionPage}: {notionPage: string}) {
     const isMounted = useRef(false)
     const [recordMap, setRecordMap] = useState<ExtendedRecordMap | null>(null);
 

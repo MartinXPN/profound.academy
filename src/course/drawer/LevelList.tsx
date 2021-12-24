@@ -16,14 +16,13 @@ import {SubmissionStatus} from "../../models/submissions";
 import {CourseContext, CurrentExerciseContext} from "../Course";
 
 
-export default function LevelList({levelNumber, levelStatus, onItemSelected, isDrawerOpen, isSingleLevel}:
-                       {
-                           levelNumber: number,
-                           levelStatus: 'Solved' | 'In Progress' | 'Unavailable',
-                           onItemSelected: (exercise: Exercise) => void,
-                           isDrawerOpen: boolean,
-                           isSingleLevel: boolean
-                       }) {
+export default function LevelList({levelNumber, levelStatus, onItemSelected, isDrawerOpen, isSingleLevel}: {
+    levelNumber: number,
+    levelStatus: 'Solved' | 'In Progress' | 'Unavailable',
+    onItemSelected: (exercise: Exercise) => void,
+    isDrawerOpen: boolean,
+    isSingleLevel: boolean
+}) {
     const auth = useContext(AuthContext);
     const {course} = useContext(CourseContext);
     const {exercise} = useContext(CurrentExerciseContext);

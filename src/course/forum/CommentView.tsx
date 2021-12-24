@@ -1,16 +1,18 @@
-import {Avatar, ListItem, ListItemIcon, ListItemText, IconButton, Button, List, MenuItem} from "@mui/material";
+import {Avatar, ListItem, ListItemIcon, ListItemText, IconButton, Button, List, MenuItem, Stack} from "@mui/material";
 import {Typography, TextField} from "@mui/material";
 import { Theme } from "@mui/material";
 import createStyles from '@mui/styles/createStyles';
 import makeStyles from '@mui/styles/makeStyles';
 import {ArrowDropDown, ArrowDropUp, Edit, Save, Reply as ReplyIcon, Delete} from '@mui/icons-material';
-import React, {useContext, useEffect, useState} from "react";
+import React, {useCallback, useContext, useEffect, useState} from "react";
 import {AuthContext} from "../../App";
 import {Comment} from "../../models/forum";
 import {deleteComment, onCommentRepliesChanged, updateComment, vote} from "../../services/forum";
 import Reply from "./Reply";
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import Menu from "@mui/material/Menu";
+import {styled} from "@mui/styles";
+import {useHistory} from "react-router-dom";
 
 
 const useStyles = makeStyles((theme: Theme) =>
@@ -40,6 +42,10 @@ const useStyles = makeStyles((theme: Theme) =>
         },
     }),
 );
+
+const UserName = styled(Typography)({
+    '&:focus,&:hover': {cursor: 'pointer'},
+});
 
 
 function Score({commentId, score}: { commentId: string, score: number }) {
@@ -106,6 +112,7 @@ function CommentView({comment, allowReply}: {
     allowReply: boolean
 }) {
     const classes = useStyles();
+    const history = useHistory();
     const auth = useContext(AuthContext);
 
     const [replies, setReplies] = useState<Comment[]>([]);
@@ -130,21 +137,25 @@ function CommentView({comment, allowReply}: {
 
     const onShowReplies = () => setShowReplies(true);
     const onHideReplies = () => setShowReplies(false);
+    const onReplySaved = () => setShowReply(false);
     const onReplyClicked = () => {
         setShowReplies(true);
         setShowReply(true);
     }
-    const onReplySaved = () => setShowReply(false);
 
-    const onEdit = () => setIsEditing(true);
-    const onSave = async () => {
+    const onEdit = useCallback(() => setIsEditing(true), []);
+    const onSave = useCallback(async () => {
         await updateComment(comment.id, text);
         setIsEditing(false);
-    }
-    const onDelete = async () => {
+    }, [comment.id, text]);
+    const onDelete = useCallback(async () => {
         await deleteComment(comment.id);
         console.log('Removed the comment!!');
-    }
+    }, [comment.id]);
+
+    const onUserClicked = useCallback((userId: string) => {
+        history.push(`/users/${userId}`);
+    }, [history]);
 
     return <>
         <ListItem key={comment.id} alignItems="flex-start">
@@ -158,11 +169,11 @@ function CommentView({comment, allowReply}: {
             <div className={classes.content}>
                 <ListItemText
                     primary={
-                        <div>
-                            {comment.displayName}
+                        <Stack direction="row" alignItems="center">
+                            <UserName onClick={() => onUserClicked(comment.userId)}>{comment.displayName}</UserName>
                             {auth && auth.currentUser && comment.userId === auth.currentUser.uid && !isEditing &&
                             <CommentEditing onEditClicked={onEdit} onDeleteClicked={onDelete} />}
-                        </div>
+                        </Stack>
                     }
                     secondary={
                         <div style={{display: 'flex'}}>
@@ -178,7 +189,8 @@ function CommentView({comment, allowReply}: {
                     }/>
 
                 <div className={classes.actions}>
-                    {allowReply && <Button size="small" onClick={onReplyClicked} startIcon={<ReplyIcon/>} className={classes.button}>Reply</Button>}
+                    {allowReply &&
+                    <Button size="small" onClick={onReplyClicked} startIcon={<ReplyIcon/>} className={classes.button}>Reply</Button>}
                     {comment.replies.length > 0 &&
                     <>
                         {!showReplies &&

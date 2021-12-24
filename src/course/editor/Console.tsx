@@ -1,4 +1,4 @@
-import React, {memo, useCallback, useEffect, useState} from "react";
+import React, {memo, useCallback, useContext, useEffect, useState} from "react";
 import {Add, Done, Send} from "@mui/icons-material";
 import {Badge, Button, CircularProgress, IconButton, Theme, Typography} from "@mui/material";
 import HighlightOffTwoToneIcon from '@mui/icons-material/HighlightOffTwoTone';
@@ -7,10 +7,12 @@ import makeStyles from '@mui/styles/makeStyles';
 import ToggleButton from '@mui/material/ToggleButton';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 
-import {Exercise, TestCase} from "../../models/courses";
+import {TestCase} from "../../models/courses";
 import {SubmissionResult} from "../../models/submissions";
 import TestView from "./TestView";
 import {statusColors, statusToColor} from "../colors";
+import {styled} from "@mui/styles";
+import {CurrentExerciseContext} from "../Course";
 
 const useStyles = makeStyles((theme: Theme) =>
     createStyles({
@@ -45,22 +47,23 @@ const useStyles = makeStyles((theme: Theme) =>
             paddingTop: '8px',
             paddingBottom: '8px',
         },
-        center: {
-            width: '100%',
-            marginTop: '5%',
-            marginBottom: '5%',
-            textAlign: 'center',
-        },
     }),
 );
 
+const CenterContainer = styled('div')({
+    width: '100%',
+    marginTop: '5%',
+    marginBottom: '5%',
+    textAlign: 'center',
+});
 
-function Console({exercise, onSubmitClicked, onRunClicked, isProcessing, submissionResult}: {
-    exercise: Exercise,
+
+function Console({onSubmitClicked, onRunClicked, isProcessing, submissionResult}: {
     onSubmitClicked: () => void, onRunClicked: (tests: TestCase[]) => void,
     isProcessing: boolean, submissionResult: SubmissionResult | null
 }) {
     const classes = useStyles();
+    const {exercise} = useContext(CurrentExerciseContext);
 
     const outputs = submissionResult?.outputs ?? [];
     const status = submissionResult?.status ?? undefined;
@@ -70,7 +73,8 @@ function Console({exercise, onSubmitClicked, onRunClicked, isProcessing, submiss
     const [tests, setTests] = useState<TestCase[]>([]);
 
     useEffect(() => {
-        setTests(exercise.testCases);
+        if( exercise )
+            setTests(exercise.testCases);
     }, [exercise]);
     if(selectedTest && selectedTest >= tests.length )
         setSelectedTest(null);
@@ -98,39 +102,42 @@ function Console({exercise, onSubmitClicked, onRunClicked, isProcessing, submiss
         };
         setTests(newTests);
     }, [tests]);
-    const addTest = () => {
+    const addTest = useCallback(() => {
         const len = tests.length;
         setTests([...tests, {
             input: '',
             target: '',
         }]);
         setSelectedTest(len);
-    }
-    const removeTest = (index: number) => {
+    }, [tests]);
+    const removeTest = useCallback((index: number) => {
         const newTests = [...tests];
         if( 0 <= index && index < newTests.length )
             newTests.splice(index, 1);
         setTests(newTests);
         setSelectedTest(0 <= index - 1 && index - 1 < newTests.length ? index - 1 : null );
-    }
+    }, [tests]);
 
+    if( !exercise )
+        return <></>
     return <>
         <div className={classes.root}>
             <Typography className={classes.testText}>TESTS: </Typography>
-            <ToggleButtonGroup value={selectedTest} exclusive size='small' style={{float: 'left'}}>
+            <ToggleButtonGroup value={selectedTest} exclusive size='small' sx={{float: 'left'}}>
 
                 {tests.map((test, index) => {
                     const currentStatus = Array.isArray(status) ? status[index] : status;
                     console.log('index:', index, 'status:', currentStatus);
                     return (<div key={index.toString()}>
-                        <Badge badgeContent={selectedTest === index
-                            ? <HighlightOffTwoToneIcon sx={{ color: '#515151', "&:focus,&:hover": {cursor: 'pointer'}}}
-                                                       fontSize="small"
-                                                       onClick={() => removeTest(index)}/>
-                            : 0}>
+                        <Badge invisible={selectedTest !== index || index < exercise.testCases.length} badgeContent={
+                            <HighlightOffTwoToneIcon sx={{ color: '#515151', "&:focus,&:hover": {cursor: 'pointer'}}}
+                                                     fontSize="small"
+                                                     onClick={() => removeTest(index)}/>
+                        }>
                         <ToggleButton value={index} id={`${index}`}
                                       onClick={() => onTestSelected(index)}
                                       className={classes.tests}
+                                      selected={selectedTest === index}
                                       style={{color: statusToColor(currentStatus, false)}}>
                             <Typography>{index + 1}</Typography>
                         </ToggleButton>
@@ -159,10 +166,10 @@ function Console({exercise, onSubmitClicked, onRunClicked, isProcessing, submiss
 
 
         {isProcessing &&
-        <div className={classes.center}>
+        <CenterContainer>
             <Typography className={classes.status}>Running the program...</Typography>
             <CircularProgress />
-        </div>}
+        </CenterContainer>}
 
         <div style={{padding: '10px'}}>
             {submissionResult && submissionResult.compileOutputs &&
@@ -178,6 +185,7 @@ function Console({exercise, onSubmitClicked, onRunClicked, isProcessing, submiss
             <TestView
                 testCase={tests[selectedTest]}
                 output={outputs[selectedTest]}
+                readOnly={selectedTest < exercise.testCases.length}
                 status={Array.isArray(status) ? status[selectedTest] : status}
                 memory={Array.isArray(memory) ? memory[selectedTest] : memory}
                 time={Array.isArray(time) ? time[selectedTest] : time}

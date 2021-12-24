@@ -1,25 +1,26 @@
 import {TestCase} from "../../models/courses";
 import { TextField, Typography } from "@mui/material";
-import makeStyles from '@mui/styles/makeStyles';
 import React, {memo, useEffect, useState} from "react";
 import {statusToColor} from "../colors";
+import {styled} from "@mui/material/styles";
 
-const useStyles = makeStyles({
-    save: {
-        marginBottom: '2em',
-    },
-    status: {
-        fontWeight: 'bold',
-        paddingTop: '8px',
-        paddingBottom: '8px',
-    },
+
+const StatusTypography = styled(Typography)({
+    fontWeight: 'bold',
+    paddingTop: '8px',
+    paddingBottom: '8px',
 });
 
 
-function TestView({testCase, output, status, memory, time, onSaveTest}:
-                  { testCase: TestCase, output?: string, status?: string, memory?: number, time?: number, onSaveTest: (input: string, target: string) => void }) {
-    const classes = useStyles();
-
+function TestView({testCase, output, readOnly, status, memory, time, onSaveTest}: {
+    testCase: TestCase,
+    output?: string,
+    readOnly: boolean,
+    status?: string,
+    memory?: number,
+    time?: number,
+    onSaveTest: (input: string, target: string) => void
+}) {
     const [input, setInput] = useState('');
     const [target, setTarget] = useState('');
 
@@ -41,16 +42,17 @@ function TestView({testCase, output, status, memory, time, onSaveTest}:
 
     return <>
         {status && time &&
-        <Typography className={classes.status} style={{color: statusToColor(status)}}>
+        <StatusTypography style={{color: statusToColor(status)}}>
             {status} in {time.toFixed(2)} seconds, used {memory?.toFixed(1)}MB
-        </Typography>
+        </StatusTypography>
         }
         <TextField multiline fullWidth
                    variant="outlined"
                    label="Input"
                    placeholder="Start typing the input..."
                    onChange={event => setInput(event.target.value)}
-                   value={input} />
+                   value={input}
+                   inputProps={{ readOnly: readOnly }}/>
 
         <br/><br/>
         <TextField multiline fullWidth
@@ -58,7 +60,8 @@ function TestView({testCase, output, status, memory, time, onSaveTest}:
                    label="Expected output"
                    placeholder="Start typing the expected output..."
                    onChange={event => setTarget(event.target.value)}
-                   value={target} />
+                   value={target}
+                   inputProps={{ readOnly: readOnly }}/>
 
         <br/><br/>
         {output &&

@@ -25,18 +25,18 @@ function Reply({commentId, onReplySaved}: { commentId: string, onReplySaved: () 
 
     return (<>
         <TextField required multiline fullWidth placeholder="Type your reply here..."
-                   variant="standard"
-                   onChange={event => setReplyText(event.target.value)}
-                   value={replyText}
-                   InputProps={{disableUnderline: true}}
-                   onKeyPress={async (ev) => {
-                       if (ev.key === 'Enter' && !ev.shiftKey) {
-                           // Do code here
-                           ev.preventDefault();
-                           if( replyText.length > 0 )
-                               await onSave();
-                       }
-                   }} />
+            variant="standard"
+            onChange={event => setReplyText(event.target.value)}
+            value={replyText}
+            InputProps={{disableUnderline: true}}
+            onKeyPress={async (ev) => {
+               if (ev.key === 'Enter' && !ev.shiftKey) {
+                   // Do code here
+                   ev.preventDefault();
+                   if( replyText.length > 0 )
+                       await onSave();
+               }
+            }} />
     </>);
 }
 

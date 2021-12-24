@@ -1,4 +1,4 @@
-import React, {memo, useContext, useEffect, useState} from 'react';
+import React, {memo, useCallback, useContext, useEffect, useState} from 'react';
 import {Avatar, IconButton, MenuItem, ListItemIcon, ListItemText} from "@mui/material";
 import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
@@ -66,10 +66,10 @@ export function AppBarProfile() {
         handleClose();
         await firebase.auth().signOut();
     }
-    const onUserProfileClicked = () => {
-        if( auth.currentUserId )
-            history.push(`/users/${auth.currentUserId}`);
-    }
+    const onUserProfileClicked = useCallback(() => {
+        history.push(`/users/${auth.currentUserId}`);
+    }, [auth.currentUserId, history]);
+
 
     useAsyncEffect(async () => {
 
@@ -108,8 +108,8 @@ export function AppBarProfile() {
                 },
             }}
             transformOrigin={{ horizontal: 'right', vertical: 'top' }}
-            anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
-        >
+            anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}>
+
             <MenuItem onClick={onUserProfileClicked} key='user-profile'>
                 <ListItemIcon><AccountCircleIcon fontSize="medium" /></ListItemIcon>
                 <ListItemText>Profile</ListItemText>

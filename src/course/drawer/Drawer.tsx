@@ -59,9 +59,9 @@ const DrawerHeader = styled('div')(({ theme }) => ({
     ...theme.mixins.toolbar,
 }));
 
-const AuthDiv = styled('div')(({theme}) => ({
+const AuthDiv = styled('div')({
     marginLeft: 'auto',
-}));
+});
 
 interface AppBarProps extends MuiAppBarProps {
     open?: boolean;

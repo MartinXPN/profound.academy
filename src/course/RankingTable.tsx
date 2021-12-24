@@ -92,14 +92,14 @@ function RankingTable({metric}: {metric: 'score' | 'solved' | 'upsolveScore'}) {
     }, [history]);
 
 
-    const onLevelClicked = (level: number) => {
+    const onLevelClicked = useCallback((level: number) => {
         const levelName = (level + 1).toString();
         console.log(`level ${levelName} clicked!`);
         if( !(levelName in levelOpen) || !levelOpen[levelName] )
             setLevelOpen({...levelOpen, [levelName]: true});
         else
             setLevelOpen({...levelOpen, [levelName]: false});
-    }
+    }, [levelOpen]);
 
 
     return (

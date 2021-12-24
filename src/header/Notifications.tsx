@@ -1,4 +1,4 @@
-import React, {useContext, useEffect, useState} from 'react';
+import React, {useCallback, useContext, useEffect, useState} from 'react';
 import {IconButton, MenuItem, ListItemIcon, ListItemText, Badge, Avatar, Typography} from "@mui/material";
 import Menu from '@mui/material/Menu';
 import NotificationsIcon from '@mui/icons-material/Notifications';
@@ -21,12 +21,12 @@ export default function AppBarNotifications() {
     const [notifications, setNotifications] = useState<Notification[]>([]);
     const [unreadNotifications, setUnreadNotifications] = useState(0);
 
-    const onNotificationClicked = async (notification: Notification) => {
+    const onNotificationClicked = useCallback(async (notification: Notification) => {
         if( !auth.currentUserId )
             return;
         await readNotification(auth.currentUserId, notification.id);
         history.push(notification.url);
-    }
+    }, [auth.currentUserId, history]);
 
     useEffect(() => {
         if( !auth.currentUserId ) {

@@ -1,4 +1,4 @@
-import React, {useContext, useEffect, useState} from "react";
+import React, {useCallback, useContext, useEffect, useState} from "react";
 import {Avatar, Badge, Button, darken, IconButton, Paper, Stack, TextField, Typography} from "@mui/material";
 import {styled} from "@mui/material/styles";
 import CircularProgress from "@mui/material/CircularProgress";
@@ -59,11 +59,11 @@ function UserImage({user}: {user: User}) {
     const [state, setState] = useState<'open' | 'editing' | 'uploading'>('open');
     const onEditClicked = () => setState('editing');
     const onCancelClicked = () => setState('open');
-    const handleChange = async (file: File) => {
+    const handleChange = useCallback(async (file: File) => {
         setState('uploading');
         await uploadProfilePicture(user.id, file);
         setState('open');
-    };
+    }, [user.id]);
 
     return <Stack direction="column">
         <Badge

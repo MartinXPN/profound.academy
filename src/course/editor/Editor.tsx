@@ -6,12 +6,13 @@ import { IconButton } from "@mui/material";
 import makeStyles from '@mui/styles/makeStyles';
 import {Remove, Add} from "@mui/icons-material";
 import {useStickyState} from "../../util";
-import {Course, Exercise, TestCase} from "../../models/courses";
+import {TestCase} from "../../models/courses";
 import {onRunResultChanged, onSubmissionResultChanged, submitSolution} from "../../services/submissions";
 import {AuthContext} from "../../App";
 import {SubmissionResult} from "../../models/submissions";
 import {saveCode} from "../../services/codeDrafts";
 import {TextSelection} from "../../models/codeDrafts";
+import {CourseContext, CurrentExerciseContext} from "../Course";
 
 
 const useStyles = makeStyles({
@@ -34,16 +35,19 @@ const useStyles = makeStyles({
 });
 
 
-function Editor({course, exercise}: {course: Course, exercise: Exercise}) {
+function Editor() {
     const classes = useStyles();
     const auth = useContext(AuthContext);
-    const [code, setCode] = useStickyState('', `code-${auth?.currentUser?.uid}-${exercise.id}`);
+    const {course} = useContext(CourseContext);
+    const {exercise} = useContext(CurrentExerciseContext);
+
+    const [code, setCode] = useStickyState('', `code-${auth?.currentUser?.uid}-${exercise?.id}`);
     const [selection, setSelection] = useState<TextSelection>({start: { row: 0, column: 0 }, end: { row: 0, column: 0 }});
     const [theme, setTheme] = useStickyState('tomorrow', `editorTheme-${auth?.currentUser?.uid}`);
-    const [language, setLanguage] = useStickyState(course.preferredLanguage, `${course.id}-language-${auth?.currentUser?.uid}`);
+    const [language, setLanguage] = useStickyState(course?.preferredLanguage, `${course?.id}-language-${auth?.currentUser?.uid}`);
     const [fontSize, setFontSize] = useStickyState(14, `fontSize-${auth?.currentUser?.uid}`);
 
-    const [submissionResult, setSubmissionResult] = useStickyState<SubmissionResult | null>(null, `submissionRes-${auth?.currentUser?.uid}-${exercise.id}`);
+    const [submissionResult, setSubmissionResult] = useStickyState<SubmissionResult | null>(null, `submissionRes-${auth?.currentUser?.uid}-${exercise?.id}`);
     const [submitted, setSubmitted] = useState(false);
 
     const editorLanguage = getModeForPath(`main.${language.extension}`).name;
@@ -51,7 +55,7 @@ function Editor({course, exercise}: {course: Course, exercise: Exercise}) {
     const increaseFontSize = () => setFontSize(Math.min(fontSize + 1, 30));
 
     useEffect(() => {
-        if( !auth.currentUserId || !auth.currentUser )
+        if( !auth.currentUserId || !auth.currentUser || !course || !exercise )
             return;
 
         const timeOutId = setTimeout(() => {
@@ -62,11 +66,11 @@ function Editor({course, exercise}: {course: Course, exercise: Exercise}) {
                 .then(() => console.log('successfully saved the code'));
         }, 500);
         return () => clearTimeout(timeOutId);
-    }, [auth.currentUser, auth.currentUserId, course.id, exercise.id, code, language, selection]);
+    }, [auth.currentUser, auth.currentUserId, code, language, selection, course, exercise]);
 
 
     const onEvaluate = useCallback(async (mode: 'run' | 'submit', tests?: TestCase[]) => {
-        if( !auth.currentUserId || !auth.currentUser )
+        if( !auth.currentUserId || !auth.currentUser || !course || !exercise )
             return;
 
         setSubmitted(true);
@@ -80,7 +84,7 @@ function Editor({course, exercise}: {course: Course, exercise: Exercise}) {
             if(result)
                 setSubmitted(false);
         });
-    }, [auth.currentUserId, auth.currentUser, course.id, exercise.id, code, language, setSubmissionResult]);
+    }, [auth.currentUserId, auth.currentUser, course, exercise, code, language, setSubmissionResult]);
     const handleSubmit = useCallback(async () => onEvaluate('submit'), [onEvaluate]);
     const handleRun = useCallback(async (tests) => onEvaluate('run', tests), [onEvaluate]);
 
@@ -98,7 +102,6 @@ function Editor({course, exercise}: {course: Course, exercise: Exercise}) {
 
             <div className={classes.console}>
                 <Console
-                    exercise={exercise}
                     onSubmitClicked={handleSubmit}
                     onRunClicked={handleRun}
                     isProcessing={submitted}

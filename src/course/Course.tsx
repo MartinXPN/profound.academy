@@ -1,4 +1,4 @@
-import React, {createContext, useContext, useEffect, useState} from "react";
+import React, {createContext, useCallback, useContext, useEffect, useState} from "react";
 import {Route, Switch, useHistory, useParams, useRouteMatch} from "react-router-dom";
 
 import { Theme } from '@mui/material/styles';
@@ -50,19 +50,19 @@ function CurrentCourseView({openPage}: {openPage: (page: string) => void}) {
     const [currentExercise, setCurrentExercise] = useState<Exercise | null>(null);
     const [currentExerciseId, setCurrentExerciseId] = useStickyState<string>('', `ex-${auth?.currentUserId}-${course?.id}`);
 
-    const openExercise = (exercise: Exercise) => {
+    const openExercise = useCallback((exercise: Exercise) => {
         setCurrentExercise(exercise);
         openPage(exercise.id);
-    }
-    const openRanking = () => openPage('ranking');
-    const launchCourse = async () => {
+    }, [openPage]);
+    const openRanking = useCallback(() => openPage('ranking'), [openPage]);
+    const launchCourse = useCallback(async () => {
         console.log('Launching the course!');
         if( course ) {
             const firstExercise = await getFirstExercise(course.id);
             if( firstExercise )
                 openPage(firstExercise.id);
         }
-    }
+    }, [course, openPage]);
 
     if( exerciseId && currentExerciseId !== exerciseId ) {
         setCurrentExerciseId(exerciseId);
@@ -123,10 +123,10 @@ function CourseView() {
         setCourse(course);
     }, [courseId, auth]);
 
-    const openPage = (pageId: string) => {
+    const openPage = useCallback((pageId: string) => {
         const url = match.url.replace(/\/$/, '');
         history.push(`${url}/${pageId}`);
-    }
+    }, [history, match.url]);
 
     if( !course )
         return <></>

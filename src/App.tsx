@@ -8,11 +8,11 @@ import "./firebase";
 
 import { ThemeProvider, StyledEngineProvider, createTheme } from '@mui/material/styles';
 
-import Home from "./home/Home";
+import Home from "./Home";
 import Course from "./course/Course";
-import {useStickyState} from "./util";
-import UserProfile from "./profile/UserProfile";
+import UserProfile from "./user/UserProfile";
 import {updateUserInfo} from "./services/users";
+import {useStickyState} from "./util";
 
 
 firebase.analytics();

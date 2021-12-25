@@ -1,7 +1,7 @@
 import React from "react";
 import {useParams} from "react-router-dom";
-import ActivityHeatmap from "../home/ActivityHeatmap";
-import CourseList from "../home/CourseList";
+import ActivityHeatmap from "./ActivityHeatmap";
+import CourseList from "../course/CourseList";
 import ProfileAppBar from "./ProfileAppBar";
 import UserInfo from "./UserInfo";
 

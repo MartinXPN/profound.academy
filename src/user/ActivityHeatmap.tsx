@@ -19,6 +19,7 @@ const useStyles = makeStyles({
 });
 
 const HeatmapDiv = styled('div')({
+    maxWidth: '100%',
     width: '50em',
     marginTop: '4em',
     marginLeft: 'auto',

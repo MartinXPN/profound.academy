@@ -5,8 +5,8 @@ import Toolbar from '@mui/material/Toolbar';
 import IconButton from '@mui/material/IconButton';
 import {Home} from "@mui/icons-material";
 import {useHistory} from "react-router-dom";
-import AppBarNotifications from "../header/Notifications";
-import {AppBarProfile} from "../header/Auth";
+import AppBarNotifications from "./Notifications";
+import {AppBarProfile} from "./Auth";
 import {Typography} from "@mui/material";
 
 export default function ProfileAppBar() {

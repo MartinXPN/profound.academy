@@ -10,7 +10,7 @@ import {getAllCourses, getCompletedCourses, getUserCourses} from "../services/co
 import useAsyncEffect from "use-async-effect";
 import {useHistory} from "react-router-dom";
 import {useStickyState} from "../util";
-import {lastExerciseId} from "../course/Course";
+import {lastExerciseId} from "./Course";
 import {AuthContext} from "../App";
 
 const useStyles = makeStyles((theme: Theme) =>

@@ -18,9 +18,9 @@ import {Home} from "@mui/icons-material";
 import QueryStatsIcon from '@mui/icons-material/QueryStats';
 
 import {Exercise} from "../../models/courses";
-import {AppBarProfile} from "../../header/Auth";
+import {AppBarProfile} from "../../user/Auth";
 import {Progress} from "../../models/courses";
-import AppBarNotifications from "../../header/Notifications";
+import AppBarNotifications from "../../user/Notifications";
 import LevelList from "./LevelList";
 import {AuthContext} from "../../App";
 import {onUserProgressChanged} from "../../services/courses";

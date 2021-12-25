@@ -4,7 +4,7 @@ import {AuthContext} from "../App";
 import {useStickyState} from "../util";
 import LandingPage from "./LandingPage";
 import {startCourse} from "../services/courses";
-import {SignIn} from "../header/Auth";
+import {SignIn} from "../user/Auth";
 import Editor from "./editor/Editor";
 import RankingTable from "./RankingTable";
 import makeStyles from '@mui/styles/makeStyles';

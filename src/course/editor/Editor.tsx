@@ -81,6 +81,17 @@ function Editor() {
         if( !auth.currentUserId || !auth.currentUser || !course || !exercise )
             return;
 
+        // if the code > 64 KB (2 bytes per character)
+        console.log('code length:', JSON.stringify(code).length);
+        if( JSON.stringify(code).length > 32000 ) {
+            setSubmissionResult({
+                isBest: false, time: 0, score: 0, memory: 0,
+                status: 'Compilation error',
+                compileOutputs: 'Source code exceeds the allowed 64KB limit',
+            });
+            return;
+        }
+
         setSubmitted(true);
         const submissionId = mode === 'submit'
             ? await submitSolution(auth.currentUserId, auth.currentUser.displayName, course.id, exercise.id, code, language, false, tests)

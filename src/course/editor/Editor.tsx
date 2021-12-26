@@ -69,6 +69,10 @@ function Editor() {
         const timeOutId = setTimeout(() => {
             const extension = language.extension;
             const projectCode = {[`main.${extension}`]: code};
+            if( JSON.stringify(projectCode).length > 32000 ) {
+                console.log('source code too big');
+                return;
+            }
 
             saveCode(course.id, exercise.id, auth.currentUserId!, auth.currentUser!.displayName!, language, projectCode, selection)
                 .then(() => console.log('successfully saved the code'));
@@ -80,6 +84,17 @@ function Editor() {
     const onEvaluate = useCallback(async (mode: 'run' | 'submit', tests?: TestCase[]) => {
         if( !auth.currentUserId || !auth.currentUser || !course || !exercise )
             return;
+
+        // if the code > 64 KB (2 bytes per character)
+        console.log('code length:', JSON.stringify(code).length);
+        if( JSON.stringify(code).length > 32000 ) {
+            setSubmissionResult({
+                isBest: false, time: 0, score: 0, memory: 0,
+                status: 'Compilation error',
+                compileOutputs: 'Source code exceeds the allowed 64KB limit',
+            });
+            return;
+        }
 
         setSubmitted(true);
         const submissionId = mode === 'submit'

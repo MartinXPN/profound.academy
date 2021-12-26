@@ -12,7 +12,7 @@ import CircularProgress from '@mui/material/CircularProgress';
 
 import {Course, Exercise} from "../models/courses";
 import {useOnScreen} from '../util';
-import {onSubmissionsChanged} from "../services/submissions";
+import {onSubmissionsChanged, onUserSubmissionsChanged} from "../services/submissions";
 import {SubmissionResult} from "../models/submissions";
 import moment from "moment/moment";
 import SubmissionBackdrop from "./SubmissionBackdrop";
@@ -55,7 +55,7 @@ function Bottom({hasMore, loadMore}: {hasMore: boolean, loadMore: () => void}) {
 }
 
 
-function SubmissionsTable({course, exercise, mode}: {course: Course, exercise: Exercise, mode: 'all' | 'best'}) {
+function SubmissionsTable({course, exercise, mode, userId}: {course?: Course, exercise?: Exercise, userId?: string, mode: 'all' | 'best' | 'user'}) {
     const history = useHistory();
     const [page, setPage, pageRef] = useState(0);
     const [hasMore, setHasMore, moreRef] = useState(true);
@@ -92,7 +92,7 @@ function SubmissionsTable({course, exercise, mode}: {course: Course, exercise: E
         setPageSubmissions([]);
         setUpdateSubscriptions([]);
         setDisplayedSubmission(undefined);
-    }, [exercise.id]);
+    }, [exercise?.id, userId]);
 
     const loadNextPage = async () => {
         console.log('Load more!');
@@ -106,18 +106,23 @@ function SubmissionsTable({course, exercise, mode}: {course: Course, exercise: E
         }
         console.log('startAfter:', startAfterId, 'for page:', page);
 
-        const unsubscribe = await onSubmissionsChanged(
-            course.id, exercise.id, mode, startAfterId ?? null, rowsPerPage,
-            ((submissions, more) => {
-                console.log('setting the new submissions to page:', page, 'while total page is:', pageRef.current);
-                setHasMore(more && moreRef.current);
-                const currentSubscriptions = [...pageSubmissionsRef.current];
-                currentSubscriptions[page] = submissions;
-                setPageSubmissions(currentSubscriptions);
-                setPage(Math.max(pageRef.current, page + 1));
-            }));
+        const onChanged = (submissions: SubmissionResult[], more: boolean) => {
+            console.log('setting the new submissions to page:', page, 'while total page is:', pageRef.current);
+            setHasMore(more && moreRef.current);
+            const currentSubscriptions = [...pageSubmissionsRef.current];
+            currentSubscriptions[page] = submissions;
+            setPageSubmissions(currentSubscriptions);
+            setPage(Math.max(pageRef.current, page + 1));
+        };
 
-        setUpdateSubscriptions([...updateSubscriptions, unsubscribe]);
+        if( mode === 'user' && userId ) {
+            const unsubscribe = await onUserSubmissionsChanged(userId, startAfterId ?? null, rowsPerPage, onChanged);
+            setUpdateSubscriptions([...updateSubscriptions, unsubscribe]);
+        }
+        else if( (mode === 'all' || mode === 'best') && course && exercise ) {
+            const unsubscribe = await onSubmissionsChanged(course.id, exercise.id, mode, startAfterId ?? null, rowsPerPage, onChanged);
+            setUpdateSubscriptions([...updateSubscriptions, unsubscribe]);
+        }
     };
 
     console.log('SubmissionTable:', exercise);

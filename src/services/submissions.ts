@@ -55,6 +55,25 @@ export const onSubmissionResultChanged = (userId: string, submissionId: string,
 }
 
 
+const submissionQuery = async (query: firebase.firestore.Query<SubmissionResult>, startAfterId: string | null, numItems: number) => {
+    if( startAfterId ) {
+        const startAfterSubmission = await db.submissionResult(startAfterId).get();
+        query = query.startAfter(startAfterSubmission);
+        query = query.limit(numItems);
+    }
+    else {
+        const endAt = (await query.limit(numItems).get()).docs.at(-1)?.id;
+        if( endAt ) {
+            const endAtSubmission = await db.submissionResult(endAt).get();
+            query = query.endAt(endAtSubmission);
+        }
+        else {
+            query = query.limit(numItems);
+        }
+    }
+    return query;
+};
+
 export const onSubmissionsChanged = async (courseId: string, exerciseId: string, mode: 'all' | 'best',
                                      startAfterId: string | null, numItems: number,
                                      onChanged: (submissionResult: SubmissionResult[], hasMore: boolean) => void) => {
@@ -71,25 +90,30 @@ export const onSubmissionsChanged = async (courseId: string, exerciseId: string,
             .orderBy('memory', 'asc');
 
     console.log('startAfterId:', startAfterId);
-    if( startAfterId ) {
-        const startAfterSubmission = await db.submissionResult(startAfterId).get();
-        query = query.startAfter(startAfterSubmission);
-        query = query.limit(numItems);
-    }
-    else {
-        const endAt = (await query.limit(numItems).get()).docs.at(-1)?.id;
-        if( endAt ) {
-            const endAtSubmission = await db.submissionResult(endAt).get();
-            query = query.endAt(endAtSubmission);
-        }
-        else {
-            query = query.limit(numItems);
-        }
-    }
+    query = await submissionQuery(query, startAfterId, numItems);
 
     return query.onSnapshot(snapshot => {
         const submissions: SubmissionResult[] = snapshot.docs.map(d => d.data());
         console.log('Got submissions for exercise:', exerciseId, submissions);
+        onChanged(submissions, submissions.length >= numItems);
+    });
+}
+
+export const onUserSubmissionsChanged = async (
+    userId: string,
+    startAfterId: string | null, numItems: number,
+    onChanged: (submissionResult: SubmissionResult[], hasMore: boolean) => void,
+    ) => {
+    let query = db.submissionResults
+        .where('userId', '==', userId)
+        .orderBy('createdAt', 'desc');
+
+    console.log('startAfterId:', startAfterId);
+    query = await submissionQuery(query, startAfterId, numItems);
+
+    return query.onSnapshot(snapshot => {
+        const submissions: SubmissionResult[] = snapshot.docs.map(d => d.data());
+        console.log('Got submissions user:', userId, submissions);
         onChanged(submissions, submissions.length >= numItems);
     });
 }

@@ -69,6 +69,10 @@ function Editor() {
         const timeOutId = setTimeout(() => {
             const extension = language.extension;
             const projectCode = {[`main.${extension}`]: code};
+            if( JSON.stringify(projectCode).length > 32000 ) {
+                console.log('source code too big');
+                return;
+            }
 
             saveCode(course.id, exercise.id, auth.currentUserId!, auth.currentUser!.displayName!, language, projectCode, selection)
                 .then(() => console.log('successfully saved the code'));

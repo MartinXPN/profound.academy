@@ -4,9 +4,9 @@ import firebase from "firebase/app";
 import {SubmissionStatus} from "../models/submissions";
 
 export const getNotionPageMap = async (pageId: string) => {
-    const getPage = firebase.functions().httpsCallable('getNotionPage');
-    const map = await getPage({pageId: pageId});
-    return map.data;
+    const GET_NOTION_ENDPOINT = 'https://us-central1-profound-academy.cloudfunctions.net/getNotionPage';
+    const res = await fetch(`${GET_NOTION_ENDPOINT}?pageId=${pageId}`, {method: 'GET', mode: 'cors'});
+    return res.json();
 }
 
 
@@ -64,15 +64,6 @@ export const startCourse = async (userId: string, courseId: string) => {
     return await db.user(userId).update({
         courses: [course],
     })
-}
-
-
-export const getCourseExercises = async (courseId: string) => {
-    const snapshot = await db.exercises(courseId).orderBy('order', 'asc').get();
-
-    const exercises: Exercise[] = snapshot.docs.map(x => x.data());
-    console.log('Got exercises:', exercises);
-    return exercises;
 }
 
 export const getExercise = async (courseId: string, exerciseId: string) => {

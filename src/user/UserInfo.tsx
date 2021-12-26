@@ -17,7 +17,7 @@ const UserInfoRoot = styled('div')(({theme}) => ({
     justifyContent: 'space-around',
     overflow: 'hidden',
     backgroundColor: theme.palette.background.paper,
-    margin: '4em',
+    marginTop: '4em',
 }));
 
 const UserInfoContents = styled('div')({

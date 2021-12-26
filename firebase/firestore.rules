@@ -46,7 +46,7 @@ service cloud.firestore {
       allow read;
 
       // All the exercises are public when they are revealed
-      match /exercises/{exerciseId} {
+      match /exercises/{exerciseId=**} {
         allow read: if isCourseInstructor(request, courseId) || request.time > get(/databases/$(database)/documents/courses/$(courseId)).data.revealsAt;
       }
 

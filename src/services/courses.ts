@@ -66,15 +66,6 @@ export const startCourse = async (userId: string, courseId: string) => {
     })
 }
 
-
-export const getCourseExercises = async (courseId: string) => {
-    const snapshot = await db.exercises(courseId).orderBy('order', 'asc').get();
-
-    const exercises: Exercise[] = snapshot.docs.map(x => x.data());
-    console.log('Got exercises:', exercises);
-    return exercises;
-}
-
 export const getExercise = async (courseId: string, exerciseId: string) => {
     const exercise = await db.exercise(courseId, exerciseId).get();
     return exercise.data() ?? null;

@@ -1,3 +1,4 @@
+import * as cors from 'cors';
 import * as functions from 'firebase-functions';
 import {fetchNotionPage} from './services/notion';
 import {notifyOnComment} from './services/notifications';
@@ -9,26 +10,35 @@ import {Comment} from './models/forum';
 // Start writing Firebase Functions
 // https://firebase.google.com/docs/functions/typescript
 
+const corss = cors({origin: true});
+
 export const helloWorld = functions.https
-    .onRequest((request, response) => {
+    .onRequest((req, res) => {
         functions.logger.info('Hello logs!');
-        response.send('Hello from Firebase!');
+        res.send('Hello from Firebase!');
     });
 
-export const getNotionPage = functions.https
-    .onCall(async (data, context) => {
-        functions.logger.info(`data: ${JSON.stringify(data)}`);
-        const pageId = data.pageId;
-        if (!pageId)
-            throw new functions.https.HttpsError(
-                'invalid-argument',
-                'pageId needs to be provided in data'
-            );
+export const getNotionPage = functions.https.onRequest(async (req, res) => {
+    res.set('Cache-Control', 'public, max-age=300, s-maxage=600');
+    if (req.method !== 'GET') {
+        res.status(403).send('Forbidden');
+        return;
+    }
 
-        const recordMap = await fetchNotionPage(pageId);
-        functions.logger.info(`recordMap: ${JSON.stringify(recordMap)}`);
-        return recordMap;
+    corss(req, res, async () => {
+        functions.logger.info(`query: ${JSON.stringify(req.query)}`);
+        const pageId = req.query.pageId;
+
+        if (!pageId) {
+            res.status(400).send('pageId needs to be provided in data');
+            return;
+        }
+
+        const recordMap = await fetchNotionPage(<string>pageId);
+        functions.logger.info(`recordMap #chars: ${JSON.stringify(recordMap).length}`);
+        res.status(200).send(recordMap);
     });
+});
 
 
 export const submitSolution = functions.firestore

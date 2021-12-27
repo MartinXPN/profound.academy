@@ -13,6 +13,7 @@ import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import Menu from "@mui/material/Menu";
 import {styled} from "@mui/styles";
 import {useHistory} from "react-router-dom";
+import moment from "moment";
 
 
 const useStyles = makeStyles((theme: Theme) =>
@@ -171,6 +172,8 @@ function CommentView({comment, allowReply}: {
                     primary={
                         <Stack direction="row" alignItems="center">
                             <UserName onClick={() => onUserClicked(comment.userId)}>{comment.displayName}</UserName>
+                            <Typography variant="body2" color="text.secondary" noWrap>&nbsp; • &nbsp;</Typography>
+                            <Typography variant="body2" color="text.secondary">{moment(comment.createdAt.toDate()).fromNow()}</Typography>
                             {auth && auth.currentUser && comment.userId === auth.currentUser.uid && !isEditing &&
                             <CommentEditing onEditClicked={onEdit} onDeleteClicked={onDelete} />}
                         </Stack>

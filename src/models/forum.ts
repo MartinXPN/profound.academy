@@ -6,7 +6,7 @@ export interface Comment {
     userId: string;
     displayName: string;
     avatarUrl?: string;
-    createdAt: firebase.firestore.FieldValue;
+    createdAt: firebase.firestore.Timestamp;
 
     repliedTo: Exercise | Comment;
     replies: Comment[];

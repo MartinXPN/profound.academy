@@ -106,13 +106,25 @@ service cloud.firestore {
     match /submissions/{submissionId} {
       allow read: if request.auth != null;
     }
+    // submission can have private fields available for only the users that have already solved the challenge
+    function isViewingAllowed(request, submissionId) {
+      let submission = get(/databases/$(database)/documents/submissions/$(submissionId)).data;
+      let course = get(submission.course);
+      let exercise = get(submission.exercise);
+      let level = string(int(math.floor(exercise.data.order)));
+      let userId = request.auth.uid;
+      let exerciseSolved = get(/databases/$(database)/documents/courses/$(course.id)/progress/$(userId)/exerciseSolved/$(level)).data;
+
+      let hasSolved = exerciseSolved.progress[exercise.id] == 'Solved';
+      return request.auth != null && course.data.allowViewingSolutions && hasSolved;
+    }
     // submission can have private fields available for only the current user and instructors
     function isInstructor(request, submissionId) {
       let course = get(/databases/$(database)/documents/submissions/$(submissionId)).data.course;
       return request.auth != null && request.auth.uid in get(course).data.instructors;
     }
     match /submissions/{submissionId}/private/{userId} {
-      allow read: if isCurrentUser(request, userId) || isInstructor(request, submissionId);
+      allow read: if isCurrentUser(request, userId) || isInstructor(request, submissionId) || isViewingAllowed(request, submissionId);
     }
 
 

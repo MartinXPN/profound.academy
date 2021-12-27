@@ -27,6 +27,7 @@ export interface Course {
     freezeAt: firebase.firestore.Timestamp;
     visibility: string;
     rankingVisibility: string;
+    allowViewingSolutions: boolean;
     title: string;
     author: string;
     instructors: string[],

@@ -15,6 +15,7 @@ export interface Submission {
     id: string;
     userId: string;
     userDisplayName: string;
+    userImageUrl?: string;
     exercise: Exercise;
     testCases?: TestCase[];
     course: Course;

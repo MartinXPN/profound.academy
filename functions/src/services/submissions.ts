@@ -48,6 +48,7 @@ const updateActivity = (
     const submissionDay = moment(submissionDate).format('YYYY-MM-DD');
 
     transaction.set(db.activity(submission.userId).doc(submissionDay), {
+        // @ts-ignore
         count: firestore.FieldValue.increment(1),
         date: submissionDay,
     }, {merge: true});
@@ -170,6 +171,7 @@ export const processSubmissionResult = async (
         updateUserMetric(transaction, 'solved', submissionResult.userId, course.id, exercise.id, level,
             prevSolved?.progress?.[exercise.id] === 'Solved' ? 1 : 0, status === 'Solved' ? 1 : 0, status);
         transaction.set(db.userProgress(course.id, user.uid), {userDisplayName: user.displayName}, {merge: true});
+        transaction.set(db.userProgress(course.id, user.uid), {userImageUrl: user.photoURL}, {merge: true});
     });
 };
 

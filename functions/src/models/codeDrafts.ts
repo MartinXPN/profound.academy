@@ -1,5 +1,5 @@
-import firebase from "firebase";
-import {LANGUAGES} from "./language";
+import firebase from 'firebase';
+import {LANGUAGES} from './language';
 
 
 export interface TextSelection {
@@ -10,7 +10,6 @@ export interface TextSelection {
 export interface CodeDraft {
     id: string;
     userDisplayName: string;
-    userImageUrl?: string;
     code?: { [key: string]: string };
     selection?: TextSelection;
     language: keyof typeof LANGUAGES;

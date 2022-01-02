@@ -6,6 +6,7 @@ import {submit} from './services/submissions';
 
 import {Submission} from './models/submissions';
 import {Comment} from './models/forum';
+import {updateInfoQueue} from './services/users';
 
 // Start writing Firebase Functions
 // https://firebase.google.com/docs/functions/typescript
@@ -69,3 +70,7 @@ export const notifyComment = functions.firestore
         functions.logger.info(`comment: ${JSON.stringify(comment)}`);
         await notifyOnComment(comment);
     });
+
+export const scheduledUserInfoUpdate = functions.pubsub
+    .schedule('every 10 minutes')
+    .onRun(updateInfoQueue);

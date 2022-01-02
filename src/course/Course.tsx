@@ -13,6 +13,7 @@ import {AuthContext} from "../App";
 import CourseDrawer from "./drawer/Drawer";
 import Exercise from "./Exercise";
 import {safeParse} from "../util";
+import StatusPage from "./StatusPage";
 
 
 const useStyles = makeStyles((theme: Theme) =>
@@ -50,8 +51,6 @@ function CurrentCourseView({openPage}: {openPage: (page: string) => void}) {
     const classes = useStyles();
     const auth = useContext(AuthContext);
     const {course} = useContext(CourseContext);
-    const [showRanking, setShowRanking] = useState<boolean>(false);
-
     const {exerciseId} = useParams<{ exerciseId: string }>();
     const [currentExercise, setCurrentExercise] = useState<ExerciseModel | null>(null);
 
@@ -74,16 +73,6 @@ function CurrentCourseView({openPage}: {openPage: (page: string) => void}) {
         }
     }, [course, openPage]);
 
-    useEffect(() => {
-        if( !auth.currentUserId || !course ) {
-            setShowRanking(false);
-            return;
-        }
-
-        if (course.instructors.includes(auth.currentUserId) || course.rankingVisibility === 'public' )
-            setShowRanking(true);
-    }, [course, auth]);
-
     useAsyncEffect(async () => {
         if( !course || !exerciseId )
             return;
@@ -101,12 +90,12 @@ function CurrentCourseView({openPage}: {openPage: (page: string) => void}) {
         <CurrentExerciseContext.Provider value={{exercise: currentExercise}}>
             <CourseDrawer
                 onItemSelected={openExercise}
-                showRanking={showRanking}
                 onRankingClicked={openRanking} />
 
             <main className={classes.content}>
                 <div className={classes.toolbar}/>
-                <Exercise launchCourse={launchCourse}/>
+                {exerciseId !== 'ranking' && <Exercise launchCourse={launchCourse}/>}
+                {exerciseId === 'ranking' && <StatusPage />}
             </main>
         </CurrentExerciseContext.Provider>
     </>

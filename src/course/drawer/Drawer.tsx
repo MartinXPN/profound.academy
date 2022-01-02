@@ -103,10 +103,9 @@ const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== 'open' 
 );
 
 
-function CourseDrawer({onItemSelected, showRanking, onRankingClicked}:
+function CourseDrawer({onItemSelected, onRankingClicked}:
                       {
                           onItemSelected: (exercise: Exercise) => void,
-                          showRanking: boolean,
                           onRankingClicked: () => void,
                       }) {
     const auth = useContext(AuthContext);
@@ -161,11 +160,10 @@ function CourseDrawer({onItemSelected, showRanking, onRankingClicked}:
                     <Box component="span" fontWeight="fontWeightMedium">My Progress</Box>
                 </DrawerHeader>
 
-                {showRanking &&
                 <ListItem button onClick={onRankingClicked} key="ranking">
                     <ListItemIcon><QueryStatsIcon/></ListItemIcon>
                     <ListItemText primary="Ranking"/>
-                </ListItem>}
+                </ListItem>
 
                 {Object.entries(course.levelExercises).map(([levelName, numExercises]) => {
                     const index = parseInt(levelName) - 1;

@@ -29,7 +29,6 @@ function LandingPage({introPageId, onStartCourseClicked, course}: {course: Cours
         {introPageId && <Content notionPage={introPageId} />}
         {<CenteredContainer>
             <Countdown
-                // @ts-ignore
                 date={course.revealsAt.toDate()}
                 intervalDelay={0}
                 precision={3}

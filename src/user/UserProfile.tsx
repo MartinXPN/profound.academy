@@ -4,16 +4,10 @@ import ActivityHeatmap from "./ActivityHeatmap";
 import CourseList from "../course/CourseList";
 import ProfileAppBar from "./ProfileAppBar";
 import UserInfo from "./UserInfo";
-import Button from "@mui/material/Button";
-import {Box, Theme, Typography} from "@mui/material";
-import {styled} from "@mui/styles";
+import {Box} from "@mui/material";
 import SubmissionsTable from "../course/SubmissionsTable";
+import OutlinedButton from "../common/OutlinedButton";
 
-const RoundButton = styled(Button)(({theme}: {theme: Theme}) => ({
-    margin: theme.spacing(1),
-    borderRadius: 50,
-    size: 'large',
-}));
 
 function UserProfile() {
     const {userId} = useParams<{ userId: string }>();
@@ -25,8 +19,8 @@ function UserProfile() {
 
         <UserInfo userId={userId} />
         <Box display="flex" justifyContent="center" alignItems="center">
-            <RoundButton variant={currentTab === 'overview' ? 'contained' : 'outlined'} onClick={() => setCurrentTab('overview')}>Overview</RoundButton>
-            <RoundButton variant={currentTab === 'status' ? 'contained' : 'outlined'} onClick={() => setCurrentTab('status')}>Status</RoundButton>
+            <OutlinedButton selected={currentTab === 'overview'} onClick={() => setCurrentTab('overview')}>Overview</OutlinedButton>
+            <OutlinedButton selected={currentTab === 'status'} onClick={() => setCurrentTab('status')}>Status</OutlinedButton>
         </Box>
 
         {currentTab === 'overview' && <>

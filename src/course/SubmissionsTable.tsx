@@ -12,7 +12,7 @@ import CircularProgress from '@mui/material/CircularProgress';
 
 import {Course, Exercise} from "../models/courses";
 import {useOnScreen} from '../util';
-import {onSubmissionsChanged, onUserSubmissionsChanged} from "../services/submissions";
+import {onCourseSubmissionsChanged, onSubmissionsChanged, onUserSubmissionsChanged} from "../services/submissions";
 import {SubmissionResult} from "../models/submissions";
 import moment from "moment/moment";
 import SubmissionBackdrop from "./SubmissionBackdrop";
@@ -55,7 +55,7 @@ function Bottom({hasMore, loadMore}: {hasMore: boolean, loadMore: () => void}) {
 }
 
 
-function SubmissionsTable({course, exercise, mode, userId}: {course?: Course, exercise?: Exercise, userId?: string, mode: 'all' | 'best' | 'user'}) {
+function SubmissionsTable({course, exercise, mode, userId}: {course?: Course, exercise?: Exercise, userId?: string, mode: 'all' | 'best' | 'user' | 'course'}) {
     const history = useHistory();
     const [page, setPage, pageRef] = useState(0);
     const [hasMore, setHasMore, moreRef] = useState(true);
@@ -117,6 +117,10 @@ function SubmissionsTable({course, exercise, mode, userId}: {course?: Course, ex
 
         if( mode === 'user' && userId ) {
             const unsubscribe = await onUserSubmissionsChanged(userId, startAfterId ?? null, rowsPerPage, onChanged);
+            setUpdateSubscriptions([...updateSubscriptions, unsubscribe]);
+        }
+        else if( mode === 'course' && course ) {
+            const unsubscribe = await onCourseSubmissionsChanged(course.id, startAfterId ?? null, rowsPerPage, onChanged);
             setUpdateSubscriptions([...updateSubscriptions, unsubscribe]);
         }
         else if( (mode === 'all' || mode === 'best') && course && exercise ) {

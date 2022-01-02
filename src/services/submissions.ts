@@ -99,6 +99,24 @@ export const onSubmissionsChanged = async (courseId: string, exerciseId: string,
     });
 }
 
+export const onCourseSubmissionsChanged = async (courseId: string,
+                                           startAfterId: string | null, numItems: number,
+                                           onChanged: (submissionResult: SubmissionResult[], hasMore: boolean) => void) => {
+    const course = db.course(courseId);
+    let query = db.submissionResults
+        .where('course', '==', course)
+        .orderBy('createdAt', 'desc');
+
+    console.log('startAfterId:', startAfterId);
+    query = await submissionQuery(query, startAfterId, numItems);
+
+    return query.onSnapshot(snapshot => {
+        const submissions: SubmissionResult[] = snapshot.docs.map(d => d.data());
+        console.log('Got submissions for course:', courseId, submissions);
+        onChanged(submissions, submissions.length >= numItems);
+    });
+}
+
 export const onUserSubmissionsChanged = async (
     userId: string,
     startAfterId: string | null, numItems: number,

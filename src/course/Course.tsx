@@ -13,6 +13,7 @@ import {AuthContext} from "../App";
 import CourseDrawer from "./drawer/Drawer";
 import Exercise from "./Exercise";
 import {safeParse} from "../util";
+import StatusPage from "./StatusPage";
 
 
 const useStyles = makeStyles((theme: Theme) =>
@@ -50,8 +51,6 @@ function CurrentCourseView({openPage}: {openPage: (page: string) => void}) {
     const classes = useStyles();
     const auth = useContext(AuthContext);
     const {course} = useContext(CourseContext);
-    const [showRanking, setShowRanking] = useState<boolean>(false);
-
     const {exerciseId} = useParams<{ exerciseId: string }>();
     const [currentExercise, setCurrentExercise] = useState<ExerciseModel | null>(null);
 
@@ -64,7 +63,7 @@ function CurrentCourseView({openPage}: {openPage: (page: string) => void}) {
         setCurrentExercise(exercise);
         openPage(exercise.id);
     }, [openPage]);
-    const openRanking = useCallback(() => openPage('ranking'), [openPage]);
+    const openStatus = useCallback(() => openPage('status'), [openPage]);
     const launchCourse = useCallback(async () => {
         console.log('Launching the course!');
         if( course ) {
@@ -73,16 +72,6 @@ function CurrentCourseView({openPage}: {openPage: (page: string) => void}) {
                 openPage(firstExercise.id);
         }
     }, [course, openPage]);
-
-    useEffect(() => {
-        if( !auth.currentUserId || !course ) {
-            setShowRanking(false);
-            return;
-        }
-
-        if (course.instructors.includes(auth.currentUserId) || course.rankingVisibility === 'public' )
-            setShowRanking(true);
-    }, [course, auth]);
 
     useAsyncEffect(async () => {
         if( !course || !exerciseId )
@@ -101,12 +90,12 @@ function CurrentCourseView({openPage}: {openPage: (page: string) => void}) {
         <CurrentExerciseContext.Provider value={{exercise: currentExercise}}>
             <CourseDrawer
                 onItemSelected={openExercise}
-                showRanking={showRanking}
-                onRankingClicked={openRanking} />
+                onStatusClicked={openStatus} />
 
             <main className={classes.content}>
                 <div className={classes.toolbar}/>
-                <Exercise launchCourse={launchCourse}/>
+                {exerciseId !== 'status' && <Exercise launchCourse={launchCourse}/>}
+                {exerciseId === 'status' && <StatusPage />}
             </main>
         </CurrentExerciseContext.Provider>
     </>

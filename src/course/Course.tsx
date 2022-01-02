@@ -63,7 +63,7 @@ function CurrentCourseView({openPage}: {openPage: (page: string) => void}) {
         setCurrentExercise(exercise);
         openPage(exercise.id);
     }, [openPage]);
-    const openRanking = useCallback(() => openPage('ranking'), [openPage]);
+    const openStatus = useCallback(() => openPage('status'), [openPage]);
     const launchCourse = useCallback(async () => {
         console.log('Launching the course!');
         if( course ) {
@@ -90,12 +90,12 @@ function CurrentCourseView({openPage}: {openPage: (page: string) => void}) {
         <CurrentExerciseContext.Provider value={{exercise: currentExercise}}>
             <CourseDrawer
                 onItemSelected={openExercise}
-                onRankingClicked={openRanking} />
+                onStatusClicked={openStatus} />
 
             <main className={classes.content}>
                 <div className={classes.toolbar}/>
-                {exerciseId !== 'ranking' && <Exercise launchCourse={launchCourse}/>}
-                {exerciseId === 'ranking' && <StatusPage />}
+                {exerciseId !== 'status' && <Exercise launchCourse={launchCourse}/>}
+                {exerciseId === 'status' && <StatusPage />}
             </main>
         </CurrentExerciseContext.Provider>
     </>

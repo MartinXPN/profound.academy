@@ -28,10 +28,8 @@ export const updateUserInfo = async (userId: string, displayName?: string, image
             photoURL: imageUrl,
         });
 
-    await db.user(userId).set({
-        displayName: displayName,
-        imageUrl: imageUrl,
-    }, {merge: true});
+    await db.user(userId).set({displayName: displayName, imageUrl: imageUrl}, {merge: true});
+    await db.userInfoUpdate(userId).set({displayName: displayName, imageUrl: imageUrl}, {merge: true});
 }
 
 export const uploadProfilePicture = async (userId: string, file: File) => {

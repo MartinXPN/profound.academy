@@ -1,4 +1,4 @@
-import {Course} from "./courses";
+import {Course} from './courses';
 
 export interface Activity {
     id: string;
@@ -20,4 +20,10 @@ export interface User {
     badges?: Badge;
     courses?: Course[];
     completed?: Course[];
+}
+
+export interface UserInfoUpdate {
+    id: string;
+    imageUrl?: string;
+    displayName?: string;
 }

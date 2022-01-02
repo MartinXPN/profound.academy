@@ -1,6 +1,7 @@
 import * as admin from 'firebase-admin';
 
-import {Activity, User} from '../models/users';
+import {CodeDraft} from '../models/codeDrafts';
+import {Activity, User, UserInfoUpdate} from '../models/users';
 import {Notification} from '../models/notifications';
 import {Course, Exercise, ExerciseProgress, Progress} from '../models/courses';
 import {Submission, SubmissionResult, SubmissionSensitiveRecords, SubmissionStatus} from '../models/submissions';
@@ -28,6 +29,8 @@ const dataPoint = <T>(collectionPath: string) => firestore()
 const db = {
     users: dataPoint<User>('users'),
     user: (userId: string) => dataPoint<User>('users').doc(userId),
+    infoUpdates: dataPoint<UserInfoUpdate>('infoUpdates'),
+    userInfoUpdate: (userId: string) => dataPoint<UserInfoUpdate>('infoUpdates').doc(userId),
     userVotes: (commentId: string, userId: string) => dataPoint<Vote>(`users/${userId}/votes`).doc(commentId),
     activity: (userId: string) => dataPoint<Activity>(`users/${userId}/activity`),
     notifications: (userId: string) => dataPoint<Notification>(`users/${userId}/notifications/`),
@@ -39,6 +42,7 @@ const db = {
     exercise: (courseId: string, exerciseId: string) => dataPoint<Exercise>(`courses/${courseId}/exercises`).doc(exerciseId),
     progress: (courseId: string) => dataPoint<Progress>(`courses/${courseId}/progress`),
     userProgress: (courseId: string, userId: string) => dataPoint<Progress>(`courses/${courseId}/progress`).doc(userId),
+    allUserProgress: (userId: string) => firestore().collectionGroup('progress').withConverter(converter<Progress>()).where('userId', '==', userId),
     courseExerciseProgress: (courseId: string, userId: string, level: string) => dataPoint<ExerciseProgress<SubmissionStatus>>(`courses/${courseId}/progress/${userId}/exerciseSolved`).doc(level),
     levelExerciseProgress: <T>(courseId: string, level: string, metric: string) => firestore().collectionGroup(metric).withConverter(converter<ExerciseProgress<T>>())
         .where('courseId', '==', courseId).where('level', '==', level),
@@ -54,6 +58,8 @@ const db = {
     submissionResults: dataPoint<SubmissionResult>('submissions'),
     submissionResult: (submissionId: string) => dataPoint<SubmissionResult>('submissions').doc(submissionId),
     submissionSensitiveRecords: (userId: string, submissionId: string) => dataPoint<SubmissionSensitiveRecords>(`/submissions/${submissionId}/private`).doc(userId),
+
+    codeDraft: (courseId: string, exerciseId: string, userId: string) => dataPoint<CodeDraft>(`codeDrafts/${courseId}/${exerciseId}`).doc(userId),
 };
 /* eslint-enable max-len, @typescript-eslint/explicit-module-boundary-types */
 export {db};

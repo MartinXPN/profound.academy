@@ -25,6 +25,8 @@ import LevelList from "./LevelList";
 import {AuthContext} from "../../App";
 import {onUserProgressChanged} from "../../services/courses";
 import {CourseContext} from "../Course";
+import Countdown from "react-countdown";
+import {Typography} from "@mui/material";
 
 
 const drawerWidth = 240;
@@ -128,6 +130,12 @@ function CourseDrawer({onItemSelected, onRankingClicked}:
         return () => unsubscribe();
     }, [course?.id, auth]);
 
+    const renderTimeRemaining = ({days, hours, minutes, seconds}:
+                                 { days: number, hours: number, minutes: number, seconds: number }) => {
+        return <Typography variant="h4" paddingLeft="1em">{days * 24 + hours}:{minutes.toString().padStart(2, '0')}:{seconds.toString().padStart(2, '0')}</Typography>
+    }
+    const now = new Date().getTime();
+
     if( !course )
         return <></>
     return (
@@ -147,6 +155,9 @@ function CourseDrawer({onItemSelected, onRankingClicked}:
                         {open ? (theme.direction === 'rtl' ? <ChevronRightIcon /> : <ChevronLeftIcon />) : <MenuIcon/>}
                     </IconButton>
                     <IconButton key="home" color="inherit" onClick={onHomeClicked} size="large"><Home/></IconButton>
+                    {course.revealsAt.toDate().getTime() < now && now < course.freezeAt.toDate().getTime() &&
+                        course.freezeAt.toDate().getTime() - now < 24 * 60 * 60 * 1000 && // show only if < 1 day remains
+                        <Countdown date={course.freezeAt.toDate()} intervalDelay={0} precision={3} renderer={renderTimeRemaining}/> }
 
                     <AuthDiv key="auth">
                         <AppBarNotifications />

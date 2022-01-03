@@ -101,6 +101,26 @@ export const processSubmissionResult = async (
         await db.run(userId, submissionResult.id).set(submissionRes);
         return;
     }
+    const [courseSnapshot, exerciseSnapshot, user] = await Promise.all([
+        db.course(submissionResult.course.id).get(),
+        db.exercise(submissionResult.course.id, submissionResult.exercise.id).get(),
+        admin.auth().getUser(submissionResult.userId),
+    ]);
+    const course = courseSnapshot.data();
+    const exercise = exerciseSnapshot.data();
+    if (!course)
+        throw Error(`Course with id ${submissionResult.course.id} does not exist`);
+    if (!exercise)
+        throw Error(`Exercise with id ${submissionResult.exercise.id} does not exist`);
+
+    const status = typeof submissionResult.status === 'string' ? submissionResult.status :
+        submissionResult.status.reduce((prev, cur) => cur === 'Solved' ? prev : cur, 'Solved');
+    const level = Math.floor(exercise.order).toString();
+    submissionResult.userDisplayName = submissionRes.userDisplayName = user.displayName;
+    submissionResult.userImageUrl = submissionRes.userImageUrl = user.photoURL;
+    submissionResult.courseTitle = submissionRes.courseTitle = course.title;
+    submissionResult.exerciseTitle = submissionRes.exerciseTitle = exercise.title;
+
 
     functions.logger.info(`Updating the submission: ${submissionResult.id} with ${JSON.stringify(submissionResult)}`);
     // Update the best submissions
@@ -114,7 +134,7 @@ export const processSubmissionResult = async (
         let alreadySolved = false;
 
         if (bestUserSubmissions.length > 1)
-            throw Error(`Duplicate user best: ${submissionRes.userId} for exercise: ${submissionRes.exercise.id}`);
+            throw Error(`Duplicate user best: ${submissionResult.userId} for ex: ${submissionResult.exercise.id}`);
 
         const currentBest = bestUserSubmissions.length === 1 ? bestUserSubmissions[0] : undefined;
         if (currentBest?.status === 'Solved')
@@ -133,22 +153,6 @@ export const processSubmissionResult = async (
     });
 
     // another transaction to update user metrics
-    const [courseSnapshot, exerciseSnapshot, user] = await Promise.all([
-        db.course(submissionResult.course.id).get(),
-        db.exercise(submissionResult.course.id, submissionResult.exercise.id).get(),
-        admin.auth().getUser(submissionResult.userId),
-    ]);
-    const course = courseSnapshot.data();
-    const exercise = exerciseSnapshot.data();
-    if (!course)
-        throw Error(`Course with id ${submissionResult.course.id} does not exist`);
-    if (!exercise)
-        throw Error(`Exercise with id ${submissionResult.exercise.id} does not exist`);
-
-    const status = typeof submissionResult.status === 'string' ? submissionResult.status :
-        submissionResult.status.reduce((prev, cur) => cur === 'Solved' ? prev : cur, 'Solved');
-    const level = Math.floor(exercise.order).toString();
-
     await firestore().runTransaction(async (transaction) => {
         const prevSolved = (await transaction.get(db.userProgress(course.id, userId)
             .collection('exerciseSolved').doc(level))).data();
@@ -170,8 +174,10 @@ export const processSubmissionResult = async (
 
         updateUserMetric(transaction, 'solved', submissionResult.userId, course.id, exercise.id, level,
             prevSolved?.progress?.[exercise.id] === 'Solved' ? 1 : 0, status === 'Solved' ? 1 : 0, status);
-        transaction.set(db.userProgress(course.id, user.uid), {userDisplayName: user.displayName}, {merge: true});
-        transaction.set(db.userProgress(course.id, user.uid), {userImageUrl: user.photoURL}, {merge: true});
+        transaction.set(db.userProgress(course.id, user.uid), {
+            userDisplayName: user.displayName,
+            userImageUrl: user.photoURL,
+        }, {merge: true});
     });
 };
 

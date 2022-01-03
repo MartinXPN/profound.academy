@@ -1,7 +1,6 @@
-import {Exercise, Course} from "./courses";
+import {Exercise, Course, TestCase} from './courses';
 import firebase from 'firebase/app';
-import {LANGUAGES} from "./language";
-import {TestCase} from "../../functions/src/models/courses";
+import {LANGUAGES} from './language';
 
 export type SubmissionStatus = 'Solved' |                   // OK => 100% score
                                 'Wrong answer' |            // WA => partial score or 0
@@ -14,11 +13,9 @@ export type SubmissionStatus = 'Solved' |                   // OK => 100% score
 export interface Submission {
     id: string;
     userId: string;
-    userDisplayName: string;
-    userImageUrl?: string;
+    course: Course;
     exercise: Exercise;
     testCases?: TestCase[];
-    course: Course;
     code?: { [key: string]: string };
     language: keyof typeof LANGUAGES;       // the language code
     createdAt: firebase.firestore.Timestamp;
@@ -33,6 +30,11 @@ export interface SubmissionResult extends Submission {
     score: number;
     outputs?: string | string[];
     compileOutputs?: string;
+    // for displaying results
+    userDisplayName?: string;
+    userImageUrl?: string;
+    courseTitle: string;
+    exerciseTitle: string;
 }
 
 export interface SubmissionSensitiveRecords {

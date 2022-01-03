@@ -98,8 +98,8 @@ function Editor() {
 
         setSubmitted(true);
         const submissionId = mode === 'submit'
-            ? await submitSolution(auth.currentUserId, auth.currentUser.displayName, course.id, exercise.id, code, language, false, tests)
-            : await submitSolution(auth.currentUserId, auth.currentUser.displayName, course.id, exercise.id, code, language, true, tests);
+            ? await submitSolution(auth.currentUserId, course.id, exercise.id, code, language, false, tests)
+            : await submitSolution(auth.currentUserId, course.id, exercise.id, code, language, true, tests);
 
         const onResultChanged = mode === 'submit' ? onSubmissionResultChanged: onRunResultChanged;
         return onResultChanged(auth.currentUserId, submissionId, (result) => {

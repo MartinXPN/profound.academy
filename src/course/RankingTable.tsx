@@ -40,9 +40,11 @@ function RankingTable({metric}: {metric: 'score' | 'solved' | 'upsolveScore'}) {
             setProgress(progress);
             // @ts-ignore
             const maxLevel = progress.map(p => levelMetric in p ? p[levelMetric] as number : {'1': 0})
-                .map(scores => scores ? Object.keys(scores)
-                    .map(level => parseInt(level))
-                    .reduce((prev, cur) => Math.max(prev, cur), 0) : 0)
+                .map(scores => scores
+                    ? Object.keys(scores)
+                        .map(level => parseInt(level))
+                        .reduce((prev, cur) => Math.max(prev, cur), 0)
+                    : 0)
                 .reduce((prev, cur) => Math.max(prev, cur), 0);
 
             setMaxLevel(maxLevel);

@@ -5,7 +5,7 @@ import {Language} from "../models/language";
 import {TestCase} from "../../functions/src/models/courses";
 
 
-export const submitSolution = async (userId: string, userDisplayName: string | null,
+export const submitSolution = async (userId: string,
                                      courseId: string, exerciseId: string,
                                      code: string, language: Language,
                                      isTestRun: boolean, testCases?: TestCase[]) => {
@@ -18,7 +18,6 @@ export const submitSolution = async (userId: string, userDisplayName: string | n
     const submission = {
         id: '',
         userId: userId,
-        userDisplayName: userDisplayName,
         course: courseRef,
         exercise: exerciseRef,
         testCases: testCases,

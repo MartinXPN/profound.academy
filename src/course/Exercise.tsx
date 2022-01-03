@@ -80,8 +80,8 @@ export default function Exercise({launchCourse}: {launchCourse: () => void}) {
                         <Content notionPage={exercise.pageId}/>
                         {auth.isSignedIn && <Forum/>}
                     </>}
-                    {currentTab === 'bestSubmissions' && <SubmissionsTable course={course} exercise={exercise} mode="best" />}
-                    {currentTab === 'allSubmissions' && <SubmissionsTable course={course} exercise={exercise} mode="all" />}
+                    {currentTab === 'bestSubmissions' && <SubmissionsTable rowsPerPage={5} course={course} exercise={exercise} mode="best" />}
+                    {currentTab === 'allSubmissions' && <SubmissionsTable rowsPerPage={5} course={course} exercise={exercise} mode="all" />}
                 </div>
 
                 <div style={{width: '100%', height: '100%'}}>

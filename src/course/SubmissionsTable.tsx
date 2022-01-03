@@ -1,5 +1,4 @@
-import React, {useCallback, useEffect, useRef} from "react";
-import useState from 'react-usestateref';
+import React, {Component, useRef} from "react";
 import Paper from '@mui/material/Paper';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -17,7 +16,7 @@ import {SubmissionResult} from "../models/submissions";
 import moment from "moment/moment";
 import SubmissionBackdrop from "./SubmissionBackdrop";
 import {statusToColor} from "./colors";
-import {useHistory} from "react-router-dom";
+import {RouteComponentProps, withRouter} from "react-router-dom";
 
 interface Column {
     id: '#' | 'userDisplayName' | 'createdAt' | 'status' | 'time' | 'memory' | 'language';
@@ -54,127 +53,128 @@ function Bottom({hasMore, loadMore}: {hasMore: boolean, loadMore: () => void}) {
     </div>
 }
 
+interface Props extends RouteComponentProps<any> {
+    rowsPerPage: number;
+    course?: Course;
+    exercise?: Exercise;
+    userId?: string;
+    mode: 'all' | 'best' | 'user' | 'course';
+}
 
-function SubmissionsTable({course, exercise, mode, userId}: {course?: Course, exercise?: Exercise, userId?: string, mode: 'all' | 'best' | 'user' | 'course'}) {
-    const history = useHistory();
-    const [page, setPage, pageRef] = useState(0);
-    const [hasMore, setHasMore, moreRef] = useState(true);
-    const rowsPerPage = 5;
-    const [pageSubmissions, setPageSubmissions, pageSubmissionsRef] = useState<SubmissionResult[][]>([]);
-    const [updateSubscriptions, setUpdateSubscriptions] = useState<(() => void)[]>([]);
-    const [displayedSubmission, setDisplayedSubmission] = useState<SubmissionResult | undefined>(undefined);
+interface State {
+    page: number;
+    hasMore: boolean;
+    displayedSubmission?: SubmissionResult;
+    pageSubmissions: SubmissionResult[][];
+    updateSubscriptions: (() => void)[],
+}
 
-    const onSubmissionClicked = async (submission: SubmissionResult) => {
-        console.log('clicked!', submission);
-        setDisplayedSubmission(submission);
-    }
-    const onCloseSubmission = () => setDisplayedSubmission(undefined);
+class SubmissionsTableC extends Component<Props, State> {
+    state: State = {page: 0, hasMore: true, pageSubmissions: [], updateSubscriptions: []};
 
-    const onUserClicked = useCallback((userId: string) => {
-        history.push(`/users/${userId}`);
-    }, [history]);
-
-    useEffect(() => {
-        // unsubscribe from all the listeners
-        return () => {
-            console.log('Unsubscribing from table listeners!');
-            for( const unsubscribe of updateSubscriptions )
-                unsubscribe();
-        }
-    }, []);
-    useEffect(() => {
-        console.log('unsubscribing from the previous exercise');
-        for( const unsubscribe of updateSubscriptions )
+    componentWillUnmount() {
+        console.log('unsubscribing from all the submission listeners');
+        for( const unsubscribe of this.state.updateSubscriptions )
             unsubscribe();
+    }
 
-        setPage(0);
-        setHasMore(true);
-        setPageSubmissions([]);
-        setUpdateSubscriptions([]);
-        setDisplayedSubmission(undefined);
-    }, [exercise?.id, userId]);
+    onSubmissionClicked = (submission: SubmissionResult) => this.setState({displayedSubmission: submission});
+    onCloseSubmission = () => this.setState({displayedSubmission: undefined});
+    onUserClicked = (userId: string) => this.props.history.push(`/users/${userId}`);
 
-    const loadNextPage = async () => {
-        console.log('Load more!');
-        const startAfterId = page === 0 || !pageSubmissionsRef.current[page - 1]
+    loadNextPage = async () => {
+        const page = this.state.page;
+        const startAfterId = page === 0 || !this.state.pageSubmissions[page - 1]
             ? null
-            : pageSubmissionsRef.current[page - 1].at(-1)?.id;
+            : this.state.pageSubmissions[page - 1].at(-1)?.id;
 
-        if( updateSubscriptions[page] ) {
-            console.log('Not loading as we have an active listener!');
+        // do not load if we already have a listener and set dummy listener right after check
+        if( this.state.updateSubscriptions[page] )
             return;
-        }
-        console.log('startAfter:', startAfterId, 'for page:', page);
+        this.setState({updateSubscriptions: [...this.state.updateSubscriptions, () => {}]});
+
+        console.log('startAfter:', startAfterId, 'for page:', this.state.page);
 
         const onChanged = (submissions: SubmissionResult[], more: boolean) => {
-            console.log('setting the new submissions to page:', page, 'while total page is:', pageRef.current);
-            setHasMore(more && moreRef.current);
-            const currentSubscriptions = [...pageSubmissionsRef.current];
+            console.log('onChanged:', submissions, page, `(now ${this.state.page})`, more);
+            const currentSubscriptions = [...this.state.pageSubmissions];
             currentSubscriptions[page] = submissions;
-            setPageSubmissions(currentSubscriptions);
-            setPage(Math.max(pageRef.current, page + 1));
+            this.setState({pageSubmissions: currentSubscriptions});
+
+            if( page === this.state.page )
+                this.setState({hasMore: more, page: page + 1});
         };
 
-        if( mode === 'user' && userId ) {
-            const unsubscribe = await onUserSubmissionsChanged(userId, startAfterId ?? null, rowsPerPage, onChanged);
-            setUpdateSubscriptions([...updateSubscriptions, unsubscribe]);
+        if( this.props.mode === 'user' && this.props.userId ) {
+            const unsubscribe = await onUserSubmissionsChanged(this.props.userId, startAfterId ?? null, this.props.rowsPerPage, onChanged);
+            const subscriptions = [...this.state.updateSubscriptions];
+            subscriptions[page] = unsubscribe;
+            this.setState({updateSubscriptions: subscriptions});
         }
-        else if( mode === 'course' && course ) {
-            const unsubscribe = await onCourseSubmissionsChanged(course.id, startAfterId ?? null, rowsPerPage, onChanged);
-            setUpdateSubscriptions([...updateSubscriptions, unsubscribe]);
+        else if( this.props.mode === 'course' && this.props.course ) {
+            const unsubscribe = await onCourseSubmissionsChanged(this.props.course.id, startAfterId ?? null, this.props.rowsPerPage, onChanged);
+            const subscriptions = [...this.state.updateSubscriptions];
+            subscriptions[page] = unsubscribe;
+            this.setState({updateSubscriptions: subscriptions});
         }
-        else if( (mode === 'all' || mode === 'best') && course && exercise ) {
-            const unsubscribe = await onSubmissionsChanged(course.id, exercise.id, mode, startAfterId ?? null, rowsPerPage, onChanged);
-            setUpdateSubscriptions([...updateSubscriptions, unsubscribe]);
+        else if( (this.props.mode === 'all' || this.props.mode === 'best') && this.props.course && this.props.exercise ) {
+            const unsubscribe = await onSubmissionsChanged(this.props.course.id, this.props.exercise.id, this.props.mode, startAfterId ?? null, this.props.rowsPerPage, onChanged);
+            const subscriptions = [...this.state.updateSubscriptions];
+            subscriptions[page] = unsubscribe;
+            this.setState({updateSubscriptions: subscriptions});
         }
     };
 
-    console.log('SubmissionTable:', exercise);
-    let orderNumber = 1;
-    return (
-        <Paper style={{width: '100%'}}>
-            {displayedSubmission && <SubmissionBackdrop submission={displayedSubmission} onClose={onCloseSubmission} />}
-            <TableContainer>
-                <Table>
-                    <TableHead>
-                        <TableRow>
-                            {columns.map((column) => (
-                            <TableCell
-                                key={column.id}
-                                align={column.align}
-                                style={{ minWidth: column.minWidth }}>
-                                {column.label}
-                            </TableCell>
-                            ))}
-                        </TableRow>
-                    </TableHead>
-                    <TableBody>
-                        {pageSubmissions.map((submissions, page) => submissions.map((row, index) =>
-                        <TableRow hover role="checkbox" tabIndex={-1} key={row.id} onClick={() => onSubmissionClicked(row)}>
-                            {columns.map((column) => {
-                                if( column.id === '#' )
-                                    return <TableCell key={column.id} align={column.align}>{orderNumber++}</TableCell>;
 
-                                const value = row[column.id];
-                                if( column.id === 'userDisplayName' )
-                                    return <TableCell key={column.id} align={column.align} sx={{"&:focus,&:hover": {cursor: 'pointer'}}} onClick={() => onUserClicked(row.userId)}>{value}</TableCell>
-
-                                // @ts-ignore
-                                const style = column.id === 'status' ? {color: statusToColor(value)} : {};
-                                return (
-                                    <TableCell key={column.id} align={column.align} style={style}>
-                                        {column.format ? column.format(value) : value}
+    render() {
+        const {hasMore, displayedSubmission, pageSubmissions} = this.state;
+        let orderNumber = 1;
+        return (
+            <Paper style={{width: '100%'}}>
+                {displayedSubmission && <SubmissionBackdrop submission={displayedSubmission} onClose={this.onCloseSubmission} />}
+                <TableContainer>
+                    <Table>
+                        <TableHead>
+                            <TableRow>
+                                {columns.map((column) => (
+                                    <TableCell
+                                        key={column.id}
+                                        align={column.align}
+                                        style={{ minWidth: column.minWidth }}>
+                                        {column.label}
                                     </TableCell>
-                                );
-                            })}
-                        </TableRow>
-                        ))}
-                    </TableBody>
-                </Table>
-            </TableContainer>
-            <Bottom hasMore={hasMore} loadMore={loadNextPage} />
-        </Paper>
-    );
+                                ))}
+                            </TableRow>
+                        </TableHead>
+                        <TableBody>
+                            {pageSubmissions.map((submissions, _page) => submissions.map((row, _index) =>
+                                <TableRow hover role="checkbox" tabIndex={-1} key={row.id} onClick={() => this.onSubmissionClicked(row)}>
+                                    {columns.map((column) => {
+                                        if( column.id === '#' )
+                                            return <TableCell key={column.id} align={column.align}>{orderNumber++}</TableCell>;
+
+                                        const value = row[column.id];
+                                        if( column.id === 'userDisplayName' )
+                                            return <TableCell key={column.id} align={column.align} sx={{"&:focus,&:hover": {cursor: 'pointer'}}} onClick={() => this.onUserClicked(row.userId)}>{value}</TableCell>
+
+                                        // @ts-ignore
+                                        const style = column.id === 'status' ? {color: statusToColor(value)} : {};
+                                        return (
+                                            <TableCell key={column.id} align={column.align} style={style}>
+                                                {column.format ? column.format(value) : value}
+                                            </TableCell>
+                                        );
+                                    })}
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                    </Table>
+                </TableContainer>
+                <Bottom hasMore={hasMore} loadMore={this.loadNextPage} />
+            </Paper>
+        );
+    }
 }
 
-export default SubmissionsTable;
+
+export default withRouter(SubmissionsTableC);

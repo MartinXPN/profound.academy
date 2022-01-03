@@ -30,7 +30,7 @@ function UserProfile() {
             <br/><br/><br/><br/>
         </>}
         {currentTab === 'status' && <>
-            <SubmissionsTable mode="user" userId={userId}/>
+            <SubmissionsTable rowsPerPage={5} mode="user" userId={userId}/>
         </>}
     </>
 }

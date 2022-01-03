@@ -32,7 +32,7 @@ function StatusPage() {
                 {showUpsolving && <OutlinedButton selected={currentTab === 'upsolving'} onClick={() => setCurrentTab('upsolving')}>Upsolving ranking</OutlinedButton>}
             </Stack>
 
-            {currentTab === 'submissions' && <SubmissionsTable course={course} mode="course" />}
+            {currentTab === 'submissions' && <SubmissionsTable rowsPerPage={5} course={course} mode="course" />}
             {currentTab === 'ranking' && <RankingTable metric="score"/>}
             {currentTab === 'upsolving' && <RankingTable metric="upsolveScore"/>}
         </Container>

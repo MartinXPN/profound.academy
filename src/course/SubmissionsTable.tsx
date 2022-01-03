@@ -17,9 +17,11 @@ import moment from "moment/moment";
 import SubmissionBackdrop from "./SubmissionBackdrop";
 import {statusToColor} from "./colors";
 import {RouteComponentProps, withRouter} from "react-router-dom";
+import {lastExerciseId} from "./Course";
+import {styled} from "@mui/material/styles";
 
 interface Column {
-    id: '#' | 'userDisplayName' | 'createdAt' | 'status' | 'time' | 'memory' | 'language';
+    id: '#' | 'userDisplayName' | 'createdAt' | 'courseTitle' | 'exerciseTitle' | 'status' | 'time' | 'memory' | 'language';
     label: string;
     minWidth?: number;
     align?: 'right';
@@ -30,6 +32,8 @@ const columns: Column[] = [
     { id: '#', label: '#', minWidth: 20 },
     { id: 'userDisplayName', label: 'User', minWidth: 100 },
     { id: 'createdAt', label: 'Date', minWidth: 100, format: (value) => moment(value.toDate()).format('YYYY MMM Do, HH:mm:ss') },
+    { id: 'courseTitle', label: 'Course', minWidth: 100 },
+    { id: 'exerciseTitle', label: 'Exercise', minWidth: 100 },
     { id: 'status', label: 'Status', minWidth: 50 },
     { id: 'time', label: 'Time (s)', minWidth: 50, align: 'right', format: (value: number) => value ? value.toFixed(2) : '' },
     { id: 'memory', label: 'Memory (MB)', minWidth: 50, align: 'right', format: (value: number) => value ? value.toFixed(1): '' },
@@ -53,6 +57,10 @@ function Bottom({hasMore, loadMore}: {hasMore: boolean, loadMore: () => void}) {
     </div>
 }
 
+const ClickableTableCell = styled(TableCell)({
+    "&:focus,&:hover": {cursor: 'pointer'}
+});
+
 interface Props extends RouteComponentProps<any> {
     rowsPerPage: number;
     course?: Course;
@@ -70,17 +78,39 @@ interface State {
 }
 
 class SubmissionsTableC extends Component<Props, State> {
-    state: State = {page: 0, hasMore: true, pageSubmissions: [], updateSubscriptions: []};
+    constructor(props: Props) {
+        super(props);
+        this.state = {page: 0, hasMore: true, pageSubmissions: [], updateSubscriptions: []};
+    }
+
+    componentDidUpdate(prevProps: Readonly<Props>, prevState: Readonly<State>, snapshot?: any) {
+        if( prevProps.course?.id !== this.props.course?.id ||
+            prevProps.exercise?.id !== this.props.exercise?.id ||
+            prevProps.userId !== this.props.userId ||
+            prevProps.mode !== this.props.mode ) {
+            this.setState({page: 0, hasMore: true, pageSubmissions: [], updateSubscriptions: []});
+        }
+    }
 
     componentWillUnmount() {
-        console.log('unsubscribing from all the submission listeners');
-        for( const unsubscribe of this.state.updateSubscriptions )
-            unsubscribe();
+        this.unsubscribeAll();
     }
 
     onSubmissionClicked = (submission: SubmissionResult) => this.setState({displayedSubmission: submission});
     onCloseSubmission = () => this.setState({displayedSubmission: undefined});
     onUserClicked = (userId: string) => this.props.history.push(`/users/${userId}`);
+    onExerciseClicked = (courseId: string, exerciseId: string) => this.props.history.push(`/${courseId}/${exerciseId}`);
+    onCourseClicked = (courseId: string) => {
+        const lastEx = lastExerciseId(this.context.auth?.currentUserId, courseId);
+        if( lastEx )    this.props.history.push(`/${courseId}/${lastEx}`);
+        else            this.props.history.push(`/${courseId}`);
+    };
+    unsubscribeAll = () => {
+        console.log('unsubscribing from all the submission listeners');
+        for( const unsubscribe of this.state.updateSubscriptions )
+            unsubscribe();
+    }
+
 
     loadNextPage = async () => {
         const page = this.state.page;
@@ -155,7 +185,11 @@ class SubmissionsTableC extends Component<Props, State> {
 
                                         const value = row[column.id];
                                         if( column.id === 'userDisplayName' )
-                                            return <TableCell key={column.id} align={column.align} sx={{"&:focus,&:hover": {cursor: 'pointer'}}} onClick={() => this.onUserClicked(row.userId)}>{value}</TableCell>
+                                            return <ClickableTableCell key={column.id} align={column.align} onClick={() => this.onUserClicked(row.userId)}>{value}</ClickableTableCell>
+                                        if( column.id === 'courseTitle' )
+                                            return <ClickableTableCell key={column.id} align={column.align} onClick={() => this.onCourseClicked(row.course.id)}>{value}</ClickableTableCell>
+                                        if( column.id === 'exerciseTitle' )
+                                            return <ClickableTableCell key={column.id} align={column.align} onClick={() => this.onExerciseClicked(row.course.id, row.exercise.id)}>{value}</ClickableTableCell>
 
                                         // @ts-ignore
                                         const style = column.id === 'status' ? {color: statusToColor(value)} : {};

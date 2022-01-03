@@ -8,7 +8,7 @@ import {SignIn} from "../user/Auth";
 import Editor from "./editor/Editor";
 import makeStyles from '@mui/styles/makeStyles';
 import {CourseContext, CurrentExerciseContext} from "./Course";
-import {Stack, Typography} from "@mui/material";
+import {Grid, Stack, Typography} from "@mui/material";
 import Content from "./Content";
 import Forum from "./forum/Forum";
 import SubmissionsTable from "./SubmissionsTable";
@@ -70,11 +70,11 @@ export default function Exercise({launchCourse}: {launchCourse: () => void}) {
         {exercise &&
             <SplitPane split="vertical" defaultSizes={splitPos ?? [1, 1]} onDragFinished={onSplitChanged}>
                 <div className={classes.exercise}>
-                    <Stack justifyContent="center" direction="row">
+                    <Grid container justifyContent="center">
                         <OutlinedButton selected={currentTab === 'description'} onClick={() => setCurrentTab('description')}>Description</OutlinedButton>
                         <OutlinedButton selected={currentTab === 'bestSubmissions'} onClick={() => setCurrentTab('bestSubmissions')}>Best Submissions</OutlinedButton>
                         <OutlinedButton selected={currentTab === 'allSubmissions'} onClick={() => setCurrentTab('allSubmissions')}>All Submissions</OutlinedButton>
-                    </Stack>
+                    </Grid>
 
                     {currentTab === 'description' && <>
                         <Content notionPage={exercise.pageId}/>

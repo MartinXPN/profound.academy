@@ -17,6 +17,7 @@ import {RouteComponentProps, withRouter} from "react-router-dom";
 import {lastExerciseId} from "./Course";
 import {styled} from "@mui/material/styles";
 import {BottomLoading} from "../common/loading";
+import {Avatar, Stack} from "@mui/material";
 
 interface Column {
     id: '#' | 'userDisplayName' | 'createdAt' | 'courseTitle' | 'exerciseTitle' | 'status' | 'time' | 'memory' | 'language';
@@ -42,6 +43,13 @@ const columns: Column[] = [
 const ClickableTableCell = styled(TableCell)({
     "&:focus,&:hover": {cursor: 'pointer'}
 });
+const SmallAvatar = styled(Avatar)(({ theme }) => ({
+    width: 30,
+    height: 30,
+    border: `2px solid ${theme.palette.background.paper}`,
+    marginRight: theme.spacing(1),
+}));
+
 
 interface Props extends RouteComponentProps<any> {
     reset: number;
@@ -148,7 +156,12 @@ class SubmissionsTableC extends Component<Props, State> {
 
                                         const value = row[column.id];
                                         if( column.id === 'userDisplayName' )
-                                            return <ClickableTableCell key={column.id} align={column.align} onClick={() => this.onUserClicked(row.userId)}>{value}</ClickableTableCell>
+                                            return <ClickableTableCell key={column.id} align={column.align} onClick={() => this.onUserClicked(row.userId)}>
+                                                <Stack direction="row" alignItems="center" alignContent="center">
+                                                    <SmallAvatar src={row.userImageUrl} />
+                                                    {value}
+                                                </Stack>
+                                            </ClickableTableCell>
                                         if( column.id === 'courseTitle' )
                                             return <ClickableTableCell key={column.id} align={column.align} onClick={() => this.onCourseClicked(row.course.id)}>{value}</ClickableTableCell>
                                         if( column.id === 'exerciseTitle' )

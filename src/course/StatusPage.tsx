@@ -5,7 +5,7 @@ import {AuthContext} from "../App";
 import {CourseContext} from "./Course";
 import {styled} from "@mui/styles";
 import {useStickyState} from "../util";
-import SubmissionsTable from "./SubmissionsTable";
+import {CourseSubmissionsTable} from "./SubmissionsTable";
 import RankingTable from "./RankingTable";
 
 const Container = styled('div')({
@@ -32,7 +32,7 @@ function StatusPage() {
                 {showUpsolving && <OutlinedButton selected={currentTab === 'upsolving'} onClick={() => setCurrentTab('upsolving')}>Upsolving ranking</OutlinedButton>}
             </Stack>
 
-            {currentTab === 'submissions' && <SubmissionsTable rowsPerPage={5} course={course} mode="course" />}
+            {currentTab === 'submissions' && <CourseSubmissionsTable rowsPerPage={5} course={course} />}
             {currentTab === 'ranking' && <RankingTable metric="score"/>}
             {currentTab === 'upsolving' && <RankingTable metric="upsolveScore"/>}
         </Container>

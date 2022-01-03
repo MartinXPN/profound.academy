@@ -11,7 +11,7 @@ import {CourseContext, CurrentExerciseContext} from "./Course";
 import {Grid, Stack, Typography} from "@mui/material";
 import Content from "./Content";
 import Forum from "./forum/Forum";
-import SubmissionsTable from "./SubmissionsTable";
+import {ExerciseSubmissionsTable} from "./SubmissionsTable";
 import {SplitPane} from "react-multi-split-pane";
 import "./SplitPane.css";
 import OutlinedButton from "../common/OutlinedButton";
@@ -80,8 +80,8 @@ export default function Exercise({launchCourse}: {launchCourse: () => void}) {
                         <Content notionPage={exercise.pageId}/>
                         {auth.isSignedIn && <Forum/>}
                     </>}
-                    {currentTab === 'bestSubmissions' && <SubmissionsTable rowsPerPage={5} course={course} exercise={exercise} mode="best" />}
-                    {currentTab === 'allSubmissions' && <SubmissionsTable rowsPerPage={5} course={course} exercise={exercise} mode="all" />}
+                    {currentTab === 'bestSubmissions' && <ExerciseSubmissionsTable rowsPerPage={5} course={course} exercise={exercise} mode="best" />}
+                    {currentTab === 'allSubmissions' && <ExerciseSubmissionsTable rowsPerPage={5} course={course} exercise={exercise} mode="all" />}
                 </div>
 
                 <div style={{width: '100%', height: '100%'}}>

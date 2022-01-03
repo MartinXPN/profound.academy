@@ -5,7 +5,7 @@ import CourseList from "../course/CourseList";
 import ProfileAppBar from "./ProfileAppBar";
 import UserInfo from "./UserInfo";
 import {Box} from "@mui/material";
-import SubmissionsTable from "../course/SubmissionsTable";
+import {UserSubmissionsTable} from "../course/SubmissionsTable";
 import OutlinedButton from "../common/OutlinedButton";
 
 
@@ -29,9 +29,7 @@ function UserProfile() {
             <ActivityHeatmap userId={userId} />
             <br/><br/><br/><br/>
         </>}
-        {currentTab === 'status' && <>
-            <SubmissionsTable rowsPerPage={5} mode="user" userId={userId}/>
-        </>}
+        {currentTab === 'status' && <UserSubmissionsTable rowsPerPage={5} userId={userId}/>}
     </>
 }
 

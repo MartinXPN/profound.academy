@@ -1,4 +1,4 @@
-import React, {Component, useRef} from "react";
+import React, {Component, useEffect, useState} from "react";
 import Paper from '@mui/material/Paper';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -6,11 +6,8 @@ import TableCell from '@mui/material/TableCell';
 import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
-import Box from '@mui/material/Box';
-import CircularProgress from '@mui/material/CircularProgress';
 
 import {Course, Exercise} from "../models/courses";
-import {useOnScreen} from '../util';
 import {onCourseSubmissionsChanged, onSubmissionsChanged, onUserSubmissionsChanged} from "../services/submissions";
 import {SubmissionResult} from "../models/submissions";
 import moment from "moment/moment";
@@ -19,6 +16,7 @@ import {statusToColor} from "./colors";
 import {RouteComponentProps, withRouter} from "react-router-dom";
 import {lastExerciseId} from "./Course";
 import {styled} from "@mui/material/styles";
+import {BottomLoading} from "../common/loading";
 
 interface Column {
     id: '#' | 'userDisplayName' | 'createdAt' | 'courseTitle' | 'exerciseTitle' | 'status' | 'time' | 'memory' | 'language';
@@ -41,32 +39,14 @@ const columns: Column[] = [
 ];
 
 
-function Bottom({hasMore, loadMore}: {hasMore: boolean, loadMore: () => void}) {
-    const ref = useRef();
-    const isVisible = useOnScreen(ref);
-
-    if( hasMore && isVisible )
-        loadMore();
-
-    // @ts-ignore
-    return <div ref={ref} style={{ paddingBottom: '5em' }}>{isVisible && hasMore &&
-        <Box sx={{ textAlign: 'center', width: '100%', margin: '1em' }}>
-            <CircularProgress />
-        </Box>
-    }
-    </div>
-}
-
 const ClickableTableCell = styled(TableCell)({
     "&:focus,&:hover": {cursor: 'pointer'}
 });
 
 interface Props extends RouteComponentProps<any> {
-    rowsPerPage: number;
-    course?: Course;
-    exercise?: Exercise;
-    userId?: string;
-    mode: 'all' | 'best' | 'user' | 'course';
+    reset: number;
+    onLoadNext: (startAfterId: string | null, onChange: (submissions: SubmissionResult[], more: boolean) => void) => Promise<() => void>;
+    columns: Column[];
 }
 
 interface State {
@@ -84,10 +64,7 @@ class SubmissionsTableC extends Component<Props, State> {
     }
 
     componentDidUpdate(prevProps: Readonly<Props>, prevState: Readonly<State>, snapshot?: any) {
-        if( prevProps.course?.id !== this.props.course?.id ||
-            prevProps.exercise?.id !== this.props.exercise?.id ||
-            prevProps.userId !== this.props.userId ||
-            prevProps.mode !== this.props.mode ) {
+        if( prevProps.reset !== this.props.reset ) {
             this.setState({page: 0, hasMore: true, pageSubmissions: [], updateSubscriptions: []});
         }
     }
@@ -135,24 +112,10 @@ class SubmissionsTableC extends Component<Props, State> {
                 this.setState({hasMore: more, page: page + 1});
         };
 
-        if( this.props.mode === 'user' && this.props.userId ) {
-            const unsubscribe = await onUserSubmissionsChanged(this.props.userId, startAfterId ?? null, this.props.rowsPerPage, onChanged);
-            const subscriptions = [...this.state.updateSubscriptions];
-            subscriptions[page] = unsubscribe;
-            this.setState({updateSubscriptions: subscriptions});
-        }
-        else if( this.props.mode === 'course' && this.props.course ) {
-            const unsubscribe = await onCourseSubmissionsChanged(this.props.course.id, startAfterId ?? null, this.props.rowsPerPage, onChanged);
-            const subscriptions = [...this.state.updateSubscriptions];
-            subscriptions[page] = unsubscribe;
-            this.setState({updateSubscriptions: subscriptions});
-        }
-        else if( (this.props.mode === 'all' || this.props.mode === 'best') && this.props.course && this.props.exercise ) {
-            const unsubscribe = await onSubmissionsChanged(this.props.course.id, this.props.exercise.id, this.props.mode, startAfterId ?? null, this.props.rowsPerPage, onChanged);
-            const subscriptions = [...this.state.updateSubscriptions];
-            subscriptions[page] = unsubscribe;
-            this.setState({updateSubscriptions: subscriptions});
-        }
+        const unsubscribe = await this.props.onLoadNext(startAfterId ?? null, onChanged);
+        const subscriptions = [...this.state.updateSubscriptions];
+        subscriptions[page] = unsubscribe;
+        this.setState({updateSubscriptions: subscriptions});
     };
 
 
@@ -166,7 +129,7 @@ class SubmissionsTableC extends Component<Props, State> {
                     <Table>
                         <TableHead>
                             <TableRow>
-                                {columns.map((column) => (
+                                {this.props.columns.map((column) => (
                                     <TableCell
                                         key={column.id}
                                         align={column.align}
@@ -179,7 +142,7 @@ class SubmissionsTableC extends Component<Props, State> {
                         <TableBody>
                             {pageSubmissions.map((submissions, _page) => submissions.map((row, _index) =>
                                 <TableRow hover role="checkbox" tabIndex={-1} key={row.id} onClick={() => this.onSubmissionClicked(row)}>
-                                    {columns.map((column) => {
+                                    {this.props.columns.map((column) => {
                                         if( column.id === '#' )
                                             return <TableCell key={column.id} align={column.align}>{orderNumber++}</TableCell>;
 
@@ -204,11 +167,38 @@ class SubmissionsTableC extends Component<Props, State> {
                         </TableBody>
                     </Table>
                 </TableContainer>
-                <Bottom hasMore={hasMore} loadMore={this.loadNextPage} />
+                <BottomLoading hasMore={hasMore} loadMore={this.loadNextPage} />
             </Paper>
         );
     }
 }
 
+const SubmissionsTable = withRouter(SubmissionsTableC);
 
-export default withRouter(SubmissionsTableC);
+
+export function UserSubmissionsTable({rowsPerPage, userId}: {rowsPerPage: number, userId: string}) {
+    const onLoadNext = async (startAfterId: string | null, onChange: (submissions: SubmissionResult[], more: boolean) => void) =>
+        await onUserSubmissionsChanged(userId, startAfterId ?? null, rowsPerPage, onChange);
+
+    const [reset, setReset] = useState(0);
+    useEffect(() => setReset(reset + 1), [userId]);
+    return <SubmissionsTable reset={reset} onLoadNext={onLoadNext} columns={columns.filter(c => c.id !== 'userDisplayName')}/>
+}
+
+export function CourseSubmissionsTable({rowsPerPage, course}: {rowsPerPage: number, course: Course}) {
+    const onLoadNext = async (startAfterId: string | null, onChange: (submissions: SubmissionResult[], more: boolean) => void) =>
+        await onCourseSubmissionsChanged(course.id, startAfterId ?? null, rowsPerPage, onChange);
+
+    const [reset, setReset] = useState(0);
+    useEffect(() => setReset(reset + 1), [course.id]);
+    return <SubmissionsTable reset={reset} onLoadNext={onLoadNext} columns={columns.filter(c => c.id !== 'courseTitle')}/>
+}
+
+export function ExerciseSubmissionsTable({rowsPerPage, course, exercise, mode}: {rowsPerPage: number, course: Course, exercise: Exercise, mode: 'all' | 'best'}) {
+    const onLoadNext = async (startAfterId: string | null, onChange: (submissions: SubmissionResult[], more: boolean) => void) =>
+        await onSubmissionsChanged(course.id, exercise.id, mode, startAfterId ?? null, rowsPerPage, onChange);
+
+    const [reset, setReset] = useState(0);
+    useEffect(() => setReset(reset + 1), [course.id, exercise.id, mode]);
+    return <SubmissionsTable reset={reset} onLoadNext={onLoadNext} columns={columns.filter(c => c.id !== 'courseTitle' && c.id !== 'exerciseTitle')}/>
+}

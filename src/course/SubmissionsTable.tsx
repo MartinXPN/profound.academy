@@ -15,9 +15,11 @@ import SubmissionBackdrop from "./SubmissionBackdrop";
 import {statusToColor} from "./colors";
 import {RouteComponentProps, withRouter} from "react-router-dom";
 import {lastExerciseId} from "./Course";
-import {styled} from "@mui/material/styles";
 import {BottomLoading} from "../common/loading";
-import {Avatar, Stack} from "@mui/material";
+import {Stack} from "@mui/material";
+import SmallAvatar from "../common/SmallAvatar";
+import ClickableTableCell from "../common/ClickableTableCell";
+
 
 interface Column {
     id: '#' | 'userDisplayName' | 'createdAt' | 'courseTitle' | 'exerciseTitle' | 'status' | 'time' | 'memory' | 'language';
@@ -38,17 +40,6 @@ const columns: Column[] = [
     { id: 'memory', label: 'Memory (MB)', minWidth: 50, align: 'right', format: (value: number) => value ? value.toFixed(1): '' },
     { id: 'language', label: 'Language', minWidth: 50 },
 ];
-
-
-const ClickableTableCell = styled(TableCell)({
-    "&:focus,&:hover": {cursor: 'pointer'}
-});
-const SmallAvatar = styled(Avatar)(({ theme }) => ({
-    width: 30,
-    height: 30,
-    border: `2px solid ${theme.palette.background.paper}`,
-    marginRight: theme.spacing(1),
-}));
 
 
 interface Props extends RouteComponentProps<any> {

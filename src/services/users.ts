@@ -38,3 +38,9 @@ export const uploadProfilePicture = async (userId: string, file: File) => {
     const imageUrl = await ref.getDownloadURL();
     return updateUserInfo(userId, undefined, imageUrl);
 }
+
+export const uploadPicture = async (userId: string, file: File) => {
+    const ref = firebase.storage().ref(`pictures/${userId}/${file.name}`);
+    await ref.put(file);
+    return await ref.getDownloadURL();
+}

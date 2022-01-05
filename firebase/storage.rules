@@ -14,5 +14,11 @@ service firebase.storage {
       allow write: if isCurrentUser(request, userId);
       allow read;
     }
+
+    // Allow users to upload pictures under their directories
+    match /pictures/{userId}/{filename} {
+      allow write: if isCurrentUser(request, userId);
+      allow read;
+    }
   }
 }

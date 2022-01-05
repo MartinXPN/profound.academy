@@ -17,6 +17,11 @@ export const getAllCourses = async () => {
     return courses;
 }
 
+export const doesExist = async (courseId: string) => {
+    const snapshot = await db.course(courseId).get();
+    return snapshot.exists;
+}
+
 export const getCourse = async (id: string) => {
     const snapshot = await db.course(id).get();
     const course: Course = snapshot.data() as Course;

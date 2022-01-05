@@ -1,7 +1,7 @@
 import React, {memo, useCallback, useContext, useEffect, useState} from "react";
 import {Course} from "../models/courses";
 import {AuthContext} from "../App";
-import {Button, FormControlLabel, Stack, TextField, Typography, Switch} from "@mui/material";
+import {Button, FormControlLabel, Stack, TextField, Typography, Switch, Grid} from "@mui/material";
 import Box from "@mui/material/Box";
 import {FileUploader} from "react-drag-drop-files";
 import AdapterMoment from '@mui/lab/AdapterMoment';
@@ -132,13 +132,17 @@ function CourseEditor({course}: {course?: Course | null}) {
 
     if( !auth.currentUserId )
         return <>
-            <Typography>You need to sign in to edit a course</Typography>
-            <Button onClick={onCancel} size="large" variant="outlined">Back</Button>
+            <Grid container spacing={0} direction="column" alignItems="center" justifyContent="center" marginTop="5em" marginBottom="5em">
+                <Typography>You need to sign in to edit a course</Typography>
+                <Button onClick={onCancel} size="large" variant="outlined">Go Back</Button>
+            </Grid>
         </>
     if( course && !course.instructors.includes(auth.currentUserId))
         return <>
-            <Typography>You are not in the instructor list of the course</Typography>
-            <Button onClick={onCancel} size="large" variant="outlined">Back</Button>
+            <Grid container spacing={0} direction="column" alignItems="center" justifyContent="center" marginTop="5em" marginBottom="5em">
+                <Typography>You are not in the instructor list of the course</Typography>
+                <Button onClick={onCancel} size="large" variant="outlined">Go Back</Button>
+            </Grid>
         </>
 
     return <>
@@ -190,7 +194,7 @@ function CourseEditor({course}: {course?: Course | null}) {
                     types={fileTypes}>
 
                     <div style={{display: 'grid'}}>
-                        <img width={300} height={180} src={imageUrl} loading="lazy" style={{ objectFit: 'cover', gridColumn: 1, gridRow: 1}}  alt="Course image"/>
+                        <img width={300} height={180} src={imageUrl} loading="lazy" style={{ objectFit: 'cover', gridColumn: 1, gridRow: 1}}  alt="Course background"/>
                         <UploadBackground boxShadow={3}>
                             <Typography color="common.white" align="center">Drag & Drop here</Typography>
                             <Typography color="common.white" align="center">Or click to select</Typography>

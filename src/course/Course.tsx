@@ -11,6 +11,7 @@ import CourseDrawer from "./drawer/Drawer";
 import Exercise from "./Exercise";
 import {safeParse} from "../util";
 import StatusPage from "./StatusPage";
+import CourseEditor from "./CourseEditor";
 
 
 const DrawerHeader = styled('div')(({ theme }) => ({
@@ -75,6 +76,10 @@ function CurrentCourseView({openPage}: {openPage: (page: string) => void}) {
         setCurrentExercise(ex);
     }, [exerciseId, currentExercise, course]);
 
+    let content;
+    if (exerciseId === 'status' )       content = <StatusPage />
+    else if (exerciseId === 'edit' )    content = <CourseEditor course={course} />
+    else                                content = <Exercise launchCourse={launchCourse} />
     return <>
         <CurrentExerciseContext.Provider value={{exercise: currentExercise}}>
             <CourseDrawer
@@ -83,8 +88,7 @@ function CurrentCourseView({openPage}: {openPage: (page: string) => void}) {
 
             <Content>
                 <DrawerHeader />
-                {exerciseId !== 'status' && <Exercise launchCourse={launchCourse}/>}
-                {exerciseId === 'status' && <StatusPage />}
+                {content}
             </Content>
         </CurrentExerciseContext.Provider>
     </>

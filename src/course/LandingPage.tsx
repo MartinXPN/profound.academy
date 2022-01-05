@@ -1,10 +1,13 @@
-import React from "react";
+import React, {useContext} from "react";
 import Content from "./Content";
 import Button from "@mui/material/Button";
-import {Course} from "../models/courses";
 import Countdown from "react-countdown";
 import {Typography} from "@mui/material";
 import {styled} from "@mui/material/styles";
+import {AuthContext} from "../App";
+import {CourseContext} from "./Course";
+import {Edit} from "@mui/icons-material";
+import {useHistory, useRouteMatch} from "react-router-dom";
 
 
 const CenteredContainer = styled('div')({
@@ -12,7 +15,16 @@ const CenteredContainer = styled('div')({
     paddingBottom: '3em',
 });
 
-function LandingPage({introPageId, onStartCourseClicked, course}: {course: Course, introPageId: string, onStartCourseClicked: () => void}) {
+function LandingPage({introPageId, onStartCourseClicked}: {introPageId: string, onStartCourseClicked: () => void}) {
+    const auth = useContext(AuthContext);
+    const {course} = useContext(CourseContext);
+    const history = useHistory();
+    const match = useRouteMatch();
+
+    const onEditClicked = () => {
+        const url = match.url.replace(/\/$/, '');
+        history.push(`${url}/edit`);
+    }
 
     const renderer = ({ days, hours, minutes, seconds, completed }:
                           {days: number, hours: number, minutes: number, seconds: number, completed: boolean}) => {
@@ -25,7 +37,16 @@ function LandingPage({introPageId, onStartCourseClicked, course}: {course: Cours
             </>;
     };
 
+    if( !course )
+        return <></>
     return <>
+        {auth.currentUserId && course.instructors.includes(auth.currentUserId) &&
+            <div style={{width: '100%'}}>
+            <Button variant="outlined" endIcon={<Edit />} onClick={onEditClicked} sx={{float: 'right', marginRight: '5em', marginTop: '2em'}}>
+                Edit
+            </Button>
+            </div>
+        }
         {introPageId && <Content notionPage={introPageId} />}
         {<CenteredContainer>
             <Countdown

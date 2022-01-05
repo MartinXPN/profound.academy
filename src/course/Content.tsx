@@ -1,4 +1,4 @@
-import React, {useRef, useState} from 'react';
+import React, {memo, useRef, useState} from 'react';
 import useAsyncEffect from "use-async-effect";
 
 import {ExtendedRecordMap} from "notion-types/src/maps";
@@ -8,7 +8,7 @@ import 'prismjs/themes/prism.css';          // used for code syntax highlighting
 import 'react-notion-x/src/styles.css';     // core styles shared by all of react-notion-x (required)
 import 'rc-dropdown/assets/index.css';      // used for collection views (optional)
 import 'katex/dist/katex.min.css';          // used for rendering equations (optional)
-import {CircularProgress} from "@mui/material";
+import {CircularProgress, Typography} from "@mui/material";
 
 import {getNotionPageMap} from "../services/courses";
 
@@ -16,12 +16,21 @@ import {getNotionPageMap} from "../services/courses";
 function Content({notionPage}: {notionPage: string}) {
     const isMounted = useRef(false)
     const [recordMap, setRecordMap] = useState<ExtendedRecordMap | null>(null);
+    const [errors, setErrors] = useState<string | null>(null);
 
     useAsyncEffect(async () => {
         isMounted.current = true;
         setRecordMap(null);
-        const map = await getNotionPageMap(notionPage);
-        console.log({map: map});
+        setErrors(null);
+        let map;
+        try {
+            map = await getNotionPageMap(notionPage);
+            console.log({map: map});
+        }
+        catch {
+            setRecordMap(null);
+            setErrors(`Could not get Notion page with id: ${notionPage}`);
+        }
 
         // @ts-ignore
         isMounted.current && setRecordMap(map);
@@ -53,13 +62,12 @@ function Content({notionPage}: {notionPage: string}) {
                 collectionRow: CollectionRow,
                 modal: Modal,
                 equation: Equation,
-            }}
-        /> :
-        <div style={{width: '80%', margin: '10%', textAlign: 'center'}}>
-            <CircularProgress/>
-        </div>
+            }}/>
+            : errors
+                ? <Typography sx={{color: 'red', marginBottom: '4em'}}>{errors}</Typography>
+                : <div style={{width: '80%', margin: '10%', textAlign: 'center'}}><CircularProgress/></div>
     }</>;
 }
 
 
-export default Content;
+export default memo(Content);

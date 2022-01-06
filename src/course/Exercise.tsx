@@ -53,7 +53,7 @@ export default function Exercise({launchCourse}: {launchCourse: () => void}) {
         {/* Display the landing page with an option to start the course if it wasn't started yet */
             !exerciseId &&
             <Box paddingBottom="12em">
-                <LandingPage course={course} introPageId={course.introduction} onStartCourseClicked={async () => {
+                <LandingPage introPageId={course.introduction} onStartCourseClicked={async () => {
                     if (auth && auth.currentUser && auth.currentUser.uid) {
                         await startCourse(auth.currentUser.uid, course.id);
                         launchCourse();

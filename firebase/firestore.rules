@@ -43,12 +43,17 @@ service cloud.firestore {
     }
 
 
+    function hasInstructorRole(auth) {
+      return auth != null && exists(/databases/$(database)/documents/users/$(auth.uid)/roles/instructor);
+    }
     function isCourseInstructor(request, courseId) {
       return request.auth != null && request.auth.uid in get(/databases/$(database)/documents/courses/$(courseId)).data.instructors;
     }
     // All the courses are public
     match /courses/{courseId} {
       allow read;
+      allow create: if hasInstructorRole(request.auth);
+      allow update: if isCourseInstructor(request, courseId);
 
       // All the exercises are public when they are revealed
       match /exercises/{exerciseId} {

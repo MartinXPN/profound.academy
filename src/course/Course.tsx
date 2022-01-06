@@ -1,10 +1,7 @@
 import React, {createContext, useCallback, useContext, useEffect, useState} from "react";
 import {Route, Switch, useHistory, useParams, useRouteMatch} from "react-router-dom";
 
-import { Theme } from '@mui/material/styles';
-
-import createStyles from '@mui/styles/createStyles';
-import makeStyles from '@mui/styles/makeStyles';
+import {styled} from '@mui/material/styles';
 
 import {getCourse, getExercise, getFirstExercise} from "../services/courses";
 import useAsyncEffect from "use-async-effect";
@@ -14,28 +11,22 @@ import CourseDrawer from "./drawer/Drawer";
 import Exercise from "./Exercise";
 import {safeParse} from "../util";
 import StatusPage from "./StatusPage";
+import CourseEditor from "./CourseEditor";
 
 
-const useStyles = makeStyles((theme: Theme) =>
-    createStyles({
-        root: {
-            display: 'flex',
-            height: 'calc(100vh - 64px)',
-        },
-        toolbar: {
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'flex-end',
-            padding: theme.spacing(0, 1),
-            // necessary for content to be below app bar
-            ...theme.mixins.toolbar,
-        },
-        content: {
-            flexGrow: 1,
-            padding: theme.spacing(0),
-        },
-    }),
-);
+const DrawerHeader = styled('div')(({ theme }) => ({
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'flex-start',
+    padding: theme.spacing(0, 2),
+    // necessary for content to be below app bar
+    ...theme.mixins.toolbar,
+}));
+
+const Content = styled('main')({
+    flexGrow: 1,
+    padding: 0,
+});
 
 export const CourseContext = createContext<{ course: Course | null }>({course: null});
 export const CurrentExerciseContext = createContext<{ exercise: ExerciseModel | null }>({exercise: null});
@@ -48,7 +39,6 @@ export const lastExerciseId = (userId?: string, courseId?: string) => {
 };
 
 function CurrentCourseView({openPage}: {openPage: (page: string) => void}) {
-    const classes = useStyles();
     const auth = useContext(AuthContext);
     const {course} = useContext(CourseContext);
     const {exerciseId} = useParams<{ exerciseId: string }>();
@@ -86,24 +76,32 @@ function CurrentCourseView({openPage}: {openPage: (page: string) => void}) {
         setCurrentExercise(ex);
     }, [exerciseId, currentExercise, course]);
 
+    let content;
+    if (exerciseId === 'status' )       content = <StatusPage />
+    else if (exerciseId === 'edit' )    content = <CourseEditor course={course} />
+    else                                content = <Exercise launchCourse={launchCourse} />
     return <>
         <CurrentExerciseContext.Provider value={{exercise: currentExercise}}>
             <CourseDrawer
                 onItemSelected={openExercise}
                 onStatusClicked={openStatus} />
 
-            <main className={classes.content}>
-                <div className={classes.toolbar}/>
-                {exerciseId !== 'status' && <Exercise launchCourse={launchCourse}/>}
-                {exerciseId === 'status' && <StatusPage />}
-            </main>
+            <Content>
+                <DrawerHeader />
+                {content}
+            </Content>
         </CurrentExerciseContext.Provider>
     </>
 }
 
 
+const Root = styled('div')({
+    display: 'flex',
+    height: 'calc(100vh - 64px)',
+});
+
+
 function CourseView() {
-    const classes = useStyles();
     const auth = useContext(AuthContext);
     const history = useHistory();
     const match = useRouteMatch();
@@ -127,9 +125,9 @@ function CourseView() {
         <Switch>
             <Route path={`${match.path}/:exerciseId?`}>
 
-            <div className={classes.root}>
+            <Root>
                 <CurrentCourseView openPage={openPage} />
-            </div>
+            </Root>
             </Route>
         </Switch>
         </CourseContext.Provider>

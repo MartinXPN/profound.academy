@@ -11,9 +11,11 @@ import {Exercise, Progress} from "../models/courses";
 import {getCourseLevelExercises, onLevelExerciseProgressChanged, onProgressChanged} from "../services/courses";
 import {CourseContext} from "./Course";
 import {Equalizer} from "@mui/icons-material";
-import {Typography} from "@mui/material";
+import {Stack, Typography} from "@mui/material";
 import useAsyncEffect from "use-async-effect";
 import {useHistory} from "react-router-dom";
+import ClickableTableCell from "../common/ClickableTableCell";
+import SmallAvatar from "../common/SmallAvatar";
 
 
 function RankingTable({metric}: {metric: 'score' | 'solved' | 'upsolveScore'}) {
@@ -137,9 +139,12 @@ function RankingTable({metric}: {metric: 'score' | 'solved' | 'upsolveScore'}) {
                         {progress.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row, index) =>
                         <TableRow hover role="checkbox" tabIndex={-1} key={row.id}>
                             <TableCell key="#" align="center">{page * rowsPerPage + index + 1}</TableCell>
-                            <TableCell key="userDisplayName" align="left"
-                                       sx={{"&:focus,&:hover": {cursor: 'pointer'}}}
-                                       onClick={() => onUserClicked(row.id)}>{row.userDisplayName}</TableCell>
+                            <ClickableTableCell key="userDisplayName" align="left" onClick={() => onUserClicked(row.id)}>
+                                <Stack direction="row" alignItems="center" alignContent="center">
+                                    <SmallAvatar src={row.userImageUrl} />
+                                    {row.userDisplayName}
+                                </Stack>
+                            </ClickableTableCell>
                             { /* @ts-ignore */ }
                             <TableCell key="total" align="right">{metric in row ? row[metric].toFixed(0): '-' }</TableCell>
 

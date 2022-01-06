@@ -17,6 +17,11 @@ export const getAllCourses = async () => {
     return courses;
 }
 
+export const doesExist = async (courseId: string) => {
+    const snapshot = await db.course(courseId).get();
+    return snapshot.exists;
+}
+
 export const getCourse = async (id: string) => {
     const snapshot = await db.course(id).get();
     const course: Course = snapshot.data() as Course;
@@ -64,6 +69,10 @@ export const startCourse = async (userId: string, courseId: string) => {
     return await db.user(userId).update({
         courses: [course],
     })
+}
+
+export const updateCourse = async (course: Course) => {
+    return db.course(course.id).set(course, {merge: true});
 }
 
 export const getExercise = async (courseId: string, exerciseId: string) => {

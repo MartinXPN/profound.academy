@@ -1,7 +1,9 @@
 import React, {memo, useCallback, useContext, useEffect, useState} from "react";
+import firebase from 'firebase/app';
+import 'firebase/firestore';
 import {Course} from "../models/courses";
 import {AuthContext} from "../App";
-import {Button, FormControlLabel, Stack, TextField, Typography, Switch, Grid} from "@mui/material";
+import {Button, FormControlLabel, Stack, TextField, Typography, Switch, Grid, Alert, Snackbar} from "@mui/material";
 import Box from "@mui/material/Box";
 import {FileUploader} from "react-drag-drop-files";
 import AdapterMoment from '@mui/lab/AdapterMoment';
@@ -11,7 +13,7 @@ import {styled} from "@mui/material/styles";
 import Content from "./Content";
 import {useHistory, useRouteMatch} from "react-router-dom";
 import {uploadPicture} from "../services/users";
-import {doesExist} from "../services/courses";
+import {doesExist, updateCourse} from "../services/courses";
 import useAsyncEffect from "use-async-effect";
 import UserSearch from "../user/UserSearch";
 import {User} from "../models/users";
@@ -65,8 +67,11 @@ function CourseEditor({course}: {course?: Course | null}) {
     const [instructors, setInstructors] = useState<string[]>(course?.instructors ?? []);
     const [revealDate, setRevealDate] = useState<Date | null>(course && course.revealsAt ? course.revealsAt.toDate() : new Date());
     const [freezeDate, setFreezeDate] = useState<Date | null>(course && course.freezeAt ? course.freezeAt.toDate() : new Date());
+    const [isRankingVisible, setIsRankingVisible] = useState(course?.rankingVisibility === 'public');
     const [allowViewingSolutions, setAllowViewingSolutions] = useState(course?.allowViewingSolutions ?? false);
     const [introId, setIntroId] = useState<{value?: string, error?: string}>({value: course?.introduction, error: undefined});
+
+    const [openSnackbar, setOpenSnackbar] = useState(false);
 
 
     const onIdChanged = (value: string) => setId({value: value, error: validateId(value)});
@@ -83,6 +88,7 @@ function CourseEditor({course}: {course?: Course | null}) {
         console.log('got image url:', imageUrl);
         setImageUrl(imageUrl);
     }, [auth.currentUserId]);
+    const handleCloseSnackbar = () => setOpenSnackbar(false);
 
     useAsyncEffect(async () => {
         if( course )
@@ -125,7 +131,27 @@ function CourseEditor({course}: {course?: Course | null}) {
             introId.value && !introId.error;
     }
 
-    const onSubmit = (data: any) => console.log(data);
+    const onSubmit = async () => {
+        if( !isFormReady() )
+            return;
+
+        await updateCourse({
+            id: id.value!,
+            img: imageUrl!,
+            revealsAt: firebase.firestore.Timestamp.fromDate(revealDate!),
+            freezeAt: firebase.firestore.Timestamp.fromDate(freezeDate!),
+            visibility: isPublic ? 'public' : 'private',
+            rankingVisibility: isRankingVisible ? 'public' : 'private',
+            allowViewingSolutions: allowViewingSolutions,
+            title: title.value!,
+            author: authors.value!,
+            instructors: instructors,
+            details: details.value!,
+            introduction: introId.value!,
+        } as Course);
+
+        setOpenSnackbar(true);
+    }
     const onCancel = () => {
         console.log('cancel');
         const url = match.url.replace('/edit', '');
@@ -227,23 +253,41 @@ function CourseEditor({course}: {course?: Course | null}) {
                 <Typography sx={{flex: 1}}/>
                 <FormControlLabel
                     control={
+                        <Switch checked={isRankingVisible}
+                                onChange={(event) => setIsRankingVisible(event.target.checked)}
+                                inputProps={{ 'aria-label': 'controlled' }} />
+                    }
+                    label="Is ranking visible"
+                    labelPlacement="start" />
+            </LocalizationProvider>
+            </Stack>
+
+            <Stack direction="row" spacing={2}>
+                <TextField required label="Introduction Notion ID" variant="outlined" placeholder="Notion page ID"
+                           value={introId.value} onChange={(e) => onIntroIdChanged(e.target.value)}
+                           error={!!introId.error} helperText={introId.error ?? null}
+                           inputProps={{ 'aria-label': 'controlled' }} sx={{flex: 1}}/>
+
+                <FormControlLabel
+                    control={
                         <Switch checked={allowViewingSolutions}
                                 onChange={(event) => setAllowViewingSolutions(event.target.checked)}
                                 inputProps={{ 'aria-label': 'controlled' }} />
                     }
                     label="Allow viewing solutions"
                     labelPlacement="start" />
-            </LocalizationProvider>
             </Stack>
 
-            <TextField required label="Introduction Notion ID" variant="outlined" placeholder="Notion page ID"
-                       value={introId.value} onChange={(e) => onIntroIdChanged(e.target.value)}
-                       error={!!introId.error} helperText={introId.error ?? null}
-                       inputProps={{ 'aria-label': 'controlled' }} />
             <br/><br/><br/>
             {introId.value && <Content notionPage={introId.value} />}
 
         </Stack>
+
+            <Snackbar open={openSnackbar} autoHideDuration={6000} onClose={handleCloseSnackbar}>
+                <Alert onClose={handleCloseSnackbar} severity="success" sx={{ width: '100%' }}>
+                    Successfully saved the changes!
+                </Alert>
+            </Snackbar>
         </Box>
     </>;
 }

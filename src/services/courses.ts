@@ -71,6 +71,10 @@ export const startCourse = async (userId: string, courseId: string) => {
     })
 }
 
+export const updateCourse = async (course: Course) => {
+    return db.course(course.id).set(course, {merge: true});
+}
+
 export const getExercise = async (courseId: string, exerciseId: string) => {
     const exercise = await db.exercise(courseId, exerciseId).get();
     return exercise.data() ?? null;

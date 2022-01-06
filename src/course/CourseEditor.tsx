@@ -13,6 +13,8 @@ import {useHistory, useRouteMatch} from "react-router-dom";
 import {uploadPicture} from "../services/users";
 import {doesExist} from "../services/courses";
 import useAsyncEffect from "use-async-effect";
+import UserSearch from "../user/UserSearch";
+import {User} from "../models/users";
 
 
 const validateText = (value: string, minLength: number = 3, maxLength: number = 128) => {
@@ -60,7 +62,7 @@ function CourseEditor({course}: {course?: Course | null}) {
     const [details, setDetails] = useState<{value?: string, error?: string}>({value: course?.details, error: undefined});
     const [imageUrl, setImageUrl] = useState<string | undefined>(course?.img);
     const [authors, setAuthors] = useState<{value?: string, error?: string}>({value: course?.author, error: undefined});
-    const [instructors, setInstructors] = useState<{value?: string[], error?: string}>({value: course?.instructors, error: undefined});
+    const [instructors, setInstructors] = useState<string[]>(course?.instructors ?? []);
     const [revealDate, setRevealDate] = useState<Date | null>(course && course.revealsAt ? course.revealsAt.toDate() : new Date());
     const [freezeDate, setFreezeDate] = useState<Date | null>(course && course.freezeAt ? course.freezeAt.toDate() : new Date());
     const [allowViewingSolutions, setAllowViewingSolutions] = useState(course?.allowViewingSolutions ?? false);
@@ -71,7 +73,7 @@ function CourseEditor({course}: {course?: Course | null}) {
     const onTitleChanged = (value: string) => setTitle({value: value, error: validateText(value)});
     const onDetailsChanged = (value: string) => setDetails({value: value, error: validateText(value)});
     const onAuthorsChanged = (value: string) => setAuthors({value: value, error: validateText(value)});
-    const onInstructorsChanged = (values: string[]) => setInstructors({value: values, error: validateText(values[0])});
+    const onInstructorsChanged = (users: User[]) => setInstructors(users.map(u => u.id));
     const onIntroIdChanged = (value: string) => setIntroId({value: value, error: validateText(value, 20, 35)});
     const handleImageChange = useCallback(async (file: File) => {
         if( !auth.currentUserId )
@@ -104,7 +106,7 @@ function CourseEditor({course}: {course?: Course | null}) {
         onDetailsChanged(course.details);
         setImageUrl(course.img);
         onAuthorsChanged(course.author);
-        onInstructorsChanged(course.instructors);
+        setInstructors(course.instructors ?? []);
         setRevealDate(course.revealsAt.toDate());
         setFreezeDate(course.freezeAt.toDate());
         setAllowViewingSolutions(course.allowViewingSolutions);
@@ -118,7 +120,7 @@ function CourseEditor({course}: {course?: Course | null}) {
             details.value && !details.error &&
             imageUrl &&
             authors.value && !authors.error &&
-            instructors.value && instructors.value.length > 0 && !instructors.error &&
+            instructors.length > 0 &&
             revealDate && freezeDate &&
             introId.value && !introId.error;
     }
@@ -210,12 +212,7 @@ function CourseEditor({course}: {course?: Course | null}) {
                            error={!!authors.error} helperText={authors.error ?? null}
                            inputProps={{ 'aria-label': 'controlled' }} />
 
-                {/* TODO: autocomplete with the users in the DB - write name, replace with a list of users*/}
-                <TextField required label="Instructors" variant="outlined" placeholder="List of instructor-users"
-                           sx={{flex: 1}}
-                           // value={details.value} onChange={(e) => onDetailsChanged(e.target.value)}
-                           // error={!!details.error} helperText={details.error ?? null}
-                           inputProps={{ 'aria-label': 'controlled' }} />
+                <UserSearch initialUserIds={course?.instructors ?? []} sx={{flex: 1}} onChange={onInstructorsChanged} />
             </Stack>
 
             <Stack direction="row" spacing={2}>

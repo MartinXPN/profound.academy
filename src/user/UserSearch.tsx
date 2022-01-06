@@ -61,10 +61,11 @@ function UserSearch({initialUserIds, onChange, sx}: {
             getOptionLabel={(option) => option.displayName ?? ''}
             isOptionEqualToValue={(option, value) => option.id === value.id}
             value={value}
-            onChange={
-                // @ts-ignore
-                (e, value) => setValue(value)
-            }
+            // @ts-ignore
+            onChange={(e, value: User[]) => {
+                setValue(value);
+                onChange && onChange(value);
+            }}
             loading={loading}
             renderTags={(value: User[], getTagProps) =>
                 value.map((option, index: number) =>

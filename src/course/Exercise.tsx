@@ -6,7 +6,6 @@ import LandingPage from "./LandingPage";
 import {startCourse} from "../services/courses";
 import {SignIn} from "../user/Auth";
 import Editor from "./editor/Editor";
-import makeStyles from '@mui/styles/makeStyles';
 import {CourseContext, CurrentExerciseContext} from "./Course";
 import {Grid, Stack, Typography} from "@mui/material";
 import Content from "./Content";
@@ -16,18 +15,17 @@ import {SplitPane} from "react-multi-split-pane";
 import "./SplitPane.css";
 import OutlinedButton from "../common/OutlinedButton";
 import Box from "@mui/material/Box";
+import {styled} from "@mui/material/styles";
+import CodeDrafts from "./CodeDrafts";
 
 
-const useStyles = makeStyles({
-    exercise: {
-        overflowY: 'auto',
-        height: '100%',
-        width: '100%',
-    },
+const ExerciseContent = styled('div')({
+    overflowY: 'auto',
+    height: '100%',
+    width: '100%',
 });
 
 export default function Exercise({launchCourse}: {launchCourse: () => void}) {
-    const classes = useStyles();
     const auth = useContext(AuthContext);
     const {course} = useContext(CourseContext);
     const {exercise} = useContext(CurrentExerciseContext);
@@ -36,7 +34,9 @@ export default function Exercise({launchCourse}: {launchCourse: () => void}) {
     const {exerciseId} = useParams<{ exerciseId: string }>();
     const [showSignIn, setShowSignIn] = useState(false);
     const [splitPos, setSplitPos] = useStickyState<number[] | null>(null, `splitPos-${auth?.currentUserId}`);
-    const [currentTab, setCurrentTab] = useState<'description' | 'allSubmissions' | 'bestSubmissions'>('description');
+    const [currentTab, setCurrentTab] = useState<'description' | 'allSubmissions' | 'bestSubmissions' | 'codeDrafts'>('description');
+    const [codeDraftId, setCodeDraftId] = useState<string | null>(null);
+    const isCourseInstructor = course && auth.currentUserId && course.instructors.includes(auth.currentUserId);
 
     if(auth?.isSignedIn && showSignIn)
         setShowSignIn(false);
@@ -69,28 +69,30 @@ export default function Exercise({launchCourse}: {launchCourse: () => void}) {
         {/* Display the exercise of the course at the location where it was left off the last time*/}
         {exercise &&
             <SplitPane split="vertical" defaultSizes={splitPos ?? [1, 1]} onDragFinished={onSplitChanged}>
-                <div className={classes.exercise}>
+                <ExerciseContent>
                     <Grid container justifyContent="center">
                         <OutlinedButton selected={currentTab === 'description'} onClick={() => setCurrentTab('description')}>Description</OutlinedButton>
                         <OutlinedButton selected={currentTab === 'bestSubmissions'} onClick={() => setCurrentTab('bestSubmissions')}>Best Submissions</OutlinedButton>
                         <OutlinedButton selected={currentTab === 'allSubmissions'} onClick={() => setCurrentTab('allSubmissions')}>All Submissions</OutlinedButton>
+                        {isCourseInstructor && <OutlinedButton selected={currentTab === 'codeDrafts'} onClick={() => setCurrentTab('codeDrafts')}>Code Drafts</OutlinedButton>}
                     </Grid>
 
-                    {currentTab === 'description' && <>
-                        <Content notionPage={exercise.pageId}/>
-                        {auth.isSignedIn && <Forum/>}
-                    </>}
+                    {currentTab === 'description' && <><Content notionPage={exercise.pageId}/>{auth.isSignedIn && <Forum/>}</>}
                     {currentTab === 'bestSubmissions' && <ExerciseSubmissionsTable rowsPerPage={5} course={course} exercise={exercise} mode="best" />}
                     {currentTab === 'allSubmissions' && <ExerciseSubmissionsTable rowsPerPage={5} course={course} exercise={exercise} mode="all" />}
-                </div>
+                    {currentTab === 'codeDrafts' && <CodeDrafts onCodeDraftSelected={setCodeDraftId} />}
+                </ExerciseContent>
 
                 <div style={{width: '100%', height: '100%'}}>
-                    {auth.isSignedIn && <Editor/>}
-                    {!auth.isSignedIn && <Stack direction="column" alignItems="center">
-                        <br/><br/><br/><br/><br/><br/>
-                        <Typography variant="subtitle2">To check your solution you need to sign in</Typography>
-                        <SignIn />
-                    </Stack>}
+                    {!auth.isSignedIn
+                        ? <Stack direction="column" alignItems="center">
+                            <br/><br/><br/><br/><br/><br/>
+                            <Typography variant="subtitle2">To check your solution you need to sign in</Typography>
+                            <SignIn />
+                        </Stack>
+                        : !!codeDraftId && currentTab === 'codeDrafts'
+                            ? <Editor disableCodeSync userId={codeDraftId} />
+                            : <Editor />}
                 </div>
             </SplitPane>
         }

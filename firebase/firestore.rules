@@ -140,7 +140,7 @@ service cloud.firestore {
 
     // CodeDrafts
     match /codeDrafts/{courseId}/{exerciseId}/{userId} {
-      allow read: if isCurrentUser(request, userId) || isCourseInstructor(request, resource.data.courseId);
+      allow read: if isCurrentUser(request, userId) || isCourseInstructor(request, courseId);
       allow write: if isCurrentUser(request, userId);
     }
   }

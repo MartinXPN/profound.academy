@@ -1,4 +1,5 @@
 import React, {memo, useState, useEffect} from "react";
+import {Ace, Range} from "ace-builds";
 import AceEditor from "react-ace";
 
 import "ace-builds/webpack-resolver";
@@ -8,17 +9,19 @@ import {TextSelection} from "../../models/codeDrafts";
 
 
 
-const Code = function Code({theme, language, fontSize, setCode, code, readOnly, onSelectionChanged}: {
+const Code = function Code({theme, language, fontSize, setCode, code, readOnly, selection, onSelectionChanged}: {
     theme: 'monokai' | 'github' | 'tomorrow' | 'kuroir' | 'twilight' | 'xcode' | 'textmate' | 'solarized_dark' | 'solarized_light' | 'terminal',
     language: string,
     fontSize: number,
     setCode?: (code: string) => void,
     code?: string,
     readOnly: boolean,
+    selection?: TextSelection,
     onSelectionChanged?: (selection: TextSelection) => void,
 }) {
     const [loadedTheme, setLoadedTheme] = useState('');
     const [loadedLanguage, setLoadedLanguage] = useState('');
+    const [editorInstance, setEditorInstance] = useState<Ace.Editor | null>(null);
 
     // load the language styles
     useAsyncEffect(async () => {
@@ -49,6 +52,14 @@ const Code = function Code({theme, language, fontSize, setCode, code, readOnly, 
         }
     }, []);
 
+    // set selection if possible
+    useEffect(() => {
+        editorInstance && selection && editorInstance.selection.setRange(new Range(
+            selection.start.row, selection.start.column,
+            selection.end.row, selection.end.column,
+        ));
+    }, [editorInstance, selection]);
+
 
     return <>
         <AceEditor
@@ -60,7 +71,7 @@ const Code = function Code({theme, language, fontSize, setCode, code, readOnly, 
             width='100%'
             height='100%'
             fontSize={fontSize}
-            onChange={(value) => {
+            onChange={value => {
                 console.log(value);
                 setCode && setCode(value);
             }}
@@ -85,11 +96,10 @@ const Code = function Code({theme, language, fontSize, setCode, code, readOnly, 
             }}
             editorProps={{ $blockScrolling: true }}
             onLoad={editorInstance => {
+                setEditorInstance(editorInstance);
                 editorInstance.container.style.resize = "both";
                 // mouseup = css resize end
-                document.addEventListener("mouseup", e => (
-                    editorInstance.resize()
-                ));
+                document.addEventListener('mouseup', _e => editorInstance.resize());
             }}
         />
     </>

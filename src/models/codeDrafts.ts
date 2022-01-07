@@ -14,5 +14,5 @@ export interface CodeDraft {
     code?: { [key: string]: string };
     selection?: TextSelection;
     language: keyof typeof LANGUAGES;
-    updatedAt: firebase.firestore.FieldValue;
+    updatedAt: firebase.firestore.Timestamp;
 }

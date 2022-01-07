@@ -55,6 +55,7 @@ const db = {
     submissionResult: (submissionId: string) => dataPoint<SubmissionResult>('submissions').doc(submissionId),
     submissionSensitiveRecords: (userId: string, submissionId: string) => dataPoint<SubmissionSensitiveRecords>(`/submissions/${submissionId}/private`).doc(userId),
 
+    codeDrafts: (courseId: string, exerciseId: string) => dataPoint<CodeDraft>(`codeDrafts/${courseId}/${exerciseId}`),
     codeDraft: (courseId: string, exerciseId: string, userId: string) => dataPoint<CodeDraft>(`codeDrafts/${courseId}/${exerciseId}`).doc(userId),
 };
 

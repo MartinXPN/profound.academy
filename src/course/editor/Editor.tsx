@@ -3,56 +3,59 @@ import Code from "./Code";  // needs to be before getModeForPath so that Ace is 
 import Console from "./Console";
 import {getModeForPath} from 'ace-builds/src-noconflict/ext-modelist';
 import { IconButton } from "@mui/material";
-import makeStyles from '@mui/styles/makeStyles';
 import {Remove, Add} from "@mui/icons-material";
 import {useStickyState} from "../../util";
 import {TestCase} from "../../models/courses";
 import {onRunResultChanged, onSubmissionResultChanged, submitSolution} from "../../services/submissions";
 import {AuthContext} from "../../App";
 import {SubmissionResult} from "../../models/submissions";
-import {saveCode} from "../../services/codeDrafts";
+import {onCodeChanged, saveCode} from "../../services/codeDrafts";
 import {TextSelection} from "../../models/codeDrafts";
 import {CourseContext, CurrentExerciseContext} from "../Course";
 import {SplitPane} from "react-multi-split-pane";
+import {styled} from "@mui/material/styles";
+import {Language, LANGUAGES} from "../../models/language";
 
 
-const useStyles = makeStyles({
-    code: {
-        position: 'relative',
-        height: '100%',
-        width: '100%',
-    },
-    settings: {
-        position: 'absolute',
-        top: 0,
-        right: 0,
-    },
-    console: {
-        height: '100%',
-        width: '100%',
-        backgroundColor: '#d9d9d9',
-        overflowY: 'auto',
-    },
+export const Settings = styled('div')({
+    position: 'absolute',
+    top: 0,
+    right: 0,
+});
+
+export const CodeView = styled('div')({
+    position: 'relative',
+    height: '100%',
+    width: '100%',
+});
+
+export const ConsoleView = styled('div')({
+    height: '100%',
+    width: '100%',
+    backgroundColor: '#d9d9d9',
+    overflowY: 'auto',
 });
 
 
-function Editor() {
-    const classes = useStyles();
+function Editor({disableCodeSync, userId}: {disableCodeSync?: boolean, userId?: string}) {
     const auth = useContext(AuthContext);
     const {course} = useContext(CourseContext);
     const {exercise} = useContext(CurrentExerciseContext);
+    const currentUserId = userId ?? auth.currentUserId;
+    const isMyCode = currentUserId === auth.currentUserId;
 
-    const [code, setCode] = useStickyState('', `code-${auth?.currentUser?.uid}-${exercise?.id}`);
+    const [code, setCode] = useStickyState<string>('', `code-${currentUserId}-${exercise?.id}`);
     const [selection, setSelection] = useState<TextSelection>({start: { row: 0, column: 0 }, end: { row: 0, column: 0 }});
-    const [theme, setTheme] = useStickyState('tomorrow', `editorTheme-${auth?.currentUser?.uid}`);
-    const [language, setLanguage] = useStickyState(course?.preferredLanguage, `${course?.id}-language-${auth?.currentUser?.uid}`);
+    const [theme, setTheme] = useStickyState('tomorrow', `editorTheme-${currentUserId}`);
+    const [language, setLanguage] = useStickyState<Language | null>(course?.preferredLanguage ?? null, `${course?.id}-language-${currentUserId}`);
     const [fontSize, setFontSize] = useStickyState(14, `fontSize-${auth?.currentUser?.uid}`);
     const [splitPos, setSplitPos] = useStickyState<number[] | null>(null, `consoleSplitPos-${auth?.currentUserId}`);
 
-    const [submissionResult, setSubmissionResult] = useStickyState<SubmissionResult | null>(null, `submissionRes-${auth?.currentUser?.uid}-${exercise?.id}`);
+    const [submissionResult, setSubmissionResult] = useStickyState<SubmissionResult | null>(null, `submissionRes-${currentUserId}-${exercise?.id}`);
     const [submitted, setSubmitted] = useState(false);
 
-    const editorLanguage = getModeForPath(`main.${language.extension}`).name;
+    const filename = `main.${language.extension}`;
+    const editorLanguage = getModeForPath(filename).name;
     const decreaseFontSize = () => setFontSize(Math.max(fontSize - 1, 5));
     const increaseFontSize = () => setFontSize(Math.min(fontSize + 1, 30));
 
@@ -60,10 +63,13 @@ function Editor() {
         console.log('split:', newSplit);
         setSplitPos(newSplit);
     }, [setSplitPos]);
+    const onSelectionChanged = useCallback((newSelection: TextSelection) => {
+        isMyCode && setSelection(newSelection);
+    }, [isMyCode]);
 
 
     useEffect(() => {
-        if( !auth.currentUserId || !auth.currentUser || !course || !exercise )
+        if( !auth.currentUserId || !auth.currentUser || !course || !exercise || disableCodeSync )
             return;
 
         const timeOutId = setTimeout(() => {
@@ -74,12 +80,26 @@ function Editor() {
                 return;
             }
 
-            saveCode(course.id, exercise.id, auth.currentUserId!, auth.currentUser!.displayName!, language, projectCode, selection)
-                .then(() => console.log('successfully saved the code'));
+            saveCode(course.id, exercise.id, auth.currentUserId!, language.languageCode,
+                auth.currentUser?.displayName ?? undefined, auth.currentUser?.photoURL ?? undefined,
+                projectCode, selection).then(() => console.log('successfully saved the code'));
         }, 500);
         return () => clearTimeout(timeOutId);
-    }, [auth.currentUser, auth.currentUserId, code, language, selection, course, exercise]);
+    }, [auth.currentUser, auth.currentUserId, code, language, selection, course, exercise, disableCodeSync]);
 
+    useEffect(() => {
+        if( !course || !exercise || !currentUserId || isMyCode )
+            return;
+
+        return onCodeChanged(course.id, exercise.id, currentUserId, (codeDraft) => {
+            if( !codeDraft )
+                return;
+
+            codeDraft.selection && setSelection(codeDraft.selection);
+            setLanguage(typeof codeDraft.language === 'string' ? LANGUAGES[codeDraft.language] : codeDraft.language);
+            setCode(codeDraft.code?.[filename] ?? 'No code here...');
+        })
+    }, [currentUserId, auth.currentUserId, course, exercise, isMyCode, filename, setCode, setLanguage]);
 
     const onEvaluate = useCallback(async (mode: 'run' | 'submit', tests?: TestCase[]) => {
         if( !auth.currentUserId || !auth.currentUser || !course || !exercise )
@@ -114,22 +134,24 @@ function Editor() {
 
     return <>
         <SplitPane split="horizontal" defaultSizes={splitPos ?? [3, 1]} onDragFinished={onSplitChanged}>
-            <div className={classes.code}>
-                <Code theme={theme} readOnly={false} language={editorLanguage} fontSize={fontSize}
-                      setCode={setCode} code={code} onSelectionChanged={setSelection}/>
-                <div className={classes.settings}>
+            <CodeView>
+                <Code theme={theme} language={editorLanguage} fontSize={fontSize}
+                      readOnly={!isMyCode}
+                      setCode={setCode} code={code}
+                      onSelectionChanged={onSelectionChanged} selection={!isMyCode ? selection : undefined}/>
+                <Settings>
                     <IconButton aria-label="decrease" onClick={decreaseFontSize} size="large"><Remove fontSize="small" /></IconButton>
                     <IconButton aria-label="increase" onClick={increaseFontSize} size="large"><Add fontSize="small" /></IconButton>
-                </div>
-            </div>
+                </Settings>
+            </CodeView>
 
-            <div className={classes.console}>
+            <ConsoleView>
                 <Console
                     onSubmitClicked={handleSubmit}
                     onRunClicked={handleRun}
                     isProcessing={submitted}
                     submissionResult={submissionResult} />
-            </div>
+            </ConsoleView>
         </SplitPane>
     </>
 }

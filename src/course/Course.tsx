@@ -8,8 +8,8 @@ import useAsyncEffect from "use-async-effect";
 import {Course, Exercise as ExerciseModel} from "../models/courses";
 import {AuthContext} from "../App";
 import CourseDrawer from "./drawer/Drawer";
-import Exercise from "./Exercise";
-import {safeParse} from "../util";
+import Exercise from "./exercise/Exercise";
+import {getLocalizedParam, safeParse} from "../util";
 import StatusPage from "./StatusPage";
 import CourseEditor from "./CourseEditor";
 
@@ -50,18 +50,20 @@ function CurrentCourseView({openPage}: {openPage: (page: string) => void}) {
     }, [exerciseId, auth?.currentUserId, course?.id]);
 
     const openExercise = useCallback((exercise: ExerciseModel) => {
+        exercise.title = getLocalizedParam(exercise.title);
+        exercise.pageId = getLocalizedParam(exercise.pageId);
         setCurrentExercise(exercise);
         openPage(exercise.id);
     }, [openPage]);
     const openStatus = useCallback(() => openPage('status'), [openPage]);
     const launchCourse = useCallback(async () => {
+        if( !course )
+            return;
+
         console.log('Launching the course!');
-        if( course ) {
-            const firstExercise = await getFirstExercise(course.id);
-            if( firstExercise )
-                openPage(firstExercise.id);
-        }
-    }, [course, openPage]);
+        const firstExercise = await getFirstExercise(course.id);
+        openExercise(firstExercise);
+    }, [course, openExercise]);
 
     useAsyncEffect(async () => {
         if( !course || !exerciseId )
@@ -72,9 +74,9 @@ function CurrentCourseView({openPage}: {openPage: (page: string) => void}) {
         }
 
         const ex = await getExercise(course.id, exerciseId);
-        console.log('Updating current exercise to:', ex);
-        setCurrentExercise(ex);
-    }, [exerciseId, currentExercise, course]);
+        if( ex )    openExercise(ex);
+        else        setCurrentExercise(null);
+    }, [exerciseId, currentExercise, course, openExercise, setCurrentExercise]);
 
     let content;
     if (exerciseId === 'status' )       content = <StatusPage />

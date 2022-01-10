@@ -20,6 +20,7 @@ import {Stack} from "@mui/material";
 import SmallAvatar from "../common/SmallAvatar";
 import ClickableTableCell from "../common/ClickableTableCell";
 import {LANGUAGES} from "../models/language";
+import {getLocalizedParam} from "../util";
 
 
 interface Column {
@@ -157,7 +158,10 @@ class SubmissionsTableC extends Component<Props, State> {
                                         if( column.id === 'courseTitle' )
                                             return <ClickableTableCell key={column.id} align={column.align} onClick={() => this.onCourseClicked(row.course.id)}>{value}</ClickableTableCell>
                                         if( column.id === 'exerciseTitle' )
-                                            return <ClickableTableCell key={column.id} align={column.align} onClick={() => this.onExerciseClicked(row.course.id, row.exercise.id)}>{value}</ClickableTableCell>
+                                            return <ClickableTableCell key={column.id} align={column.align} onClick={() => this.onExerciseClicked(row.course.id, row.exercise.id)}>
+                                                { /* @ts-ignore */}
+                                                {getLocalizedParam(value)}
+                                            </ClickableTableCell>
 
                                         if( column.id === 'language' && typeof value === 'string' )
                                             return <TableCell key={column.id} align={column.align}>{LANGUAGES[value].displayName}</TableCell>

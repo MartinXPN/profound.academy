@@ -1,4 +1,4 @@
-import React, {useContext, useEffect, useState} from "react";
+import React, {useContext, useEffect, useState, memo} from "react";
 
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
@@ -14,9 +14,10 @@ import {onCourseExerciseProgressChanged, onCourseLevelExercisesChanged} from "..
 import {AuthContext} from "../../App";
 import {SubmissionStatus} from "../../models/submissions";
 import {CourseContext, CurrentExerciseContext} from "../Course";
+import {getLocalizedParam} from '../../util';
 
 
-export default function LevelList({levelNumber, levelStatus, onItemSelected, isDrawerOpen, isSingleLevel}: {
+function LevelList({levelNumber, levelStatus, onItemSelected, isDrawerOpen, isSingleLevel}: {
     levelNumber: number,
     levelStatus: 'Solved' | 'In Progress' | 'Unavailable',
     onItemSelected: (exercise: Exercise) => void,
@@ -84,9 +85,12 @@ export default function LevelList({levelNumber, levelStatus, onItemSelected, isD
             {open && levelExercises.map((ex, index) =>
                 <ListItem button key={ex.id} onClick={() => onItemSelected(ex)} className={getStatusStyle(ex.id)}>
                     <ListItemIcon>{exercise?.id === ex.id ? <ArrowRightIcon /> : <ListItemText primary={index + 1}/>}</ListItemIcon>
-                    <ListItemText primary={ex.title}/>
+                    <ListItemText primary={getLocalizedParam(ex.title)}/>
                 </ListItem>
             )}
         </List>
     </>
 }
+
+
+export default memo(LevelList);

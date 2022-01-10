@@ -3,19 +3,14 @@ import Content from "./Content";
 import Button from "@mui/material/Button";
 import Countdown from "react-countdown";
 import {Typography} from "@mui/material";
-import {styled} from "@mui/material/styles";
 import {AuthContext} from "../App";
 import {CourseContext} from "./Course";
 import {Edit} from "@mui/icons-material";
 import {useHistory, useRouteMatch} from "react-router-dom";
+import Box from "@mui/material/Box";
 
 
-const CenteredContainer = styled('div')({
-    textAlign: 'center',
-    paddingBottom: '3em',
-});
-
-function LandingPage({introPageId, onStartCourseClicked}: {introPageId: string, onStartCourseClicked: () => void}) {
+function LandingPage({onStartCourseClicked}: {onStartCourseClicked: () => void}) {
     const auth = useContext(AuthContext);
     const {course} = useContext(CourseContext);
     const history = useHistory();
@@ -47,14 +42,14 @@ function LandingPage({introPageId, onStartCourseClicked}: {introPageId: string, 
             </Button>
             </div>
         }
-        {introPageId && <Content notionPage={introPageId} />}
-        {<CenteredContainer>
+        {course.introduction && <Content notionPage={course.introduction} />}
+        <Box textAlign="center" paddingBottom="3em">
             <Countdown
                 date={course.revealsAt.toDate()}
                 intervalDelay={0}
                 precision={3}
                 renderer={renderer} />
-        </CenteredContainer>}
+        </Box>
     </>
 }
 

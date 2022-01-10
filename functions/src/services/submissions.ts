@@ -94,6 +94,8 @@ export const processSubmissionResult = async (
     userId: string
 ): Promise<void> => {
     const {code, ...submissionRes} = submissionResult;
+    if (!submissionResult)
+        throw Error('Submission result is null');
 
     if (isTestRun) {
         // save the results to /runs/userId/private/<submissionId>

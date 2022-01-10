@@ -5,6 +5,14 @@ import {Notification} from '../models/notifications';
 import {db, firestore} from './db';
 
 
+export const getTopLocalizedParam = (param: string | { [key: string]: string }): string => {
+    if (typeof param === 'string')
+        return param;
+
+    return param[Object.keys(param)[0]];
+};
+
+
 const notify = async (notification: Notification, userId: string) => {
     const res = await db.notifications(userId).add(notification);
     functions.logger.info(`added notification for user: ${userId} with id: ${res.id}`);
@@ -76,7 +84,7 @@ export const notifyOnComment = async (comment: Comment): Promise<void> => {
         readAt: null,
         createdAt: admin.firestore.FieldValue.serverTimestamp(),
         imageUrl: comment.avatarUrl,
-        message: `${user.displayName} commented under ${exerciseData.title}`,
+        message: `${user.displayName} commented under ${getTopLocalizedParam(exerciseData.title)}`,
     } as Notification;
     functions.logger.info(`notification: ${JSON.stringify(notification)}`);
 

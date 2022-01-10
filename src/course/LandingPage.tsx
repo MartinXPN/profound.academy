@@ -36,11 +36,11 @@ function LandingPage({onStartCourseClicked}: {onStartCourseClicked: () => void})
         return <></>
     return <>
         {auth.currentUserId && course.instructors.includes(auth.currentUserId) &&
-            <div style={{width: '100%'}}>
+            <Box width="100%">
             <Button variant="outlined" endIcon={<Edit />} onClick={onEditClicked} sx={{float: 'right', marginRight: '5em', marginTop: '2em'}}>
                 Edit
             </Button>
-            </div>
+            </Box>
         }
         {course.introduction && <Content notionPage={course.introduction} />}
         <Box textAlign="center" paddingBottom="3em">

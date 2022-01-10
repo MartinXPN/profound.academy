@@ -16,6 +16,8 @@ import "../SplitPane.css";
 import OutlinedButton from "../../common/OutlinedButton";
 import Box from "@mui/material/Box";
 import CodeDrafts from "../CodeDrafts";
+import Button from "@mui/material/Button";
+import {Edit} from "@mui/icons-material";
 
 
 export default function Exercise({launchCourse}: {launchCourse: () => void}) {
@@ -30,6 +32,8 @@ export default function Exercise({launchCourse}: {launchCourse: () => void}) {
     const [currentTab, setCurrentTab] = useState<'description' | 'allSubmissions' | 'bestSubmissions' | 'codeDrafts'>('description');
     const [codeDraftId, setCodeDraftId] = useState<string | null>(null);
     const isCourseInstructor = course && auth.currentUserId && course.instructors.includes(auth.currentUserId);
+
+    const onEditClicked = useCallback(() => {}, []);
 
     if(auth?.isSignedIn && showSignIn)
         setShowSignIn(false);
@@ -63,11 +67,13 @@ export default function Exercise({launchCourse}: {launchCourse: () => void}) {
         {exercise &&
             <SplitPane split="vertical" defaultSizes={splitPos ?? [1, 1]} onDragFinished={onSplitChanged}>
                 <Box width="100%" height="100%" sx={{overflowY: 'auto'}}>
+
                     <Grid container justifyContent="center">
                         <OutlinedButton selected={currentTab === 'description'} onClick={() => setCurrentTab('description')}>Description</OutlinedButton>
                         <OutlinedButton selected={currentTab === 'bestSubmissions'} onClick={() => setCurrentTab('bestSubmissions')}>Best Submissions</OutlinedButton>
                         <OutlinedButton selected={currentTab === 'allSubmissions'} onClick={() => setCurrentTab('allSubmissions')}>All Submissions</OutlinedButton>
                         {isCourseInstructor && <OutlinedButton selected={currentTab === 'codeDrafts'} onClick={() => setCurrentTab('codeDrafts')}>Code Drafts</OutlinedButton>}
+                        {isCourseInstructor && <Button variant="outlined" endIcon={<Edit />} onClick={onEditClicked}>Edit</Button>}
                     </Grid>
 
                     {currentTab === 'description' && <><Content notionPage={getLocalizedParam(exercise.pageId)}/>{auth.isSignedIn && <Forum/>}</>}

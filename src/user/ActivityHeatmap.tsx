@@ -1,7 +1,6 @@
 import React, {memo} from 'react';
 import CalendarHeatmap from 'react-calendar-heatmap';
 import 'react-calendar-heatmap/dist/styles.css';
-import {styled} from "@mui/material/styles";
 import {Tooltip, Typography} from "@mui/material";
 import makeStyles from "@mui/styles/makeStyles";
 import moment from "moment/moment";
@@ -9,6 +8,7 @@ import useAsyncEffect from "use-async-effect";
 import {Activity} from "../models/users";
 import {getUserActivity} from "../services/users";
 import {useStickyState} from "../util";
+import Box from "@mui/material/Box";
 
 
 const useStyles = makeStyles({
@@ -17,15 +17,6 @@ const useStyles = makeStyles({
     colorScale3: {fill: '#44a340'},
     colorScale4: {fill: '#1e6823'},
 });
-
-const HeatmapDiv = styled('div')({
-    maxWidth: '100%',
-    width: '50em',
-    marginTop: '4em',
-    marginLeft: 'auto',
-    marginRight: 'auto',
-});
-
 
 
 function ActivityHeatmap({userId}: {userId: string}) {
@@ -44,7 +35,7 @@ function ActivityHeatmap({userId}: {userId: string}) {
     startDate.setFullYear(startDate.getFullYear() - 1);
 
     return <>
-        <HeatmapDiv>
+        <Box maxWidth="100%" width="50em" marginTop="4em" marginLeft="auto" marginRight="auto">
             <CalendarHeatmap
                 showMonthLabels
                 startDate={startDate}
@@ -70,7 +61,7 @@ function ActivityHeatmap({userId}: {userId: string}) {
                 }}
             />
             <Typography variant="subtitle1">{totalActivity ?? '...'} solutions in the last year</Typography>
-        </HeatmapDiv>
+        </Box>
     </>
 }
 

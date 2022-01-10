@@ -1,9 +1,7 @@
 import {useContext, useState} from "react";
 import useAsyncEffect from "use-async-effect";
 import { Backdrop, CircularProgress, ClickAwayListener, Paper } from "@mui/material";
-import createStyles from '@mui/styles/createStyles';
-import { Theme } from "@mui/material/styles";
-import makeStyles from '@mui/styles/makeStyles';
+import {styled} from "@mui/material/styles";
 import {SubmissionResult} from "../models/submissions";
 import {getSubmissionCode} from "../services/submissions";
 import {AuthContext} from "../App";
@@ -11,22 +9,13 @@ import Code from "./editor/Code";
 import {LANGUAGES} from "../models/language";
 import {getModeForPath} from "ace-builds/src-noconflict/ext-modelist";
 
-const useStyles = makeStyles((theme: Theme) =>
-    createStyles({
-        backdrop: {
-            zIndex: theme.zIndex.drawer + 1,
-            color: '#fff',
-        },
-        content: {
-            position: 'relative',
-            height: '90%',
-            width: '70%',
-        },
-    }),
-);
+
+const CodeBackdrop = styled(Backdrop)(({theme}) => ({
+    zIndex: theme.zIndex.drawer + 1,
+    color: 'white',
+}));
 
 function SubmissionBackdrop({submission, onClose}: {submission: SubmissionResult, onClose: () => void}) {
-    const classes = useStyles();
     const auth = useContext(AuthContext);
 
     const [open, setOpen] = useState(true);
@@ -58,13 +47,13 @@ function SubmissionBackdrop({submission, onClose}: {submission: SubmissionResult
     const editorLanguage = getModeForPath(`main.${language.extension}`).name;
 
     return (<>
-        <Backdrop className={classes.backdrop} open={open}>
+        <CodeBackdrop open={open}>
             <ClickAwayListener onClickAway={handleClose}>
                 {!submissionCode
                     ?
                     <CircularProgress color="inherit"/>
                     :
-                    <Paper className={classes.content}>
+                    <Paper sx={{position: 'relative', height: '90%', width: '70%'}}>
                         <Code theme="tomorrow" fontSize={14}
                               language={editorLanguage}
                               readOnly
@@ -72,7 +61,7 @@ function SubmissionBackdrop({submission, onClose}: {submission: SubmissionResult
                     </Paper>
                 }
             </ClickAwayListener>
-        </Backdrop>
+        </CodeBackdrop>
     </>);
 }
 

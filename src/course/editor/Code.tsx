@@ -1,5 +1,6 @@
 import React, {memo, useState, useEffect} from "react";
 import {Ace, Range} from "ace-builds";
+import {themesByName} from 'ace-builds/src-noconflict/ext-themelist';
 import AceEditor from "react-ace";
 
 import "ace-builds/webpack-resolver";
@@ -10,7 +11,7 @@ import {TextSelection} from "../../models/codeDrafts";
 
 
 const Code = function Code({theme, language, fontSize, setCode, code, readOnly, selection, onSelectionChanged}: {
-    theme: 'monokai' | 'github' | 'tomorrow' | 'kuroir' | 'twilight' | 'xcode' | 'textmate' | 'solarized_dark' | 'solarized_light' | 'terminal',
+    theme: keyof typeof themesByName,
     language: string,
     fontSize: number,
     setCode?: (code: string) => void,
@@ -33,8 +34,9 @@ const Code = function Code({theme, language, fontSize, setCode, code, readOnly, 
 
     // load the theme styles
     useAsyncEffect(async () => {
-        await import(`ace-builds/src-noconflict/theme-${theme}`);
-        setLoadedTheme(theme);
+        const themeName = String(theme);
+        await import(`ace-builds/src-noconflict/theme-${themeName}`);
+        setLoadedTheme(themeName);
     }, [theme]);
 
     // Handle ctrl/cmnd + s

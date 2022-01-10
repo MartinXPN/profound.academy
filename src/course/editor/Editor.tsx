@@ -2,8 +2,6 @@ import React, {useCallback, useContext, useEffect, useState} from "react";
 import Code from "./Code";  // needs to be before getModeForPath so that Ace is loaded
 import Console from "./Console";
 import {getModeForPath} from 'ace-builds/src-noconflict/ext-modelist';
-import { IconButton } from "@mui/material";
-import {Remove, Add} from "@mui/icons-material";
 import {useStickyState} from "../../util";
 import {TestCase} from "../../models/courses";
 import {onRunResultChanged, onSubmissionResultChanged, submitSolution} from "../../services/submissions";
@@ -13,28 +11,9 @@ import {onCodeChanged, saveCode} from "../../services/codeDrafts";
 import {TextSelection} from "../../models/codeDrafts";
 import {CourseContext, CurrentExerciseContext} from "../Course";
 import {SplitPane} from "react-multi-split-pane";
-import {styled} from "@mui/material/styles";
 import {Language, LANGUAGES} from "../../models/language";
-
-
-export const Settings = styled('div')({
-    position: 'absolute',
-    top: 0,
-    right: 0,
-});
-
-export const CodeView = styled('div')({
-    position: 'relative',
-    height: '100%',
-    width: '100%',
-});
-
-export const ConsoleView = styled('div')({
-    height: '100%',
-    width: '100%',
-    backgroundColor: '#d9d9d9',
-    overflowY: 'auto',
-});
+import Box from "@mui/material/Box";
+import Settings from "./Settings";
 
 
 function Editor({disableCodeSync, userId}: {disableCodeSync?: boolean, userId?: string}) {
@@ -56,8 +35,8 @@ function Editor({disableCodeSync, userId}: {disableCodeSync?: boolean, userId?: 
 
     const filename = `main.${language.extension}`;
     const editorLanguage = getModeForPath(filename).name;
-    const decreaseFontSize = () => setFontSize(Math.max(fontSize - 1, 5));
-    const increaseFontSize = () => setFontSize(Math.min(fontSize + 1, 30));
+    const decreaseFontSize = useCallback(() => setFontSize(Math.max(fontSize - 1, 5)), [fontSize, setFontSize]);
+    const increaseFontSize = useCallback(() => setFontSize(Math.min(fontSize + 1, 30)), [fontSize, setFontSize]);
 
     const onSplitChanged = useCallback((newSplit) => {
         console.log('split:', newSplit);
@@ -99,7 +78,7 @@ function Editor({disableCodeSync, userId}: {disableCodeSync?: boolean, userId?: 
             setLanguage(typeof codeDraft.language === 'string' ? LANGUAGES[codeDraft.language] : codeDraft.language);
             setCode(codeDraft.code?.[filename] ?? 'No code here...');
         })
-    }, [currentUserId, auth.currentUserId, course, exercise, isMyCode, filename, setCode, setLanguage]);
+    }, [course, exercise, currentUserId, isMyCode, filename, setCode, setLanguage]);
 
     const onEvaluate = useCallback(async (mode: 'run' | 'submit', tests?: TestCase[]) => {
         if( !auth.currentUserId || !auth.currentUser || !course || !exercise )
@@ -134,24 +113,26 @@ function Editor({disableCodeSync, userId}: {disableCodeSync?: boolean, userId?: 
 
     return <>
         <SplitPane split="horizontal" defaultSizes={splitPos ?? [3, 1]} onDragFinished={onSplitChanged}>
-            <CodeView>
+            <Box width="100%" height="100%" position="relative">
                 <Code theme={theme} language={editorLanguage} fontSize={fontSize}
                       readOnly={!isMyCode}
                       setCode={setCode} code={code}
                       onSelectionChanged={onSelectionChanged} selection={!isMyCode ? selection : undefined}/>
-                <Settings>
-                    <IconButton aria-label="decrease" onClick={decreaseFontSize} size="large"><Remove fontSize="small" /></IconButton>
-                    <IconButton aria-label="increase" onClick={increaseFontSize} size="large"><Add fontSize="small" /></IconButton>
-                </Settings>
-            </CodeView>
 
-            <ConsoleView>
+                <Box top={0} right={0} position="absolute">
+                    <Settings increaseFontSize={increaseFontSize} decreaseFontSize={decreaseFontSize}
+                              theme={theme} setTheme={setTheme}
+                              language={language.languageCode} setLanguage={(id) => setLanguage(LANGUAGES[id])}/>
+                </Box>
+            </Box>
+
+            <Box width="100%" height="100%" sx={{backgroundColor: '#d9d9d9', overflowY: 'auto'}}>
                 <Console
                     onSubmitClicked={handleSubmit}
                     onRunClicked={handleRun}
                     isProcessing={submitted}
                     submissionResult={submissionResult} />
-            </ConsoleView>
+            </Box>
         </SplitPane>
     </>
 }

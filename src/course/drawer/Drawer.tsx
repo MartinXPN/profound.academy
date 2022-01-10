@@ -1,4 +1,4 @@
-import React, {useContext, useEffect, useState} from "react";
+import React, {useContext, useEffect, useState, memo} from "react";
 import {useHistory} from "react-router-dom";
 
 import { styled, useTheme, Theme, CSSObject } from '@mui/material/styles';
@@ -105,11 +105,10 @@ const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== 'open' 
 );
 
 
-function CourseDrawer({onItemSelected, onStatusClicked}:
-                      {
-                          onItemSelected: (exercise: Exercise) => void,
-                          onStatusClicked: () => void,
-                      }) {
+function CourseDrawer({onItemSelected, onStatusClicked}: {
+    onItemSelected: (exercise: Exercise) => void,
+    onStatusClicked: () => void,
+}) {
     const auth = useContext(AuthContext);
     const {course} = useContext(CourseContext);
     const theme = useTheme();
@@ -194,4 +193,4 @@ function CourseDrawer({onItemSelected, onStatusClicked}:
     );
 }
 
-export default CourseDrawer;
+export default memo(CourseDrawer);

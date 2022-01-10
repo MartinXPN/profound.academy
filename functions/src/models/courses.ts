@@ -10,8 +10,8 @@ export interface TestCase {
 
 export interface Exercise {
     id: string;
-    title: string;
-    pageId: string;
+    title: string | {[key: string]: string};        // string or mapping {locale => titleText}
+    pageId: string | {[key: string]: string};       // string or mapping {locale => pageId}
     order: number;
     testCases: TestCase[];
     memoryLimit?: number;

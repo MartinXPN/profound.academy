@@ -44,7 +44,7 @@ function Settings({increaseFontSize, decreaseFontSize, theme, setTheme, language
 
     return <>
         <ClickAwayListener onClickAway={onAwayClicked}>
-        <Paper elevation={showConfigs ? 1 : 0} sx={!showConfigs ? {background: 'none'} : {}}>
+        <Paper elevation={showConfigs ? 1 : 0} sx={!showConfigs ? {background: 'none', paddingTop: 1} : {paddingTop: 1}}>
         <Stack direction="row" alignItems="center" alignContent="center">
             <IconButton aria-label="decrease" onClick={decreaseFontSize} size="large"><Remove fontSize="small" /></IconButton>
             <IconButton aria-label="increase" onClick={increaseFontSize} size="large"><Add fontSize="small" /></IconButton>
@@ -52,7 +52,7 @@ function Settings({increaseFontSize, decreaseFontSize, theme, setTheme, language
             {showConfigs && <>
                 <Autocomplete
                     id="theme"
-                    sx={{ width: 200, margin: 1 }}
+                    sx={{ width: 200 }}
                     autoHighlight
                     autoSelect
                     disableClearable
@@ -64,7 +64,7 @@ function Settings({increaseFontSize, decreaseFontSize, theme, setTheme, language
 
                 <Autocomplete
                     id="language"
-                    sx={{ width: 200, margin: 1 }}
+                    sx={{ width: 200 }}
                     autoHighlight
                     autoSelect
                     disableClearable

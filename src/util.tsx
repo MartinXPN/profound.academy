@@ -1,4 +1,5 @@
 import {useEffect, useState} from "react";
+import LocalizedStrings from "react-localization";
 
 
 export function safeParse<T>(str: string | null, defaultValue: T) {
@@ -34,3 +35,19 @@ export function useStickyState<T>(defaultValue: T, key: string) {
     }, [value, key]);
     return [value, setValue];
 }
+
+/**
+ * Get localized exercise params
+ * @param param string or object mapping from locale to text value
+ */
+export const getLocalizedParam = (param: string | {[key: string]: string}) => {
+    if( typeof param === 'string' )
+        return param;
+
+    const localeToParamText: {[key: string]: {value: string}} = {};
+    Object.entries(param).forEach(([locale, titleText]) => {
+        localeToParamText[locale] = {value: titleText};
+    });
+
+    return new LocalizedStrings(localeToParamText).value;
+};

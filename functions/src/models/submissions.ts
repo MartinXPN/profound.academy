@@ -34,7 +34,7 @@ export interface SubmissionResult extends Submission {
     userDisplayName?: string;
     userImageUrl?: string;
     courseTitle: string;
-    exerciseTitle: string;
+    exerciseTitle: string | {[key: string]: string};
 }
 
 export interface SubmissionSensitiveRecords {

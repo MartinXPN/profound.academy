@@ -1,5 +1,4 @@
 import {SubmissionStatus} from "../models/submissions";
-import makeStyles from '@mui/styles/makeStyles';
 
 function adjust(color: string, amount: number) {
     return '#' + color.replace(/^#/, '')
@@ -39,7 +38,7 @@ const getStyle = (color: string) => {
     }
 };
 
-export const useStatusToStyledBackground = makeStyles({
+export const statusToStyledBackground = {
     'Solved': getStyle(statusToColor('Solved')),
     'Wrong answer': getStyle(statusToColor('Wrong answer')),
     'Time limit exceeded': getStyle(statusToColor('Time limit exceeded')),
@@ -49,4 +48,4 @@ export const useStatusToStyledBackground = makeStyles({
     'Unavailable': getStyle(statusToColor('Unavailable')),
     null: getStyle(statusToColor(null)),
     undefined: getStyle(statusToColor(undefined)),
-});
+};

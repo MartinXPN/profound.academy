@@ -2,7 +2,6 @@ import React, {memo} from 'react';
 import CalendarHeatmap from 'react-calendar-heatmap';
 import 'react-calendar-heatmap/dist/styles.css';
 import {Tooltip, Typography} from "@mui/material";
-import makeStyles from "@mui/styles/makeStyles";
 import moment from "moment/moment";
 import useAsyncEffect from "use-async-effect";
 import {Activity} from "../models/users";
@@ -11,16 +10,7 @@ import {useStickyState} from "../util";
 import Box from "@mui/material/Box";
 
 
-const useStyles = makeStyles({
-    colorScale1: {fill: '#d6e685'},
-    colorScale2: {fill: '#8cc665'},
-    colorScale3: {fill: '#44a340'},
-    colorScale4: {fill: '#1e6823'},
-});
-
-
 function ActivityHeatmap({userId}: {userId: string}) {
-    const classes = useStyles();
     const [activity, setActivity] = useStickyState<Activity[] | null>(null, `activity-${userId}`);
     const [totalActivity, setTotalActivity] = useStickyState<number | null>(null, `totalActivity-${userId}`);
 
@@ -35,6 +25,12 @@ function ActivityHeatmap({userId}: {userId: string}) {
     startDate.setFullYear(startDate.getFullYear() - 1);
 
     return <>
+        <style>{`
+            .react-calendar-heatmap .color-scale-1 { fill: #d6e685; }
+            .react-calendar-heatmap .color-scale-2 { fill: #8cc665; }
+            .react-calendar-heatmap .color-scale-3 { fill: #44a340; }
+            .react-calendar-heatmap .color-scale-4 { fill: #1e6823; }
+        `}</style>
         <Box maxWidth="100%" width="50em" marginTop="4em" marginLeft="auto" marginRight="auto">
             <CalendarHeatmap
                 showMonthLabels
@@ -43,10 +39,10 @@ function ActivityHeatmap({userId}: {userId: string}) {
                 values={activity ?? []}
                 classForValue={(value) => {
                     if (!value || !value.count) return 'color-empty';
-                    if( value.count < 3 )       return classes.colorScale1;
-                    if( value.count < 6 )       return classes.colorScale2;
-                    if( value.count < 9 )       return classes.colorScale3;
-                    return classes.colorScale4;
+                    if( value.count < 3 )       return 'color-scale-1';
+                    if( value.count < 6 )       return 'color-scale-2';
+                    if( value.count < 9 )       return 'color-scale-3';
+                    return 'color-scale-4';
                 }}
                 transformDayElement={(element, value, index) => {
                     const currentDate = new Date(startDate);

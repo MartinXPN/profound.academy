@@ -8,7 +8,7 @@ import {ArrowDropUp, ArrowDropDown, Equalizer} from "@mui/icons-material";
 import ArrowRightIcon from '@mui/icons-material/ArrowRight';
 
 import {Exercise, ExerciseProgress} from "../../models/courses";
-import {useStatusToStyledBackground} from "../colors";
+import {statusToStyledBackground} from "../colors";
 import {Typography} from "@mui/material";
 import {onCourseExerciseProgressChanged, onCourseLevelExercisesChanged} from "../../services/courses";
 import {AuthContext} from "../../App";
@@ -30,7 +30,6 @@ function LevelList({levelNumber, levelStatus, onItemSelected, isDrawerOpen, isSi
     const [levelExercises, setLevelExercises] = useState<Exercise[]>([]);
     const [open, setOpen] = useState(isSingleLevel);
     const [progress, setProgress] = useState<ExerciseProgress<SubmissionStatus> | null>(null);
-    const statusToStyle = useStatusToStyledBackground();
     const isCourseOpen = course && course.revealsAt.toDate() < new Date();
 
     useEffect(() => {
@@ -61,19 +60,19 @@ function LevelList({levelNumber, levelStatus, onItemSelected, isDrawerOpen, isSi
     const onLevelClicked = () => setOpen(!open);
     const getStatusStyle = (id: string) => {
         if( !progress )
-            return statusToStyle.undefined;
+            return statusToStyledBackground.undefined;
 
-        const status = id in progress.progress ? progress.progress[id] : undefined;
+        const status = progress.progress?.[id];
         if( !status )
-            return statusToStyle.undefined;
-        return statusToStyle[status];
+            return statusToStyledBackground.undefined;
+        return statusToStyledBackground[status];
     }
 
-    const levelClass = levelStatus === 'Solved' ? statusToStyle.Solved : statusToStyle.undefined;
+    const levelStyle = levelStatus === 'Solved' ? statusToStyledBackground.Solved : statusToStyledBackground.undefined;
     return <>
         <List disablePadding>
             {!isSingleLevel &&
-                <ListItem button key={`level-${levelNumber}`} onClick={onLevelClicked} className={levelClass}>
+                <ListItem button key={`level-${levelNumber}`} onClick={onLevelClicked} style={levelStyle}>
                     <ListItemIcon>
                         <Equalizer/>
                         {!isDrawerOpen && <Typography variant="subtitle1">{levelNumber}</Typography>}
@@ -83,7 +82,7 @@ function LevelList({levelNumber, levelStatus, onItemSelected, isDrawerOpen, isSi
                 </ListItem>
             }
             {open && levelExercises.map((ex, index) =>
-                <ListItem button key={ex.id} onClick={() => onItemSelected(ex)} className={getStatusStyle(ex.id)}>
+                <ListItem button key={ex.id} onClick={() => onItemSelected(ex)} style={getStatusStyle(ex.id)}>
                     <ListItemIcon>{exercise?.id === ex.id ? <ArrowRightIcon /> : <ListItemText primary={index + 1}/>}</ListItemIcon>
                     <ListItemText primary={getLocalizedParam(ex.title)}/>
                 </ListItem>

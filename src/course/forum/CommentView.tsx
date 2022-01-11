@@ -8,10 +8,10 @@ import {deleteComment, onCommentRepliesChanged, updateComment, vote} from "../..
 import Reply from "./Reply";
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import Menu from "@mui/material/Menu";
-import {styled} from "@mui/styles";
 import {useHistory} from "react-router-dom";
 import moment from "moment";
 import Box from "@mui/material/Box";
+import {styled} from "@mui/material/styles";
 
 const UserName = styled(Typography)({
     '&:focus,&:hover': {cursor: 'pointer'},

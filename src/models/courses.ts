@@ -1,4 +1,4 @@
-import {Language} from './language';
+import {Language, LANGUAGES} from './language';
 import firebase from 'firebase';
 import {SubmissionStatus} from './submissions';
 
@@ -35,6 +35,7 @@ export interface Exercise {
     order: number;
     exerciseType?: keyof typeof EXERCISE_TYPES;
     unlockContent?: string[],
+    allowedLanguages?: (keyof typeof LANGUAGES)[];
     testCases: TestCase[];
     memoryLimit?: number;
     timeLimit?: number;

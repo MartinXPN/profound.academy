@@ -1,6 +1,7 @@
-import {Language} from './language';
+import {Language, LANGUAGES} from './language';
 import firebase from 'firebase';
 import {SubmissionStatus} from './submissions';
+
 
 export interface ExerciseType {
     id: string;
@@ -8,7 +9,7 @@ export interface ExerciseType {
     description: string;
 }
 
-export const EXERCISE_TYPES: {[key: string]: ExerciseType} = {
+export const EXERCISE_TYPES: { [key: string]: ExerciseType } = {
     testCases: {id: 'testCases', displayName: 'Test cases',
         description: 'An exercise with predefined test cases (input/output or unittest)'},
     code: {id: 'code', displayName: 'Code',
@@ -33,6 +34,8 @@ export interface Exercise {
     pageId: string | {[key: string]: string};       // string or mapping {locale => pageId}
     order: number;
     exerciseType?: keyof typeof EXERCISE_TYPES;
+    unlockContent?: string[],
+    allowedLanguages?: (keyof typeof LANGUAGES)[];
     testCases: TestCase[];
     memoryLimit?: number;
     timeLimit?: number;

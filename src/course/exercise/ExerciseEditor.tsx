@@ -5,6 +5,8 @@ import {Autocomplete, Button, Stack, TextField} from "@mui/material";
 import LocalizedFields from "./LocalizedFields";
 import Box from "@mui/material/Box";
 import CourseSearch from "../CourseSearch";
+import {LANGUAGES} from "../../models/language";
+import ExecutionParameters from "./ExecutionParameters";
 
 
 function ExerciseEditor({cancelEditing}: {
@@ -12,9 +14,9 @@ function ExerciseEditor({cancelEditing}: {
 }) {
     const {exercise} = useContext(CurrentExerciseContext);
     const [order, setOrder] = useState<number>(exercise?.order ?? 0);
-    // @ts-ignore
-    const [exerciseType, setExerciseType] = useState<string>(exercise?.exerciseType ?? EXERCISE_TYPES.testCases.id);
+    const [exerciseType, setExerciseType] = useState<keyof typeof EXERCISE_TYPES>(exercise?.exerciseType ?? EXERCISE_TYPES.testCases.id);
     const [unlockContent, setUnlockContent] = useState<string[]>(exercise?.unlockContent ?? []);
+    const [allowedLanguages, setAllowedLanguages] = useState<(keyof typeof LANGUAGES)[]>(exercise?.allowedLanguages ?? []);
 
     const isFormReady = () => true;
     const onSubmit = () => {console.log('onSubmit')};
@@ -30,12 +32,19 @@ function ExerciseEditor({cancelEditing}: {
         }
         setNameToExerciseType(nameToId);
     }, []);
-
+    const [nameToLanguageId, setNameToLanguageId] = useState<{ [key: string]: keyof typeof LANGUAGES }>({});
+    useEffect(() => {
+        const nameToLanguageId = {};
+        for( const [id, language] of Object.entries(LANGUAGES) ) {
+            // @ts-ignore
+            nameToLanguageId[language.displayName] = id;
+        }
+        setNameToLanguageId(nameToLanguageId);
+    }, []);
 
 
     if( !exercise )
         return <></>
-
     return <Box m={1}>
         <Stack direction="row" spacing={1} marginTop={4} justifyContent="center" alignItems="center" alignContent="center">
             <TextField required label="ID" variant="outlined" value={exercise.id} size="small" sx={{flex: 1, marginRight: 3}} inputProps={{readOnly: true}}/>
@@ -45,8 +54,7 @@ function ExerciseEditor({cancelEditing}: {
 
         <LocalizedFields />
         <br/><br/>
-        <TextField required variant="outlined" placeholder="1.01" type="number"
-                   fullWidth
+        <TextField required variant="outlined" placeholder="1.01" type="number" fullWidth
                    label="Order (level is the number before decimal dot, the rest is the order withing level)"
                    value={order} onChange={e => setOrder(Number(e.target.value))}
                    helperText="Exercise is not visible to students until the order is defined"
@@ -54,20 +62,37 @@ function ExerciseEditor({cancelEditing}: {
         <br/><br/>
 
         <Stack direction="row" spacing={1}>
-            <Autocomplete
-                sx={{ width: 200 }}
-                autoHighlight
-                autoSelect
-                disableClearable
+            <Autocomplete sx={{ width: 200 }} autoHighlight autoSelect disableClearable
                 value={EXERCISE_TYPES[exerciseType].displayName}
-                onChange={(event, value: string | null) => value && setExerciseType(nameToExerciseType[value])}
                 options={Object.keys(nameToExerciseType)}
+                onChange={(event, value: string | null) => value && setExerciseType(nameToExerciseType[value])}
                 renderInput={(params) => <TextField {...params} label="Exercise type"/>}
             />
 
             <CourseSearch initialCourseIds={exercise?.unlockContent} sx={{flex: 1}} onChange={onUnlockContentChanged} />
 
         </Stack>
+
+        {(exerciseType === 'testCases' || exerciseType === 'code') && <>
+            <Stack marginTop={4} spacing={4} marginBottom={10} direction="column">
+                <Autocomplete sx={{ width: 200 }} multiple autoHighlight autoSelect disableCloseOnSelect disableClearable
+                    value={allowedLanguages.map(l => LANGUAGES[l].displayName)}
+                    onChange={(event, values: string[] | null) => values && setAllowedLanguages(values.map(v => nameToLanguageId[v]))}
+                    options={Object.keys(nameToLanguageId)}
+                    renderInput={(params) => <TextField {...params} label="Allowed languages" />}
+                />
+
+                <ExecutionParameters
+                    initialParams={{
+                        dirty: true,
+                        values: {
+                            memoryLimit: exercise?.memoryLimit,
+                            timeLimit: exercise?.timeLimit,
+                        }
+                    }}
+                    setParams={() => {}} />
+            </Stack>
+        </>}
     </Box>;
 }
 

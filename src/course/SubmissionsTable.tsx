@@ -192,7 +192,7 @@ export function UserSubmissionsTable({rowsPerPage, userId}: {rowsPerPage: number
         await onUserSubmissionsChanged(userId, startAfterId ?? null, rowsPerPage, onChange);
 
     const [reset, setReset] = useState(0);
-    useEffect(() => setReset(reset + 1), [userId]);
+    useEffect(() => setReset(r => r + 1), [userId]);
     return <SubmissionsTable reset={reset} onLoadNext={onLoadNext} columns={columns.filter(c => c.id !== 'userDisplayName')}/>
 }
 
@@ -201,7 +201,7 @@ export function CourseSubmissionsTable({rowsPerPage, course}: {rowsPerPage: numb
         await onCourseSubmissionsChanged(course.id, startAfterId ?? null, rowsPerPage, onChange);
 
     const [reset, setReset] = useState(0);
-    useEffect(() => setReset(reset + 1), [course.id]);
+    useEffect(() => setReset(r => r + 1), [course.id]);
     return <SubmissionsTable reset={reset} onLoadNext={onLoadNext} columns={columns.filter(c => c.id !== 'courseTitle')}/>
 }
 
@@ -210,6 +210,6 @@ export function ExerciseSubmissionsTable({rowsPerPage, course, exercise, mode}: 
         await onSubmissionsChanged(course.id, exercise.id, mode, startAfterId ?? null, rowsPerPage, onChange);
 
     const [reset, setReset] = useState(0);
-    useEffect(() => setReset(reset + 1), [course.id, exercise.id, mode]);
+    useEffect(() => setReset(r => r + 1), [course.id, exercise.id, mode]);
     return <SubmissionsTable reset={reset} onLoadNext={onLoadNext} columns={columns.filter(c => c.id !== 'courseTitle' && c.id !== 'exerciseTitle')}/>
 }

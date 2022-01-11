@@ -53,7 +53,7 @@ function RankingTable({metric}: {metric: 'score' | 'solved' | 'upsolveScore'}) {
 
             // single-level rankings should always be open
             if( maxLevel <= 1 )
-                setLevelOpen({...levelOpen, '1': true});
+                setLevelOpen(lOpen => {return {...lOpen, '1': true}});
         });
     }, [course, metric, levelMetric]);
 

@@ -20,7 +20,7 @@ import {User} from "../models/users";
 
 
 const validateText = (value: string, minLength: number = 3, maxLength: number = 128) => {
-    if( !value )                        return 'Id is required';
+    if( !value )                        return 'The value is required';
     if( value.length < minLength )      return `The length should be at least ${minLength}`;
     if( value.length > maxLength )      return `The length should be at most ${maxLength}`;
     return undefined;

@@ -2,6 +2,25 @@ import {Language} from './language';
 import firebase from 'firebase';
 import {SubmissionStatus} from './submissions';
 
+export interface ExerciseType {
+    id: string;
+    displayName: string;
+    description: string;
+}
+
+export const EXERCISE_TYPES: {[key: string]: ExerciseType} = {
+    testCases: {id: 'testCases', displayName: 'Test cases',
+        description: 'An exercise with predefined test cases (input/output or unittest)'},
+    code: {id: 'code', displayName: 'Code',
+        description: 'An exercise with editable test cases - judge is defined within the platform'},
+    textAnswer: {id: 'textAnswer', displayName: 'Text answer',
+        description: 'An exercise with a single correct text-based answer (can be a number as well)'},
+    checkboxes: {id: 'checkboxes', displayName: 'Checkboxes',
+        description: 'An exercise which has several correct answers'},
+    multipleChoice: {id: 'multipleChoice', displayName: 'Multiple choice',
+        description: 'An exercise with a single correct answer'},
+};
+
 
 export interface TestCase {
     input: string;
@@ -13,6 +32,7 @@ export interface Exercise {
     title: string | {[key: string]: string};        // string or mapping {locale => titleText}
     pageId: string | {[key: string]: string};       // string or mapping {locale => pageId}
     order: number;
+    exerciseType?: keyof typeof EXERCISE_TYPES;
     testCases: TestCase[];
     memoryLimit?: number;
     timeLimit?: number;

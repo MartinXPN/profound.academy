@@ -28,6 +28,23 @@ export const getCourse = async (id: string) => {
     return course;
 }
 
+export const getCourses = async (courseIds: string[]) => {
+    const courses: Course[] = await Promise.all(courseIds.map(id => getCourse(id)));
+    console.log('Got courses:', courses);
+    return courses;
+}
+
+export const searchCourses = async (title: string, limit: number = 20) => {
+    const snapshot = await db.courses
+        .where('title', '>=', title.toUpperCase())
+        .where('title', '<=', title.toLowerCase() + '\uf8ff')
+        .limit(limit)
+        .get();
+    const courses = snapshot.docs.map(d => d.data());
+    console.log('Found courses:', courses);
+    return courses;
+}
+
 export const getUserCourses = async (userId: string) => {
     const snap = await db.user(userId).get();
     const us = snap.data();

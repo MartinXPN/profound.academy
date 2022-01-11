@@ -78,7 +78,7 @@ export default function Exercise({launchCourse}: {launchCourse: () => void}) {
                     {currentTab === 'bestSubmissions' && <ExerciseSubmissionsTable rowsPerPage={5} course={course} exercise={exercise} mode="best" />}
                     {currentTab === 'allSubmissions' && <ExerciseSubmissionsTable rowsPerPage={5} course={course} exercise={exercise} mode="all" />}
                     {currentTab === 'codeDrafts' && <CodeDrafts onCodeDraftSelected={setCodeDraftId} />}
-                    {currentTab === 'edit' && <ExerciseEditor />}
+                    {currentTab === 'edit' && <ExerciseEditor cancelEditing={() => setCurrentTab('description')} />}
                 </Box>
 
                 <Box width="100%" height="100%">

@@ -22,7 +22,7 @@ function ExerciseEditor({cancelEditing}: {
     const isFormReady = () => true;
     const onSubmit = () => {console.log('onSubmit')};
     const onCancel = () => {console.log('onCancel'); cancelEditing();};
-    const onUnlockContentChanged = (unlockContent: Course[]) => setUnlockContent(unlockContent.map(c => c.title));
+    const onUnlockContentChanged = (unlockContent: Course[]) => setUnlockContent(unlockContent.map(c => c.id));
 
     const [nameToExerciseType, setNameToExerciseType] = useState<{ [key: string]: string }>({});
     useEffect(() => {
@@ -70,7 +70,6 @@ function ExerciseEditor({cancelEditing}: {
                 renderInput={(params) => <TextField {...params} label="Exercise type"/>}
             />
 
-
             { /* @ts-ignore */}
             <AutocompleteSearch<Course>
                 label="Unlock Content" placeholder="Courses..."
@@ -81,7 +80,6 @@ function ExerciseEditor({cancelEditing}: {
                 initialIds={exercise?.unlockContent}
                 onChange={onUnlockContentChanged}
                 sx={{flex: 1}} />
-
         </Stack>
 
         {(exerciseType === 'testCases' || exerciseType === 'code') && <>

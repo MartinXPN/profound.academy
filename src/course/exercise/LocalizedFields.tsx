@@ -32,7 +32,10 @@ function LocalizedField({field, setField, allowedLocales}: {
 
     const onLocaleChanged = (value: string) => setCurrentLocale(value);
     const onTitleChanged = (value: string) => setTitle({value: value, error: validateText(value ?? '')});
-    const onNotionIdChanged = (value: string) => setNotionId({value: value, error: validateText(value ?? '', 20, 35)});
+    const onNotionIdChanged = (value: string) => {
+        const notionId = value.split('-').at(-1) ?? '';
+        setNotionId({value: notionId, error: validateText(notionId, 20, 35)});
+    }
     const isDirty = useCallback(() => {
         return !currentLocale || !title.value || !notionId.value || !!title.error || !!notionId.error
     }, [currentLocale, notionId, title]);
@@ -98,7 +101,7 @@ function LocalizedField({field, setField, allowedLocales}: {
                        error={!!title.error} helperText={title.error ?? null}
                        inputProps={{ 'aria-label': 'controlled' }} />
 
-            <TextField required label="Notion ID" variant="outlined" size="small" placeholder="Exercise Notion ID"
+            <TextField required label="Notion page" variant="outlined" size="small" placeholder="Exercise Notion ID"
                        value={notionId.value} onChange={(e) => onNotionIdChanged(e.target.value)}
                        error={!!notionId.error} helperText={notionId.error ?? null}
                        inputProps={{ 'aria-label': 'controlled' }} sx={{flex: 1}}/>

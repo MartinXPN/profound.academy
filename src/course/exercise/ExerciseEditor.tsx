@@ -1,11 +1,10 @@
 import React, {memo, useContext, useEffect, useState} from "react";
 import {CurrentExerciseContext} from "../Course";
 import {Course, EXERCISE_TYPES} from '../../models/courses';
-import {Autocomplete, Button, Stack, TextField} from "@mui/material";
+import {Autocomplete, Button, Stack, TextField, Typography} from "@mui/material";
 import LocalizedFields from "./LocalizedFields";
 import Box from "@mui/material/Box";
 import {LANGUAGES} from "../../models/language";
-import ExecutionParameters from "./ExecutionParameters";
 import AutocompleteSearch from "../../common/AutocompleteSearch";
 import {getCourses, searchCourses} from "../../services/courses";
 
@@ -18,11 +17,24 @@ function ExerciseEditor({cancelEditing}: {
     const [exerciseType, setExerciseType] = useState<keyof typeof EXERCISE_TYPES>(exercise?.exerciseType ?? EXERCISE_TYPES.testCases.id);
     const [unlockContent, setUnlockContent] = useState<string[]>(exercise?.unlockContent ?? []);
     const [allowedLanguages, setAllowedLanguages] = useState<(keyof typeof LANGUAGES)[]>(exercise?.allowedLanguages ?? []);
+    const [memoryLimit, setMemoryLimit] = useState<{ value: number, error?: string }>({value: 512, error: undefined});
+    const [timeLimit, setTimeLimit] = useState<{ value: number, error?: string }>({value: 2, error: undefined});
 
     const isFormReady = () => true;
     const onSubmit = () => {console.log('onSubmit')};
     const onCancel = () => {console.log('onCancel'); cancelEditing();};
     const onUnlockContentChanged = (unlockContent: Course[]) => setUnlockContent(unlockContent.map(c => c.id));
+    const onMemoryLimitChanged = (value?: number) => setMemoryLimit({value: value ?? 512, error: value && 10 <= value && value <= 1000 ? undefined : 'value should be between 10 and 1000'});
+    const onTimeLimitChanged = (value?: number) => setTimeLimit({value: value ?? 2, error: value && 0.001 <= value && value <= 30 ? undefined : 'value should be positive and less than 30'});
+
+    useEffect(() => {
+        setExerciseType(exercise?.exerciseType ?? EXERCISE_TYPES.testCases.id);
+        setUnlockContent(exercise?.unlockContent ?? []);
+        setAllowedLanguages(exercise?.allowedLanguages ?? []);
+        onMemoryLimitChanged(exercise?.memoryLimit ?? 512);
+        onTimeLimitChanged(exercise?.timeLimit ?? 2);
+    }, [exercise]);
+
 
     const [nameToExerciseType, setNameToExerciseType] = useState<{ [key: string]: string }>({});
     useEffect(() => {
@@ -91,15 +103,18 @@ function ExerciseEditor({cancelEditing}: {
                     renderInput={(params) => <TextField {...params} label="Allowed languages" />}
                 />
 
-                <ExecutionParameters
-                    initialParams={{
-                        dirty: true,
-                        values: {
-                            memoryLimit: exercise?.memoryLimit,
-                            timeLimit: exercise?.timeLimit,
-                        }
-                    }}
-                    setParams={() => {}} />
+                <Typography variant="h6" marginBottom={2}>Execution Parameters (per test-case)</Typography>
+                <Stack direction="row" spacing={1}>
+                    <TextField required variant="outlined" placeholder="512" type="number" label="Memory limit (MB)"
+                               value={memoryLimit.value} onChange={e => onMemoryLimitChanged(Number(e.target.value))}
+                               inputProps={{ inputMode: 'numeric', pattern: '[0-9]*' }} sx={{flex: 1}}
+                               error={!!memoryLimit.error} helperText={memoryLimit.error}/>
+
+                    <TextField required variant="outlined" placeholder="2" type="number" label="Time limit (s)"
+                               value={timeLimit.value} onChange={e => onTimeLimitChanged(Number(e.target.value))}
+                               inputProps={{inputMode: 'numeric', pattern: '[0-9.]*' }} sx={{flex: 1}}
+                               error={!!timeLimit.error} helperText={timeLimit.error}/>
+                </Stack>
             </Stack>
         </>}
     </Box>;

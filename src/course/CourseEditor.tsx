@@ -12,11 +12,11 @@ import DateTimePicker from '@mui/lab/DateTimePicker';
 import {styled} from "@mui/material/styles";
 import Content from "./Content";
 import {useHistory, useRouteMatch} from "react-router-dom";
-import {uploadPicture} from "../services/users";
+import {getUsers, searchUser, uploadPicture} from "../services/users";
 import {doesExist, updateCourse} from "../services/courses";
 import useAsyncEffect from "use-async-effect";
-import UserSearch from "../user/UserSearch";
 import {User} from "../models/users";
+import AutocompleteSearch from "../common/AutocompleteSearch";
 
 
 const validateText = (value: string, minLength: number = 3, maxLength: number = 128) => {
@@ -238,7 +238,16 @@ function CourseEditor({course}: {course?: Course | null}) {
                            error={!!authors.error} helperText={authors.error ?? null}
                            inputProps={{ 'aria-label': 'controlled' }} />
 
-                <UserSearch initialUserIds={course?.instructors ?? []} sx={{flex: 1}} onChange={onInstructorsChanged} />
+                { /* @ts-ignore */}
+                <AutocompleteSearch<User>
+                    label="Instructors" placeholder="Instructor users..."
+                    search={searchUser} idsToValues={getUsers}
+                    optionToId={option => option.id}
+                    optionToLabel={option => option.displayName ?? ''}
+                    optionToImageUrl={option => option.imageUrl}
+                    initialIds={course?.instructors}
+                    onChange={onInstructorsChanged}
+                    sx={{flex: 1}} />
             </Stack>
 
             <Stack direction="row" spacing={2}>

@@ -3,41 +3,48 @@ import {memo, useState, useEffect} from "react";
 import {TextField, Autocomplete, Chip, Avatar, Box} from "@mui/material";
 import {SxProps} from "@mui/system";
 import {Theme} from "@mui/material/styles/createTheme";
-import {User} from "../models/users";
 import useAsyncEffect from "use-async-effect";
-import {getUsers, searchUser} from "../services/users";
 
 
-function UserSearch({initialUserIds, onChange, sx}: {
-    initialUserIds?: string[],
-    onChange?: (users: User[]) => void,
+function AutocompleteSearch<T>({label, placeholder, search, idsToValues,
+                                   optionToLabel, optionToId, optionToImageUrl,
+                                   initialIds, onChange, sx}: {
+    label: string,
+    placeholder: string,
+    search: (query: string, limit: number) => Promise<T[]>,
+    idsToValues: (ids: string[]) => Promise<T[]>,
+    optionToLabel: (option: T) => string,
+    optionToId: (option: T) => string,
+    optionToImageUrl: (option: T) => string,
+    initialIds?: string[],
+    onChange?: (values: T[]) => void,
     sx?: SxProps<Theme>
 }) {
     const [open, setOpen] = useState(false);
     const [loading, setLoading] = useState(false);
-    const [value, setValue] = useState<User[]>([]);
     const [currentSearch, setCurrentSearch] = useState<string | null>(null);
-    const [options, setOptions] = useState<readonly User[]>([]);
+    const [value, setValue] = useState<T[]>([]);
+    const [options, setOptions] = useState<readonly T[]>([]);
 
     useAsyncEffect(async () => {
-        if( !initialUserIds )
+        if( !initialIds )
             return;
 
         setLoading(true);
-        const users = await getUsers(initialUserIds);
+        const values = await idsToValues(initialIds);
         setCurrentSearch(null);
-        setValue(users);
+        setValue(values);
         setLoading(false);
-    }, [initialUserIds]);
+    }, [initialIds]);
 
     useAsyncEffect(async () => {
         if( !currentSearch )
             return;
 
         setLoading(true);
-        const userOptions = await searchUser(currentSearch, 20);
+        const options = await search(currentSearch, 20);
         setCurrentSearch(null);
-        setOptions(userOptions);
+        setOptions(options);
         setLoading(false);
     }, [currentSearch]);
 
@@ -58,28 +65,26 @@ function UserSearch({initialUserIds, onChange, sx}: {
             onClose={() => setOpen(false)}
 
             options={options}
-            getOptionLabel={(option) => option.displayName ?? ''}
-            isOptionEqualToValue={(option, value) => option.id === value.id}
+            getOptionLabel={optionToLabel}
+            isOptionEqualToValue={(option, value) => optionToId(option) === optionToId(value)}
             value={value}
             // @ts-ignore
-            onChange={(e, value: User[]) => {
+            onChange={(e, value: T[]) => {
                 setValue(value);
                 onChange && onChange(value);
             }}
             loading={loading}
-            renderTags={(value: User[], getTagProps) => value.map((option, index: number) =>
+            renderTags={(value: T[], getTagProps) => value.map((option, index: number) =>
                 <Chip
-                    variant="outlined"
-                    avatar={<Avatar alt={option.displayName} src={option.imageUrl} />}
-                    label={option.displayName}
+                    variant="outlined" label={optionToLabel(option)}
+                    avatar={<Avatar alt={optionToLabel(option)} src={optionToImageUrl(option)} />}
                     {...getTagProps({ index })} />
             )}
             renderOption={(props, option) => (
-                <Box component="li" {...props} key={option.id}>
+                <Box component="li" {...props} key={optionToId(option)}>
                     <Chip
-                        variant="outlined"
-                        avatar={<Avatar alt={option.displayName} src={option.imageUrl} />}
-                        label={option.displayName} />
+                        variant="outlined" label={optionToLabel(option)}
+                        avatar={<Avatar alt={optionToLabel(option)} src={optionToImageUrl(option)} />} />
                 </Box>
             )}
             renderInput={(params) => (
@@ -87,12 +92,12 @@ function UserSearch({initialUserIds, onChange, sx}: {
                     {...params}
                     value={currentSearch}
                     onChange={(e) => setCurrentSearch(e.target.value)}
-                    label="Instructors"
-                    placeholder="Instructor users..."
+                    label={label}
+                    placeholder={placeholder}
                 />
             )}
         />
     </>;
 }
 
-export default memo(UserSearch);
+export default memo(AutocompleteSearch);

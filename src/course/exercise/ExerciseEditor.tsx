@@ -4,9 +4,10 @@ import {Course, EXERCISE_TYPES} from '../../models/courses';
 import {Autocomplete, Button, Stack, TextField} from "@mui/material";
 import LocalizedFields from "./LocalizedFields";
 import Box from "@mui/material/Box";
-import CourseSearch from "../CourseSearch";
 import {LANGUAGES} from "../../models/language";
 import ExecutionParameters from "./ExecutionParameters";
+import AutocompleteSearch from "../../common/AutocompleteSearch";
+import {getCourses, searchCourses} from "../../services/courses";
 
 
 function ExerciseEditor({cancelEditing}: {
@@ -69,7 +70,17 @@ function ExerciseEditor({cancelEditing}: {
                 renderInput={(params) => <TextField {...params} label="Exercise type"/>}
             />
 
-            <CourseSearch initialCourseIds={exercise?.unlockContent} sx={{flex: 1}} onChange={onUnlockContentChanged} />
+
+            { /* @ts-ignore */}
+            <AutocompleteSearch<Course>
+                label="Unlock Content" placeholder="Courses..."
+                search={searchCourses} idsToValues={getCourses}
+                optionToId={option => option.id}
+                optionToLabel={option => option.title ?? ''}
+                optionToImageUrl={option => option.img}
+                initialIds={exercise?.unlockContent}
+                onChange={onUnlockContentChanged}
+                sx={{flex: 1}} />
 
         </Stack>
 

@@ -1,6 +1,4 @@
 import React, {memo, useCallback, useContext, useEffect, useState} from "react";
-import firebase from 'firebase/app';
-import 'firebase/firestore';
 import {Course} from "../models/courses";
 import {AuthContext} from "../App";
 import {Button, FormControlLabel, Stack, TextField, Typography, Switch, Grid, Alert, Snackbar} from "@mui/material";
@@ -135,20 +133,12 @@ function CourseEditor({course}: {course?: Course | null}) {
         if( !isFormReady() )
             return;
 
-        await updateCourse({
-            id: id.value!,
-            img: imageUrl!,
-            revealsAt: firebase.firestore.Timestamp.fromDate(revealDate!),
-            freezeAt: firebase.firestore.Timestamp.fromDate(freezeDate!),
-            visibility: isPublic ? 'public' : 'private',
-            rankingVisibility: isRankingVisible ? 'public' : 'private',
-            allowViewingSolutions: allowViewingSolutions,
-            title: title.value!,
-            author: authors.value!,
-            instructors: instructors,
-            details: details.value!,
-            introduction: introId.value!,
-        } as Course);
+        await updateCourse(
+            id.value!, imageUrl!,
+            revealDate!, freezeDate!,
+            isPublic ? 'public' : 'private', isRankingVisible ? 'public' : 'private', allowViewingSolutions,
+            title.value!, authors.value!, instructors, details.value!, introId.value!
+        );
 
         setOpenSnackbar(true);
     }

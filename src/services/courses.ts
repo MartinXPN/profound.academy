@@ -88,8 +88,24 @@ export const startCourse = async (userId: string, courseId: string) => {
     })
 }
 
-export const updateCourse = async (course: Course) => {
-    return db.course(course.id).set(course, {merge: true});
+export const updateCourse = async (
+    id: string, img: string,
+    revealsAt: Date, freezesAt: Date,
+    visibility: 'public' | 'private', rankingVisibility: 'public' | 'private', allowViewingSolutions: boolean,
+    title: string, author: string, instructors: string[], details: string, introduction: string) => {
+    return db.course(id).set({
+        img: img,
+        revealsAt: firebase.firestore.Timestamp.fromDate(revealsAt),
+        freezeAt: firebase.firestore.Timestamp.fromDate(freezesAt),
+        visibility: visibility,
+        rankingVisibility: rankingVisibility,
+        allowViewingSolutions: allowViewingSolutions,
+        title: title,
+        author: author,
+        instructors: instructors,
+        details: details,
+        introduction: introduction,
+    }, {merge: true});
 }
 
 export const getExercise = async (courseId: string, exerciseId: string) => {

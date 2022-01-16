@@ -18,6 +18,7 @@ import Box from "@mui/material/Box";
 import CodeDrafts from "../CodeDrafts";
 import {Edit} from "@mui/icons-material";
 import ExerciseEditor from "./ExerciseEditor";
+import {EXERCISE_TYPES} from "../../models/courses";
 
 
 export default function Exercise({launchCourse}: {launchCourse: () => void}) {
@@ -27,6 +28,7 @@ export default function Exercise({launchCourse}: {launchCourse: () => void}) {
     console.log('exercise:', exercise);
 
     const {exerciseId} = useParams<{ exerciseId: string }>();
+    const [exerciseType, setExerciseType] = useState(exercise?.exerciseType ?? EXERCISE_TYPES.testCases.id);
     const [showSignIn, setShowSignIn] = useState(false);
     const [splitPos, setSplitPos] = useStickyState<number[] | null>(null, `splitPos-${auth?.currentUserId}`);
     const [currentTab, setCurrentTab] = useState<'description' | 'allSubmissions' | 'bestSubmissions' | 'codeDrafts' | 'edit'>('description');
@@ -78,7 +80,7 @@ export default function Exercise({launchCourse}: {launchCourse: () => void}) {
                     {currentTab === 'bestSubmissions' && <ExerciseSubmissionsTable rowsPerPage={5} course={course} exercise={exercise} mode="best" />}
                     {currentTab === 'allSubmissions' && <ExerciseSubmissionsTable rowsPerPage={5} course={course} exercise={exercise} mode="all" />}
                     {currentTab === 'codeDrafts' && <CodeDrafts onCodeDraftSelected={setCodeDraftId} />}
-                    {currentTab === 'edit' && <ExerciseEditor cancelEditing={() => setCurrentTab('description')} />}
+                    {currentTab === 'edit' && <ExerciseEditor cancelEditing={() => setCurrentTab('description')} exerciseTypeChanged={setExerciseType} />}
                 </Box>
 
                 <Box width="100%" height="100%">

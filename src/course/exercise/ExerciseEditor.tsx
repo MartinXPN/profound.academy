@@ -1,7 +1,7 @@
 import React, {memo, useContext, useEffect, useState} from "react";
 import {CurrentExerciseContext} from "../Course";
 import {Course, EXERCISE_TYPES} from '../../models/courses';
-import {Autocomplete, Button, Stack, TextField, Typography} from "@mui/material";
+import {Alert, Autocomplete, Button, Snackbar, Stack, TextField, Typography} from "@mui/material";
 import LocalizedFields from "./LocalizedFields";
 import Box from "@mui/material/Box";
 import {LANGUAGES} from "../../models/language";
@@ -9,8 +9,9 @@ import AutocompleteSearch from "../../common/AutocompleteSearch";
 import {getCourses, searchCourses} from "../../services/courses";
 
 
-function ExerciseEditor({cancelEditing}: {
-    cancelEditing: () => void
+function ExerciseEditor({cancelEditing, exerciseTypeChanged}: {
+    cancelEditing: () => void,
+    exerciseTypeChanged: (exerciseType: keyof typeof EXERCISE_TYPES) => void,
 }) {
     const {exercise} = useContext(CurrentExerciseContext);
     const [order, setOrder] = useState<number>(exercise?.order ?? 0);
@@ -19,10 +20,24 @@ function ExerciseEditor({cancelEditing}: {
     const [allowedLanguages, setAllowedLanguages] = useState<(keyof typeof LANGUAGES)[]>(exercise?.allowedLanguages ?? []);
     const [memoryLimit, setMemoryLimit] = useState<{ value: number, error?: string }>({value: 512, error: undefined});
     const [timeLimit, setTimeLimit] = useState<{ value: number, error?: string }>({value: 2, error: undefined});
+    const [openSnackbar, setOpenSnackbar] = useState(false);
+    const handleCloseSnackbar = () => setOpenSnackbar(false);
 
-    const isFormReady = () => true;
-    const onSubmit = () => {console.log('onSubmit')};
-    const onCancel = () => {console.log('onCancel'); cancelEditing();};
+    const isFormReady = () => {
+        return allowedLanguages.length > 0 && !memoryLimit.error && !timeLimit.error;
+    };
+    const onSubmit = () => {
+        if( !isFormReady() )
+            return;
+
+        // TODO: save the exercise
+        setOpenSnackbar(true);
+    };
+    const onCancel = () => cancelEditing();
+    const onExerciseTypeChanged = (newType: keyof typeof EXERCISE_TYPES) => {
+        setExerciseType(newType);
+        exerciseTypeChanged(newType);
+    }
     const onUnlockContentChanged = (unlockContent: Course[]) => setUnlockContent(unlockContent.map(c => c.id));
     const onMemoryLimitChanged = (value?: number) => setMemoryLimit({value: value ?? 512, error: value && 10 <= value && value <= 1000 ? undefined : 'value should be between 10 and 1000'});
     const onTimeLimitChanged = (value?: number) => setTimeLimit({value: value ?? 2, error: value && 0.001 <= value && value <= 30 ? undefined : 'value should be positive and less than 30'});
@@ -78,7 +93,7 @@ function ExerciseEditor({cancelEditing}: {
             <Autocomplete sx={{ width: 200 }} autoHighlight autoSelect disableClearable
                 value={EXERCISE_TYPES[exerciseType].displayName}
                 options={Object.keys(nameToExerciseType)}
-                onChange={(event, value: string | null) => value && setExerciseType(nameToExerciseType[value])}
+                onChange={(event, value: string | null) => value && onExerciseTypeChanged(nameToExerciseType[value])}
                 renderInput={(params) => <TextField {...params} label="Exercise type"/>}
             />
 
@@ -117,6 +132,12 @@ function ExerciseEditor({cancelEditing}: {
                 </Stack>
             </Stack>
         </>}
+
+        <Snackbar open={openSnackbar} autoHideDuration={6000} onClose={handleCloseSnackbar}>
+            <Alert onClose={handleCloseSnackbar} severity="success" sx={{ width: '100%' }}>
+                Successfully saved the changes!
+            </Alert>
+        </Snackbar>
     </Box>;
 }
 

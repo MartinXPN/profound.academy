@@ -1,7 +1,8 @@
 import {db} from "./db";
-import {Course, Exercise, ExerciseProgress, Progress} from "../models/courses";
+import {Course, Exercise, EXERCISE_TYPES, ExerciseProgress, Progress} from "../models/courses";
 import firebase from "firebase/app";
 import {SubmissionStatus} from "../models/submissions";
+import {LANGUAGES} from "../models/language";
 
 export const getNotionPageMap = async (pageId: string) => {
     const GET_NOTION_ENDPOINT = 'https://us-central1-profound-academy.cloudfunctions.net/getNotionPage';
@@ -111,6 +112,28 @@ export const updateCourse = async (
 export const getExercise = async (courseId: string, exerciseId: string) => {
     const exercise = await db.exercise(courseId, exerciseId).get();
     return exercise.data() ?? null;
+}
+
+export const updateExercise = async (
+    courseId: string, exerciseId: string,
+    title: {[key: string]: string}, pageId: {[key: string]: string},
+    order: number,
+    exerciseType: keyof typeof EXERCISE_TYPES,
+    unlockContent: string[],
+    allowedLanguages: (keyof typeof LANGUAGES)[],
+    memoryLimit?: number,
+    timeLimit?: number,
+) => {
+    return db.exercise(courseId, exerciseId).set({
+        title: title,
+        pageId: pageId,
+        order: order,
+        exerciseType: exerciseType,
+        unlockContent: unlockContent,
+        allowedLanguages: allowedLanguages,
+        memoryLimit: memoryLimit,
+        timeLimit: timeLimit,
+    }, {merge: true});
 }
 
 

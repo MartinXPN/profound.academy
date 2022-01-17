@@ -14,7 +14,7 @@ const validateText = (value: string, minLength: number = 3, maxLength: number = 
     return undefined;
 };
 
-interface Field {
+export interface Field {
     dirty: boolean;
     locale: string;
     title: string;
@@ -110,8 +110,10 @@ function LocalizedField({field, setField, allowedLocales}: {
 }
 
 
-function LocalizedFields() {
-    const [localizedFields, setLocalizedFields] = useState<Field[]>([]);
+function LocalizedFields({localizedFields, setLocalizedFields}: {
+    localizedFields: Field[],
+    setLocalizedFields: (fields: Field[]) => void,
+}) {
 
     if( localizedFields.length === 0 ) {
         setLocalizedFields([{dirty: true, locale: 'enUS', title: '', notionId: ''}]);

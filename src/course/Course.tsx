@@ -3,7 +3,7 @@ import {Route, Switch, useHistory, useParams, useRouteMatch} from "react-router-
 
 import {styled} from '@mui/material/styles';
 
-import {getCourse, getExercise, getFirstExercise} from "../services/courses";
+import {createCourseExercise, getCourse, getExercise, getFirstExercise} from "../services/courses";
 import useAsyncEffect from "use-async-effect";
 import {Course, Exercise as ExerciseModel} from "../models/courses";
 import {AuthContext} from "../App";
@@ -52,18 +52,23 @@ function CurrentCourseView({openPage}: {openPage: (page: string) => void}) {
     const openExercise = useCallback((exercise: ExerciseModel) => {
         exercise.title = getLocalizedParam(exercise.title);
         exercise.pageId = getLocalizedParam(exercise.pageId);
-        setCurrentExercise(exercise);
         openPage(exercise.id);
+        setCurrentExercise(exercise);
     }, [openPage]);
     const openStatus = useCallback(() => openPage('status'), [openPage]);
     const launchCourse = useCallback(async () => {
-        if( !course )
-            return;
+        if( !course )   return;
 
         console.log('Launching the course!');
         const firstExercise = await getFirstExercise(course.id);
         openExercise(firstExercise);
     }, [course, openExercise]);
+    const createExercise = useCallback(async () => {
+        if( !course )   return;
+        const ex = await createCourseExercise(course.id);
+        if( ex )    openPage(ex.id);
+        else        setCurrentExercise(null);
+    }, [course, openPage]);
 
     useAsyncEffect(async () => {
         if( !course || !exerciseId )
@@ -86,7 +91,8 @@ function CurrentCourseView({openPage}: {openPage: (page: string) => void}) {
         <CurrentExerciseContext.Provider value={{exercise: currentExercise}}>
             <CourseDrawer
                 onItemSelected={openExercise}
-                onStatusClicked={openStatus} />
+                onStatusClicked={openStatus}
+                onCreateExerciseClicked={createExercise}/>
 
             <Content>
                 <DrawerHeader />

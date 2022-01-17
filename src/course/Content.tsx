@@ -8,7 +8,9 @@ import 'prismjs/themes/prism.css';          // used for code syntax highlighting
 import 'react-notion-x/src/styles.css';     // core styles shared by all of react-notion-x (required)
 import 'rc-dropdown/assets/index.css';      // used for collection views (optional)
 import 'katex/dist/katex.min.css';          // used for rendering equations (optional)
-import {CircularProgress, Typography} from "@mui/material";
+import CircularProgress from "@mui/material/CircularProgress";
+import Typography from "@mui/material/Typography";
+import Box from "@mui/material/Box";
 
 import {getNotionPageMap} from "../services/courses";
 
@@ -64,9 +66,10 @@ function Content({notionPage}: {notionPage: string}) {
                 equation: Equation,
             }}/>
             : errors
-                ? <Typography sx={{color: 'red', marginBottom: '4em'}}>{errors}</Typography>
-                : <div style={{width: '80%', margin: '10%', textAlign: 'center'}}><CircularProgress/></div>
-    }</>;
+                ? <Typography textAlign="center" color="error" marginBottom={4}>{errors}</Typography>
+                : <Box width="80%" margin="10%" textAlign="center"><CircularProgress/></Box>
+        }
+    </>
 }
 
 

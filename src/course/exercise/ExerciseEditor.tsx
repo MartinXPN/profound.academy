@@ -1,12 +1,33 @@
 import React, {memo, useContext, useEffect, useState} from "react";
 import {CourseContext, CurrentExerciseContext} from "../Course";
-import {Course, EXERCISE_TYPES} from '../../models/courses';
+import {Course, Exercise, EXERCISE_TYPES} from '../../models/courses';
 import {Alert, Autocomplete, Button, Snackbar, Stack, TextField, Typography} from "@mui/material";
 import LocalizedFields, {Field} from "./LocalizedFields";
 import Box from "@mui/material/Box";
 import {LANGUAGES} from "../../models/language";
 import AutocompleteSearch from "../../common/AutocompleteSearch";
 import {getCourses, searchCourses, updateExercise} from "../../services/courses";
+
+
+const getExerciseLocalizedFields = (exercise: Exercise | null) => {
+    if( !exercise )
+        return []
+
+    const fields: Field[] = [];
+    if( typeof exercise.title === 'string' ) {
+        if( typeof exercise.pageId !== 'string' )
+            throw Error('Locale-dependent fields exercise title and pageId are not of the same type (string)');
+
+        fields.push({dirty: false, locale: 'enUS', title: exercise.title, notionId: exercise.pageId});
+    }
+    else if( typeof exercise.title === 'object' && typeof exercise.pageId === 'object' ) {
+        for( const locale of Object.keys(exercise.title) )
+            fields.push({dirty: false, locale: locale, title: exercise.title[locale], notionId: exercise.pageId[locale]});
+    }
+    else throw Error('Unsupported exercise title/pageId types');
+
+    return fields;
+}
 
 
 function ExerciseEditor({cancelEditing, exerciseTypeChanged}: {
@@ -23,6 +44,7 @@ function ExerciseEditor({cancelEditing, exerciseTypeChanged}: {
     const [memoryLimit, setMemoryLimit] = useState<{ value: number, error?: string }>({value: 512, error: undefined});
     const [timeLimit, setTimeLimit] = useState<{ value: number, error?: string }>({value: 2, error: undefined});
 
+    const [exerciseFields, setExerciseFields] = useState<Field[]>([]);
     const [openSnackbar, setOpenSnackbar] = useState(false);
     const handleCloseSnackbar = () => setOpenSnackbar(false);
 
@@ -57,21 +79,8 @@ function ExerciseEditor({cancelEditing, exerciseTypeChanged}: {
     const onTimeLimitChanged = (value?: number) => setTimeLimit({value: value ?? 2, error: value && 0.001 <= value && value <= 30 ? undefined : 'value should be positive and less than 30'});
 
     useEffect(() => {
-        const fields: Field[] = [];
-        if( exercise ) {
-            if( typeof exercise.title === 'string' ) {
-                if( typeof exercise.pageId !== 'string' )
-                    throw Error('Locale-dependent fields exercise title and pageId are not of the same type (string)');
-
-                fields.push({dirty: false, locale: 'enUS', title: exercise.title, notionId: exercise.pageId});
-            }
-            else if( typeof exercise.title === 'object' && typeof exercise.pageId === 'object' ) {
-                for( const locale of Object.keys(exercise.title) )
-                    fields.push({dirty: false, locale: locale, title: exercise.title[locale], notionId: exercise.pageId[locale]});
-            }
-            else throw Error('Unsupported exercise title/pageId types');
-        }
-        setLocalizedFields(fields);
+        setExerciseFields(getExerciseLocalizedFields(exercise));
+        setLocalizedFields(getExerciseLocalizedFields(exercise));
         setOrder(exercise?.order ?? 0);
         setExerciseType(exercise?.exerciseType ?? EXERCISE_TYPES.testCases.id);
         setUnlockContent(exercise?.unlockContent ?? []);
@@ -110,7 +119,7 @@ function ExerciseEditor({cancelEditing, exerciseTypeChanged}: {
             <Button onClick={onCancel} size="large" variant="outlined">Cancel</Button>
         </Stack>
 
-        <LocalizedFields localizedFields={localizedFields} setLocalizedFields={setLocalizedFields} />
+        <LocalizedFields initialFields={exerciseFields} onFieldsChanged={setLocalizedFields} />
         <br/><br/>
         <TextField required variant="outlined" placeholder="1.01" type="number" fullWidth
                    label="Order (level is the number before decimal dot, the rest is the order withing level)"

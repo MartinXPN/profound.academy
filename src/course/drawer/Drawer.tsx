@@ -14,7 +14,7 @@ import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import ListItem from '@mui/material/ListItem';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
-import {Home} from "@mui/icons-material";
+import {Add, Home} from "@mui/icons-material";
 import QueryStatsIcon from '@mui/icons-material/QueryStats';
 
 import {Exercise} from "../../models/courses";
@@ -105,9 +105,10 @@ const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== 'open' 
 );
 
 
-function CourseDrawer({onItemSelected, onStatusClicked}: {
+function CourseDrawer({onItemSelected, onStatusClicked, onCreateExerciseClicked}: {
     onItemSelected: (exercise: Exercise) => void,
     onStatusClicked: () => void,
+    onCreateExerciseClicked: () => void,
 }) {
     const auth = useContext(AuthContext);
     const {course} = useContext(CourseContext);
@@ -119,14 +120,13 @@ function CourseDrawer({onItemSelected, onStatusClicked}: {
     const handleDrawerOpen = () => setOpen(true);
     const handleDrawerClose = () => setOpen(false);
     const onHomeClicked = () => history.push('/');
+    const isCourseInstructor = course && auth.currentUserId && course.instructors.includes(auth.currentUserId);
 
 
     useEffect(() => {
         if( !auth.currentUserId || !course?.id )
             return;
-
-        const unsubscribe = onUserProgressChanged(course.id, auth.currentUserId, setProgress);
-        return () => unsubscribe();
+        return onUserProgressChanged(course.id, auth.currentUserId, setProgress);
     }, [course?.id, auth]);
 
     const renderTimeRemaining = ({days, hours, minutes, seconds}:
@@ -188,6 +188,12 @@ function CourseDrawer({onItemSelected, onStatusClicked}: {
                             isSingleLevel={Object.keys(course?.levelExercises ?? {}).length <= 1}/>
                     }
                 )}
+
+                {isCourseInstructor &&
+                <ListItem button onClick={onCreateExerciseClicked} key="add-exercise">
+                    <ListItemIcon><Add/></ListItemIcon>
+                    <ListItemText primary="Create exercise"/>
+                </ListItem>}
             </Drawer>
         </Box>
     );

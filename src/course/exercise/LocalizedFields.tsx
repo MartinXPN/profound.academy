@@ -1,6 +1,6 @@
 import React, {memo, useCallback, useEffect, useState} from "react";
-import {Autocomplete, Button, Collapse, IconButton, List, ListItem, TextField, Stack} from "@mui/material";
-import { TransitionGroup } from 'react-transition-group';
+import {Autocomplete, Button, Collapse, IconButton, List, ListItem, Stack, TextField} from "@mui/material";
+import {TransitionGroup} from 'react-transition-group';
 import CloseIcon from '@mui/icons-material/Close';
 import AddIcon from '@mui/icons-material/Add';
 import Box from "@mui/material/Box";
@@ -12,6 +12,9 @@ const validateText = (value: string, minLength: number = 3, maxLength: number = 
     if( value.length < minLength )      return `The length should be at least ${minLength}`;
     if( value.length > maxLength )      return `The length should be at most ${maxLength}`;
     return undefined;
+};
+const notionPageToId = (page: string) => {
+    return page.split('-').at(-1) ?? '';
 };
 
 export interface Field {
@@ -26,35 +29,35 @@ function LocalizedField({field, setField, allowedLocales}: {
     setField: (field: Field) => void,
     allowedLocales: string[],
 }) {
+    console.log('field:', field);
     const [currentLocale, setCurrentLocale] = useState<string>(field.locale);
     const [title, setTitle] = useState<{value: string, error?: string}>({value: field.title, error: undefined});
     const [notionId, setNotionId] = useState<{value: string, error?: string}>({value: field.notionId, error: undefined});
 
-    const onLocaleChanged = (value: string) => setCurrentLocale(value);
-    const onTitleChanged = (value: string) => setTitle({value: value, error: validateText(value ?? '')});
-    const onNotionIdChanged = (value: string) => {
-        const notionId = value.split('-').at(-1) ?? '';
-        setNotionId({value: notionId, error: validateText(notionId, 20, 35)});
-    }
     const isDirty = useCallback(() => {
-        return !currentLocale || !title.value || !notionId.value || !!title.error || !!notionId.error
+        return !currentLocale || !title.value || !notionId.value || !!title.error || !!notionId.error;
     }, [currentLocale, notionId, title]);
 
-    useEffect(() => {
-        if( field.locale === currentLocale && field.title === title.value && field.notionId === notionId.value )
-            return;
 
-        setField({
-            locale: currentLocale,
-            title: title.value,
-            notionId: notionId.value,
-            dirty: isDirty(),
-        });
-    }, [field, currentLocale, title, notionId, setField, isDirty]);
+    const onLocaleChanged = (value: string) => {
+        setCurrentLocale(value);
+        setField({...field, locale: value});
+    };
+    const onTitleChanged = (value: string) => {
+        setTitle({value: value, error: validateText(value ?? '')});
+        setField({...field, title: value, dirty: isDirty()});
+    };
+    const onNotionIdChanged = (value: string) => {
+        const notionId = notionPageToId(value);
+        setNotionId({value: notionId, error: validateText(notionId, 20, 35)});
+        setField({...field, notionId: value, dirty: isDirty()});
+    };
+
     useEffect(() => {
         setCurrentLocale(field.locale);
-        onTitleChanged(field.title);
-        onNotionIdChanged(field.notionId);
+        setTitle({value: field.title, error: validateText(field.title ?? '')});
+        const notionId = notionPageToId(field.notionId);
+        setNotionId({value: notionId, error: validateText(notionId, 20, 35)});
     }, [field]);
 
     return <>
@@ -110,14 +113,13 @@ function LocalizedField({field, setField, allowedLocales}: {
 }
 
 
-function LocalizedFields({localizedFields, setLocalizedFields}: {
-    localizedFields: Field[],
-    setLocalizedFields: (fields: Field[]) => void,
+function LocalizedFields({initialFields, onFieldsChanged}: {
+    initialFields: Field[],
+    onFieldsChanged: (fields: Field[]) => void,
 }) {
-
-    if( localizedFields.length === 0 ) {
-        setLocalizedFields([{dirty: true, locale: 'enUS', title: '', notionId: ''}]);
-    }
+    console.log('initial:', initialFields);
+    const [localizedFields, setLocalizedFields] = useState<Field[]>([]);
+    useEffect(() => setLocalizedFields(initialFields), [initialFields]);
 
     const getAllowedLocales = (index: number) => {
         const allLocales = new Set(Object.keys(locales));
@@ -125,23 +127,32 @@ function LocalizedFields({localizedFields, setLocalizedFields}: {
         currentlyUsedLocales.forEach((l) => allLocales.delete(l));
         return [...allLocales];
     }
+    const updateFields = (newFields: Field[]) => {
+        setLocalizedFields(newFields);
+        onFieldsChanged(newFields);
+    }
 
     const handleRemoveItem = (index: number) => {
         const newFields = [...localizedFields];
         if( 0 <= index && index < localizedFields.length )
             newFields.splice(index, 1);
 
-        setLocalizedFields(newFields);
+        updateFields(newFields);
     }
-    const addItem = () => {
-        setLocalizedFields([...localizedFields, {dirty: true, locale: getAllowedLocales(-1)[0], title: '', notionId: ''}]);
+    const addItem = (locale?: string) => {
+        if( !locale )
+            locale = getAllowedLocales(-1)[0];
+        updateFields([...localizedFields, {dirty: true, locale: locale, title: '', notionId: ''}]);
     }
     const changeItem = (index: number, field: Field) => {
         const newFields = [...localizedFields];
         if( 0 <= index && index < localizedFields.length )
             newFields[index] = field;
-        setLocalizedFields(newFields);
+        updateFields(newFields);
     }
+
+    if( localizedFields.length === 0 )
+        addItem('enUs');
 
     return <>
         <List>
@@ -161,7 +172,7 @@ function LocalizedFields({localizedFields, setLocalizedFields}: {
                 </Collapse>
             ))}
             </TransitionGroup>
-            <Button sx={{textTransform: 'none', marginLeft: 2}} startIcon={<AddIcon/>} onClick={addItem}>Add</Button>
+            <Button sx={{textTransform: 'none', marginLeft: 2}} startIcon={<AddIcon/>} onClick={() => addItem()}>Add</Button>
         </List>
     </>
 }

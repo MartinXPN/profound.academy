@@ -1,8 +1,5 @@
 import {Avatar, ListItem, ListItemIcon, ListItemText, IconButton, Button, List, MenuItem, Stack} from "@mui/material";
 import {Typography, TextField} from "@mui/material";
-import { Theme } from "@mui/material";
-import createStyles from '@mui/styles/createStyles';
-import makeStyles from '@mui/styles/makeStyles';
 import {ArrowDropDown, ArrowDropUp, Edit, Save, Reply as ReplyIcon, Delete} from '@mui/icons-material';
 import React, {useCallback, useContext, useEffect, useState} from "react";
 import {AuthContext} from "../../App";
@@ -11,38 +8,10 @@ import {deleteComment, onCommentRepliesChanged, updateComment, vote} from "../..
 import Reply from "./Reply";
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import Menu from "@mui/material/Menu";
-import {styled} from "@mui/styles";
 import {useHistory} from "react-router-dom";
 import moment from "moment";
-
-
-const useStyles = makeStyles((theme: Theme) =>
-    createStyles({
-        userHeader: {
-            display: 'flex',
-        },
-        userHeaderItem: {
-            margin: 'auto',
-        },
-        content: {
-            width: '100%',
-        },
-        score: {
-            textAlign: 'center',
-        },
-        actions: {
-            width: '100%',
-            display: 'flex',
-            overflow: 'hidden',
-        },
-        replies: {
-            marginLeft: theme.spacing(2),
-        },
-        button: {
-            textTransform: 'none'
-        },
-    }),
-);
+import Box from "@mui/material/Box";
+import {styled} from "@mui/material/styles";
 
 const UserName = styled(Typography)({
     '&:focus,&:hover': {cursor: 'pointer'},
@@ -50,18 +19,17 @@ const UserName = styled(Typography)({
 
 
 function Score({commentId, score}: { commentId: string, score: number }) {
-    const classes = useStyles();
     const auth = useContext(AuthContext);
 
     const upVote = async () => auth && auth.currentUser && auth.currentUser.uid && await vote(commentId, auth.currentUser.uid, 1);
     const downVote = async () => auth && auth.currentUser && auth.currentUser.uid && await vote(commentId, auth.currentUser.uid, -1);
 
     return (
-        <div className={classes.score}>
+        <Box textAlign="center">
             <IconButton onClick={upVote} size="large"><ArrowDropUp/></IconButton>
             <Typography>{score}</Typography>
             <IconButton onClick={downVote} size="large"><ArrowDropDown/></IconButton>
-        </div>
+        </Box>
     );
 }
 
@@ -112,7 +80,6 @@ function CommentView({comment, allowReply}: {
     comment: Comment,
     allowReply: boolean
 }) {
-    const classes = useStyles();
     const history = useHistory();
     const auth = useContext(AuthContext);
 
@@ -160,20 +127,20 @@ function CommentView({comment, allowReply}: {
 
     return <>
         <ListItem key={comment.id} alignItems="flex-start">
-            <div className={classes.userHeader}>
-                <div className={classes.userHeaderItem}><Score commentId={comment.id} score={comment.score} /></div>
-                <ListItemIcon className={classes.userHeaderItem}>
+            <Box display="flex">
+                <Box margin="auto"><Score commentId={comment.id} score={comment.score} /></Box>
+                <ListItemIcon sx={{margin: 'auto'}}>
                     <Avatar alt={comment.displayName} src={comment.avatarUrl}/>
                 </ListItemIcon>
-            </div>
+            </Box>
 
-            <div className={classes.content}>
+            <Box width="100%">
                 <ListItemText
                     primary={
                         <Stack direction="row" alignItems="center">
                             <UserName onClick={() => onUserClicked(comment.userId)}>{comment.displayName}</UserName>
                             <Typography variant="body2" color="text.secondary" noWrap>&nbsp; • &nbsp;</Typography>
-                            <Typography variant="body2" color="text.secondary">{moment(comment.createdAt.toDate()).fromNow()}</Typography>
+                            <Typography variant="body2" color="text.secondary">{comment.createdAt ? moment(comment.createdAt.toDate()).fromNow() : 'just now'}</Typography>
                             {auth && auth.currentUser && comment.userId === auth.currentUser.uid && !isEditing &&
                             <CommentEditing onEditClicked={onEdit} onDeleteClicked={onDelete} />}
                         </Stack>
@@ -191,20 +158,20 @@ function CommentView({comment, allowReply}: {
                         </div>
                     }/>
 
-                <div className={classes.actions}>
+                <Box width="100%" display="flex" overflow="hidden">
                     {allowReply &&
-                    <Button size="small" onClick={onReplyClicked} startIcon={<ReplyIcon/>} className={classes.button}>Reply</Button>}
+                    <Button size="small" onClick={onReplyClicked} startIcon={<ReplyIcon/>} sx={{textTransform: 'none'}}>Reply</Button>}
                     {comment.replies.length > 0 &&
                     <>
                         {!showReplies &&
-                        <Button endIcon={<ArrowDropDown/>} size="small" onClick={onShowReplies} className={classes.button}>Show replies ({comment.replies.length})</Button>}
+                        <Button endIcon={<ArrowDropDown/>} size="small" onClick={onShowReplies} sx={{textTransform: 'none'}}>Show replies ({comment.replies.length})</Button>}
 
                         {showReplies &&
-                        <Button endIcon={<ArrowDropUp/>} size="small" onClick={onHideReplies} className={classes.button}>Hide replies</Button>}
+                        <Button endIcon={<ArrowDropUp/>} size="small" onClick={onHideReplies} sx={{textTransform: 'none'}}>Hide replies</Button>}
                     </>}
                     {auth && auth.currentUser && comment.userId === auth.currentUser.uid && isEditing &&
                     <Button size="small" endIcon={<Save/>} onClick={onSave}>Save</Button>}
-                </div>
+                </Box>
 
                 {showReplies &&
                 <List>
@@ -212,7 +179,7 @@ function CommentView({comment, allowReply}: {
                 </List>}
 
                 {showReply && <Reply commentId={comment.id} onReplySaved={onReplySaved}/>}
-            </div>
+            </Box>
 
         </ListItem>
     </>;

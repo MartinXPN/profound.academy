@@ -1,9 +1,7 @@
 import React, {memo, useCallback, useContext, useEffect, useState} from "react";
 import {Add, Done, Send} from "@mui/icons-material";
-import {Badge, Button, CircularProgress, IconButton, Theme, Typography} from "@mui/material";
+import {Badge, Button, CircularProgress, IconButton, Typography} from "@mui/material";
 import HighlightOffTwoToneIcon from '@mui/icons-material/HighlightOffTwoTone';
-import createStyles from '@mui/styles/createStyles';
-import makeStyles from '@mui/styles/makeStyles';
 import ToggleButton from '@mui/material/ToggleButton';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 
@@ -11,50 +9,15 @@ import {TestCase} from "../../models/courses";
 import {SubmissionResult} from "../../models/submissions";
 import TestView from "./TestView";
 import {statusColors, statusToColor} from "../colors";
-import {styled} from "@mui/styles";
 import {CurrentExerciseContext} from "../Course";
+import Box from "@mui/material/Box";
+import {styled} from "@mui/material/styles";
 
-const useStyles = makeStyles((theme: Theme) =>
-    createStyles({
-        root: {
-            width: '100%',
-            overflow: 'hidden',
-            padding: '10px',
-        },
-        testText: {
-            float: 'left',
-            marginTop: '8px',
-            marginRight: '8px',
-        },
-        tests: {
-            float: 'left',
-            paddingLeft: '24px',
-            paddingRight: '24px',
-        },
-        addTest: {
-            float: 'left',
-            padding: '12px',
-        },
-        button: {
-            margin: theme.spacing(1),
-            float: 'right',
-        },
-        content: {
-            whiteSpace: 'pre-wrap',
-        },
-        status: {
-            fontWeight: 'bold',
-            paddingTop: '8px',
-            paddingBottom: '8px',
-        },
-    }),
-);
 
-const CenterContainer = styled('div')({
-    width: '100%',
-    marginTop: '5%',
-    marginBottom: '5%',
-    textAlign: 'center',
+const StatusTypography = styled(Typography)({
+    fontWeight: 'bold',
+    paddingTop: '8px',
+    paddingBottom: '8px',
 });
 
 
@@ -62,7 +25,6 @@ function Console({onSubmitClicked, onRunClicked, isProcessing, submissionResult}
     onSubmitClicked: () => void, onRunClicked: (tests: TestCase[]) => void,
     isProcessing: boolean, submissionResult: SubmissionResult | null
 }) {
-    const classes = useStyles();
     const {exercise} = useContext(CurrentExerciseContext);
 
     const outputs = submissionResult?.outputs ?? [];
@@ -121,8 +83,8 @@ function Console({onSubmitClicked, onRunClicked, isProcessing, submissionResult}
     if( !exercise )
         return <></>
     return <>
-        <div className={classes.root}>
-            <Typography className={classes.testText}>TESTS: </Typography>
+        <Box width="100%" overflow="hidden" padding={1}>
+            <Typography sx={{float: 'left', marginTop: 1, marginRight: 1}}>TESTS: </Typography>
             <ToggleButtonGroup value={selectedTest} exclusive size='small' sx={{float: 'left'}}>
 
                 {tests.map((test, index) => {
@@ -136,7 +98,7 @@ function Console({onSubmitClicked, onRunClicked, isProcessing, submissionResult}
                         }>
                         <ToggleButton value={index} id={`${index}`}
                                       onClick={() => onTestSelected(index)}
-                                      className={classes.tests}
+                                      sx={{float: 'left', paddingLeft: 3, paddingRight: 3}}
                                       selected={selectedTest === index}
                                       style={{color: statusToColor(currentStatus, false)}}>
                             <Typography>{index + 1}</Typography>
@@ -145,13 +107,13 @@ function Console({onSubmitClicked, onRunClicked, isProcessing, submissionResult}
                     </div>)}
                 )}
             </ToggleButtonGroup>
-            <IconButton id="add-test" className={classes.addTest} onClick={addTest} size="large"><Add /></IconButton>
+            <IconButton id="add-test" sx={{float: 'left', padding: '12px'}} onClick={addTest} size="large"><Add /></IconButton>
 
             <Button
                 variant="contained"
                 color="primary"
                 size='small'
-                className={classes.button}
+                sx={{float: 'right', margin: 1}}
                 onClick={onSubmitClicked}
                 endIcon={<Done />}>Submit</Button>
 
@@ -159,27 +121,27 @@ function Console({onSubmitClicked, onRunClicked, isProcessing, submissionResult}
                 variant="contained"
                 color="primary"
                 size='small'
-                className={classes.button}
+                sx={{float: 'right', margin: 1}}
                 onClick={handleRun}
                 endIcon={<Send />}>Run</Button>
-        </div>
+        </Box>
 
 
         {isProcessing &&
-        <CenterContainer>
-            <Typography className={classes.status}>Running the program...</Typography>
+        <Box width="100%" marginTop="5%" marginBottom="5%" textAlign="center">
+            <StatusTypography>Running the program...</StatusTypography>
             <CircularProgress />
-        </CenterContainer>}
+        </Box>}
 
-        <div style={{padding: '10px'}}>
+        <Box padding="10px">
             {submissionResult && submissionResult.compileOutputs &&
             <>
-                <Typography className={classes.status} style={{color: statusColors.failed}}>{submissionResult.status}</Typography>
-                <Typography className={classes.content}>{submissionResult.compileOutputs}</Typography>
+                <StatusTypography style={{color: statusColors.failed}}>{submissionResult.status}</StatusTypography>
+                <Typography whiteSpace='pre-wrap'>{submissionResult.compileOutputs}</Typography>
             </>}
 
             {!isProcessing && !submissionResult && selectedTest === null &&
-            <Typography className={classes.status}>Run the program to see the output, Submit to evaluate</Typography>}
+            <StatusTypography>Run the program to see the output, Submit to evaluate</StatusTypography>}
 
             {selectedTest !== null && selectedTest < tests.length &&
             <TestView
@@ -190,7 +152,7 @@ function Console({onSubmitClicked, onRunClicked, isProcessing, submissionResult}
                 memory={Array.isArray(memory) ? memory[selectedTest] : memory}
                 time={Array.isArray(time) ? time[selectedTest] : time}
                 onSaveTest={(input, target) => onSaveTest(selectedTest, input, target)} />}
-        </div>
+        </Box>
     </>;
 }
 

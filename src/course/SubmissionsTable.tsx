@@ -34,13 +34,13 @@ interface Column {
 const columns: Column[] = [
     { id: '#', label: '#', minWidth: 20 },
     { id: 'userDisplayName', label: 'User', minWidth: 100 },
-    { id: 'createdAt', label: 'Date', minWidth: 100, format: (value) => moment(value.toDate()).format('YYYY MMM Do, HH:mm:ss') },
     { id: 'courseTitle', label: 'Course', minWidth: 100 },
     { id: 'exerciseTitle', label: 'Exercise', minWidth: 100 },
     { id: 'status', label: 'Status', minWidth: 50 },
     { id: 'time', label: 'Time (s)', minWidth: 50, align: 'right', format: (value: number) => value ? value.toFixed(2) : '' },
     { id: 'memory', label: 'Memory (MB)', minWidth: 50, align: 'right', format: (value: number) => value ? value.toFixed(1): '' },
     { id: 'language', label: 'Language', minWidth: 50 },
+    { id: 'createdAt', label: 'Date', minWidth: 100, format: (value) => moment(value.toDate()).format('YYYY MMM Do, HH:mm:ss') },
 ];
 
 
@@ -192,7 +192,7 @@ export function UserSubmissionsTable({rowsPerPage, userId}: {rowsPerPage: number
         await onUserSubmissionsChanged(userId, startAfterId ?? null, rowsPerPage, onChange);
 
     const [reset, setReset] = useState(0);
-    useEffect(() => setReset(reset + 1), [userId]);
+    useEffect(() => setReset(r => r + 1), [userId]);
     return <SubmissionsTable reset={reset} onLoadNext={onLoadNext} columns={columns.filter(c => c.id !== 'userDisplayName')}/>
 }
 
@@ -201,7 +201,7 @@ export function CourseSubmissionsTable({rowsPerPage, course}: {rowsPerPage: numb
         await onCourseSubmissionsChanged(course.id, startAfterId ?? null, rowsPerPage, onChange);
 
     const [reset, setReset] = useState(0);
-    useEffect(() => setReset(reset + 1), [course.id]);
+    useEffect(() => setReset(r => r + 1), [course.id]);
     return <SubmissionsTable reset={reset} onLoadNext={onLoadNext} columns={columns.filter(c => c.id !== 'courseTitle')}/>
 }
 
@@ -210,6 +210,6 @@ export function ExerciseSubmissionsTable({rowsPerPage, course, exercise, mode}: 
         await onSubmissionsChanged(course.id, exercise.id, mode, startAfterId ?? null, rowsPerPage, onChange);
 
     const [reset, setReset] = useState(0);
-    useEffect(() => setReset(reset + 1), [course.id, exercise.id, mode]);
+    useEffect(() => setReset(r => r + 1), [course.id, exercise.id, mode]);
     return <SubmissionsTable reset={reset} onLoadNext={onLoadNext} columns={columns.filter(c => c.id !== 'courseTitle' && c.id !== 'exerciseTitle')}/>
 }

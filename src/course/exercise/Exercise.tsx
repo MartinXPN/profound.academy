@@ -16,6 +16,9 @@ import "../SplitPane.css";
 import OutlinedButton from "../../common/OutlinedButton";
 import Box from "@mui/material/Box";
 import CodeDrafts from "../CodeDrafts";
+import {Edit} from "@mui/icons-material";
+import ExerciseEditor from "./ExerciseEditor";
+import {EXERCISE_TYPES} from "../../models/courses";
 
 
 export default function Exercise({launchCourse}: {launchCourse: () => void}) {
@@ -25,9 +28,10 @@ export default function Exercise({launchCourse}: {launchCourse: () => void}) {
     console.log('exercise:', exercise);
 
     const {exerciseId} = useParams<{ exerciseId: string }>();
+    const [exerciseType, setExerciseType] = useState(exercise?.exerciseType ?? EXERCISE_TYPES.testCases.id);
     const [showSignIn, setShowSignIn] = useState(false);
     const [splitPos, setSplitPos] = useStickyState<number[] | null>(null, `splitPos-${auth?.currentUserId}`);
-    const [currentTab, setCurrentTab] = useState<'description' | 'allSubmissions' | 'bestSubmissions' | 'codeDrafts'>('description');
+    const [currentTab, setCurrentTab] = useState<'description' | 'allSubmissions' | 'bestSubmissions' | 'codeDrafts' | 'edit'>('description');
     const [codeDraftId, setCodeDraftId] = useState<string | null>(null);
     const isCourseInstructor = course && auth.currentUserId && course.instructors.includes(auth.currentUserId);
 
@@ -63,26 +67,30 @@ export default function Exercise({launchCourse}: {launchCourse: () => void}) {
         {exercise &&
             <SplitPane split="vertical" defaultSizes={splitPos ?? [1, 1]} onDragFinished={onSplitChanged}>
                 <Box width="100%" height="100%" sx={{overflowY: 'auto'}}>
+
                     <Grid container justifyContent="center">
                         <OutlinedButton selected={currentTab === 'description'} onClick={() => setCurrentTab('description')}>Description</OutlinedButton>
                         <OutlinedButton selected={currentTab === 'bestSubmissions'} onClick={() => setCurrentTab('bestSubmissions')}>Best Submissions</OutlinedButton>
                         <OutlinedButton selected={currentTab === 'allSubmissions'} onClick={() => setCurrentTab('allSubmissions')}>All Submissions</OutlinedButton>
                         {isCourseInstructor && <OutlinedButton selected={currentTab === 'codeDrafts'} onClick={() => setCurrentTab('codeDrafts')}>Code Drafts</OutlinedButton>}
+                        {isCourseInstructor && <OutlinedButton selected={currentTab === 'edit'} endIcon={<Edit />} onClick={() => setCurrentTab('edit')}>Edit</OutlinedButton>}
                     </Grid>
 
                     {currentTab === 'description' && <><Content notionPage={getLocalizedParam(exercise.pageId)}/>{auth.isSignedIn && <Forum/>}</>}
                     {currentTab === 'bestSubmissions' && <ExerciseSubmissionsTable rowsPerPage={5} course={course} exercise={exercise} mode="best" />}
                     {currentTab === 'allSubmissions' && <ExerciseSubmissionsTable rowsPerPage={5} course={course} exercise={exercise} mode="all" />}
                     {currentTab === 'codeDrafts' && <CodeDrafts onCodeDraftSelected={setCodeDraftId} />}
+                    {currentTab === 'edit' && <ExerciseEditor cancelEditing={() => setCurrentTab('description')} exerciseTypeChanged={setExerciseType} />}
                 </Box>
 
                 <Box width="100%" height="100%">
                     {!auth.isSignedIn
-                        ? <Stack direction="column" alignItems="center">
-                            <br/><br/><br/><br/><br/><br/>
-                            <Typography variant="subtitle2">To check your solution you need to sign in</Typography>
-                            <SignIn />
-                        </Stack>
+                        ? <Grid container direction="column" alignItems="center" justifyContent="center" height="100%">
+                            <Stack direction="column" alignItems="center">
+                                <Typography variant="subtitle2" textAlign="center">To check your solution you need to sign in</Typography>
+                                <SignIn />
+                            </Stack>
+                        </Grid>
                         : !!codeDraftId && currentTab === 'codeDrafts'
                             ? <Editor disableCodeSync userId={codeDraftId} />
                             : <Editor />}

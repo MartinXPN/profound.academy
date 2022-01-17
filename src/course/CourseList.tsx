@@ -1,6 +1,5 @@
 import React, {memo, useCallback, useContext} from 'react';
-import {Theme} from '@mui/material/styles';
-import {createStyles, makeStyles} from '@mui/styles';
+import {styled} from '@mui/material/styles';
 import {ImageList, ImageListItem, ImageListItemBar, IconButton} from '@mui/material';
 import {Tooltip, Typography} from "@mui/material";
 import InfoIcon from '@mui/icons-material/Info';
@@ -12,42 +11,20 @@ import {useHistory} from "react-router-dom";
 import {useStickyState} from "../util";
 import {lastExerciseId} from "./Course";
 import {AuthContext} from "../App";
+import Box from "@mui/material/Box";
 
-const useStyles = makeStyles((theme: Theme) =>
-    createStyles({
-        root: {
-            display: 'flex',
-            flexWrap: 'wrap',
-            justifyContent: 'space-around',
-            overflow: 'hidden',
-            backgroundColor: theme.palette.background.paper,
-        },
-        imageList: {
-            width: 600,
-            minHeight: 300,
-        },
-        listItem: {
-            "&:focus,&:hover": {
-                cursor: 'pointer',
-            }
-        },
-        icon: {
-            color: 'rgba(255, 255, 255, 0.54)',
-        },
-        title: {
-            display: 'flex',
-            justifyContent: 'center',
-            marginTop: theme.spacing(2),
-        },
-    }),
-);
+const ClickableImageListItem = styled(ImageListItem)({
+    "&:focus,&:hover": {
+        cursor: 'pointer',
+    }
+});
+
 
 function CourseList({variant, title, userId}: {
     variant: 'allCourses' | 'userCourses' | 'completedCourses', title: string, userId?: string
 }) {
     const auth = useContext(AuthContext);
     const history = useHistory();
-    const classes = useStyles();
     const [courses, setCourses] = useStickyState<Course[] | null>(null, `${variant}-${userId}`);
 
     useAsyncEffect(async () => {
@@ -74,31 +51,28 @@ function CourseList({variant, title, userId}: {
     if( !courses || courses.length === 0 )
         return <></>
     return <>
-        <Typography variant='h5' className={classes.title}>{title}</Typography>
-        <div className={classes.root}>
-            <ImageList rowHeight={180} className={classes.imageList}>
+        <Typography variant='h5' sx={{display: 'flex', justifyContent: 'center', marginTop: 2}}>{title}</Typography>
+        <Box display="flex" flexWrap="wrap" justifyContent="space-around" overflow="hidden">
+            <ImageList rowHeight={180} sx={{width: 600, minHeight: 300}}>
                 {courses.map((item: Course) => (
-                    <ImageListItem className={classes.listItem} key={item.id} onClick={() => onCourseSelected(item.id)}>
+                    <ClickableImageListItem key={item.id} onClick={() => onCourseSelected(item.id)}>
                         <img src={item.img} alt={item.title} loading="lazy" 
                              style={{width: '100%', height: '100%', objectFit: 'cover'}} />
                         <ImageListItemBar
                             title={item.title}
                             subtitle={<span>by: {item.author}</span>}
                             actionIcon={
-                                <IconButton
-                                    aria-label={`info about ${item.title}`}
-                                    className={classes.icon}
-                                    size="large">
+                                <IconButton size="large" sx={{color: 'rgba(255, 255, 255, 0.70)'}}>
                                     <Tooltip title={item.details} placement="top-start">
-                                        <div><InfoIcon fontSize='small'/></div>
+                                        <InfoIcon fontSize='small'/>
                                     </Tooltip>
                                 </IconButton>
                             }
                         />
-                    </ImageListItem>
+                    </ClickableImageListItem>
                 ))}
             </ImageList>
-        </div>
+        </Box>
     </>;
 }
 

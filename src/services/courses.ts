@@ -1,7 +1,8 @@
 import {db} from "./db";
-import {Course, Exercise, ExerciseProgress, Progress} from "../models/courses";
+import {Course, Exercise, EXERCISE_TYPES, ExerciseProgress, Progress} from "../models/courses";
 import firebase from "firebase/app";
 import {SubmissionStatus} from "../models/submissions";
+import {LANGUAGES} from "../models/language";
 
 export const getNotionPageMap = async (pageId: string) => {
     const GET_NOTION_ENDPOINT = 'https://us-central1-profound-academy.cloudfunctions.net/getNotionPage';
@@ -26,6 +27,23 @@ export const getCourse = async (id: string) => {
     const snapshot = await db.course(id).get();
     const course: Course = snapshot.data() as Course;
     return course;
+}
+
+export const getCourses = async (courseIds: string[]) => {
+    const courses: Course[] = await Promise.all(courseIds.map(id => getCourse(id)));
+    console.log('Got courses:', courses);
+    return courses;
+}
+
+export const searchCourses = async (title: string, limit: number = 20) => {
+    const snapshot = await db.courses
+        .where('title', '>=', title.toUpperCase())
+        .where('title', '<=', title.toLowerCase() + '\uf8ff')
+        .limit(limit)
+        .get();
+    const courses = snapshot.docs.map(d => d.data());
+    console.log('Found courses:', courses);
+    return courses;
 }
 
 export const getUserCourses = async (userId: string) => {
@@ -71,13 +89,62 @@ export const startCourse = async (userId: string, courseId: string) => {
     })
 }
 
-export const updateCourse = async (course: Course) => {
-    return db.course(course.id).set(course, {merge: true});
+export const updateCourse = async (
+    id: string, img: string,
+    revealsAt: Date, freezesAt: Date,
+    visibility: 'public' | 'private', rankingVisibility: 'public' | 'private', allowViewingSolutions: boolean,
+    title: string, author: string, instructors: string[], details: string, introduction: string) => {
+    return db.course(id).set({
+        img: img,
+        revealsAt: firebase.firestore.Timestamp.fromDate(revealsAt),
+        freezeAt: firebase.firestore.Timestamp.fromDate(freezesAt),
+        visibility: visibility,
+        rankingVisibility: rankingVisibility,
+        allowViewingSolutions: allowViewingSolutions,
+        title: title,
+        author: author,
+        instructors: instructors,
+        details: details,
+        introduction: introduction,
+    }, {merge: true});
+}
+
+export const createCourseExercise = async (courseId: string) => {
+    const ref = await db.exercises(courseId).add({
+        id: '',
+        title: '',
+        pageId: '',
+        order: 0,
+        testCases: [],
+    });
+    return await getExercise(courseId, ref.id);
 }
 
 export const getExercise = async (courseId: string, exerciseId: string) => {
     const exercise = await db.exercise(courseId, exerciseId).get();
     return exercise.data() ?? null;
+}
+
+export const updateExercise = async (
+    courseId: string, exerciseId: string,
+    title: {[key: string]: string}, pageId: {[key: string]: string},
+    order: number,
+    exerciseType: keyof typeof EXERCISE_TYPES,
+    unlockContent: string[],
+    allowedLanguages: (keyof typeof LANGUAGES)[],
+    memoryLimit?: number,
+    timeLimit?: number,
+) => {
+    return db.exercise(courseId, exerciseId).set({
+        title: title,
+        pageId: pageId,
+        order: order,
+        exerciseType: exerciseType,
+        unlockContent: unlockContent,
+        allowedLanguages: allowedLanguages,
+        memoryLimit: memoryLimit,
+        timeLimit: timeLimit,
+    }, {merge: true});
 }
 
 

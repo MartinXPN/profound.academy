@@ -8,7 +8,6 @@ import firebase from 'firebase/app';
 import 'firebase/auth';
 import {AuthContext} from "../App";
 import {useHistory} from "react-router-dom";
-import useAsyncEffect from "use-async-effect";
 
 // Configure FirebaseUI.
 const uiConfig = {
@@ -69,11 +68,6 @@ export function AppBarProfile() {
     const onUserProfileClicked = useCallback(() => {
         history.push(`/users/${auth.currentUserId}`);
     }, [auth.currentUserId, history]);
-
-
-    useAsyncEffect(async () => {
-
-    }, [auth.currentUser]);
 
     return <>
         <IconButton

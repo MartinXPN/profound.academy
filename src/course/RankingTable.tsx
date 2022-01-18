@@ -89,7 +89,7 @@ function RankingTable({metric}: {metric: 'score' | 'solved' | 'upsolveScore'}) {
                 u();
             });
         }
-    }, [course, levelOpen, exerciseMetric]);
+    }, unsubscribe => unsubscribe && unsubscribe(), [course, levelOpen, exerciseMetric]);
 
     const onUserClicked = useCallback((userId: string) => {
         history.push(`/users/${userId}`);
@@ -108,8 +108,8 @@ function RankingTable({metric}: {metric: 'score' | 'solved' | 'upsolveScore'}) {
 
     return (
         <Paper sx={{width: '100%'}}>
-            <TableContainer>
-                <Table>
+            <TableContainer sx={{ maxHeight: 'calc(100vh - 64px)' }}>
+                <Table stickyHeader>
                     <TableHead>
                         <TableRow>
                             <TableCell key="#" align="center" style={{minWidth: 20}}>#</TableCell>
@@ -119,9 +119,13 @@ function RankingTable({metric}: {metric: 'score' | 'solved' | 'upsolveScore'}) {
                             {(maxLevel >= 1) && Array(maxLevel).fill(1).map((_, level) => {
                                 const levelName = (level + 1).toString();
                                 return <>
-                                    {maxLevel >= 2 && <TableCell key={level} align="right" style={{width: 50}} onClick={() => onLevelClicked(level)} sx={{"&:focus,&:hover": {cursor: 'pointer'}}}>
+                                    {maxLevel >= 2 &&
+                                    <TableCell key={level} align="right" style={{width: 50}} onClick={() => onLevelClicked(level)} sx={{"&:focus,&:hover": {cursor: 'pointer'}}}>
                                         <Typography variant="subtitle1" sx={{verticalAlign: 'middle', display: 'inline-flex'}}>
                                             <Equalizer /> {level}
+                                        </Typography>
+                                        <Typography variant="body2">
+                                            {course && course?.levelExercises && course.levelExercises[levelName] ? course.levelExercises[levelName] * 100 : '?'}
                                         </Typography>
                                     </TableCell>}
 

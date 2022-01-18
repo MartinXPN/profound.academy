@@ -47,7 +47,7 @@ function ActivityHeatmap({userId}: {userId: string}) {
                 transformDayElement={(element, value, index) => {
                     const currentDate = new Date(startDate);
                     currentDate.setDate(currentDate.getDate() + index - startDate.getDay());
-                    const formattedDate = moment(currentDate).format('MMM Do, YYYY');
+                    const formattedDate = moment(currentDate).locale('en').format('MMM Do, YYYY');
                     return (
                         <Tooltip key={formattedDate} describeChild title={value && value.count
                             ? `${value.count} solutions on ${formattedDate}` + ( value.count >= 10 ? '!' : '')

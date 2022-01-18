@@ -1,16 +1,25 @@
-import {memo, useContext, useState} from "react";
+import {memo, useContext, useEffect, useState} from "react";
 import {CodeDraft} from "../models/codeDrafts";
 import useAsyncEffect from "use-async-effect";
 import {CourseContext, CurrentExerciseContext} from "./Course";
 import {getCodeDrafts} from "../services/codeDrafts";
 import {Avatar, Badge, Grid, Stack, Typography, ListItemButton} from "@mui/material";
 import {styled} from "@mui/material/styles";
+import moment from "moment";
 
-const StyledBadge = styled(Badge)(({ theme }) => ({
+
+const LastUpdateBadge = styled(Badge)<{active: boolean}>(({theme, active}) => ({
     '& .MuiBadge-badge': {
-        backgroundColor: '#44b700',
-        color: '#44b700',
+        ...(active && {
+            backgroundColor: '#44b700',
+            color: '#44b700',
+        }),
+        ...(!active && {
+            backgroundColor: 'rgba(80,80,80,0.70)',
+            color: '#ffffff',
+        }),
         boxShadow: `0 0 0 2px ${theme.palette.background.paper}`,
+        textColorPrimary: `${theme.palette.background.paper}`,
         '&::after': {
             position: 'absolute',
             top: 0,
@@ -18,9 +27,9 @@ const StyledBadge = styled(Badge)(({ theme }) => ({
             width: '100%',
             height: '100%',
             borderRadius: '50%',
-            animation: 'ripple 1.2s infinite ease-in-out',
             border: '1px solid currentColor',
-            content: '""',
+            ...(active && {animation: 'ripple 1.2s infinite ease-in-out'}),
+            ...(active && {content: '""'}),
         },
     },
     '@keyframes ripple': {
@@ -34,6 +43,7 @@ const StyledBadge = styled(Badge)(({ theme }) => ({
         },
     },
 }));
+
 
 function CodeDrafts({onCodeDraftSelected}: {
     onCodeDraftSelected?: (codeDraftId: string | null) => void,
@@ -58,30 +68,58 @@ function CodeDrafts({onCodeDraftSelected}: {
     useAsyncEffect(async () => {
         if( !course?.id || !exercise?.id )
             return;
+        const fetchCodeDrafts = async () => {
+            const codeDrafts = await getCodeDrafts(course.id, exercise.id);
+            setCodeDrafts(codeDrafts);
+        }
 
-        const codeDrafts = await getCodeDrafts(course.id, exercise.id);
-        setCodeDrafts(codeDrafts);
-    }, [course?.id, exercise?.id]);
+        await fetchCodeDrafts();
+        return setInterval(async () => await fetchCodeDrafts(), 1000 * 60);
+
+    }, (timeOutId) => timeOutId && clearInterval(timeOutId), [course?.id, exercise?.id, setCodeDrafts]);
+
+    useEffect(() => {
+        moment.defineLocale('short', {
+            relativeTime: {
+                future: 'in %s',
+                past: '%s',
+                s: (number, withoutSuffix) => withoutSuffix ? 'now' : 'a few seconds',
+                m: '1m',
+                mm: '%dm',
+                h: '1h',
+                hh: '%dh',
+                d: '1d',
+                dd: '%dd',
+                M: '1mon',
+                MM: '%dmon',
+                y: '1y',
+                yy: '%dy'
+            }
+        });
+    }, []);
 
     return <>
         <Grid container justifyContent="center" padding={4} rowSpacing={4} columnSpacing={4}>
-            {codeDrafts.map(codeDraft => <Grid item key={codeDraft.id}>
-                <ListItemButton selected={currentDraft?.id === codeDraft.id} onClick={() => onCodeDraftClicked(codeDraft)}>
-                <Stack direction="column" alignItems="center" alignContent="center">
-                    <StyledBadge
-                        overlap="circular"
-                        color="success"
-                        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-                        variant="dot"
-                        invisible={new Date().getTime() - codeDraft.updatedAt.toDate().getTime() > 60 * 1000 /* updated at most one minute ago */ }
-                        badgeContent="">
-                        <Avatar alt={codeDraft.userDisplayName} src={codeDraft.userImageUrl} />
-                    </StyledBadge>
+            {codeDrafts.map(codeDraft => {
+                const isActive = new Date().getTime() - codeDraft.updatedAt.toDate().getTime() < 60 * 1000; /* updated at most one minute ago */
+                return <Grid item key={codeDraft.id}>
+                    <ListItemButton selected={currentDraft?.id === codeDraft.id}
+                                    onClick={() => onCodeDraftClicked(codeDraft)}>
+                        <Stack direction="column" alignItems="center" alignContent="center">
+                            <LastUpdateBadge
+                                overlap="circular"
+                                variant={isActive ? 'dot' : 'standard'}
+                                anchorOrigin={{vertical: 'bottom', horizontal: 'right'}}
+                                active={isActive}
+                                badgeContent={isActive ? "" : moment(codeDraft.updatedAt.toDate()).locale('short').fromNow()}>
+                                <Avatar alt={codeDraft.userDisplayName} src={codeDraft.userImageUrl}/>
+                            </LastUpdateBadge>
 
-                    <Typography>{codeDraft.userDisplayName}</Typography>
-                </Stack>
-                </ListItemButton>
-            </Grid>)}
+                            <Typography>{codeDraft.userDisplayName}</Typography>
+                        </Stack>
+                    </ListItemButton>
+                </Grid>
+            })}
         </Grid>
     </>;
 }

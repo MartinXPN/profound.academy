@@ -13,6 +13,7 @@ import Course from "./course/Course";
 import UserProfile from "./user/UserProfile";
 import {updateUserInfo} from "./services/users";
 import {useStickyState} from "./util";
+import CourseEditor from "./course/CourseEditor";
 
 
 firebase.analytics();
@@ -73,6 +74,7 @@ function App() {
             <Switch>
                 <Route exact path="/"><Home/></Route>
                 <Route exact path={'/users/:userId'}><UserProfile/></Route>
+                <Route exact path={'/new'}><CourseEditor/></Route>
                 <Route path={'/:courseId'}><Course/></Route>
             </Switch>
             </AuthContext.Provider>

@@ -62,3 +62,8 @@ export const getUsers = async (userIds: string[]) => {
     console.log('Found users:', users);
     return users;
 }
+
+export const hasInstructorRole = async (userId: string) => {
+    const snapshot = await db.userRoles(userId).doc('instructor').get();
+    return snapshot.exists;
+}

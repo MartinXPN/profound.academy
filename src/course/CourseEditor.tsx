@@ -9,7 +9,7 @@ import LocalizationProvider from '@mui/lab/LocalizationProvider';
 import DateTimePicker from '@mui/lab/DateTimePicker';
 import {styled} from "@mui/material/styles";
 import Content from "./Content";
-import {useHistory, useRouteMatch} from "react-router-dom";
+import {useHistory} from "react-router-dom";
 import {getUsers, searchUser, uploadPicture} from "../services/users";
 import {doesExist, updateCourse} from "../services/courses";
 import useAsyncEffect from "use-async-effect";
@@ -53,7 +53,6 @@ const fileTypes = ['jpeg', 'jpg', 'png', 'webp'];
 
 function CourseEditor({course}: {course?: Course | null}) {
     const history = useHistory();
-    const match = useRouteMatch();
     const auth = useContext(AuthContext);
     const [id, setId] = useState<{value?: string, error?: string}>({value: course?.id, error: undefined});
     const [isIdValid, setIsIdValid] = useState(false);
@@ -140,13 +139,10 @@ function CourseEditor({course}: {course?: Course | null}) {
             title.value!, authors.value!, instructors, details.value!, introId.value!
         );
 
+        history.push(`/${id.value}`);
         setOpenSnackbar(true);
     }
-    const onCancel = () => {
-        console.log('cancel');
-        const url = match.url.replace('/edit', '');
-        history.push(url);
-    }
+    const onCancel = () => history.goBack();
 
     if( !auth.currentUserId )
         return <>
@@ -244,10 +240,16 @@ function CourseEditor({course}: {course?: Course | null}) {
             <LocalizationProvider dateAdapter={AdapterMoment}>
                 <DateTimePicker renderInput={params => <TextField {...params} />}
                                 label="Course reveals for students at"
-                                value={revealDate} onChange={setRevealDate}/>
+                                value={revealDate} onChange={newDate => {
+                                    // @ts-ignore
+                                    newDate && setRevealDate(newDate.toDate())
+                                }}/>
                 <DateTimePicker renderInput={params => <TextField {...params} />}
                                 label="Rankings freeze at"
-                                value={freezeDate} onChange={setFreezeDate}/>
+                                value={freezeDate} onChange={newDate => {
+                                    // @ts-ignore
+                                    newDate && setFreezeDate(newDate.toDate())
+                                }}/>
 
                 <Typography sx={{flex: 1}}/>
                 <FormControlLabel

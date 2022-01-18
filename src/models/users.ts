@@ -1,4 +1,5 @@
 import {Course} from './courses';
+import firebase from 'firebase';
 
 export interface Activity {
     id: string;
@@ -26,4 +27,9 @@ export interface UserInfoUpdate {
     id: string;
     imageUrl?: string;
     displayName?: string;
+}
+
+export interface UserRole {
+    grantedBy: string,
+    updatedAt: firebase.firestore.Timestamp,
 }

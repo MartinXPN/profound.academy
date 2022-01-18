@@ -94,6 +94,7 @@ export const updateCourse = async (
     revealsAt: Date, freezesAt: Date,
     visibility: 'public' | 'private', rankingVisibility: 'public' | 'private', allowViewingSolutions: boolean,
     title: string, author: string, instructors: string[], details: string, introduction: string) => {
+    console.log('update course:', id, img, revealsAt, freezesAt, visibility, rankingVisibility, allowViewingSolutions);
     return db.course(id).set({
         img: img,
         revealsAt: firebase.firestore.Timestamp.fromDate(revealsAt),

@@ -179,7 +179,7 @@ export const onCourseLevelExercisesChanged = (courseId: string, level: number, o
 }
 
 
-export const onProgressChanged = (courseId: string, metric: 'score' | 'solved' | 'upsolveScore', onChanged: (progress: Progress[]) => void ) => {
+export const onProgressChanged = (courseId: string, metric: string, onChanged: (progress: Progress[]) => void ) => {
 
     return db.progress(courseId).orderBy(metric, 'desc').onSnapshot(snapshot => {
         const res = snapshot.docs.map(d => d.data());
@@ -197,8 +197,10 @@ export const onUserProgressChanged = (courseId: string, userId: string, onChange
 }
 
 export const onLevelExerciseProgressChanged = <T>(courseId: string, level: string,
-                                                  metric: 'exerciseScore' | 'exerciseSolved' | 'exerciseUpsolveScore',
+                                                  metric: string,
                                                   onChanged: (userIdToProgress: { [key: string]: { [key: string]: T } }) => void) => {
+    if( !metric.startsWith('exercise') )
+        throw Error(`Invalid metric provided: ${metric}`);
     return db.levelExerciseProgress(courseId, level, metric).onSnapshot(snapshot => {
         // @ts-ignore
         const res: ExerciseProgress<T>[] = snapshot.docs.map(d => d.data());

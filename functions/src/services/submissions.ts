@@ -166,6 +166,10 @@ export const processSubmissionResult = async (
             functions.logger.info(`prevScore: ${JSON.stringify(prevScore)}`);
             updateUserMetric(transaction, 'score', submissionResult.userId, course.id, exercise.id, level,
                 prevScore?.progress?.[exercise.id] ?? 0, submissionResult.score, submissionResult.score);
+            // update weekly score metrics
+            updateUserMetric(transaction, `score_${moment().format('YYYY_MM_WW')}`,
+                submissionResult.userId, course.id, exercise.id, level,
+                prevScore?.progress?.[exercise.id] ?? 0, submissionResult.score, submissionResult.score);
         } else {
             const prevScore = (await transaction.get(db.userProgress(course.id, userId)
                 .collection('exerciseUpsolveScore').doc(level))).data();

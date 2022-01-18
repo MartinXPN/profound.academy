@@ -1,4 +1,4 @@
-import React, {useCallback, useContext, useEffect, useState} from "react";
+import React, {memo, useCallback, useContext, useEffect, useState} from "react";
 import Paper from '@mui/material/Paper';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -18,7 +18,7 @@ import ClickableTableCell from "../common/ClickableTableCell";
 import SmallAvatar from "../common/SmallAvatar";
 
 
-function RankingTable({metric}: {metric: 'score' | 'solved' | 'upsolveScore'}) {
+function RankingTable({metric}: {metric: string}) {
     const history = useHistory();
     const {course} = useContext(CourseContext);
     const [page, setPage] = useState(0);
@@ -32,8 +32,6 @@ function RankingTable({metric}: {metric: 'score' | 'solved' | 'upsolveScore'}) {
     const uppercaseMetric = metric.charAt(0).toUpperCase() + metric.slice(1);
     const levelMetric = 'level' + uppercaseMetric;
     const exerciseMetric = 'exercise' + uppercaseMetric;
-    if( exerciseMetric !== 'exerciseScore' && exerciseMetric !== 'exerciseUpsolveScore' && exerciseMetric !== 'exerciseSolved' )
-        throw Error(`wrong exercise metric: ${exerciseMetric}`)
 
     useEffect(() => {
         if( !course )
@@ -89,7 +87,7 @@ function RankingTable({metric}: {metric: 'score' | 'solved' | 'upsolveScore'}) {
                 u();
             });
         }
-    }, [course, levelOpen, exerciseMetric]);
+    }, unsubscribe => unsubscribe && unsubscribe(), [course, levelOpen, exerciseMetric]);
 
     const onUserClicked = useCallback((userId: string) => {
         history.push(`/users/${userId}`);
@@ -108,8 +106,8 @@ function RankingTable({metric}: {metric: 'score' | 'solved' | 'upsolveScore'}) {
 
     return (
         <Paper sx={{width: '100%'}}>
-            <TableContainer>
-                <Table>
+            <TableContainer sx={{ maxHeight: 'calc(100vh - 64px)' }}>
+                <Table stickyHeader>
                     <TableHead>
                         <TableRow>
                             <TableCell key="#" align="center" style={{minWidth: 20}}>#</TableCell>
@@ -119,9 +117,13 @@ function RankingTable({metric}: {metric: 'score' | 'solved' | 'upsolveScore'}) {
                             {(maxLevel >= 1) && Array(maxLevel).fill(1).map((_, level) => {
                                 const levelName = (level + 1).toString();
                                 return <>
-                                    {maxLevel >= 2 && <TableCell key={level} align="right" style={{width: 50}} onClick={() => onLevelClicked(level)} sx={{"&:focus,&:hover": {cursor: 'pointer'}}}>
+                                    {maxLevel >= 2 &&
+                                    <TableCell key={level} align="right" style={{width: 50}} onClick={() => onLevelClicked(level)} sx={{"&:focus,&:hover": {cursor: 'pointer'}}}>
                                         <Typography variant="subtitle1" sx={{verticalAlign: 'middle', display: 'inline-flex'}}>
                                             <Equalizer /> {level}
+                                        </Typography>
+                                        <Typography variant="body2">
+                                            {course && course?.levelExercises && course.levelExercises[levelName] ? course.levelExercises[levelName] * 100 : '?'}
                                         </Typography>
                                     </TableCell>}
 
@@ -153,7 +155,8 @@ function RankingTable({metric}: {metric: 'score' | 'solved' | 'upsolveScore'}) {
                                 // @ts-ignore
                                 const levelScore = row?.[levelMetric]?.[levelName];
                                 return <>
-                                    {maxLevel >= 2 && <TableCell key={levelName} align="right">
+                                    {maxLevel >= 2 &&
+                                    <TableCell key={levelName} align="right">
                                         {levelScore ? levelScore.toFixed(0) : '-'}
                                     </TableCell>}
 
@@ -177,4 +180,4 @@ function RankingTable({metric}: {metric: 'score' | 'solved' | 'upsolveScore'}) {
     );
 }
 
-export default RankingTable;
+export default memo(RankingTable);

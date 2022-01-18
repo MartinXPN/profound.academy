@@ -16,11 +16,12 @@ import {statusToColor} from "./colors";
 import {RouteComponentProps, withRouter} from "react-router-dom";
 import {lastExerciseId} from "./Course";
 import {BottomLoading} from "../common/loading";
-import {Stack} from "@mui/material";
+import {Stack, Typography} from "@mui/material";
 import SmallAvatar from "../common/SmallAvatar";
 import ClickableTableCell from "../common/ClickableTableCell";
 import {LANGUAGES} from "../models/language";
 import {getLocalizedParam} from "../util";
+import Box from "@mui/material/Box";
 
 
 interface Column {
@@ -123,18 +124,21 @@ class SubmissionsTableC extends Component<Props, State> {
     render() {
         const {hasMore, displayedSubmission, pageSubmissions} = this.state;
         let orderNumber = 1;
+        console.log(pageSubmissions.length, hasMore);
+        if( (pageSubmissions.length === 0 || (pageSubmissions.length === 1 && pageSubmissions[0].length === 0)) && !hasMore )
+            return <Box alignItems="center" alignContent="center" textAlign="center">
+                <Typography>No submissions yet to display</Typography>
+            </Box>
+
         return (
-            <Paper style={{width: '100%'}}>
+            <Paper sx={{width: '100%'}}>
                 {displayedSubmission && <SubmissionBackdrop submission={displayedSubmission} onClose={this.onCloseSubmission} />}
                 <TableContainer>
                     <Table>
                         <TableHead>
                             <TableRow>
                                 {this.props.columns.map((column) => (
-                                    <TableCell
-                                        key={column.id}
-                                        align={column.align}
-                                        style={{ minWidth: column.minWidth }}>
+                                    <TableCell key={column.id} align={column.align} sx={{ minWidth: column.minWidth }}>
                                         {column.label}
                                     </TableCell>
                                 ))}
@@ -195,6 +199,16 @@ export function UserSubmissionsTable({rowsPerPage, userId}: {rowsPerPage: number
     useEffect(() => setReset(r => r + 1), [userId]);
     return <SubmissionsTable reset={reset} onLoadNext={onLoadNext} columns={columns.filter(c => c.id !== 'userDisplayName')}/>
 }
+
+export function UserDateSubmissionsTable({rowsPerPage, userId, startDate, endDate}: {rowsPerPage: number, userId: string, startDate: Date, endDate: Date}) {
+    const onLoadNext = async (startAfterId: string | null, onChange: (submissions: SubmissionResult[], more: boolean) => void) =>
+        await onUserSubmissionsChanged(userId, startAfterId ?? null, rowsPerPage, onChange, startDate, endDate, 'asc');
+
+    const [reset, setReset] = useState(0);
+    useEffect(() => setReset(r => r + 1), [userId]);
+    return <SubmissionsTable reset={reset} onLoadNext={onLoadNext} columns={columns.filter(c => c.id !== 'userDisplayName')}/>
+}
+
 
 export function CourseSubmissionsTable({rowsPerPage, course}: {rowsPerPage: number, course: Course}) {
     const onLoadNext = async (startAfterId: string | null, onChange: (submissions: SubmissionResult[], more: boolean) => void) =>

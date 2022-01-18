@@ -51,3 +51,10 @@ export const getLocalizedParam = (param: string | {[key: string]: string}) => {
 
     return new LocalizedStrings(localeToParamText).value;
 };
+
+
+export const tomorrow = (d: Date) => {
+    const res = new Date(d);
+    res.setDate(res.getDate() + 1);
+    return res;
+}

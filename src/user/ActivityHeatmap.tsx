@@ -1,24 +1,34 @@
-import React, {memo} from 'react';
+import React, {memo, useState} from 'react';
 import CalendarHeatmap from 'react-calendar-heatmap';
 import 'react-calendar-heatmap/dist/styles.css';
-import {Tooltip, Typography} from "@mui/material";
+import {Collapse, Tooltip, Typography} from "@mui/material";
 import moment from "moment/moment";
 import useAsyncEffect from "use-async-effect";
 import {Activity} from "../models/users";
 import {getUserActivity} from "../services/users";
-import {useStickyState} from "../util";
+import {tomorrow, useStickyState} from "../util";
 import Box from "@mui/material/Box";
+import {TransitionGroup} from "react-transition-group";
+import {UserDateSubmissionsTable} from "../course/SubmissionsTable";
 
 
 function ActivityHeatmap({userId}: {userId: string}) {
     const [activity, setActivity] = useStickyState<Activity[] | null>(null, `activity-${userId}`);
     const [totalActivity, setTotalActivity] = useStickyState<number | null>(null, `totalActivity-${userId}`);
+    const [selectedDate, setSelectedDate] = useState<{ date: Date, formattedDate: string } | null>(null);
 
     useAsyncEffect(async () => {
         const activity = await getUserActivity(userId);
         setActivity(activity);
         setTotalActivity(activity.reduce((sum, a) => sum + a.count, 0));
     }, [userId]);
+
+    const onDateClicked = (date: Date, formattedDate: string) => {
+        if( !selectedDate || selectedDate.formattedDate !== formattedDate )
+            setSelectedDate({date: date, formattedDate: formattedDate});
+        else
+            setSelectedDate(null);
+    }
 
     const endDate = new Date();
     const startDate = new Date();
@@ -49,14 +59,30 @@ function ActivityHeatmap({userId}: {userId: string}) {
                     currentDate.setDate(currentDate.getDate() + index - startDate.getDay());
                     const formattedDate = moment(currentDate).locale('en').format('MMM Do, YYYY');
                     return (
-                        <Tooltip key={formattedDate} describeChild title={value && value.count
-                            ? `${value.count} solutions on ${formattedDate}` + ( value.count >= 10 ? '!' : '')
-                            : `No solutions on ${formattedDate}`}>
+                        <Tooltip
+                            key={formattedDate}
+                            describeChild
+                            onClickCapture={() => onDateClicked(currentDate, formattedDate)}
+                            title={value && value.count
+                                ? `${value.count} solutions on ${formattedDate}` + ( value.count >= 10 ? '!' : '')
+                                : `No solutions on ${formattedDate}`
+                            }>
                             {React.cloneElement(element)}
-                        </Tooltip>);
+                        </Tooltip>
+                    );
                 }}
             />
             <Typography variant="subtitle1">{totalActivity ?? '...'} solutions in the last year</Typography>
+
+            <TransitionGroup>
+                {selectedDate &&
+                <Collapse key={selectedDate.formattedDate}>
+                    <UserDateSubmissionsTable
+                        userId={userId} rowsPerPage={10}
+                        startDate={new Date(selectedDate.date)}
+                        endDate={tomorrow(new Date(selectedDate.date))} />
+                </Collapse>}
+            </TransitionGroup>
         </Box>
     </>
 }

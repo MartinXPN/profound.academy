@@ -49,7 +49,7 @@ function CourseList({variant, title, userId}: {
         if( !isCurrentUserCourses || !auth.currentUserId )
             return;
 
-        const isInstructor = hasInstructorRole(auth.currentUserId);
+        const isInstructor = await hasInstructorRole(auth.currentUserId);
         setHasInstructorPermissions(isInstructor);
     }, [isCurrentUserCourses, auth.currentUserId, setHasInstructorPermissions]);
 

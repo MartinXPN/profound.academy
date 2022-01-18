@@ -1,4 +1,4 @@
-import React, {useCallback, useContext, useEffect, useState} from "react";
+import React, {memo, useCallback, useContext, useEffect, useState} from "react";
 import Paper from '@mui/material/Paper';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -181,4 +181,4 @@ function RankingTable({metric}: {metric: 'score' | 'solved' | 'upsolveScore'}) {
     );
 }
 
-export default RankingTable;
+export default memo(RankingTable);

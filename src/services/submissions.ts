@@ -120,13 +120,13 @@ export const onUserSubmissionsChanged = async (
     userId: string,
     startAfterId: string | null, numItems: number,
     onChanged: (submissionResult: SubmissionResult[], hasMore: boolean) => void,
-    startDate?: Date, endDate?: Date,
+    startDate?: Date, endDate?: Date, direction?: 'desc' | 'asc',
 ) => {
     let query = db.submissionResults.where('userId', '==', userId);
     if( startDate && endDate )
         query = query.where('createdAt', '>', firebase.firestore.Timestamp.fromDate(startDate))
             .where('createdAt', '<', firebase.firestore.Timestamp.fromDate(endDate))
-    query = query.orderBy('createdAt', 'desc');
+    query = query.orderBy('createdAt', direction ?? 'desc');
 
     console.log('startAfterId:', startAfterId);
     query = await submissionQuery(query, startAfterId, numItems);

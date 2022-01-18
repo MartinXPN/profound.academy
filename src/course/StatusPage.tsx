@@ -7,27 +7,32 @@ import {useStickyState} from "../util";
 import {CourseSubmissionsTable} from "./SubmissionsTable";
 import RankingTable from "./RankingTable";
 import Box from "@mui/material/Box";
+import moment from "moment";
 
 
 function StatusPage() {
     const auth = useContext(AuthContext);
     const {course} = useContext(CourseContext);
-    const [currentTab, setCurrentTab] = useStickyState<'submissions' | 'ranking' | 'upsolving'>('submissions', `status-${course?.id}`);
+    const [currentTab, setCurrentTab] = useStickyState<'submissions' | 'ranking' | 'lastWeeksProgress' | 'upsolving'>('submissions', `status-${course?.id}`);
 
     const showRanking = course && auth.currentUserId && (course.instructors.includes(auth.currentUserId) || course.rankingVisibility === 'public');
     const showUpsolving = course && course.freezeAt.toDate().getTime() < new Date().getTime();
+    const showLastWeekProgress = showRanking && !showUpsolving && course && new Date().getTime() - course.revealsAt.toDate().getTime() > 24 * 60 * 1000; // at least one day has passed
+
     if( !course )
         return <></>
     return <>
         <Box overflow="auto" width="100%" height="100%">
             <Stack justifyContent="center" direction="row">
                 <OutlinedButton selected={currentTab === 'submissions'} onClick={() => setCurrentTab('submissions')}>Submissions</OutlinedButton>
+                {showLastWeekProgress && <OutlinedButton selected={currentTab === 'lastWeeksProgress'} onClick={() => setCurrentTab('lastWeeksProgress')}>Last week progress</OutlinedButton>}
                 {showRanking && <OutlinedButton selected={currentTab === 'ranking'} onClick={() => setCurrentTab('ranking')}>Ranking</OutlinedButton>}
                 {showUpsolving && <OutlinedButton selected={currentTab === 'upsolving'} onClick={() => setCurrentTab('upsolving')}>Upsolving ranking</OutlinedButton>}
             </Stack>
 
             {currentTab === 'submissions' && <CourseSubmissionsTable rowsPerPage={5} course={course} />}
             {currentTab === 'ranking' && <RankingTable metric="score"/>}
+            {currentTab === 'lastWeeksProgress' && <RankingTable metric={`score_${moment().format('YYYY_MM_WW')}`}/>}
             {currentTab === 'upsolving' && <RankingTable metric="upsolveScore"/>}
         </Box>
     </>

@@ -18,7 +18,7 @@ import ClickableTableCell from "../common/ClickableTableCell";
 import SmallAvatar from "../common/SmallAvatar";
 
 
-function RankingTable({metric}: {metric: 'score' | 'solved' | 'upsolveScore'}) {
+function RankingTable({metric}: {metric: string}) {
     const history = useHistory();
     const {course} = useContext(CourseContext);
     const [page, setPage] = useState(0);
@@ -32,8 +32,6 @@ function RankingTable({metric}: {metric: 'score' | 'solved' | 'upsolveScore'}) {
     const uppercaseMetric = metric.charAt(0).toUpperCase() + metric.slice(1);
     const levelMetric = 'level' + uppercaseMetric;
     const exerciseMetric = 'exercise' + uppercaseMetric;
-    if( exerciseMetric !== 'exerciseScore' && exerciseMetric !== 'exerciseUpsolveScore' && exerciseMetric !== 'exerciseSolved' )
-        throw Error(`wrong exercise metric: ${exerciseMetric}`)
 
     useEffect(() => {
         if( !course )
@@ -157,7 +155,8 @@ function RankingTable({metric}: {metric: 'score' | 'solved' | 'upsolveScore'}) {
                                 // @ts-ignore
                                 const levelScore = row?.[levelMetric]?.[levelName];
                                 return <>
-                                    {maxLevel >= 2 && <TableCell key={levelName} align="right">
+                                    {maxLevel >= 2 &&
+                                    <TableCell key={levelName} align="right">
                                         {levelScore ? levelScore.toFixed(0) : '-'}
                                     </TableCell>}
 

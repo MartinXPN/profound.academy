@@ -196,6 +196,16 @@ export function UserSubmissionsTable({rowsPerPage, userId}: {rowsPerPage: number
     return <SubmissionsTable reset={reset} onLoadNext={onLoadNext} columns={columns.filter(c => c.id !== 'userDisplayName')}/>
 }
 
+export function UserDateSubmissionsTable({rowsPerPage, userId, startDate, endDate}: {rowsPerPage: number, userId: string, startDate: Date, endDate: Date}) {
+    const onLoadNext = async (startAfterId: string | null, onChange: (submissions: SubmissionResult[], more: boolean) => void) =>
+        await onUserSubmissionsChanged(userId, startAfterId ?? null, rowsPerPage, onChange, startDate, endDate);
+
+    const [reset, setReset] = useState(0);
+    useEffect(() => setReset(r => r + 1), [userId]);
+    return <SubmissionsTable reset={reset} onLoadNext={onLoadNext} columns={columns.filter(c => c.id !== 'userDisplayName')}/>
+}
+
+
 export function CourseSubmissionsTable({rowsPerPage, course}: {rowsPerPage: number, course: Course}) {
     const onLoadNext = async (startAfterId: string | null, onChange: (submissions: SubmissionResult[], more: boolean) => void) =>
         await onCourseSubmissionsChanged(course.id, startAfterId ?? null, rowsPerPage, onChange);

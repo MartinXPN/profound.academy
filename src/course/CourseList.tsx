@@ -1,8 +1,10 @@
 import React, {memo, useCallback, useContext} from 'react';
 import {styled} from '@mui/material/styles';
-import {ImageList, ImageListItem, ImageListItemBar, IconButton} from '@mui/material';
+import {ImageList, ImageListItem, ImageListItemBar, IconButton, Grid} from '@mui/material';
 import {Tooltip, Typography} from "@mui/material";
 import InfoIcon from '@mui/icons-material/Info';
+import {Add} from "@mui/icons-material";
+import Box from "@mui/material/Box";
 
 import {Course} from '../models/courses';
 import {getAllCourses, getCompletedCourses, getUserCourses} from "../services/courses";
@@ -11,7 +13,7 @@ import {useHistory} from "react-router-dom";
 import {useStickyState} from "../util";
 import {lastExerciseId} from "./Course";
 import {AuthContext} from "../App";
-import Box from "@mui/material/Box";
+import {hasInstructorRole} from "../services/users";
 
 const ClickableImageListItem = styled(ImageListItem)({
     "&:focus,&:hover": {
@@ -26,6 +28,8 @@ function CourseList({variant, title, userId}: {
     const auth = useContext(AuthContext);
     const history = useHistory();
     const [courses, setCourses] = useStickyState<Course[] | null>(null, `${variant}-${userId}`);
+    const [hasInstructorPermissions, setHasInstructorPermissions] = useStickyState(false, `isInstructor-${userId}`);
+    const isCurrentUserCourses = userId && auth.currentUserId === userId && variant === 'userCourses';
 
     useAsyncEffect(async () => {
         if( variant === 'allCourses' ) {
@@ -41,6 +45,15 @@ function CourseList({variant, title, userId}: {
         setCourses(res);
     }, [variant, userId]);
 
+    useAsyncEffect(async () => {
+        if( !isCurrentUserCourses || !auth.currentUserId )
+            return;
+
+        const isInstructor = hasInstructorRole(auth.currentUserId);
+        setHasInstructorPermissions(isInstructor);
+    }, [isCurrentUserCourses, auth.currentUserId, setHasInstructorPermissions]);
+
+    const onCreateCourseClicked = useCallback(() => history.push('/new'), [history]);
     const onCourseSelected = useCallback((courseId: string) => {
         const lastEx = lastExerciseId(auth?.currentUserId, courseId);
         if( lastEx )    history.push(`/${courseId}/${lastEx}`);
@@ -51,9 +64,17 @@ function CourseList({variant, title, userId}: {
     if( !courses || courses.length === 0 )
         return <></>
     return <>
-        <Typography variant='h5' sx={{display: 'flex', justifyContent: 'center', marginTop: 2}}>{title}</Typography>
+        <Typography variant="h5" textAlign="center" marginTop={2}>{title}</Typography>
         <Box display="flex" flexWrap="wrap" justifyContent="space-around" overflow="hidden">
             <ImageList rowHeight={180} sx={{width: 600, minHeight: 300}}>
+                {isCurrentUserCourses && hasInstructorPermissions &&
+                <ClickableImageListItem key="create-course" onClick={onCreateCourseClicked} sx={{border: 1, borderColor: '#e1e1e1'}}>
+                    <Grid container direction="column" alignItems="center" justifyContent="center" height="100%">
+                        <Add fontSize="large" color="action" />
+                        <Typography>Create a new course</Typography>
+                    </Grid>
+                </ClickableImageListItem>}
+
                 {courses.map((item: Course) => (
                     <ClickableImageListItem key={item.id} onClick={() => onCourseSelected(item.id)}>
                         <img src={item.img} alt={item.title} loading="lazy" 

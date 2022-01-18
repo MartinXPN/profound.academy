@@ -1,7 +1,7 @@
 import * as admin from 'firebase-admin';
 
 import {CodeDraft} from '../models/codeDrafts';
-import {Activity, User, UserInfoUpdate} from '../models/users';
+import {Activity, User, UserInfoUpdate, UserRole} from '../models/users';
 import {Notification} from '../models/notifications';
 import {Course, Exercise, ExerciseProgress, Progress} from '../models/courses';
 import {Submission, SubmissionResult, SubmissionSensitiveRecords, SubmissionStatus} from '../models/submissions';
@@ -29,6 +29,7 @@ const dataPoint = <T>(collectionPath: string) => firestore()
 const db = {
     users: dataPoint<User>('users'),
     user: (userId: string) => dataPoint<User>('users').doc(userId),
+    userRoles: (userId: string) => dataPoint<UserRole>(`users/${userId}/roles`),
     infoUpdates: dataPoint<UserInfoUpdate>('infoUpdates'),
     userInfoUpdate: (userId: string) => dataPoint<UserInfoUpdate>('infoUpdates').doc(userId),
     userVotes: (commentId: string, userId: string) => dataPoint<Vote>(`users/${userId}/votes`).doc(commentId),

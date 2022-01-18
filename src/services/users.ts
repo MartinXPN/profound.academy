@@ -65,5 +65,6 @@ export const getUsers = async (userIds: string[]) => {
 
 export const hasInstructorRole = async (userId: string) => {
     const snapshot = await db.userRoles(userId).doc('instructor').get();
+    console.log('roles:', snapshot.data(), snapshot, snapshot.exists);
     return snapshot.exists;
 }

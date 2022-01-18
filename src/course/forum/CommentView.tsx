@@ -140,7 +140,7 @@ function CommentView({comment, allowReply}: {
                         <Stack direction="row" alignItems="center">
                             <UserName onClick={() => onUserClicked(comment.userId)}>{comment.displayName}</UserName>
                             <Typography variant="body2" color="text.secondary" noWrap>&nbsp; • &nbsp;</Typography>
-                            <Typography variant="body2" color="text.secondary">{comment.createdAt ? moment(comment.createdAt.toDate()).fromNow() : 'just now'}</Typography>
+                            <Typography variant="body2" color="text.secondary">{comment.createdAt ? moment(comment.createdAt.toDate()).locale('en').fromNow() : 'just now'}</Typography>
                             {auth && auth.currentUser && comment.userId === auth.currentUser.uid && !isEditing &&
                             <CommentEditing onEditClicked={onEdit} onDeleteClicked={onDelete} />}
                         </Stack>

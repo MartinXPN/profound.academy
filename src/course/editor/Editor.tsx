@@ -48,7 +48,7 @@ function Editor({disableCodeSync, userId}: {disableCodeSync?: boolean, userId?: 
 
 
     useEffect(() => {
-        if( !auth.currentUserId || !auth.currentUser || !course || !exercise || disableCodeSync )
+        if( !auth.currentUserId || !auth.currentUser || !course || !exercise || disableCodeSync || !code )
             return;
 
         const timeOutId = setTimeout(() => {

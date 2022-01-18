@@ -40,7 +40,7 @@ const columns: Column[] = [
     { id: 'time', label: 'Time (s)', minWidth: 50, align: 'right', format: (value: number) => value ? value.toFixed(2) : '' },
     { id: 'memory', label: 'Memory (MB)', minWidth: 50, align: 'right', format: (value: number) => value ? value.toFixed(1): '' },
     { id: 'language', label: 'Language', minWidth: 50 },
-    { id: 'createdAt', label: 'Date', minWidth: 100, format: (value) => moment(value.toDate()).format('YYYY MMM Do, HH:mm:ss') },
+    { id: 'createdAt', label: 'Date', minWidth: 100, format: (value) => moment(value.toDate()).locale('en').format('YYYY MMM Do, HH:mm:ss') },
 ];
 
 

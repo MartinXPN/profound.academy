@@ -12,9 +12,11 @@ const StatusTypography = styled(Typography)({
 });
 
 
-function TestView({testCase, output, readOnly, status, memory, time, onSaveTest}: {
+function TestView({testCase, message, output, error, readOnly, status, memory, time, onSaveTest}: {
     testCase: TestCase,
+    message?: string,
     output?: string,
+    error?: string,
     readOnly: boolean,
     status?: string,
     memory?: number,
@@ -41,11 +43,13 @@ function TestView({testCase, output, readOnly, status, memory, time, onSaveTest}
     }, [testCase, input, target, onSaveTest]);
 
     return <>
-        {status && time &&
+        {!!status && !!time &&
         <StatusTypography style={{color: statusToColor(status)}}>
             {status} in {time.toFixed(2)} seconds, used {memory?.toFixed(1)}MB
         </StatusTypography>
         }
+
+        {message && <Typography whiteSpace="pre-wrap" marginBottom={4}>{message}</Typography>}
         <TextField multiline fullWidth
                    variant="outlined"
                    label="Input"
@@ -69,6 +73,14 @@ function TestView({testCase, output, readOnly, status, memory, time, onSaveTest}
                    variant="outlined"
                    label="Program output"
                    value={output}
+                   inputProps={{ readOnly: true }}/>
+        }
+        <br/><br/>
+        {error &&
+        <TextField multiline fullWidth
+                   variant="outlined"
+                   label="Program errors (stderr)"
+                   value={error}
                    inputProps={{ readOnly: true }}/>
         }
     </>

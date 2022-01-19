@@ -27,7 +27,9 @@ function Console({onSubmitClicked, onRunClicked, isProcessing, submissionResult}
 }) {
     const {exercise} = useContext(CurrentExerciseContext);
 
-    const outputs = submissionResult?.outputs ?? [];
+    const message = submissionResult?.message ?? undefined;
+    const outputs = submissionResult?.outputs ?? undefined;
+    const errors = submissionResult?.errors ?? undefined;
     const status = submissionResult?.status ?? undefined;
     const memory = submissionResult?.memory ?? undefined;
     const time = submissionResult?.time ?? undefined;
@@ -134,10 +136,11 @@ function Console({onSubmitClicked, onRunClicked, isProcessing, submissionResult}
         </Box>}
 
         <Box padding="10px">
-            {submissionResult && submissionResult.compileOutputs &&
+            {submissionResult && submissionResult.status === 'Compilation error' &&
             <>
+                <div>{submissionResult.compileOutputs}</div>
                 <StatusTypography style={{color: statusColors.failed}}>{submissionResult.status}</StatusTypography>
-                <Typography whiteSpace='pre-wrap'>{submissionResult.compileOutputs}</Typography>
+                {submissionResult.compileOutputs?.trim() && <Typography whiteSpace='pre-wrap'>{submissionResult.compileOutputs}</Typography>}
             </>}
 
             {!isProcessing && !submissionResult && selectedTest === null &&
@@ -146,7 +149,9 @@ function Console({onSubmitClicked, onRunClicked, isProcessing, submissionResult}
             {selectedTest !== null && selectedTest < tests.length &&
             <TestView
                 testCase={tests[selectedTest]}
-                output={outputs[selectedTest]}
+                message={Array.isArray(message) ? message[selectedTest] : message}
+                output={Array.isArray(outputs) ? outputs[selectedTest] : outputs}
+                error={Array.isArray(errors) ? errors[selectedTest] : errors}
                 readOnly={selectedTest < exercise.testCases.length}
                 status={Array.isArray(status) ? status[selectedTest] : status}
                 memory={Array.isArray(memory) ? memory[selectedTest] : memory}

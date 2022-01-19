@@ -17,6 +17,7 @@ export const statusToColor = (status: SubmissionStatus | string | null | undefin
     if (status === 'Solved')                return statusColors.solved;
     if (status === 'Wrong answer')          return statusColors.failed;
     if (status === 'Time limit exceeded')   return statusColors.failed;
+    if (status === 'Memory limit exceeded') return statusColors.failed;
     if (status === 'Runtime error')         return statusColors.failed;
     if (status === 'Compilation error')     return statusColors.failed;
     if (status === 'Unavailable')           return statusColors.unavailable;
@@ -42,6 +43,7 @@ export const statusToStyledBackground = {
     'Solved': getStyle(statusToColor('Solved')),
     'Wrong answer': getStyle(statusToColor('Wrong answer')),
     'Time limit exceeded': getStyle(statusToColor('Time limit exceeded')),
+    'Memory limit exceeded': getStyle(statusToColor('Memory limit exceeded')),
     'Runtime error': getStyle(statusToColor('Runtime error')),
     'Compilation error': getStyle(statusToColor('Compilation error')),
     'Checking': getStyle(statusToColor('Checking')),

@@ -6,6 +6,7 @@ export type SubmissionStatus = 'Solved' |                   // OK => 100% score
                                 'Wrong answer' |            // WA => partial score or 0
                                 'Time limit exceeded' |     // TLE => score 0
                                 'Memory limit exceeded' |   // MLE => score 0
+                                'Output limit exceeded' |   // OLE => too much printing
                                 'Runtime error' |           // RE => partial score or 0
                                 'Compilation error' |       // CE => score 0
                                 'Checking' |                // In progress...

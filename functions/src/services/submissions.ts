@@ -7,7 +7,7 @@ import * as moment from 'moment';
 import {db} from './db';
 import {Submission, SubmissionResult} from '../models/submissions';
 
-const AWS_LAMBDA_URL = 'https://l5nhpbb1bd.execute-api.us-east-1.amazonaws.com/Prod/check/';
+const AWS_LAMBDA_URL = 'https://5qsqutwixi.execute-api.us-east-1.amazonaws.com/Prod/check/';
 
 
 const updateBest = (

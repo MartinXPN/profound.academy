@@ -7,7 +7,7 @@ import * as moment from 'moment';
 import {db} from './db';
 import {Submission, SubmissionResult} from '../models/submissions';
 
-const AWS_LAMBDA_URL = 'https://5qsqutwixi.execute-api.us-east-1.amazonaws.com/Prod/check/';
+const LAMBDA_JUDGE_URL = 'https://judge.profound.academy/check';
 
 
 const updateBest = (
@@ -202,14 +202,15 @@ export const submit = async (submission: Submission): Promise<void> => {
         language: submission.language,
         memoryLimit: exercise?.memoryLimit ?? 512,
         timeLimit: exercise?.timeLimit ?? 2,
-        floatPrecision: exercise?.floatPrecision ?? 0.001,
+        outputLimit: exercise?.outputLimit ?? 1,
         aggregateResults: !submission.isTestRun,
         returnOutputs: submission.isTestRun,
-        returnCompileOutputs: true,
+        stopOnFirstFail: !submission.isTestRun,
         comparisonMode: exercise?.comparisonMode ?? 'token',
+        floatPrecision: exercise?.floatPrecision ?? 0.001,
     };
     functions.logger.info(`submitting data: ${JSON.stringify(data)}`);
-    const res = await needle('post', AWS_LAMBDA_URL, JSON.stringify(data), {open_timeout: 100});
+    const res = await needle('post', LAMBDA_JUDGE_URL, JSON.stringify(data), {open_timeout: 100});
     functions.logger.info(`res: ${JSON.stringify(res.body)}`);
 
     const submissionResult = {

@@ -39,6 +39,7 @@ export interface Exercise {
     testCases: TestCase[];
     memoryLimit?: number;
     timeLimit?: number;
+    outputLimit?: number;
     floatPrecision?: number;
     comparisonMode?: string;
 }

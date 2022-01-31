@@ -1,8 +1,9 @@
 import * as cors from 'cors';
 import * as functions from 'firebase-functions';
+import * as express from 'express';
 import {fetchNotionPage} from './services/notion';
 import {notifyOnComment} from './services/notifications';
-import {submit} from './services/submissions';
+import {processResult, submit} from './services/submissions';
 
 import {Submission} from './models/submissions';
 import {Comment} from './models/forum';
@@ -13,11 +14,10 @@ import {updateInfoQueue} from './services/users';
 
 const corss = cors({origin: true});
 
-export const helloWorld = functions.https
-    .onRequest((req, res) => {
-        functions.logger.info('Hello logs!');
-        res.send('Hello from Firebase!');
-    });
+export const helloWorld = functions.https.onRequest((req, res) => {
+    functions.logger.info('Hello logs!');
+    res.send('Hello from Firebase!');
+});
 
 export const getNotionPage = functions.https.onRequest(async (req, res) => {
     res.set('Cache-Control', 'public, max-age=300, s-maxage=600');
@@ -57,6 +57,14 @@ export const submitSolution = functions.firestore
         functions.logger.info(`process submission: ${JSON.stringify(submission)}`);
         await submit(submission);
     });
+
+const app = express();
+app.post('/:userId/:submissionId', async (req, res) => {
+    functions.logger.info(`processSubmissionResult!: ${JSON.stringify(req.body)}`);
+    await processResult(req.body, req.params.userId, req.params.submissionId);
+    res.send('Successfully updated contestant results');
+});
+export const processSubmissionResult = functions.https.onRequest(app);
 
 export const notifyComment = functions.firestore
     .document('forum/{commentId}')

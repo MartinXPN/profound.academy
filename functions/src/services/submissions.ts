@@ -1,13 +1,14 @@
 import {firestore} from 'firebase-admin';
 import * as admin from 'firebase-admin';
 import * as functions from 'firebase-functions';
-import * as needle from 'needle';
 import * as moment from 'moment';
-
+import * as https from 'https';
+import * as http from 'node:http';
 import {db} from './db';
 import {Submission, SubmissionResult} from '../models/submissions';
 
-const LAMBDA_JUDGE_URL = 'https://judge.profound.academy/check';
+const LAMBDA_JUDGE_URL='https://judge.profound.academy/check';
+const PROCESS_SUBMISSION_CALLBACK_URL='https://us-central1-profound-academy.cloudfunctions.net/processSubmissionResult';
 
 
 const updateBest = (
@@ -88,19 +89,24 @@ const updateUserMetric = (
 };
 
 
-export const processSubmissionResult = async (
-    submissionResult: SubmissionResult,
-    isTestRun: boolean,
-    userId: string
+export const processResult = async (
+    judgeResult: SubmissionResult,
+    userId: string,
+    submissionId: string,
 ): Promise<void> => {
-    const {code, ...submissionRes} = submissionResult;
-    if (!submissionResult)
+    functions.logger.info(`res for user ${userId}, submission ${submissionId}: ${JSON.stringify(judgeResult)}`);
+    const submission = (await db.submissionQueue(userId).doc(submissionId).get()).data();
+    const {code, ...submissionResult} = {...submission, ...judgeResult, id: submissionId, isBest: false};
+    functions.logger.info(`submissionResult: ${JSON.stringify(submissionResult)}`);
+
+
+    if (!judgeResult)
         throw Error('Submission result is null');
 
-    if (isTestRun) {
+    if (submissionResult.isTestRun) {
         // save the results to /runs/userId/private/<submissionId>
-        functions.logger.info(`Updating the run: ${submissionResult.id} with ${JSON.stringify(submissionRes)}`);
-        await db.run(userId, submissionResult.id).set(submissionRes);
+        functions.logger.info(`Updating the run: ${submissionResult.id} with ${JSON.stringify(submissionResult)}`);
+        await db.run(userId, submissionResult.id).set(submissionResult);
         return;
     }
     const [courseSnapshot, exerciseSnapshot, user] = await Promise.all([
@@ -118,10 +124,10 @@ export const processSubmissionResult = async (
     const status = typeof submissionResult.status === 'string' ? submissionResult.status :
         submissionResult.status.reduce((prev, cur) => cur === 'Solved' ? prev : cur, 'Solved');
     const level = Math.floor(exercise.order).toString();
-    submissionResult.userDisplayName = submissionRes.userDisplayName = user.displayName;
-    submissionResult.userImageUrl = submissionRes.userImageUrl = user.photoURL;
-    submissionResult.courseTitle = submissionRes.courseTitle = course.title;
-    submissionResult.exerciseTitle = submissionRes.exerciseTitle = exercise.title;
+    submissionResult.userDisplayName = user.displayName;
+    submissionResult.userImageUrl = user.photoURL;
+    submissionResult.courseTitle = course.title;
+    submissionResult.exerciseTitle = exercise.title;
 
 
     functions.logger.info(`Updating the submission: ${submissionResult.id} with ${JSON.stringify(submissionResult)}`);
@@ -143,7 +149,7 @@ export const processSubmissionResult = async (
             alreadySolved = true;
 
         console.log(`Already solved (${submissionResult.id}): ${alreadySolved}`);
-        updateBest(transaction, submissionRes, currentBest);
+        updateBest(transaction, submissionResult, currentBest);
 
         // save the sensitive information to /submissions/${submissionId}/private/${userId}
         const sensitiveData = {code: code};
@@ -151,7 +157,7 @@ export const processSubmissionResult = async (
         functions.logger.info(`Saved the submission: ${JSON.stringify(code)}`);
 
         if (!alreadySolved)
-            updateActivity(transaction, submissionRes);
+            updateActivity(transaction, submissionResult);
     });
 
     // another transaction to update user metrics
@@ -188,7 +194,7 @@ export const processSubmissionResult = async (
 };
 
 
-export const submit = async (submission: Submission): Promise<void> => {
+export const submit = async (submission: Submission): Promise<http.ClientRequest> => {
     const problem = submission.exercise.id;
     if (!submission.isTestRun && submission.testCases)
         throw Error('Final submissions cannot have test cases');
@@ -208,17 +214,25 @@ export const submit = async (submission: Submission): Promise<void> => {
         stopOnFirstFail: !submission.isTestRun,
         comparisonMode: exercise?.comparisonMode ?? 'token',
         floatPrecision: exercise?.floatPrecision ?? 0.001,
+        callbackUrl: `${PROCESS_SUBMISSION_CALLBACK_URL}/${submission.userId}/${submission.id}`,
     };
     functions.logger.info(`submitting data: ${JSON.stringify(data)}`);
-    const res = await needle('post', LAMBDA_JUDGE_URL, JSON.stringify(data), {open_timeout: 100});
-    functions.logger.info(`res: ${JSON.stringify(res.body)}`);
 
-    const submissionResult = {
-        ...res.body,
-        ...submission,
-        isBest: false,
-    } as SubmissionResult;
-    functions.logger.info(`submissionResult: ${JSON.stringify(submissionResult)}`);
+    return new Promise((resolve) => {
+        const dataString = JSON.stringify(data);
+        const options = {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Content-Length': dataString.length,
+            },
+            timeout: 1000, // in ms
+        };
 
-    await processSubmissionResult(submissionResult, submission.isTestRun, submission.userId);
+        const req = https.request(LAMBDA_JUDGE_URL, options);
+        req.write(dataString);
+        functions.logger.info(`req: ${JSON.stringify(req)}`);
+        req.end(() => resolve(req));
+        functions.logger.info('done:');
+    });
 };

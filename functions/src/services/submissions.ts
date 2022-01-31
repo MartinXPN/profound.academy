@@ -1,9 +1,9 @@
 import {firestore} from 'firebase-admin';
 import * as admin from 'firebase-admin';
 import * as functions from 'firebase-functions';
-import * as needle from 'needle';
 import * as moment from 'moment';
-
+import * as https from 'https';
+import * as http from 'node:http';
 import {db} from './db';
 import {Submission, SubmissionResult} from '../models/submissions';
 
@@ -194,7 +194,7 @@ export const processResult = async (
 };
 
 
-export const submit = async (submission: Submission): Promise<void> => {
+export const submit = async (submission: Submission): Promise<http.ClientRequest> => {
     const problem = submission.exercise.id;
     if (!submission.isTestRun && submission.testCases)
         throw Error('Final submissions cannot have test cases');
@@ -217,6 +217,22 @@ export const submit = async (submission: Submission): Promise<void> => {
         callbackUrl: `${PROCESS_SUBMISSION_CALLBACK_URL}/${submission.userId}/${submission.id}`,
     };
     functions.logger.info(`submitting data: ${JSON.stringify(data)}`);
-    const res = await needle('post', LAMBDA_JUDGE_URL, JSON.stringify(data), {open_timeout: 100});
-    functions.logger.info(`res: ${JSON.stringify(res.body)}`);
+
+    return new Promise((resolve) => {
+        const dataString = JSON.stringify(data);
+        const options = {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Content-Length': dataString.length,
+            },
+            timeout: 1000, // in ms
+        };
+
+        const req = https.request(LAMBDA_JUDGE_URL, options);
+        req.write(dataString);
+        functions.logger.info(`req: ${JSON.stringify(req)}`);
+        req.end(() => resolve(req));
+        functions.logger.info('done:');
+    });
 };

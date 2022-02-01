@@ -5,6 +5,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import AddIcon from '@mui/icons-material/Add';
 import Box from "@mui/material/Box";
 import * as locales from '@mui/material/locale';
+import { notionPageToId } from "../../util";
 
 
 const validateText = (value: string, minLength: number = 3, maxLength: number = 128) => {
@@ -12,9 +13,6 @@ const validateText = (value: string, minLength: number = 3, maxLength: number = 
     if( value.length < minLength )      return `The length should be at least ${minLength}`;
     if( value.length > maxLength )      return `The length should be at most ${maxLength}`;
     return undefined;
-};
-const notionPageToId = (page: string) => {
-    return page.split('-').at(-1) ?? '';
 };
 
 export interface Field {
@@ -24,7 +22,7 @@ export interface Field {
     notionId: string;
 }
 
-function LocalizedField({field, setField, allowedLocales}: {
+export function LocalizedField({field, setField, allowedLocales}: {
     field: Field,
     setField: (field: Field) => void,
     allowedLocales: string[],
@@ -61,7 +59,7 @@ function LocalizedField({field, setField, allowedLocales}: {
     }, [field]);
 
     return <>
-        <Stack direction="row" alignItems="center" alignContent="center">
+        <Stack direction="row" alignItems="top" alignContent="top">
             <Autocomplete
                 multiple
                 limitTags={1}

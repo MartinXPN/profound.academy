@@ -57,4 +57,8 @@ export const tomorrow = (d: Date) => {
     const res = new Date(d);
     res.setDate(res.getDate() + 1);
     return res;
-}
+};
+
+export const notionPageToId = (page: string) => {
+    return page.split('-').at(-1) ?? '';
+};

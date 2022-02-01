@@ -49,8 +49,8 @@ export interface Course {
     img: string;
     revealsAt: firebase.firestore.Timestamp;
     freezeAt: firebase.firestore.Timestamp;
-    visibility: string;
-    rankingVisibility: string;
+    visibility: 'public' | 'unlisted' | 'private';
+    rankingVisibility: 'public' | 'private';
     allowViewingSolutions: boolean;
     title: string;
     author: string;

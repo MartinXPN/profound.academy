@@ -80,7 +80,7 @@ function CourseEditor({course}: {course?: Course | null}) {
         mode: 'onChange',
         resolver: zodResolver(schema)
     });
-    const introId = watch('introduction');
+    const introId = watch('introduction', course?.introduction);
     const onSubmit = async (data: Schema) => {
         console.log('submit!', data)
         await updateCourse(

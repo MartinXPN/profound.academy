@@ -1,4 +1,4 @@
-import React, {memo, useContext, useState} from "react";
+import React, {memo, useCallback, useContext, useEffect, useMemo, useState} from "react";
 import {CourseContext, CurrentExerciseContext} from "../Course";
 import {Course, Exercise, EXERCISE_TYPES} from '../../models/courses';
 import {Alert, Autocomplete, Button, Collapse, IconButton, List, ListItem, Snackbar, Stack, TextField, Typography} from "@mui/material";
@@ -66,17 +66,28 @@ function ExerciseEditor({cancelEditing, exerciseTypeChanged}: {
     const [openSnackbar, setOpenSnackbar] = useState(false);
     const handleCloseSnackbar = () => setOpenSnackbar(false);
 
+    const getDefaultFieldValues = useCallback(() => {
+        return {
+            localizedFields: getExerciseLocalizedFields(exercise, 'enUS'),
+            order: exercise?.order,
+            exerciseType: exercise?.exerciseType ?? 'testCases',
+            unlockContent: exercise?.unlockContent ?? [],
+            allowedLanguages: exercise?.allowedLanguages ?? [],
+            memoryLimit: exercise?.memoryLimit ?? 512,
+            timeLimit: exercise?.timeLimit ?? 1,
+        }
+    }, [exercise]);
+
     const formMethods = useForm<Schema>({
         mode: 'onChange',
         resolver: zodResolver(schema),
-        defaultValues: {
-            localizedFields: getExerciseLocalizedFields(exercise, 'enUS'),
-        }
+        // @ts-ignore
+        defaultValues: getDefaultFieldValues(),
     });
-    const {control, watch, handleSubmit, formState: {errors, isValid}, setValue} = formMethods;
+    const {control, watch, handleSubmit, formState: {errors, isValid}, reset, setValue} = formMethods;
     const { fields, append, remove } = useFieldArray({
-        control: formMethods.control,   // control props comes from useForm (optional: if you are using FormContext)
-        name: 'localizedFields',        // unique name for your Field Array
+        control,                    // control props comes from useForm (optional: if you are using FormContext)
+        name: 'localizedFields',    // unique name for your Field Array
     });
     console.log('errors:', errors);
     // @ts-ignore
@@ -101,6 +112,9 @@ function ExerciseEditor({cancelEditing, exerciseTypeChanged}: {
     }
 
 
+    // @ts-ignore
+    useEffect(() => reset(getDefaultFieldValues()), [exercise, reset]);
+    const onCancel = () => cancelEditing();
     const onSubmit = async (data: Schema) => {
         if( !course || !exercise )
             return;
@@ -118,13 +132,12 @@ function ExerciseEditor({cancelEditing, exerciseTypeChanged}: {
         );
         setOpenSnackbar(true);
     };
-    const onCancel = () => cancelEditing();
 
     if( !exercise )
         return <></>
     return <>
         <FormProvider {...formMethods}>
-        <form onSubmit={handleSubmit(onSubmit)} key={exercise.id}>
+        <form onSubmit={handleSubmit(onSubmit)}>
         <Box m={1}>
             <Stack direction="row" spacing={1} marginTop={4} justifyContent="center" alignItems="center" alignContent="center">
                 <TextField label="ID" variant="outlined" value={exercise.id} size="small" sx={{flex: 1, marginRight: 3}} inputProps={{readOnly: true}}/>
@@ -146,7 +159,7 @@ function ExerciseEditor({cancelEditing, exerciseTypeChanged}: {
             </List>
 
             <br/><br/>
-            <Controller name="order" control={control} defaultValue={exercise.order} render={({ field: { ref, onChange, ...field } }) => (
+            <Controller name="order" control={control} render={({ field: { ref, onChange, ...field } }) => (
                 <TextField required variant="outlined" placeholder="1.01" type="number" fullWidth
                            label="Order (0 = invisible) (level = number before decimal dot, the rest is the order within level)"
                            onChange={e => e.target.value ? onChange(Number(e.target.value)) : onChange(e.target.value)}
@@ -156,8 +169,7 @@ function ExerciseEditor({cancelEditing, exerciseTypeChanged}: {
             <br/><br/>
 
             <Stack direction="row" spacing={1}>
-                { /* @ts-ignore */}
-                <Controller name="exerciseType" control={control} defaultValue={exercise.exerciseType ?? 'testCases'} render={({field}) => (
+                <Controller name="exerciseType" control={control} render={({field}) => (
                     <Autocomplete sx={{ width: 200 }} autoHighlight autoSelect disableClearable ref={field.ref}
                                   value={EXERCISE_TYPES[field.value].displayName}
                                   options={Object.keys(EXERCISE_TYPES).map(key => EXERCISE_TYPES[key].displayName)}
@@ -165,7 +177,7 @@ function ExerciseEditor({cancelEditing, exerciseTypeChanged}: {
                                   renderInput={(params) => <TextField {...params} label="Exercise type"/>}/>
                 )} />
 
-                <Controller name="unlockContent" control={control} defaultValue={exercise.unlockContent ?? []} render={({field}) => <>
+                <Controller name="unlockContent" control={control} render={({field}) => <>
                     {/* @ts-ignore */}
                     <AutocompleteSearch<Course>
                         label="Unlock Content" placeholder="Courses..."
@@ -181,8 +193,7 @@ function ExerciseEditor({cancelEditing, exerciseTypeChanged}: {
 
             {(exerciseType === 'testCases' || exerciseType === 'code') && <>
                 <Stack marginTop={4} spacing={4} marginBottom={10} direction="column">
-                    { /* @ts-ignore */ }
-                    <Controller name="allowedLanguages" control={control} defaultValue={exercise.allowedLanguages ?? []} render={({field}) => (
+                    <Controller name="allowedLanguages" control={control} render={({field}) => (
                         <Autocomplete
                             sx={{ width: 200 }} ref={field.ref} multiple autoHighlight autoSelect disableCloseOnSelect disableClearable
                             value={field.value.map(l => LANGUAGES[l].displayName)}
@@ -196,7 +207,7 @@ function ExerciseEditor({cancelEditing, exerciseTypeChanged}: {
 
                     <Typography variant="h6" marginBottom={2}>Execution Parameters (per test-case)</Typography>
                     <Stack direction="row" spacing={1}>
-                        <Controller name="memoryLimit" control={control} defaultValue={exercise.memoryLimit ?? 512} render={({ field: { ref, onChange, ...field } }) => (
+                        <Controller name="memoryLimit" control={control} render={({ field: { ref, onChange, ...field } }) => (
                             <TextField
                                 required variant="outlined" placeholder="512" type="number" label="Memory limit (MB)"
                                 onChange={e => e.target.value ? onChange(Number(e.target.value)) : onChange(e.target.value)}
@@ -204,7 +215,7 @@ function ExerciseEditor({cancelEditing, exerciseTypeChanged}: {
                                 inputProps={{ inputMode: 'numeric', pattern: '[0-9]*' }} inputRef={ref} {...field} sx={{flex: 1}} />
                         )}/>
 
-                        <Controller name="timeLimit" control={control} defaultValue={exercise.timeLimit ?? 1} render={({ field: { ref, onChange, ...field } }) => (
+                        <Controller name="timeLimit" control={control} render={({ field: { ref, onChange, ...field } }) => (
                             <TextField
                                 required variant="outlined" placeholder="2" type="number" label="Time limit (s)"
                                 onChange={e => e.target.value ? onChange(Number(e.target.value)) : onChange(e.target.value)}

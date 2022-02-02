@@ -1,5 +1,5 @@
 import React, {memo} from "react";
-import {Autocomplete, Stack, TextField} from "@mui/material";
+import {Autocomplete, Stack, TextField, Typography} from "@mui/material";
 import Box from "@mui/material/Box";
 import { notionPageToId } from "../../util";
 
@@ -21,10 +21,17 @@ export function LocalizedField({field, allowedLocales, namePrefix}: {
     namePrefix?: string,
 }) {
     const {control, formState: {errors}} = useFormContext();
+    const getError = (path: string) => {
+        if( path.includes('.') ) {
+            const [rootName, index, fieldName] = path.split('.');
+            return errors?.[rootName]?.[Number(index)]?.[fieldName];
+        }
+        return errors[path];
+    }
 
     return <>
         <Stack direction="row" alignItems="top" alignContent="top">
-            <Controller name={`${namePrefix}locale`} control={control} defaultValue={field.locale} render={({ field }) => (
+            <Controller name={`${namePrefix}locale`} control={control} defaultValue={field.locale} render={({ field }) => <>
                 <Autocomplete
                     multiple
                     limitTags={1}
@@ -56,16 +63,17 @@ export function LocalizedField({field, allowedLocales, namePrefix}: {
                     renderInput={(params) => <TextField{...params} label="Language"/>}
                     onChange={(e, value: string[]) => value.length && field.onChange(value.at(-1)!)}
                 />
-            )} />
+                {getError(`${namePrefix}locale`) && <Typography variant="body2" color="error">getError(`${namePrefix}locale`).message</Typography>}
+            </>} />
 
             <Controller name={`${namePrefix}title`} control={control} defaultValue={field.title} render={({ field: { ref, ...field } }) => (
                 <TextField required label="Title" variant="outlined" size="small" placeholder="Exercise Title"
-                           error={Boolean(errors[`${namePrefix}title`])} helperText={errors[`${namePrefix}title`]?.message}
+                           error={Boolean(getError(`${namePrefix}title`))} helperText={getError(`${namePrefix}title`)?.message}
                            inputRef={ref} {...field} sx={{flex: 1}} />
             )}/>
             <Controller name={`${namePrefix}notionId`} control={control} defaultValue={field.notionId} render={({ field: { ref, onChange, ...field } }) => (
                 <TextField required label="Notion page" variant="outlined" size="small" placeholder="Exercise Notion ID"
-                           error={Boolean(errors[`${namePrefix}notionId`])} helperText={errors[`${namePrefix}notionId`]?.message}
+                           error={Boolean(getError(`${namePrefix}notionId`))} helperText={getError(`${namePrefix}notionId`)?.message}
                            onChange={(e) => onChange(notionPageToId(e.target.value))}
                            inputRef={ref} {...field} sx={{flex: 1}} />
             )}/>

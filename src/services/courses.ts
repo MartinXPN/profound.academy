@@ -20,6 +20,7 @@ export const getAllCourses = async () => {
 
 export const doesExist = async (courseId: string) => {
     const snapshot = await db.course(courseId).get();
+    console.log(`${courseId} exists: ${snapshot.exists}`);
     return snapshot.exists;
 }
 
@@ -92,9 +93,10 @@ export const startCourse = async (userId: string, courseId: string) => {
 export const updateCourse = async (
     id: string, img: string,
     revealsAt: Date, freezesAt: Date,
-    visibility: 'public' | 'private', rankingVisibility: 'public' | 'private', allowViewingSolutions: boolean,
+    visibility: 'public' | 'unlisted' | 'private', rankingVisibility: 'public' | 'private', allowViewingSolutions: boolean,
     title: string, author: string, instructors: string[], details: string, introduction: string) => {
     console.log('update course:', id, img, revealsAt, freezesAt, visibility, rankingVisibility, allowViewingSolutions);
+    const exists = await doesExist(id);
     return db.course(id).set({
         img: img,
         revealsAt: firebase.firestore.Timestamp.fromDate(revealsAt),
@@ -107,6 +109,7 @@ export const updateCourse = async (
         instructors: instructors,
         details: details,
         introduction: introduction,
+        ...(!exists && {levelExercises: {'1': 0}}),
     }, {merge: true});
 }
 

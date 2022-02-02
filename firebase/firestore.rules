@@ -69,10 +69,7 @@ service cloud.firestore {
         }
       }
     }
-    match /{path=**}/exerciseScore/{level} {
-      allow read: if isCurrentUser(request, resource.data.userId) || isCourseInstructor(request, resource.data.courseId) || get(/databases/$(database)/documents/courses/$(resource.data.courseId)).data.rankingVisibility == 'public';
-    }
-    match /{path=**}/exerciseUpsolveScore/{level} {
+    match /{path=**}/{metric}/{level} {
       allow read: if isCurrentUser(request, resource.data.userId) || isCourseInstructor(request, resource.data.courseId) || get(/databases/$(database)/documents/courses/$(resource.data.courseId)).data.rankingVisibility == 'public';
     }
 

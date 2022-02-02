@@ -1,4 +1,4 @@
-import React, {memo, useCallback, useContext, useState} from "react";
+import React, {memo, useCallback, useContext, useEffect, useState} from "react";
 import {Course} from "../models/courses";
 import {AuthContext} from "../App";
 import {Button, FormControlLabel, Stack, TextField, Typography, Switch, Grid, Alert, Snackbar, MenuItem} from "@mui/material";
@@ -67,11 +67,30 @@ function CourseEditor({course}: {course?: Course | null}) {
     const auth = useContext(AuthContext);
     const [openSnackbar, setOpenSnackbar] = useState(false);
 
-    const {control, watch, handleSubmit, formState: { errors, isValid }, setValue, setError} = useForm<Schema>({
+    const getDefaultFieldValues = useCallback(() => {
+        return {
+            id: course?.id,
+            img: course?.img,
+            revealsAt: course?.revealsAt ? course.revealsAt.toDate() : new Date(),
+            freezeAt: course?.freezeAt ? course.freezeAt.toDate() : new Date(),
+            visibility: course?.visibility ?? 'private',
+            rankingVisibility: course?.rankingVisibility ?? 'private',
+            allowViewingSolutions: course?.allowViewingSolutions ?? false,
+            title: course?.title,
+            author: course?.author,
+            instructors: course?.instructors,
+            details: course?.details,
+            introduction: course?.introduction,
+        }
+    }, [course]);
+
+    const {control, watch, handleSubmit, formState: { errors, isValid }, setValue, reset, setError} = useForm<Schema>({
         mode: 'onChange',
-        resolver: zodResolver(schema)
+        resolver: zodResolver(schema),
+        defaultValues: getDefaultFieldValues(),
     });
     const introId = watch('introduction', course?.introduction);
+    useEffect(() => reset(getDefaultFieldValues()), [course, getDefaultFieldValues, reset]);
 
     const onSubmit = async (data: Schema) => {
         if( course && course.id && data.id !== course.id )
@@ -118,7 +137,7 @@ function CourseEditor({course}: {course?: Course | null}) {
         </>
 
     return <>
-        <form onSubmit={handleSubmit(onSubmit)} key={course?.id ?? 'new-course'}>
+        <form onSubmit={handleSubmit(onSubmit)}>
         <Box maxWidth="48em" marginLeft="auto" marginRight="auto" marginTop="2em" marginBottom="2em">
         <Stack direction="column" spacing={3}>
             <Stack direction="row" spacing={1} justifyContent="center" alignItems="center" alignContent="center">
@@ -128,13 +147,13 @@ function CourseEditor({course}: {course?: Course | null}) {
             </Stack>
 
             <Stack direction="row" justifyContent="top" alignItems="top" alignContent="top" spacing={2}>
-                <Controller name="id" control={control} defaultValue={course?.id} render={({ field: { ref, ...field } }) => (
+                <Controller name="id" control={control} render={({ field: { ref, ...field } }) => (
                     <TextField required label="ID" variant="outlined" placeholder="ID of the course"
                                error={Boolean(errors.id)} helperText={errors.id?.message}
                                inputRef={ref} {...field} inputProps={{ readOnly: Boolean(course) }} sx={{flex: 1}}  />
                 )} />
 
-                <Controller name="visibility" control={control} defaultValue={course?.visibility ?? 'private'} render={({ field: { ref, ...field } }) => (
+                <Controller name="visibility" control={control} render={({ field: { ref, ...field } }) => (
                     <TextField select label="Visibility" variant="outlined" inputRef={ref} {...field}>
                         <MenuItem value="public">Public</MenuItem>
                         <MenuItem value="unlisted">Unlisted</MenuItem>
@@ -144,20 +163,20 @@ function CourseEditor({course}: {course?: Course | null}) {
             </Stack>
 
             <Stack direction="row" spacing={2}>
-                <Controller name="title" control={control} defaultValue={course?.title} render={({ field: { ref, ...field } }) => (
+                <Controller name="title" control={control} render={({ field: { ref, ...field } }) => (
                     <TextField required label="Title" variant="outlined" placeholder="Course Title"
                                error={Boolean(errors.title)} helperText={errors.title?.message}
                                inputRef={ref} {...field} sx={{flex: 1}} />
                 )}/>
 
-                <Controller name="details" control={control} defaultValue={course?.details} render={({ field: { ref, ...field } }) => (
+                <Controller name="details" control={control} render={({ field: { ref, ...field } }) => (
                     <TextField required multiline label="Description" variant="outlined" placeholder="Details"
                                error={Boolean(errors.details)} helperText={errors.details?.message}
                                inputRef={ref} {...field} sx={{flex: 1}} />
                 )}/>
             </Stack>
 
-            <Controller name="img" control={control} defaultValue={course?.img} render={({field}) => <>
+            <Controller name="img" control={control} render={({field}) => <>
                 <Box width={300} height={180}>
                     <FileUploader
                         handleChange={handleImageChange}
@@ -180,13 +199,13 @@ function CourseEditor({course}: {course?: Course | null}) {
             </>}/>
 
             <Stack direction="row" spacing={2}>
-                <Controller name="author" control={control} defaultValue={course?.author} render={({ field: { ref, ...field } }) => (
+                <Controller name="author" control={control} render={({ field: { ref, ...field } }) => (
                     <TextField required label="Authors" variant="outlined" placeholder="Displayed name of the creator"
                                error={Boolean(errors.author)} helperText={errors.author?.message}
                                inputRef={ref} {...field} sx={{flex: 1}} />
                 )}/>
 
-                <Controller name="instructors" control={control} defaultValue={course?.instructors} render={({field}) => <>
+                <Controller name="instructors" control={control} render={({field}) => <>
                     { /* @ts-ignore */}
                     <AutocompleteSearch<User>
                         label="Instructors" placeholder="Instructor users..."
@@ -203,19 +222,19 @@ function CourseEditor({course}: {course?: Course | null}) {
 
             <Stack direction="row" spacing={2}>
             <LocalizationProvider dateAdapter={AdapterMoment}>
-                <Controller name="revealsAt" control={control} defaultValue={course?.revealsAt ? course.revealsAt.toDate() : new Date()} render={({ field }) => (
+                <Controller name="revealsAt" control={control} render={({ field }) => (
                     <DateTimePicker label="Course reveals for students at" value={field.value} inputRef={field.ref}
                                     renderInput={params => <TextField {...params} />}
                                     onChange={(newDate: Moment | null) => newDate && setValue('revealsAt', newDate.toDate(), {shouldTouch: true})} />
                 )}/>
-                <Controller name="freezeAt" control={control} defaultValue={course?.freezeAt ? course.freezeAt.toDate() : new Date()} render={({ field }) => (
+                <Controller name="freezeAt" control={control} render={({ field }) => (
                     <DateTimePicker label="Rankings freeze at" value={field.value} inputRef={field.ref}
                                     renderInput={params => <TextField {...params} />}
                                     onChange={(newDate: Moment | null) => newDate && setValue('freezeAt', newDate.toDate(), {shouldTouch: true})} />
                 )}/>
 
                 <Typography sx={{flex: 1}}/>
-                <Controller name="rankingVisibility" control={control} defaultValue={course?.rankingVisibility ?? 'private'} render={({ field }) => (
+                <Controller name="rankingVisibility" control={control} render={({ field }) => (
                     <FormControlLabel label="Is ranking visible" labelPlacement="start" control={
                         <Switch checked={field.value === 'public'} inputRef={field.ref}
                                 onChange={(event) => setValue('rankingVisibility', event.target.checked ? 'public' : 'private', {shouldTouch: true})}/>
@@ -225,14 +244,14 @@ function CourseEditor({course}: {course?: Course | null}) {
             </Stack>
 
             <Stack direction="row" spacing={2}>
-                <Controller name="introduction" control={control} defaultValue={course?.introduction} render={({ field: { ref, onChange, ...field } }) => (
+                <Controller name="introduction" control={control} render={({ field: { ref, onChange, ...field } }) => (
                     <TextField required label="Introduction Notion Page" variant="outlined" placeholder="Notion page Page"
                                error={Boolean(errors.introduction)} helperText={errors.introduction?.message}
                                onChange={e => onChange(notionPageToId(e.target.value))}
                                inputRef={ref} {...field} sx={{flex: 1}} />
                 )}/>
 
-                <Controller name="allowViewingSolutions" control={control} defaultValue={course?.allowViewingSolutions ?? false} render={({ field: { ref, ...field } }) => (
+                <Controller name="allowViewingSolutions" control={control} render={({ field: { ref, ...field } }) => (
                     <FormControlLabel label="Allow viewing solutions" labelPlacement="start" control={
                         <Switch inputRef={ref} {...field} />
                     } />

@@ -1,4 +1,4 @@
-import React, {memo, useCallback, useContext, useEffect, useMemo, useState} from "react";
+import React, {memo, useCallback, useContext, useEffect, useState} from "react";
 import {CourseContext, CurrentExerciseContext} from "../Course";
 import {Course, Exercise, EXERCISE_TYPES} from '../../models/courses';
 import {Alert, Autocomplete, Button, Collapse, IconButton, List, ListItem, Snackbar, Stack, TextField, Typography} from "@mui/material";
@@ -114,7 +114,7 @@ function ExerciseEditor({cancelEditing, exerciseTypeChanged}: {
 
 
     // @ts-ignore
-    useEffect(() => reset(getDefaultFieldValues()), [exercise, reset]);
+    useEffect(() => reset(getDefaultFieldValues()), [exercise, getDefaultFieldValues, reset]);
     const onCancel = () => cancelEditing();
     const onSubmit = async (data: Schema) => {
         if( !course || !exercise )

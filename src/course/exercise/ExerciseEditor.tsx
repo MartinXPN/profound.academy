@@ -85,10 +85,7 @@ function ExerciseEditor({cancelEditing, exerciseTypeChanged}: {
         defaultValues: getDefaultFieldValues(),
     });
     const {control, watch, handleSubmit, formState: {errors, isValid}, reset, setValue} = formMethods;
-    const { fields, append, remove } = useFieldArray({
-        control,                    // control props comes from useForm (optional: if you are using FormContext)
-        name: 'localizedFields',    // unique name for your Field Array
-    });
+    const { fields, append, remove } = useFieldArray({control, name: 'localizedFields', shouldUnregister: true});
     console.log('errors:', errors);
     console.log('fields:', fields);
     // @ts-ignore
@@ -109,7 +106,10 @@ function ExerciseEditor({cancelEditing, exerciseTypeChanged}: {
     const addLanguage = (locale?: string) => {
         if( !locale )
             locale = getAllowedLocales(-1)[0];
+        // For some weird reason, append duplicates the values if we do not remove the items explicitly once again
+        remove(fields.length);
         append({locale: locale, title: '', notionId: ''});
+        remove(fields.length + 1);
     }
 
 

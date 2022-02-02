@@ -1,5 +1,5 @@
 import React, {memo} from "react";
-import {Autocomplete, Stack, TextField, Typography} from "@mui/material";
+import {Autocomplete, Stack, TextField} from "@mui/material";
 import Box from "@mui/material/Box";
 import { notionPageToId } from "../../util";
 
@@ -36,6 +36,7 @@ export function LocalizedField({field, allowedLocales, namePrefix}: {
                     multiple
                     limitTags={1}
                     sx={{ width: 150 }}
+                    ref={field.ref}
                     size="small"
                     options={allowedLocales}
                     getOptionLabel= {option => `${option.substring(0, 2)}-${option.substring(2, 4)}`}
@@ -60,10 +61,13 @@ export function LocalizedField({field, allowedLocales, namePrefix}: {
                             {option.substring(0, 2)}-{option.substring(2, 4)}
                         </Box>
                     ))}
-                    renderInput={(params) => <TextField{...params} label="Language"/>}
+                    renderInput={(params) => (
+                        <TextField{...params} label="Language"
+                                  error={Boolean(getError(`${namePrefix}locale`))}
+                                  helperText={getError(`${namePrefix}locale`)?.message} />
+                    )}
                     onChange={(e, value: string[]) => value.length && field.onChange(value.at(-1)!)}
                 />
-                {getError(`${namePrefix}locale`) && <Typography variant="body2" color="error">getError(`${namePrefix}locale`).message</Typography>}
             </>} />
 
             <Controller name={`${namePrefix}title`} control={control} defaultValue={field.title} render={({ field: { ref, ...field } }) => (

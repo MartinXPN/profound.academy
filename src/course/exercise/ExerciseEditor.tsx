@@ -73,7 +73,7 @@ function ExerciseEditor({cancelEditing, exerciseTypeChanged}: {
             localizedFields: getExerciseLocalizedFields(exercise, 'enUS'),
         }
     });
-    const {control, watch, handleSubmit, formState: {errors}, setValue} = formMethods;
+    const {control, watch, handleSubmit, formState: {errors, isValid}, setValue} = formMethods;
     const { fields, append, remove } = useFieldArray({
         control: formMethods.control,   // control props comes from useForm (optional: if you are using FormContext)
         name: 'localizedFields',        // unique name for your Field Array
@@ -106,16 +106,16 @@ function ExerciseEditor({cancelEditing, exerciseTypeChanged}: {
             return;
         console.log('submit!', data)
 
-        // await updateExercise(
-        //     course.id, exercise.id,
-        //     localizedFields.reduce((map, field) => {map[field.locale] = field.title; return map;}, {} as {[key: string]: string}),
-        //     localizedFields.reduce((map, field) => {map[field.locale] = field.notionId; return map;}, {} as {[key: string]: string}),
-        //     order,
-        //     exerciseType,
-        //     unlockContent,
-        //     allowedLanguages,
-        //     memoryLimit.value, timeLimit.value,
-        // );
+        await updateExercise(
+            course.id, exercise.id,
+            data.localizedFields.reduce((map, field) => {map[field.locale] = field.title; return map;}, {} as {[key: string]: string}),
+            data.localizedFields.reduce((map, field) => {map[field.locale] = field.notionId; return map;}, {} as {[key: string]: string}),
+            data.order,
+            data.exerciseType,
+            data.unlockContent,
+            data.allowedLanguages,
+            data.memoryLimit, data.timeLimit,
+        );
         setOpenSnackbar(true);
     };
     const onCancel = () => cancelEditing();
@@ -128,7 +128,7 @@ function ExerciseEditor({cancelEditing, exerciseTypeChanged}: {
         <Box m={1}>
             <Stack direction="row" spacing={1} marginTop={4} justifyContent="center" alignItems="center" alignContent="center">
                 <TextField label="ID" variant="outlined" value={exercise.id} size="small" sx={{flex: 1, marginRight: 3}} inputProps={{readOnly: true}}/>
-                <Button type="submit" size="large" variant="outlined" disabled={false}>Save</Button>
+                <Button type="submit" size="large" variant="outlined" disabled={!isValid}>Save</Button>
                 <Button onClick={onCancel} size="large" variant="outlined">Cancel</Button>
             </Stack>
 

@@ -15,8 +15,6 @@ import {TransitionGroup} from "react-transition-group";
 import CloseIcon from "@mui/icons-material/Close";
 import AddIcon from "@mui/icons-material/Add";
 import * as locales from "@mui/material/locale";
-import {User} from "../../models/users";
-import {getUsers, searchUser} from "../../services/users";
 
 
 // @ts-ignore
@@ -28,7 +26,7 @@ const schema = object({
     order: number().nonnegative(),
     exerciseType: zodEnum(EXERCISE_TYPE_NAMES),
     unlockContent: array(string().min(20).max(35)),
-    allowedLanguages: zodEnum(LANGUAGE_NAMES),
+    allowedLanguages: array(zodEnum(LANGUAGE_NAMES)).nonempty(),
     memoryLimit: number().min(10).max(1000),
     timeLimit: number().min(0.001).max(30),
 });
@@ -73,18 +71,22 @@ function ExerciseEditor({cancelEditing, exerciseTypeChanged}: {
         resolver: zodResolver(schema),
         defaultValues: {
             localizedFields: getExerciseLocalizedFields(exercise, 'enUS'),
-            exerciseType: 'testCases',
         }
     });
     const {control, watch, handleSubmit, formState: {errors}, setValue} = formMethods;
     const { fields, append, remove } = useFieldArray({
         control: formMethods.control,   // control props comes from useForm (optional: if you are using FormContext)
-        name: "localizedFields",        // unique name for your Field Array
+        name: 'localizedFields',        // unique name for your Field Array
     });
+    console.log('errors:', errors);
     // @ts-ignore
     const exerciseType: keyof typeof EXERCISE_TYPES = watch('exerciseType', exercise?.exerciseType ?? 'testCases');
-    console.log(exerciseType);
-
+    const onExerciseTypeChanged = (newType: keyof typeof EXERCISE_TYPES) => {
+        setValue('exerciseType', newType as string, {shouldTouch: true});
+        exerciseTypeChanged(newType);
+    }
+    const nameToExerciseType = (name: string) => Object.keys(EXERCISE_TYPES).find(key => EXERCISE_TYPES[key].displayName === name);
+    const nameToLanguageId = (name: string) => Object.keys(LANGUAGES).find(key => LANGUAGES[key].displayName === name);
 
     const getAllowedLocales = (index: number) => {
         const allLocales = new Set(Object.keys(locales));
@@ -92,16 +94,11 @@ function ExerciseEditor({cancelEditing, exerciseTypeChanged}: {
         fields.forEach((f) => allLocales.delete(f.locale));
         return 0 <= index && index < fields.length ? [fields[index].locale, ...allLocales] : [...allLocales];
     }
-
     const addLanguage = (locale?: string) => {
         if( !locale )
             locale = getAllowedLocales(-1)[0];
         append({locale: locale, title: '', notionId: ''});
     }
-
-    const [allowedLanguages, setAllowedLanguages] = useState<(keyof typeof LANGUAGES)[]>(exercise?.allowedLanguages ?? []);
-    const [memoryLimit, setMemoryLimit] = useState<{ value: number, error?: string }>({value: 512, error: undefined});
-    const [timeLimit, setTimeLimit] = useState<{ value: number, error?: string }>({value: 2, error: undefined});
 
 
     const onSubmit = async (data: Schema) => {
@@ -122,15 +119,6 @@ function ExerciseEditor({cancelEditing, exerciseTypeChanged}: {
         setOpenSnackbar(true);
     };
     const onCancel = () => cancelEditing();
-    const onExerciseTypeChanged = (newType: keyof typeof EXERCISE_TYPES) => {
-        setValue('exerciseType', newType as string, {shouldTouch: true});
-        exerciseTypeChanged(newType);
-    }
-    const onMemoryLimitChanged = (value?: number) => setMemoryLimit({value: value ?? 512, error: value && 10 <= value && value <= 1000 ? undefined : 'value should be between 10 and 1000'});
-    const onTimeLimitChanged = (value?: number) => setTimeLimit({value: value ?? 2, error: value && 0.001 <= value && value <= 30 ? undefined : 'value should be positive and less than 30'});
-
-    const nameToExerciseType = (name: string) => Object.keys(EXERCISE_TYPES).find(key => EXERCISE_TYPES[key].displayName === name);
-    const nameToLanguageId = (name: string) => Object.keys(LANGUAGES).find(key => LANGUAGES[key].displayName === name);
 
     if( !exercise )
         return <></>
@@ -193,24 +181,36 @@ function ExerciseEditor({cancelEditing, exerciseTypeChanged}: {
 
             {(exerciseType === 'testCases' || exerciseType === 'code') && <>
                 <Stack marginTop={4} spacing={4} marginBottom={10} direction="column">
-                    <Autocomplete sx={{ width: 200 }} multiple autoHighlight autoSelect disableCloseOnSelect disableClearable
-                        value={allowedLanguages.map(l => LANGUAGES[l].displayName)}
-                        onChange={(event, values: string[] | null) => values && setAllowedLanguages(values.map(v => nameToLanguageId(v)!))}
-                        options={Object.keys(LANGUAGES).map(key => LANGUAGES[key].displayName)}
-                        renderInput={(params) => <TextField {...params} label="Allowed languages" />}
-                    />
+                    { /* @ts-ignore */ }
+                    <Controller name="allowedLanguages" control={control} defaultValue={exercise.allowedLanguages ?? []} render={({field}) => (
+                        <Autocomplete
+                            sx={{ width: 200 }} ref={field.ref} multiple autoHighlight autoSelect disableCloseOnSelect disableClearable
+                            value={field.value.map(l => LANGUAGES[l].displayName)}
+                            onChange={(event, values: string[] | null) => values && field.onChange(values.map(v => nameToLanguageId(v)!))}
+                            options={Object.keys(LANGUAGES).map(key => LANGUAGES[key].displayName)}
+                            renderInput={(params) => (
+                                <TextField {...params} label="Allowed languages"
+                                           error={Boolean(errors.allowedLanguages)} helperText={errors.allowedLanguages ? 'Need to provide several valid languages' : null}/>
+                            )} />
+                    )} />
 
                     <Typography variant="h6" marginBottom={2}>Execution Parameters (per test-case)</Typography>
                     <Stack direction="row" spacing={1}>
-                        <TextField required variant="outlined" placeholder="512" type="number" label="Memory limit (MB)"
-                                   value={memoryLimit.value} onChange={e => onMemoryLimitChanged(Number(e.target.value))}
-                                   inputProps={{ inputMode: 'numeric', pattern: '[0-9]*' }} sx={{flex: 1}}
-                                   error={!!memoryLimit.error} helperText={memoryLimit.error}/>
+                        <Controller name="memoryLimit" control={control} defaultValue={exercise.memoryLimit ?? 512} render={({ field: { ref, onChange, ...field } }) => (
+                            <TextField
+                                required variant="outlined" placeholder="512" type="number" label="Memory limit (MB)"
+                                onChange={e => e.target.value ? onChange(Number(e.target.value)) : onChange(e.target.value)}
+                                error={Boolean(errors.memoryLimit)} helperText={errors.memoryLimit?.message}
+                                inputProps={{ inputMode: 'numeric', pattern: '[0-9]*' }} inputRef={ref} {...field} sx={{flex: 1}} />
+                        )}/>
 
-                        <TextField required variant="outlined" placeholder="2" type="number" label="Time limit (s)"
-                                   value={timeLimit.value} onChange={e => onTimeLimitChanged(Number(e.target.value))}
-                                   inputProps={{inputMode: 'numeric', pattern: '[0-9.]*' }} sx={{flex: 1}}
-                                   error={!!timeLimit.error} helperText={timeLimit.error}/>
+                        <Controller name="timeLimit" control={control} defaultValue={exercise.timeLimit ?? 1} render={({ field: { ref, onChange, ...field } }) => (
+                            <TextField
+                                required variant="outlined" placeholder="2" type="number" label="Time limit (s)"
+                                onChange={e => e.target.value ? onChange(Number(e.target.value)) : onChange(e.target.value)}
+                                error={Boolean(errors.timeLimit)} helperText={errors.timeLimit?.message}
+                                inputProps={{ inputMode: 'numeric', pattern: '[0-9]*' }} inputRef={ref} {...field} sx={{flex: 1}} />
+                        )}/>
                     </Stack>
                 </Stack>
             </>}

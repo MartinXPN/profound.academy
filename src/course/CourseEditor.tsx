@@ -50,7 +50,7 @@ const schema = object({
     author: string().min(3).max(128),
     details: string().min(3).max(128),
     introduction: string().min(20).max(35),
-    instructors: array(string()),
+    instructors: array(string().min(3).max(20)),
 });
 type Schema = Infer<typeof schema>;
 

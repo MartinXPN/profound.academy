@@ -90,6 +90,7 @@ function ExerciseEditor({cancelEditing, exerciseTypeChanged}: {
         name: 'localizedFields',    // unique name for your Field Array
     });
     console.log('errors:', errors);
+    console.log('fields:', fields);
     // @ts-ignore
     const exerciseType: keyof typeof EXERCISE_TYPES = watch('exerciseType', exercise?.exerciseType ?? 'testCases');
     const onExerciseTypeChanged = (newType: keyof typeof EXERCISE_TYPES) => {
@@ -141,8 +142,8 @@ function ExerciseEditor({cancelEditing, exerciseTypeChanged}: {
         <Box m={1}>
             <Stack direction="row" spacing={1} marginTop={4} justifyContent="center" alignItems="center" alignContent="center">
                 <TextField label="ID" variant="outlined" value={exercise.id} size="small" sx={{flex: 1, marginRight: 3}} inputProps={{readOnly: true}}/>
-                <Button type="submit" size="large" variant="outlined" disabled={!isValid}>Save</Button>
-                <Button onClick={onCancel} size="large" variant="outlined">Cancel</Button>
+                <Button size="large" variant="outlined" type="submit" disabled={!isValid && false}>Save</Button>
+                <Button size="large" variant="outlined" onClick={onCancel}>Cancel</Button>
             </Stack>
 
             <List>
@@ -201,7 +202,9 @@ function ExerciseEditor({cancelEditing, exerciseTypeChanged}: {
                             options={Object.keys(LANGUAGES).map(key => LANGUAGES[key].displayName)}
                             renderInput={(params) => (
                                 <TextField {...params} label="Allowed languages"
-                                           error={Boolean(errors.allowedLanguages)} helperText={errors.allowedLanguages ? 'Need to provide several valid languages' : null}/>
+                                           error={Boolean(errors.allowedLanguages)}
+                                           // @ts-ignore
+                                           helperText={errors.allowedLanguages?.message}/>
                             )} />
                     )} />
 

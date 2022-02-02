@@ -23,7 +23,6 @@ import {Moment} from "moment";
 
 
 const validIdCharacters = new RegExp(/^[a-z0-9-]*$/);
-const existingCourseIds: {[key: string]: boolean} = {}
 const schema = object({
     id: string().min(5).max(40)
         .superRefine(async (val, ctx) => {
@@ -31,14 +30,6 @@ const schema = object({
                 return ctx.addIssue({code: ZodIssueCode.custom, message: 'ID is required to create a course'})
             if( !validIdCharacters.test(val) )
                 return ctx.addIssue({code: ZodIssueCode.custom, message: 'Should only contain lowercase latin letters, numbers, and hyphens (-)'})
-            if( val in existingCourseIds ) {
-                if( existingCourseIds[val] )
-                    ctx.addIssue({code: ZodIssueCode.custom, message: 'Course with this ID already exists'});
-                return;
-            }
-            existingCourseIds[val] = await doesExist(val);
-            if( existingCourseIds[val] )
-                return ctx.addIssue({code: ZodIssueCode.custom, message: 'Course with this ID already exists'})
         }),
     img: string().url(),
     revealsAt: date(),
@@ -50,7 +41,7 @@ const schema = object({
     author: string().min(3).max(128),
     details: string().min(3).max(128),
     introduction: string().min(20).max(35),
-    instructors: array(string().min(3).max(20)),
+    instructors: array(string().min(25).max(30)),
 });
 type Schema = Infer<typeof schema>;
 
@@ -76,13 +67,18 @@ function CourseEditor({course}: {course?: Course | null}) {
     const auth = useContext(AuthContext);
     const [openSnackbar, setOpenSnackbar] = useState(false);
 
-    const {control, watch, handleSubmit, formState: { errors }, setValue} = useForm<Schema>({
+    const {control, watch, handleSubmit, formState: { errors, isValid }, setValue, setError} = useForm<Schema>({
         mode: 'onChange',
         resolver: zodResolver(schema)
     });
     const introId = watch('introduction', course?.introduction);
 
     const onSubmit = async (data: Schema) => {
+        if( course && course.id && data.id !== course.id )
+            return setError('id', {message: 'You cannot change the id of an existing course'});
+        if( !course && await doesExist(data.id) )
+            return setError('id', {message: 'A course with this ID already exists'});
+
         console.log('submit!', data)
         await updateCourse(
             data.id, data.img,
@@ -127,8 +123,8 @@ function CourseEditor({course}: {course?: Course | null}) {
         <Stack direction="column" spacing={3}>
             <Stack direction="row" spacing={1} justifyContent="center" alignItems="center" alignContent="center">
                 <Typography variant="h4" sx={{flex: 1}}>Course Editor</Typography>
-                <Button type="submit" size="large" variant="outlined">Save</Button>
-                <Button onClick={onCancel} size="large" variant="outlined">Cancel</Button>
+                <Button size="large" variant="outlined" type="submit" disabled={!isValid}>Save</Button>
+                <Button size="large" variant="outlined" onClick={onCancel}>Cancel</Button>
             </Stack>
 
             <Stack direction="row" justifyContent="top" alignItems="top" alignContent="top" spacing={2}>

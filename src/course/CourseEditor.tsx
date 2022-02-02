@@ -81,6 +81,7 @@ function CourseEditor({course}: {course?: Course | null}) {
         resolver: zodResolver(schema)
     });
     const introId = watch('introduction', course?.introduction);
+
     const onSubmit = async (data: Schema) => {
         console.log('submit!', data)
         await updateCourse(
@@ -95,7 +96,6 @@ function CourseEditor({course}: {course?: Course | null}) {
     }
     const onCancel = () => history.goBack();
 
-    const onInstructorsChanged = (users: User[]) => setValue('instructors', users.map(u => u.id));
     const handleImageChange = useCallback(async (file: File) => {
         if( !auth.currentUserId )
             return;
@@ -190,17 +190,17 @@ function CourseEditor({course}: {course?: Course | null}) {
                                inputRef={ref} {...field} sx={{flex: 1}} />
                 )}/>
 
-                <Controller name="instructors" control={control} defaultValue={course?.instructors} render={() => <>
+                <Controller name="instructors" control={control} defaultValue={course?.instructors} render={({field}) => <>
                     { /* @ts-ignore */}
                     <AutocompleteSearch<User>
-                    label="Instructors" placeholder="Instructor users..."
-                    search={searchUser} idsToValues={getUsers}
-                    optionToId={option => option.id}
-                    optionToLabel={option => option.displayName ?? ''}
-                    optionToImageUrl={option => option.imageUrl}
-                    initialIds={course?.instructors}
-                    onChange={onInstructorsChanged}
-                    sx={{flex: 1}} />
+                        label="Instructors" placeholder="Instructor users..."
+                        search={searchUser} idsToValues={getUsers}
+                        optionToId={option => option.id}
+                        optionToLabel={option => option.displayName ?? ''}
+                        optionToImageUrl={option => option.imageUrl}
+                        initialIds={course?.instructors}
+                        onChange={users => field.onChange(users.map(u => u.id))}
+                        sx={{flex: 1}} />
                 </>} />
             </Stack>
 

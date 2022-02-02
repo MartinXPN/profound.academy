@@ -1,4 +1,4 @@
-import React, {memo, useCallback, useContext, useEffect, useState} from "react";
+import React, {memo, useContext, useState} from "react";
 import {CourseContext, CurrentExerciseContext} from "../Course";
 import {Course, Exercise, EXERCISE_TYPES} from '../../models/courses';
 import {Alert, Autocomplete, Button, Collapse, IconButton, List, ListItem, Snackbar, Stack, TextField, Typography} from "@mui/material";
@@ -15,6 +15,8 @@ import {TransitionGroup} from "react-transition-group";
 import CloseIcon from "@mui/icons-material/Close";
 import AddIcon from "@mui/icons-material/Add";
 import * as locales from "@mui/material/locale";
+import {User} from "../../models/users";
+import {getUsers, searchUser} from "../../services/users";
 
 
 // @ts-ignore
@@ -71,12 +73,17 @@ function ExerciseEditor({cancelEditing, exerciseTypeChanged}: {
         resolver: zodResolver(schema),
         defaultValues: {
             localizedFields: getExerciseLocalizedFields(exercise, 'enUS'),
+            exerciseType: 'testCases',
         }
     });
+    const {control, watch, handleSubmit, formState: {errors}, setValue} = formMethods;
     const { fields, append, remove } = useFieldArray({
         control: formMethods.control,   // control props comes from useForm (optional: if you are using FormContext)
         name: "localizedFields",        // unique name for your Field Array
     });
+    // @ts-ignore
+    const exerciseType: keyof typeof EXERCISE_TYPES = watch('exerciseType', exercise?.exerciseType ?? 'testCases');
+    console.log(exerciseType);
 
 
     const getAllowedLocales = (index: number) => {
@@ -92,10 +99,6 @@ function ExerciseEditor({cancelEditing, exerciseTypeChanged}: {
         append({locale: locale, title: '', notionId: ''});
     }
 
-
-    const [order, setOrder] = useState<number>(exercise?.order ?? 0);
-    const [exerciseType, setExerciseType] = useState<keyof typeof EXERCISE_TYPES>(exercise?.exerciseType ?? EXERCISE_TYPES.testCases.id);
-    const [unlockContent, setUnlockContent] = useState<string[]>(exercise?.unlockContent ?? []);
     const [allowedLanguages, setAllowedLanguages] = useState<(keyof typeof LANGUAGES)[]>(exercise?.allowedLanguages ?? []);
     const [memoryLimit, setMemoryLimit] = useState<{ value: number, error?: string }>({value: 512, error: undefined});
     const [timeLimit, setTimeLimit] = useState<{ value: number, error?: string }>({value: 2, error: undefined});
@@ -120,48 +123,20 @@ function ExerciseEditor({cancelEditing, exerciseTypeChanged}: {
     };
     const onCancel = () => cancelEditing();
     const onExerciseTypeChanged = (newType: keyof typeof EXERCISE_TYPES) => {
-        setExerciseType(newType);
+        setValue('exerciseType', newType as string, {shouldTouch: true});
         exerciseTypeChanged(newType);
     }
-    const onUnlockContentChanged = (unlockContent: Course[]) => setUnlockContent(unlockContent.map(c => c.id));
     const onMemoryLimitChanged = (value?: number) => setMemoryLimit({value: value ?? 512, error: value && 10 <= value && value <= 1000 ? undefined : 'value should be between 10 and 1000'});
     const onTimeLimitChanged = (value?: number) => setTimeLimit({value: value ?? 2, error: value && 0.001 <= value && value <= 30 ? undefined : 'value should be positive and less than 30'});
 
-    useEffect(() => {
-        setOrder(exercise?.order ?? 0);
-        setExerciseType(exercise?.exerciseType ?? EXERCISE_TYPES.testCases.id);
-        setUnlockContent(exercise?.unlockContent ?? []);
-        setAllowedLanguages(exercise?.allowedLanguages ?? []);
-        onMemoryLimitChanged(exercise?.memoryLimit ?? 512);
-        onTimeLimitChanged(exercise?.timeLimit ?? 2);
-    }, [exercise]);
-
-
-    const [nameToExerciseType, setNameToExerciseType] = useState<{ [key: string]: string }>({});
-    useEffect(() => {
-        const nameToId = {};
-        for( const [id, name] of Object.entries(EXERCISE_TYPES) ) {
-            // @ts-ignore
-            nameToId[name.displayName] = id;
-        }
-        setNameToExerciseType(nameToId);
-    }, []);
-    const [nameToLanguageId, setNameToLanguageId] = useState<{ [key: string]: keyof typeof LANGUAGES }>({});
-    useEffect(() => {
-        const nameToLanguageId = {};
-        for( const [id, language] of Object.entries(LANGUAGES) ) {
-            // @ts-ignore
-            nameToLanguageId[language.displayName] = id;
-        }
-        setNameToLanguageId(nameToLanguageId);
-    }, []);
-
+    const nameToExerciseType = (name: string) => Object.keys(EXERCISE_TYPES).find(key => EXERCISE_TYPES[key].displayName === name);
+    const nameToLanguageId = (name: string) => Object.keys(LANGUAGES).find(key => LANGUAGES[key].displayName === name);
 
     if( !exercise )
         return <></>
     return <>
         <FormProvider {...formMethods}>
-        <form onSubmit={formMethods.handleSubmit(onSubmit)} key={exercise.id}>
+        <form onSubmit={handleSubmit(onSubmit)} key={exercise.id}>
         <Box m={1}>
             <Stack direction="row" spacing={1} marginTop={4} justifyContent="center" alignItems="center" alignContent="center">
                 <TextField label="ID" variant="outlined" value={exercise.id} size="small" sx={{flex: 1, marginRight: 3}} inputProps={{readOnly: true}}/>
@@ -183,39 +158,45 @@ function ExerciseEditor({cancelEditing, exerciseTypeChanged}: {
             </List>
 
             <br/><br/>
-            <TextField required variant="outlined" placeholder="1.01" type="number" fullWidth
-                       label="Order (level is the number before decimal dot, the rest is the order withing level)"
-                       value={order} onChange={e => setOrder(Number(e.target.value))}
-                       helperText="Exercise is not visible to students until the order is defined"
-                       inputProps={{ 'aria-label': 'controlled', inputMode: 'numeric', pattern: '[0-9.]*' }} sx={{flex: 1}}/>
+            <Controller name="order" control={control} defaultValue={exercise.order} render={({ field: { ref, onChange, ...field } }) => (
+                <TextField required variant="outlined" placeholder="1.01" type="number" fullWidth
+                           label="Order (0 = invisible) (level = number before decimal dot, the rest is the order within level)"
+                           onChange={e => e.target.value ? onChange(Number(e.target.value)) : onChange(e.target.value)}
+                           error={Boolean(errors.order)} helperText={errors.order?.message}
+                           inputProps={{ inputMode: 'numeric', pattern: '[0-9.]*' }} inputRef={ref} {...field} sx={{flex: 1}}/>
+            )}/>
             <br/><br/>
 
             <Stack direction="row" spacing={1}>
-                <Autocomplete sx={{ width: 200 }} autoHighlight autoSelect disableClearable
-                    value={EXERCISE_TYPES[exerciseType].displayName}
-                    options={Object.keys(nameToExerciseType)}
-                    onChange={(event, value: string | null) => value && onExerciseTypeChanged(nameToExerciseType[value])}
-                    renderInput={(params) => <TextField {...params} label="Exercise type"/>}
-                />
-
                 { /* @ts-ignore */}
-                <AutocompleteSearch<Course>
-                    label="Unlock Content" placeholder="Courses..."
-                    search={searchCourses} idsToValues={getCourses}
-                    optionToId={option => option.id}
-                    optionToLabel={option => option.title ?? ''}
-                    optionToImageUrl={option => option.img}
-                    initialIds={exercise?.unlockContent}
-                    onChange={onUnlockContentChanged}
-                    sx={{flex: 1}} />
+                <Controller name="exerciseType" control={control} defaultValue={exercise.exerciseType ?? 'testCases'} render={({field}) => (
+                    <Autocomplete sx={{ width: 200 }} autoHighlight autoSelect disableClearable ref={field.ref}
+                                  value={EXERCISE_TYPES[field.value].displayName}
+                                  options={Object.keys(EXERCISE_TYPES).map(key => EXERCISE_TYPES[key].displayName)}
+                                  onChange={(event, value: string | null) => value && onExerciseTypeChanged(nameToExerciseType(value)!)}
+                                  renderInput={(params) => <TextField {...params} label="Exercise type"/>}/>
+                )} />
+
+                <Controller name="unlockContent" control={control} defaultValue={exercise.unlockContent ?? []} render={({field}) => <>
+                    {/* @ts-ignore */}
+                    <AutocompleteSearch<Course>
+                        label="Unlock Content" placeholder="Courses..."
+                        search={searchCourses} idsToValues={getCourses}
+                        optionToId={option => option.id}
+                        optionToLabel={option => option.title ?? ''}
+                        optionToImageUrl={option => option.img}
+                        initialIds={exercise?.unlockContent}
+                        onChange={content => field.onChange(content.map(c => c.id))}
+                        sx={{flex: 1}} />
+                </>} />
             </Stack>
 
             {(exerciseType === 'testCases' || exerciseType === 'code') && <>
                 <Stack marginTop={4} spacing={4} marginBottom={10} direction="column">
                     <Autocomplete sx={{ width: 200 }} multiple autoHighlight autoSelect disableCloseOnSelect disableClearable
                         value={allowedLanguages.map(l => LANGUAGES[l].displayName)}
-                        onChange={(event, values: string[] | null) => values && setAllowedLanguages(values.map(v => nameToLanguageId[v]))}
-                        options={Object.keys(nameToLanguageId)}
+                        onChange={(event, values: string[] | null) => values && setAllowedLanguages(values.map(v => nameToLanguageId(v)!))}
+                        options={Object.keys(LANGUAGES).map(key => LANGUAGES[key].displayName)}
                         renderInput={(params) => <TextField {...params} label="Allowed languages" />}
                     />
 

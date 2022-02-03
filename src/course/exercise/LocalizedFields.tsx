@@ -1,10 +1,13 @@
 import React, {memo} from "react";
-import {Autocomplete, Stack, TextField} from "@mui/material";
+import {Autocomplete, Button, IconButton, List, ListItem, Stack, TextField} from "@mui/material";
 import Box from "@mui/material/Box";
 import { notionPageToId } from "../../util";
 
-import {Controller, useFormContext} from "react-hook-form";
+import {Controller, useFieldArray, useFormContext} from "react-hook-form";
 import {infer as Infer, object, string} from "zod";
+import CloseIcon from "@mui/icons-material/Close";
+import AddIcon from "@mui/icons-material/Add";
+import * as locales from "@mui/material/locale";
 
 
 export const fieldSchema = object({
@@ -15,7 +18,7 @@ export const fieldSchema = object({
 export type FieldSchema = Infer<typeof fieldSchema>;
 
 
-export function LocalizedField({allowedLocales, namePrefix}: { allowedLocales: string[], namePrefix?: string }) {
+export function LocalizedFieldView({allowedLocales, namePrefix}: { allowedLocales: string[], namePrefix?: string }) {
     const {control, formState: {errors}} = useFormContext();
     const getError = (path: string) => {
         if( path.includes('.') ) {
@@ -24,7 +27,7 @@ export function LocalizedField({allowedLocales, namePrefix}: { allowedLocales: s
         }
         return errors[path];
     }
-    console.log(namePrefix);
+    // console.log(namePrefix);
 
     return <>
         <Stack direction="row" alignItems="top" alignContent="top">
@@ -82,4 +85,47 @@ export function LocalizedField({allowedLocales, namePrefix}: { allowedLocales: s
     </>
 }
 
-export default memo(LocalizedField);
+
+export const LocalizedField = memo(LocalizedFieldView);
+
+function LocalizedFields() {
+    const {control, watch} = useFormContext();
+    const { fields, append, remove } = useFieldArray({control, name: 'localizedFields'});
+    const watchFieldArray = watch('localizedFields');
+    // console.log('fields:', fields, 'watchFieldArray:', watchFieldArray);
+    const controlledFields = fields.map((field, index) => {
+        return {...field, ...watchFieldArray[index]};
+    });
+
+    const getAllowedLocales = (index: number) => {
+        const allLocales = new Set(Object.keys(locales));
+        controlledFields.forEach(f => allLocales.delete(f.locale));
+        // console.log('getAllowedLocales:', index, controlledFields.map(f => f.locale), '=>', allLocales);
+        return 0 <= index && index < controlledFields.length ? [controlledFields[index].locale, ...allLocales] : [...allLocales];
+    }
+    const addLanguage = (locale?: string) => {
+        if( !locale )
+            locale = getAllowedLocales(-1)[0];
+        append({locale: locale, title: '', notionId: ''});
+    }
+    const removeLanguage = (index: number) => {
+        remove([index, controlledFields.length]);
+    }
+
+    return <>
+        <List>
+        {/*    <TransitionGroup>*/}
+                {controlledFields.map((item, index) => (
+                    // <Collapse key={item.id}>
+                        <ListItem key={item.id} secondaryAction={<IconButton edge="end" title="Delete" onClick={() => removeLanguage(index)}><CloseIcon /></IconButton>}>
+                            <LocalizedField allowedLocales={getAllowedLocales(index)} namePrefix={`localizedFields.${index}.`} />
+                        </ListItem>
+                    // </Collapse>
+                ))}
+        {/*    </TransitionGroup>*/}
+            <Button key="add" sx={{textTransform: 'none', marginLeft: 2}} startIcon={<AddIcon/>} onClick={() => addLanguage()}>Add</Button>
+        </List>
+    </>
+}
+
+export default memo(LocalizedFields);

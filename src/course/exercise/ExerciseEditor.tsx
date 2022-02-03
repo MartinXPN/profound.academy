@@ -1,20 +1,16 @@
 import React, {memo, useCallback, useContext, useEffect, useState} from "react";
 import {CourseContext, CurrentExerciseContext} from "../Course";
 import {Course, Exercise, EXERCISE_TYPES} from '../../models/courses';
-import {Alert, Autocomplete, Button, Collapse, IconButton, List, ListItem, Snackbar, Stack, TextField, Typography} from "@mui/material";
-import LocalizedField, {FieldSchema, fieldSchema} from "./LocalizedField";
+import {Alert, Autocomplete, Button, Snackbar, Stack, TextField, Typography} from "@mui/material";
+import LocalizedFields, {FieldSchema, fieldSchema} from "./LocalizedFields";
 import Box from "@mui/material/Box";
 import {LANGUAGES} from "../../models/language";
 import AutocompleteSearch from "../../common/AutocompleteSearch";
 import {getCourses, searchCourses, updateExercise} from "../../services/courses";
 
-import {Controller, useForm, FormProvider, useFieldArray} from "react-hook-form";
+import {Controller, useForm, FormProvider} from "react-hook-form";
 import {zodResolver} from "@hookform/resolvers/zod";
 import {infer as Infer, object, string, array, enum as zodEnum, number} from "zod";
-import {TransitionGroup} from "react-transition-group";
-import CloseIcon from "@mui/icons-material/Close";
-import AddIcon from "@mui/icons-material/Add";
-import * as locales from "@mui/material/locale";
 
 
 // @ts-ignore
@@ -85,14 +81,8 @@ function ExerciseEditor({cancelEditing, exerciseTypeChanged}: {
         defaultValues: getDefaultFieldValues(),
     });
     const {control, watch, handleSubmit, formState: {errors, isValid}, reset, setValue} = formMethods;
-    const { fields, append, remove } = useFieldArray({control, name: 'localizedFields'});
-    const watchFieldArray = watch('localizedFields');
-    const controlledFields = fields.map((field, index) => {
-        return {...field, ...watchFieldArray[index]};
-    });
+    errors && Object.keys(errors).length && console.log('errors:', errors);
 
-    console.log('errors:', errors);
-    console.log('fields:', controlledFields);
     // @ts-ignore
     const exerciseType: keyof typeof EXERCISE_TYPES = watch('exerciseType');
     const onExerciseTypeChanged = (newType: keyof typeof EXERCISE_TYPES) => {
@@ -102,28 +92,8 @@ function ExerciseEditor({cancelEditing, exerciseTypeChanged}: {
     const nameToExerciseType = (name: string) => Object.keys(EXERCISE_TYPES).find(key => EXERCISE_TYPES[key].displayName === name);
     const nameToLanguageId = (name: string) => Object.keys(LANGUAGES).find(key => LANGUAGES[key].displayName === name);
 
-    const getAllowedLocales = (index: number) => {
-        const allLocales = new Set(Object.keys(locales));
-        controlledFields.forEach(f => allLocales.delete(f.locale));
-        console.log('getAllowedLocales:', index, controlledFields.map(f => f.locale), '=>', allLocales);
-        return 0 <= index && index < fields.length ? [controlledFields[index].locale, ...allLocales] : [...allLocales];
-    }
-    const addLanguage = (locale?: string) => {
-        if( !locale )
-            locale = getAllowedLocales(-1)[0];
-        // For some weird reason, append duplicates the values if we do not remove the items explicitly once again
-        // remove(fields.length);
-        append({locale: locale, title: '', notionId: ''});
-        // remove(fields.length + 1);
-    }
-    const removeLanguage = (index: number) => {
-        remove(index);
-        remove(fields.length);
-    }
-
     // @ts-ignore
-    useEffect(() => reset(getDefaultFieldValues()),
-        [exercise, getDefaultFieldValues, reset]);
+    useEffect(() => reset(getDefaultFieldValues()), [exercise, getDefaultFieldValues, reset]);
     const onCancel = () => cancelEditing();
     const onSubmit = async (data: Schema) => {
         if( !course || !exercise )
@@ -155,20 +125,9 @@ function ExerciseEditor({cancelEditing, exerciseTypeChanged}: {
                 <Button size="large" variant="outlined" onClick={onCancel}>Cancel</Button>
             </Stack>
 
-            <List>
-                <TransitionGroup>
-                    {controlledFields.map((item, index) => (
-                    <Collapse key={item.id}>
-                        <ListItem secondaryAction={<IconButton edge="end" title="Delete" onClick={() => removeLanguage(index)}><CloseIcon /></IconButton>}>
-                            <LocalizedField allowedLocales={getAllowedLocales(index)} namePrefix={`localizedFields.${index}.`} />
-                        </ListItem>
-                    </Collapse>
-                    ))}
-                </TransitionGroup>
-                <Button sx={{textTransform: 'none', marginLeft: 2}} startIcon={<AddIcon/>} onClick={() => addLanguage()}>Add</Button>
-            </List>
-
+            <LocalizedFields />
             <br/><br/>
+
             <Controller name="order" control={control} render={({ field: { ref, onChange, ...field } }) => (
                 <TextField required variant="outlined" placeholder="1.01" type="number" fullWidth
                            label="Order (0 = invisible) (level = number before decimal dot, the rest is the order within level)"

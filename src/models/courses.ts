@@ -43,7 +43,7 @@ export interface Exercise {
     timeLimit?: number;
     outputLimit?: number;
     floatPrecision?: number;
-    comparisonMode?: string;
+    comparisonMode?: 'whole' | 'token' | 'custom';
 }
 
 export interface Course {

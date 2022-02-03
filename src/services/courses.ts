@@ -137,6 +137,7 @@ export const updateExercise = async (
     unlockContent: string[],
     allowedLanguages: (keyof typeof LANGUAGES)[],
     memoryLimit?: number, timeLimit?: number, outputLimit?: number,
+    floatPrecision?: number, comparisonMode?: 'whole' | 'token' | 'custom',
 ) => {
     return db.exercise(courseId, exerciseId).set({
         title: title,
@@ -150,6 +151,8 @@ export const updateExercise = async (
         memoryLimit: memoryLimit,
         timeLimit: timeLimit,
         outputLimit: outputLimit,
+        floatPrecision:  floatPrecision,
+        comparisonMode: comparisonMode,
     }, {merge: true});
 }
 

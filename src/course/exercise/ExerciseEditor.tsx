@@ -13,6 +13,7 @@ import {zodResolver} from "@hookform/resolvers/zod";
 import {infer as Infer, object, string, array, enum as zodEnum, number} from "zod";
 
 
+const COMPARISON_MODES = ['whole', 'token', 'custom'] as const;
 // @ts-ignore
 const EXERCISE_TYPE_NAMES: readonly [string, ...string[]] = Object.keys(EXERCISE_TYPES);
 // @ts-ignore
@@ -28,6 +29,8 @@ const schema = object({
     memoryLimit: number().min(10).max(1000),
     timeLimit: number().min(0.001).max(30),
     outputLimit: number().min(0.001).max(10),
+    floatPrecision: number().min(0.00000000000001).max(0.1),
+    comparisonMode: zodEnum(COMPARISON_MODES),
 });
 type Schema = Infer<typeof schema>;
 
@@ -77,6 +80,8 @@ function ExerciseEditor({cancelEditing, exerciseTypeChanged}: {
             memoryLimit: exercise?.memoryLimit ?? 512,
             timeLimit: exercise?.timeLimit ?? 1,
             outputLimit: exercise?.outputLimit ?? 1,
+            floatPrecision: exercise?.floatPrecision ?? 0.0001,
+            comparisonMode: exercise?.comparisonMode ?? 'token',
         }
     }, [exercise]);
 
@@ -91,6 +96,7 @@ function ExerciseEditor({cancelEditing, exerciseTypeChanged}: {
 
     // @ts-ignore
     const exerciseType: keyof typeof EXERCISE_TYPES = watch('exerciseType');
+    const comparisonMode = watch('comparisonMode');
     const onExerciseTypeChanged = (newType: keyof typeof EXERCISE_TYPES) => {
         setValue('exerciseType', newType as string, {shouldTouch: true});
         exerciseTypeChanged(newType);
@@ -117,6 +123,7 @@ function ExerciseEditor({cancelEditing, exerciseTypeChanged}: {
             data.unlockContent,
             data.allowedLanguages,
             data.memoryLimit, data.timeLimit, data.outputLimit,
+            data.floatPrecision, data.comparisonMode,
         );
         setOpenSnackbar(true);
     };
@@ -126,7 +133,7 @@ function ExerciseEditor({cancelEditing, exerciseTypeChanged}: {
     return <>
         <FormProvider {...formMethods}>
         <form onSubmit={handleSubmit(onSubmit)}>
-        <Box m={1}>
+        <Box m={1} marginBottom={16}>
             <Stack direction="row" spacing={1} marginTop={4} justifyContent="center" alignItems="center" alignContent="center">
                 <TextField label="ID" variant="outlined" value={exercise.id} size="small" sx={{flex: 1, marginRight: 3}} inputProps={{readOnly: true}}/>
                 <Button size="large" variant="outlined" type="submit" disabled={!isValid && false}>Save</Button>
@@ -181,9 +188,10 @@ function ExerciseEditor({cancelEditing, exerciseTypeChanged}: {
                               onChange={(event, value: string | null) => value && onExerciseTypeChanged(nameToExerciseType(value)!)}
                               renderInput={(params) => <TextField {...params} label="Exercise type"/>}/>
             )} />
+            <br/>
 
             {(exerciseType === 'testCases' || exerciseType === 'code') && <>
-                <Stack marginTop={4} spacing={4} marginBottom={10} direction="column">
+                <Stack direction="row" spacing={1}>
                     <Controller name="allowedLanguages" control={control} render={({field}) => (
                         <Autocomplete
                             sx={{ width: 200 }} ref={field.ref} multiple autoHighlight autoSelect disableCloseOnSelect disableClearable
@@ -198,32 +206,57 @@ function ExerciseEditor({cancelEditing, exerciseTypeChanged}: {
                             )} />
                     )} />
 
-                    <Typography variant="h6" marginBottom={2}>Execution Parameters (per test-case)</Typography>
-                    <Stack direction="row" spacing={1}>
-                        <Controller name="memoryLimit" control={control} render={({ field: { ref, onChange, ...field } }) => (
-                            <TextField
-                                required variant="outlined" placeholder="512" type="number" label="Memory limit (MB)"
-                                onChange={e => e.target.value ? onChange(Number(e.target.value)) : onChange(e.target.value)}
-                                error={Boolean(errors.memoryLimit)} helperText={errors.memoryLimit?.message}
-                                inputProps={{ inputMode: 'numeric', pattern: '[0-9]*' }} inputRef={ref} {...field} sx={{flex: 1}} />
-                        )}/>
+                    <Controller name="comparisonMode" control={control} render={({field: {onChange, ...field}}) => <>
+                        <Autocomplete
+                            sx={{ width: 200 }} autoHighlight autoSelect disableClearable {...field}
+                            onChange={(event, value) => onChange(value)}
+                            options={COMPARISON_MODES}
+                            renderInput={(params) => (
+                                <TextField
+                                    {...params} label="Checker" error={Boolean(errors.comparisonMode)}
+                                    helperText={field.value === 'whole'
+                                        ? 'Compare whole output with the target'
+                                        : field.value === 'token'
+                                            ? 'Token-by-token comparison'
+                                            : 'Need to implement a custom checker'} />
+                            )}/>
+                    </>} />
 
-                        <Controller name="timeLimit" control={control} render={({ field: { ref, onChange, ...field } }) => (
-                            <TextField
-                                required variant="outlined" placeholder="2" type="number" label="Time limit (s)"
+                    {comparisonMode === 'token' && <>
+                        <Controller name="floatPrecision" control={control} render={({field: {ref, onChange, ...field}}) => (
+                            <TextField required variant="outlined" placeholder="0.001" type="number" label="Float precision"
                                 onChange={e => e.target.value ? onChange(Number(e.target.value)) : onChange(e.target.value)}
-                                error={Boolean(errors.timeLimit)} helperText={errors.timeLimit?.message}
-                                inputProps={{ inputMode: 'numeric', pattern: '[0-9]*' }} inputRef={ref} {...field} sx={{flex: 1}} />
+                                error={Boolean(errors.floatPrecision)} helperText={errors.floatPrecision?.message}
+                                inputProps={{inputMode: 'numeric', pattern: '[0-9]*'}} inputRef={ref} {...field} sx={{flex: 1}}/>
                         )}/>
+                    </>}
+                </Stack>
 
-                        <Controller name="outputLimit" control={control} render={({ field: { ref, onChange, ...field } }) => (
-                            <TextField
-                                required variant="outlined" placeholder="1" type="number" label="Output limit (MB)"
-                                onChange={e => e.target.value ? onChange(Number(e.target.value)) : onChange(e.target.value)}
-                                error={Boolean(errors.outputLimit)} helperText={errors.outputLimit?.message}
-                                inputProps={{ inputMode: 'numeric', pattern: '[0-9]*' }} inputRef={ref} {...field} sx={{flex: 1}} />
-                        )}/>
-                    </Stack>
+                <Typography variant="h6" marginBottom={2} marginTop={8}>Execution Parameters (per test-case)</Typography>
+                <Stack direction="row" spacing={1}>
+                    <Controller name="memoryLimit" control={control} render={({ field: { ref, onChange, ...field } }) => (
+                        <TextField
+                            required variant="outlined" placeholder="512" type="number" label="Memory limit (MB)"
+                            onChange={e => e.target.value ? onChange(Number(e.target.value)) : onChange(e.target.value)}
+                            error={Boolean(errors.memoryLimit)} helperText={errors.memoryLimit?.message}
+                            inputProps={{ inputMode: 'numeric', pattern: '[0-9]*' }} inputRef={ref} {...field} sx={{flex: 1}} />
+                    )}/>
+
+                    <Controller name="timeLimit" control={control} render={({ field: { ref, onChange, ...field } }) => (
+                        <TextField
+                            required variant="outlined" placeholder="2" type="number" label="Time limit (s)"
+                            onChange={e => e.target.value ? onChange(Number(e.target.value)) : onChange(e.target.value)}
+                            error={Boolean(errors.timeLimit)} helperText={errors.timeLimit?.message}
+                            inputProps={{ inputMode: 'numeric', pattern: '[0-9]*' }} inputRef={ref} {...field} sx={{flex: 1}} />
+                    )}/>
+
+                    <Controller name="outputLimit" control={control} render={({ field: { ref, onChange, ...field } }) => (
+                        <TextField
+                            required variant="outlined" placeholder="1" type="number" label="Output limit (MB)"
+                            onChange={e => e.target.value ? onChange(Number(e.target.value)) : onChange(e.target.value)}
+                            error={Boolean(errors.outputLimit)} helperText={errors.outputLimit?.message}
+                            inputProps={{ inputMode: 'numeric', pattern: '[0-9]*' }} inputRef={ref} {...field} sx={{flex: 1}} />
+                    )}/>
                 </Stack>
             </>}
         </Box>

@@ -85,11 +85,16 @@ function ExerciseEditor({cancelEditing, exerciseTypeChanged}: {
         defaultValues: getDefaultFieldValues(),
     });
     const {control, watch, handleSubmit, formState: {errors, isValid}, reset, setValue} = formMethods;
-    const { fields, append, remove } = useFieldArray({control, name: 'localizedFields', shouldUnregister: true});
+    const { fields, append, remove } = useFieldArray({control, name: 'localizedFields'});
+    const watchFieldArray = watch('localizedFields');
+    const controlledFields = fields.map((field, index) => {
+        return {...field, ...watchFieldArray[index]};
+    });
+
     console.log('errors:', errors);
-    console.log('fields:', fields);
+    console.log('fields:', controlledFields);
     // @ts-ignore
-    const exerciseType: keyof typeof EXERCISE_TYPES = watch('exerciseType', exercise?.exerciseType ?? 'testCases');
+    const exerciseType: keyof typeof EXERCISE_TYPES = watch('exerciseType');
     const onExerciseTypeChanged = (newType: keyof typeof EXERCISE_TYPES) => {
         setValue('exerciseType', newType as string, {shouldTouch: true});
         exerciseTypeChanged(newType);
@@ -99,22 +104,26 @@ function ExerciseEditor({cancelEditing, exerciseTypeChanged}: {
 
     const getAllowedLocales = (index: number) => {
         const allLocales = new Set(Object.keys(locales));
-        console.log('getAllowedLocales:', index, fields.map(f => f.locale));
-        fields.forEach((f) => allLocales.delete(f.locale));
-        return 0 <= index && index < fields.length ? [fields[index].locale, ...allLocales] : [...allLocales];
+        controlledFields.forEach(f => allLocales.delete(f.locale));
+        console.log('getAllowedLocales:', index, controlledFields.map(f => f.locale), '=>', allLocales);
+        return 0 <= index && index < fields.length ? [controlledFields[index].locale, ...allLocales] : [...allLocales];
     }
     const addLanguage = (locale?: string) => {
         if( !locale )
             locale = getAllowedLocales(-1)[0];
         // For some weird reason, append duplicates the values if we do not remove the items explicitly once again
-        remove(fields.length);
+        // remove(fields.length);
         append({locale: locale, title: '', notionId: ''});
-        remove(fields.length + 1);
+        // remove(fields.length + 1);
+    }
+    const removeLanguage = (index: number) => {
+        remove(index);
+        remove(fields.length);
     }
 
-
     // @ts-ignore
-    useEffect(() => reset(getDefaultFieldValues()), [exercise, getDefaultFieldValues, reset]);
+    useEffect(() => reset(getDefaultFieldValues()),
+        [exercise, getDefaultFieldValues, reset]);
     const onCancel = () => cancelEditing();
     const onSubmit = async (data: Schema) => {
         if( !course || !exercise )
@@ -148,10 +157,10 @@ function ExerciseEditor({cancelEditing, exerciseTypeChanged}: {
 
             <List>
                 <TransitionGroup>
-                    {fields.map((item, index) => (
+                    {controlledFields.map((item, index) => (
                     <Collapse key={item.id}>
-                        <ListItem secondaryAction={<IconButton edge="end" title="Delete" onClick={() => remove(index)}><CloseIcon /></IconButton>}>
-                            <LocalizedField field={item} allowedLocales={getAllowedLocales(index)} namePrefix={`localizedFields.${index}.`} />
+                        <ListItem secondaryAction={<IconButton edge="end" title="Delete" onClick={() => removeLanguage(index)}><CloseIcon /></IconButton>}>
+                            <LocalizedField allowedLocales={getAllowedLocales(index)} namePrefix={`localizedFields.${index}.`} />
                         </ListItem>
                     </Collapse>
                     ))}

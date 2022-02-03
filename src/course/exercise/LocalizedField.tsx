@@ -15,11 +15,7 @@ export const fieldSchema = object({
 export type FieldSchema = Infer<typeof fieldSchema>;
 
 
-export function LocalizedField({field, allowedLocales, namePrefix}: {
-    field: FieldSchema,
-    allowedLocales: string[],
-    namePrefix?: string,
-}) {
+export function LocalizedField({allowedLocales, namePrefix}: { allowedLocales: string[], namePrefix?: string }) {
     const {control, formState: {errors}} = useFormContext();
     const getError = (path: string) => {
         if( path.includes('.') ) {
@@ -28,15 +24,16 @@ export function LocalizedField({field, allowedLocales, namePrefix}: {
         }
         return errors[path];
     }
+    console.log(namePrefix);
 
     return <>
         <Stack direction="row" alignItems="top" alignContent="top">
-            <Controller name={`${namePrefix}locale`} control={control} defaultValue={field.locale} render={({ field }) => <>
+            <Controller name={`${namePrefix}locale`} control={control} render={({field: {value, onChange, ...field}}) => (
                 <Autocomplete
+                    {...field}
                     multiple
                     limitTags={1}
                     sx={{ width: 150 }}
-                    ref={field.ref}
                     size="small"
                     options={allowedLocales}
                     getOptionLabel= {option => `${option.substring(0, 2)}-${option.substring(2, 4)}`}
@@ -44,7 +41,7 @@ export function LocalizedField({field, allowedLocales, namePrefix}: {
                     autoHighlight
                     autoSelect
                     disableClearable
-                    value={[field.value]}
+                    value={[value]}
                     renderOption={({ ...props}, option: string) => (
                         <Box component="li" sx={{ '& > img': { mr: 2, flexShrink: 0 } }} {...props}>
                             <img loading="lazy" width={20} alt=""
@@ -62,21 +59,21 @@ export function LocalizedField({field, allowedLocales, namePrefix}: {
                         </Box>
                     ))}
                     renderInput={(params) => (
-                        <TextField{...params} label="Language"
-                                  error={Boolean(getError(`${namePrefix}locale`))}
-                                  helperText={getError(`${namePrefix}locale`)?.message} />
+                        <TextField label="Language" {...params}
+                                   error={Boolean(getError(`${namePrefix}locale`))}
+                                   helperText={getError(`${namePrefix}locale`)?.message} />
                     )}
-                    onChange={(e, value: string[]) => value.length && field.onChange(value.at(-1)!)}
+                    onChange={(e, value: string[]) => value.length && onChange(value.at(-1)!)}
                 />
-            </>} />
+            )} />
 
-            <Controller name={`${namePrefix}title`} control={control} defaultValue={field.title} render={({ field: { ref, ...field } }) => (
-                <TextField required label="Title" variant="outlined" size="small" placeholder="Exercise Title"
+            <Controller name={`${namePrefix}title`} control={control} render={({ field: { ref, ...field } }) => (
+                <TextField required fullWidth label="Title" variant="outlined" size="small" placeholder="Exercise Title"
                            error={Boolean(getError(`${namePrefix}title`))} helperText={getError(`${namePrefix}title`)?.message}
                            inputRef={ref} {...field} sx={{flex: 1}} />
             )}/>
-            <Controller name={`${namePrefix}notionId`} control={control} defaultValue={field.notionId} render={({ field: { ref, onChange, ...field } }) => (
-                <TextField required label="Notion page" variant="outlined" size="small" placeholder="Exercise Notion ID"
+            <Controller name={`${namePrefix}notionId`} control={control} render={({ field: { ref, onChange, ...field } }) => (
+                <TextField required fullWidth label="Notion page" variant="outlined" size="small" placeholder="Exercise Notion ID"
                            error={Boolean(getError(`${namePrefix}notionId`))} helperText={getError(`${namePrefix}notionId`)?.message}
                            onChange={(e) => onChange(notionPageToId(e.target.value))}
                            inputRef={ref} {...field} sx={{flex: 1}} />

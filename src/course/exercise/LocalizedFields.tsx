@@ -108,16 +108,13 @@ function LocalizedFields() {
             locale = getAllowedLocales(-1)[0];
         append({locale: locale, title: '', notionId: ''});
     }
-    const removeLanguage = (index: number) => {
-        remove([index, controlledFields.length]);
-    }
 
     return <>
         <List>
-        {/*    <TransitionGroup>*/}
+        {/*    <TransitionGroup> https://github.com/react-hook-form/react-hook-form/issues/7733 */}
                 {controlledFields.map((item, index) => (
                     // <Collapse key={item.id}>
-                        <ListItem key={item.id} secondaryAction={<IconButton edge="end" title="Delete" onClick={() => removeLanguage(index)}><CloseIcon /></IconButton>}>
+                        <ListItem key={item.id} secondaryAction={<IconButton edge="end" title="Delete" onClick={() => remove(index)}><CloseIcon /></IconButton>}>
                             <LocalizedField allowedLocales={getAllowedLocales(index)} namePrefix={`localizedFields.${index}.`} />
                         </ListItem>
                     // </Collapse>

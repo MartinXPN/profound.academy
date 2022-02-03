@@ -33,6 +33,8 @@ export interface Exercise {
     title: string | {[key: string]: string};        // string or mapping {locale => titleText}
     pageId: string | {[key: string]: string};       // string or mapping {locale => pageId}
     order: number;
+    score?: number;
+    allowedAttempts?: number;
     exerciseType?: keyof typeof EXERCISE_TYPES;
     unlockContent?: string[],
     allowedLanguages?: (keyof typeof LANGUAGES)[];

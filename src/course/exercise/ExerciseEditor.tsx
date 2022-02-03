@@ -20,11 +20,14 @@ const LANGUAGE_NAMES: readonly [string, ...string[]] = Object.keys(LANGUAGES);
 const schema = object({
     localizedFields: array(fieldSchema).nonempty(),
     order: number().nonnegative(),
+    score: number().min(0).max(1000).int(),
+    allowedAttempts: number().min(1).max(100).int(),
     exerciseType: zodEnum(EXERCISE_TYPE_NAMES),
     unlockContent: array(string().min(20).max(35)),
     allowedLanguages: array(zodEnum(LANGUAGE_NAMES)).nonempty(),
     memoryLimit: number().min(10).max(1000),
     timeLimit: number().min(0.001).max(30),
+    outputLimit: number().min(0.001).max(10),
 });
 type Schema = Infer<typeof schema>;
 
@@ -66,11 +69,14 @@ function ExerciseEditor({cancelEditing, exerciseTypeChanged}: {
         return {
             localizedFields: getExerciseLocalizedFields(exercise, 'enUS'),
             order: exercise?.order,
+            score:  exercise?.score ?? 100,
+            allowedAttempts: exercise?.allowedAttempts ?? 100,
             exerciseType: exercise?.exerciseType ?? 'testCases',
             unlockContent: exercise?.unlockContent ?? [],
             allowedLanguages: exercise?.allowedLanguages ?? [],
             memoryLimit: exercise?.memoryLimit ?? 512,
             timeLimit: exercise?.timeLimit ?? 1,
+            outputLimit: exercise?.outputLimit ?? 1,
         }
     }, [exercise]);
 
@@ -105,10 +111,12 @@ function ExerciseEditor({cancelEditing, exerciseTypeChanged}: {
             data.localizedFields.reduce((map, field) => {map[field.locale] = field.title; return map;}, {} as {[key: string]: string}),
             data.localizedFields.reduce((map, field) => {map[field.locale] = field.notionId; return map;}, {} as {[key: string]: string}),
             data.order,
+            data.score,
+            data.allowedAttempts,
             data.exerciseType,
             data.unlockContent,
             data.allowedLanguages,
-            data.memoryLimit, data.timeLimit,
+            data.memoryLimit, data.timeLimit, data.outputLimit,
         );
         setOpenSnackbar(true);
     };
@@ -135,30 +143,44 @@ function ExerciseEditor({cancelEditing, exerciseTypeChanged}: {
                            error={Boolean(errors.order)} helperText={errors.order?.message}
                            inputProps={{ inputMode: 'numeric', pattern: '[0-9.]*' }} inputRef={ref} {...field} sx={{flex: 1}}/>
             )}/>
-            <br/><br/>
 
-            <Stack direction="row" spacing={1}>
-                <Controller name="exerciseType" control={control} render={({field}) => (
-                    <Autocomplete sx={{ width: 200 }} autoHighlight autoSelect disableClearable ref={field.ref}
-                                  value={EXERCISE_TYPES[field.value].displayName}
-                                  options={Object.keys(EXERCISE_TYPES).map(key => EXERCISE_TYPES[key].displayName)}
-                                  onChange={(event, value: string | null) => value && onExerciseTypeChanged(nameToExerciseType(value)!)}
-                                  renderInput={(params) => <TextField {...params} label="Exercise type"/>}/>
-                )} />
+            <Stack direction="row" spacing={1} marginTop={2}>
+                <Controller name="score" control={control} render={({ field: { ref, onChange, ...field } }) => (
+                    <TextField required variant="outlined" placeholder="100" type="number" label="Score"
+                               onChange={e => e.target.value ? onChange(Number(e.target.value)) : onChange(e.target.value)}
+                               error={Boolean(errors.score)} helperText={errors.score?.message}
+                               inputProps={{ inputMode: 'numeric', pattern: '[0-9.]*' }} inputRef={ref} {...field} sx={{flex: 1}}/>
+                )}/>
+
+                <Controller name="allowedAttempts" control={control} render={({ field: { ref, onChange, ...field } }) => (
+                    <TextField required variant="outlined" placeholder="100" type="number" label="Allowed attempts"
+                               onChange={e => e.target.value ? onChange(Number(e.target.value)) : onChange(e.target.value)}
+                               error={Boolean(errors.allowedAttempts)} helperText={errors.allowedAttempts?.message}
+                               inputProps={{ inputMode: 'numeric', pattern: '[0-9.]*' }} inputRef={ref} {...field} sx={{flex: 1}}/>
+                )}/>
 
                 <Controller name="unlockContent" control={control} render={({field}) => <>
                     {/* @ts-ignore */}
                     <AutocompleteSearch<Course>
-                        label="Unlock Content" placeholder="Courses..."
+                        label="Unlock Content" placeholder="Courses or contests..."
                         search={searchCourses} idsToValues={getCourses}
                         optionToId={option => option.id}
                         optionToLabel={option => option.title ?? ''}
                         optionToImageUrl={option => option.img}
                         initialIds={exercise?.unlockContent}
                         onChange={content => field.onChange(content.map(c => c.id))}
-                        sx={{flex: 1}} />
+                        sx={{flex: 3}} />
                 </>} />
             </Stack>
+
+            <br/><br/><br/>
+            <Controller name="exerciseType" control={control} render={({field}) => (
+                <Autocomplete sx={{ width: 200 }} autoHighlight autoSelect disableClearable ref={field.ref}
+                              value={EXERCISE_TYPES[field.value].displayName}
+                              options={Object.keys(EXERCISE_TYPES).map(key => EXERCISE_TYPES[key].displayName)}
+                              onChange={(event, value: string | null) => value && onExerciseTypeChanged(nameToExerciseType(value)!)}
+                              renderInput={(params) => <TextField {...params} label="Exercise type"/>}/>
+            )} />
 
             {(exerciseType === 'testCases' || exerciseType === 'code') && <>
                 <Stack marginTop={4} spacing={4} marginBottom={10} direction="column">
@@ -191,6 +213,14 @@ function ExerciseEditor({cancelEditing, exerciseTypeChanged}: {
                                 required variant="outlined" placeholder="2" type="number" label="Time limit (s)"
                                 onChange={e => e.target.value ? onChange(Number(e.target.value)) : onChange(e.target.value)}
                                 error={Boolean(errors.timeLimit)} helperText={errors.timeLimit?.message}
+                                inputProps={{ inputMode: 'numeric', pattern: '[0-9]*' }} inputRef={ref} {...field} sx={{flex: 1}} />
+                        )}/>
+
+                        <Controller name="outputLimit" control={control} render={({ field: { ref, onChange, ...field } }) => (
+                            <TextField
+                                required variant="outlined" placeholder="1" type="number" label="Output limit (MB)"
+                                onChange={e => e.target.value ? onChange(Number(e.target.value)) : onChange(e.target.value)}
+                                error={Boolean(errors.outputLimit)} helperText={errors.outputLimit?.message}
                                 inputProps={{ inputMode: 'numeric', pattern: '[0-9]*' }} inputRef={ref} {...field} sx={{flex: 1}} />
                         )}/>
                     </Stack>

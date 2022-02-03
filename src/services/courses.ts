@@ -132,22 +132,24 @@ export const getExercise = async (courseId: string, exerciseId: string) => {
 export const updateExercise = async (
     courseId: string, exerciseId: string,
     title: {[key: string]: string}, pageId: {[key: string]: string},
-    order: number,
+    order: number, score: number, allowedAttempts: number,
     exerciseType: keyof typeof EXERCISE_TYPES,
     unlockContent: string[],
     allowedLanguages: (keyof typeof LANGUAGES)[],
-    memoryLimit?: number,
-    timeLimit?: number,
+    memoryLimit?: number, timeLimit?: number, outputLimit?: number,
 ) => {
     return db.exercise(courseId, exerciseId).set({
         title: title,
         pageId: pageId,
         order: order,
+        score: score,
+        allowedAttempts: allowedAttempts,
         exerciseType: exerciseType,
         unlockContent: unlockContent,
         allowedLanguages: allowedLanguages,
         memoryLimit: memoryLimit,
         timeLimit: timeLimit,
+        outputLimit: outputLimit,
     }, {merge: true});
 }
 

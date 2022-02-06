@@ -1,7 +1,7 @@
 import React, {memo, useCallback, useContext, useEffect, useState} from "react";
 import {CourseContext, CurrentExerciseContext} from "../Course";
 import {COMPARISON_MODES, Course, Exercise, EXERCISE_TYPES} from '../../models/courses';
-import {Alert, Autocomplete, Button, Snackbar, Stack, TextField} from "@mui/material";
+import {Alert, Autocomplete, Button, FormControlLabel, Snackbar, Stack, Switch, TextField} from "@mui/material";
 import LocalizedFields, {FieldSchema, fieldSchema} from "./LocalizedFields";
 import Box from "@mui/material/Box";
 import {LANGUAGES} from "../../models/language";
@@ -10,7 +10,7 @@ import {getCourses, searchCourses, updateExercise} from "../../services/courses"
 
 import {Controller, useForm, FormProvider} from "react-hook-form";
 import {zodResolver} from "@hookform/resolvers/zod";
-import {infer as Infer, object, string, array, enum as zodEnum, number} from "zod";
+import {infer as Infer, object, string, array, enum as zodEnum, number, boolean} from "zod";
 import TestCasesForm from "./TestCasesForm";
 import CodeForm from "./CodeForm";
 import TextAnswerForm from "./TextAnswerForm";
@@ -24,7 +24,9 @@ const EXERCISE_TYPE_NAMES: readonly [string, ...string[]] = Object.keys(EXERCISE
 const LANGUAGE_NAMES: readonly [string, ...string[]] = Object.keys(LANGUAGES);
 const schema = object({
     localizedFields: array(fieldSchema).nonempty(),
-    order: number().nonnegative(),
+    isPublic: boolean(),
+    level: number().nonnegative().int(),
+    levelOrder: number().nonnegative().int(),
     score: number().min(0).max(1000).int(),
     allowedAttempts: number().min(1).max(100).int(),
     exerciseType: zodEnum(EXERCISE_TYPE_NAMES),
@@ -73,9 +75,13 @@ function ExerciseEditor({cancelEditing, exerciseTypeChanged}: {
     const handleCloseSnackbar = () => setOpenSnackbar(false);
 
     const getDefaultFieldValues = useCallback(() => {
+        const level = exercise?.order ? Math.trunc(exercise.order) : 0;
+        const levelOrder = exercise?.order ? parseInt((exercise.order - level).toFixed(3).substring(2)) : 0;
         return {
             localizedFields: getExerciseLocalizedFields(exercise, 'enUS'),
-            order: exercise?.order,
+            isPublic: exercise &&  exercise.order && exercise.order > 0,
+            level: level,
+            levelOrder: levelOrder,
             score:  exercise?.score ?? 100,
             allowedAttempts: exercise?.allowedAttempts ?? 100,
             exerciseType: exercise?.exerciseType ?? 'testCases',
@@ -97,6 +103,7 @@ function ExerciseEditor({cancelEditing, exerciseTypeChanged}: {
     });
     const {control, watch, handleSubmit, formState: {errors, isValid}, reset, setValue} = formMethods;
     errors && Object.keys(errors).length && console.log('errors:', errors);
+    const isPublic = watch('isPublic');
 
     // @ts-ignore
     const exerciseType: keyof typeof EXERCISE_TYPES = watch('exerciseType');
@@ -112,13 +119,17 @@ function ExerciseEditor({cancelEditing, exerciseTypeChanged}: {
     const onSubmit = async (data: Schema) => {
         if( !course || !exercise )
             return;
-        console.log('submit!', data)
+        console.log('submit!', data);
+
+        const levelOrder = String(data.levelOrder).padStart(3, '0');
+        const order = data.isPublic ? parseFloat(`${data.level}.${levelOrder}`) : 0;
+        console.log('Order:', order);
 
         await updateExercise(
             course.id, exercise.id,
             data.localizedFields.reduce((map, field) => {map[field.locale] = field.title; return map;}, {} as {[key: string]: string}),
             data.localizedFields.reduce((map, field) => {map[field.locale] = field.notionId; return map;}, {} as {[key: string]: string}),
-            data.order,
+            order,
             data.score,
             data.allowedAttempts,
             data.exerciseType,
@@ -145,13 +156,33 @@ function ExerciseEditor({cancelEditing, exerciseTypeChanged}: {
             <LocalizedFields />
             <br/><br/>
 
-            <Controller name="order" control={control} render={({ field: { ref, onChange, ...field } }) => (
-                <TextField required variant="outlined" placeholder="1.01" type="number" fullWidth
-                           label="Order (0 = invisible) (level = number before decimal dot, the rest is the order within level)"
-                           onChange={e => e.target.value ? onChange(Number(e.target.value)) : onChange(e.target.value)}
-                           error={Boolean(errors.order)} helperText={errors.order?.message}
-                           inputProps={{ inputMode: 'numeric', pattern: '[0-9.]*' }} inputRef={ref} {...field} sx={{flex: 1}}/>
-            )}/>
+            <Stack direction="row" spacing={1} marginTop={2}>
+                <Controller name="isPublic" control={control} render={({ field: {ref, value, onChange, ...field} }) => (
+                    <FormControlLabel label="Public" labelPlacement="start" control={
+                        <Switch checked={value === true}
+                                onChange={(event) => onChange(event.target.checked)}
+                                inputRef={ref} {...field} />
+                    } />
+                )} />
+
+                {isPublic && <>
+                    <Controller name="level" control={control} render={({ field: { ref, onChange, ...field } }) => (
+                        <TextField required variant="outlined" placeholder="4" type="number" fullWidth
+                                   label="Level"
+                                   onChange={e => e.target.value ? onChange(Number(e.target.value)) : onChange(e.target.value)}
+                                   error={Boolean(errors.level)} helperText={errors.level?.message}
+                                   inputProps={{ inputMode: 'numeric', pattern: '[0-9]*' }} inputRef={ref} {...field} sx={{flex: 1}}/>
+                    )}/>
+
+                    <Controller name="levelOrder" control={control} render={({ field: { ref, onChange, ...field } }) => (
+                        <TextField required variant="outlined" placeholder="2" type="number" fullWidth
+                                   label="Order within level"
+                                   onChange={e => e.target.value ? onChange(Number(e.target.value)) : onChange(e.target.value)}
+                                   error={Boolean(errors.levelOrder)} helperText={errors.levelOrder?.message}
+                                   inputProps={{ inputMode: 'numeric', pattern: '[0-9]*' }} inputRef={ref} {...field} sx={{flex: 1}}/>
+                    )}/>
+                </>}
+            </Stack>
 
             <Stack direction="row" spacing={1} marginTop={2}>
                 <Controller name="score" control={control} render={({ field: { ref, onChange, ...field } }) => (

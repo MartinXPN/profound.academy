@@ -21,7 +21,7 @@ export const EXERCISE_TYPES: { [key: string]: ExerciseType } = {
     multipleChoice: {id: 'multipleChoice', displayName: 'Multiple choice',
         description: 'An exercise with a single correct answer'},
 };
-
+export const COMPARISON_MODES = ['whole', 'token', 'custom'] as const;
 
 export interface TestCase {
     input: string;
@@ -43,7 +43,7 @@ export interface Exercise {
     timeLimit?: number;
     outputLimit?: number;
     floatPrecision?: number;
-    comparisonMode?: 'whole' | 'token' | 'custom';
+    comparisonMode?: typeof COMPARISON_MODES[number];
 }
 
 export interface Course {

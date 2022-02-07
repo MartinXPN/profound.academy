@@ -156,6 +156,23 @@ export const updateExercise = async (
     }, {merge: true});
 }
 
+export const updateTestCases = async (
+    courseId: string, exerciseId: string, file: File,
+    onProgressChanged: (progress: number) => void,
+    onError: (error: string) => void,
+) => {
+    const ref = firebase.storage().ref(`testCases/${courseId}/${exerciseId}`);
+    const uploadTask = ref.put(file);
+    await uploadTask.on(
+        firebase.storage.TaskEvent.STATE_CHANGED,
+        snapshot => onProgressChanged(Math.round(100 * snapshot.bytesTransferred / snapshot.totalBytes)),
+        error => onError(error.message),
+        async () => {
+            console.log('downloadURL:', await ref.getDownloadURL());
+        }
+    );
+}
+
 
 export const getFirstExercise = async (courseId: string) => {
     const exercise = await db.exercises(courseId).orderBy("order", "asc").limit(1).get();

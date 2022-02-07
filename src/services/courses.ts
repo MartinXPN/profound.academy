@@ -3,6 +3,7 @@ import {Course, Exercise, EXERCISE_TYPES, ExerciseProgress, Progress} from "../m
 import firebase from "firebase/app";
 import {SubmissionStatus} from "../models/submissions";
 import {LANGUAGES} from "../models/language";
+import axios from "axios";
 
 export const getNotionPageMap = async (pageId: string) => {
     const GET_NOTION_ENDPOINT = 'https://us-central1-profound-academy.cloudfunctions.net/getNotionPage';
@@ -159,18 +160,30 @@ export const updateExercise = async (
 export const updateTestCases = async (
     courseId: string, exerciseId: string, file: File,
     onProgressChanged: (progress: number) => void,
-    onError: (error: string) => void,
 ) => {
-    const ref = firebase.storage().ref(`testCases/${courseId}/${exerciseId}`);
-    const uploadTask = ref.put(file);
-    await uploadTask.on(
-        firebase.storage.TaskEvent.STATE_CHANGED,
-        snapshot => onProgressChanged(Math.round(100 * snapshot.bytesTransferred / snapshot.totalBytes)),
-        error => onError(error.message),
-        async () => {
-            console.log('downloadURL:', await ref.getDownloadURL());
-        }
-    );
+    onProgressChanged(5);
+    const uploadUrl = await firebase.functions().httpsCallable('getS3UploadUrl')({
+        courseId: courseId,
+        exerciseId: exerciseId,
+        contentType: file.type,
+    });
+    console.log('uploadURL:', uploadUrl.data);
+
+    const res = await axios.request({
+        method: 'put',
+        url: uploadUrl.data,
+        data: file,
+        headers: {
+            'Content-Type': file.type,
+            'x-amz-server-side-encryption': 'AES256'
+        },
+        onUploadProgress: p => {
+            onProgressChanged(100 * p.loaded / p.total);
+            console.log('progress:', p);
+        },
+    });
+    onProgressChanged(100);
+    console.log('uploaded the zip file:', res);
 }
 
 

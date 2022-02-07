@@ -8,6 +8,7 @@ import {processResult, submit} from './services/submissions';
 import {Submission} from './models/submissions';
 import {Comment} from './models/forum';
 import {updateInfoQueue} from './services/users';
+import {getS3UploadSignedUrl, isCourseInstructor} from './services/courses';
 
 // Start writing Firebase Functions
 // https://firebase.google.com/docs/functions/typescript
@@ -41,6 +42,15 @@ export const getNotionPage = functions.https.onRequest(async (req, res) => {
     });
 });
 
+exports.getS3UploadUrl = functions.https.onCall(async (data, context) => {
+    if (!await isCourseInstructor(data.courseId, context.auth?.uid))
+        throw Error(`User ${context.auth?.uid} tried to modify tests of ${data.courseId} course`);
+
+    functions.logger.info(`getS3UploadUrl: ${JSON.stringify(data)}`);
+    const url = getS3UploadSignedUrl(data.exerciseId, data.contentType);
+    functions.logger.info(`got URL: ${url}`);
+    return url;
+});
 
 export const submitSolution = functions.firestore
     .document('submissionQueue/{userId}/private/{submissionId}')

@@ -45,11 +45,7 @@ function TestCasesForm() {
         if( !course || !exercise )
             return;
         console.log('upload:', file.name);
-        await updateTestCases(
-            course.id, exercise.id, file,
-                progress => setProgress(progress),
-                error => setError(error),
-        );
+        await updateTestCases(course.id, exercise.id, file, progress => setProgress(progress));
     }, [course, exercise]);
 
 

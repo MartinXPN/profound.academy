@@ -165,7 +165,7 @@ function ExerciseEditor({cancelEditing, exerciseTypeChanged}: {
                     } />
                 )} />
 
-                {isPublic && <>
+                {Boolean(isPublic) && <>
                     <Controller name="level" control={control} render={({ field: { ref, onChange, ...field } }) => (
                         <TextField required variant="outlined" placeholder="4" type="number" fullWidth
                                    label="Level"

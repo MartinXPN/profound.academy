@@ -12,8 +12,8 @@ AWS.config.update({
 export const getS3UploadSignedUrl = (exerciseId: string, contentType: string): string => {
     const s3 = new AWS.S3();
     const s3Params = {
-        Bucket: 'lambda-judge-problems',
-        Key: `problems/${exerciseId}.zip`,
+        Bucket: 'lambda-judge-tests-bucket',
+        Key: `${exerciseId}.zip`,
         Expires: 600, // Expires in 10 minutes
         ContentType: contentType,
         ServerSideEncryption: 'AES256',

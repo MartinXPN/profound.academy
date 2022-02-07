@@ -28,7 +28,7 @@ export default function Exercise({launchCourse}: {launchCourse: () => void}) {
     console.log('exercise:', exercise);
 
     const {exerciseId} = useParams<{ exerciseId: string }>();
-    const [exerciseType, setExerciseType] = useState(exercise?.exerciseType ?? EXERCISE_TYPES.testCases.id);
+    const [exerciseType, setExerciseType] = useState<keyof typeof EXERCISE_TYPES>(exercise?.exerciseType ?? 'testCases');
     const [showSignIn, setShowSignIn] = useState(false);
     const [splitPos, setSplitPos] = useStickyState<number[] | null>(null, `splitPos-${auth?.currentUserId}`);
     const [currentTab, setCurrentTab] = useState<'description' | 'allSubmissions' | 'bestSubmissions' | 'codeDrafts' | 'edit'>('description');

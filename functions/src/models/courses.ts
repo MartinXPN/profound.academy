@@ -21,7 +21,7 @@ export const EXERCISE_TYPES: { [key: string]: ExerciseType } = {
     multipleChoice: {id: 'multipleChoice', displayName: 'Multiple choice',
         description: 'An exercise with a single correct answer'},
 };
-
+export const COMPARISON_MODES = ['whole', 'token', 'custom'] as const;
 
 export interface TestCase {
     input: string;
@@ -33,6 +33,8 @@ export interface Exercise {
     title: string | {[key: string]: string};        // string or mapping {locale => titleText}
     pageId: string | {[key: string]: string};       // string or mapping {locale => pageId}
     order: number;
+    score?: number;
+    allowedAttempts?: number;
     exerciseType?: keyof typeof EXERCISE_TYPES;
     unlockContent?: string[],
     allowedLanguages?: (keyof typeof LANGUAGES)[];
@@ -41,7 +43,7 @@ export interface Exercise {
     timeLimit?: number;
     outputLimit?: number;
     floatPrecision?: number;
-    comparisonMode?: string;
+    comparisonMode?: typeof COMPARISON_MODES[number];
 }
 
 export interface Course {
@@ -49,8 +51,8 @@ export interface Course {
     img: string;
     revealsAt: firebase.firestore.Timestamp;
     freezeAt: firebase.firestore.Timestamp;
-    visibility: string;
-    rankingVisibility: string;
+    visibility: 'public' | 'unlisted' | 'private';
+    rankingVisibility: 'public' | 'private';
     allowViewingSolutions: boolean;
     title: string;
     author: string;

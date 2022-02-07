@@ -3,6 +3,7 @@ import {Course, Exercise, EXERCISE_TYPES, ExerciseProgress, Progress} from "../m
 import firebase from "firebase/app";
 import {SubmissionStatus} from "../models/submissions";
 import {LANGUAGES} from "../models/language";
+import axios from "axios";
 
 export const getNotionPageMap = async (pageId: string) => {
     const GET_NOTION_ENDPOINT = 'https://us-central1-profound-academy.cloudfunctions.net/getNotionPage';
@@ -132,23 +133,57 @@ export const getExercise = async (courseId: string, exerciseId: string) => {
 export const updateExercise = async (
     courseId: string, exerciseId: string,
     title: {[key: string]: string}, pageId: {[key: string]: string},
-    order: number,
+    order: number, score: number, allowedAttempts: number,
     exerciseType: keyof typeof EXERCISE_TYPES,
     unlockContent: string[],
     allowedLanguages: (keyof typeof LANGUAGES)[],
-    memoryLimit?: number,
-    timeLimit?: number,
+    memoryLimit?: number, timeLimit?: number, outputLimit?: number,
+    floatPrecision?: number, comparisonMode?: 'whole' | 'token' | 'custom',
 ) => {
     return db.exercise(courseId, exerciseId).set({
         title: title,
         pageId: pageId,
         order: order,
+        score: score,
+        allowedAttempts: allowedAttempts,
         exerciseType: exerciseType,
         unlockContent: unlockContent,
         allowedLanguages: allowedLanguages,
         memoryLimit: memoryLimit,
         timeLimit: timeLimit,
+        outputLimit: outputLimit,
+        floatPrecision:  floatPrecision,
+        comparisonMode: comparisonMode,
     }, {merge: true});
+}
+
+export const updateTestCases = async (
+    courseId: string, exerciseId: string, file: File,
+    onProgressChanged: (progress: number) => void,
+) => {
+    onProgressChanged(5);
+    const uploadUrl = await firebase.functions().httpsCallable('getS3UploadUrl')({
+        courseId: courseId,
+        exerciseId: exerciseId,
+        contentType: file.type,
+    });
+    console.log('uploadURL:', uploadUrl.data);
+
+    const res = await axios.request({
+        method: 'put',
+        url: uploadUrl.data,
+        data: file,
+        headers: {
+            'Content-Type': file.type,
+            'x-amz-server-side-encryption': 'AES256'
+        },
+        onUploadProgress: p => {
+            onProgressChanged(100 * p.loaded / p.total);
+            console.log('progress:', p);
+        },
+    });
+    onProgressChanged(100);
+    console.log('uploaded the zip file:', res);
 }
 
 

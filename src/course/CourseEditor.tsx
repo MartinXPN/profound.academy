@@ -225,19 +225,19 @@ function CourseEditor({course}: {course?: Course | null}) {
                 <Controller name="revealsAt" control={control} render={({ field }) => (
                     <DateTimePicker label="Course reveals for students at" value={field.value} inputRef={field.ref}
                                     renderInput={params => <TextField {...params} />}
-                                    onChange={(newDate: Moment | null) => newDate && setValue('revealsAt', newDate.toDate(), {shouldTouch: true})} />
+                                    onChange={(newDate: Moment | null) => newDate && field.onChange(newDate.toDate())} />
                 )}/>
                 <Controller name="freezeAt" control={control} render={({ field }) => (
                     <DateTimePicker label="Rankings freeze at" value={field.value} inputRef={field.ref}
                                     renderInput={params => <TextField {...params} />}
-                                    onChange={(newDate: Moment | null) => newDate && setValue('freezeAt', newDate.toDate(), {shouldTouch: true})} />
+                                    onChange={(newDate: Moment | null) => newDate && field.onChange(newDate.toDate())} />
                 )}/>
 
                 <Typography sx={{flex: 1}}/>
                 <Controller name="rankingVisibility" control={control} render={({ field }) => (
                     <FormControlLabel label="Is ranking visible" labelPlacement="start" control={
                         <Switch checked={field.value === 'public'} inputRef={field.ref}
-                                onChange={(event) => setValue('rankingVisibility', event.target.checked ? 'public' : 'private', {shouldTouch: true})}/>
+                                onChange={e => field.onChange(e.target.checked ? 'public' : 'private')} />
                         } />
                 )} />
             </LocalizationProvider>

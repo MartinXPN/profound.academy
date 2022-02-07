@@ -16,6 +16,7 @@
   },
   "main": "lib/index.js",
   "dependencies": {
+    "aws-sdk": "^2.1069.0",
     "cors": "^2.8.5",
     "firebase-admin": "^9.11.1",
     "firebase-functions": "^3.14.1",

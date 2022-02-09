@@ -40,7 +40,9 @@ export function useStickyState<T>(defaultValue: T, key: string) {
  * Get localized exercise params
  * @param param string or object mapping from locale to text value
  */
-export const getLocalizedParam = (param: string | {[key: string]: string}) => {
+export const getLocalizedParam = (param: string | {[key: string]: string}): string => {
+    if( !param )
+        return '';
     if( typeof param === 'string' )
         return param;
 
@@ -53,12 +55,12 @@ export const getLocalizedParam = (param: string | {[key: string]: string}) => {
 };
 
 
-export const tomorrow = (d: Date) => {
+export const tomorrow = (d: Date): Date => {
     const res = new Date(d);
     res.setDate(res.getDate() + 1);
     return res;
 };
 
-export const notionPageToId = (page: string) => {
+export const notionPageToId = (page: string): string => {
     return page.split('-').at(-1) ?? '';
 };

@@ -43,6 +43,34 @@
       ]
     },
     {
+      "collectionGroup": "exerciseScore_2022_02_05",
+      "queryScope": "COLLECTION_GROUP",
+      "fields": [
+        {
+          "fieldPath": "courseId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "level",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "exerciseScore_2022_02_06",
+      "queryScope": "COLLECTION_GROUP",
+      "fields": [
+        {
+          "fieldPath": "courseId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "level",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
       "collectionGroup": "exerciseUpsolveScore",
       "queryScope": "COLLECTION_GROUP",
       "fields": [

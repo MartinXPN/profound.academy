@@ -7,7 +7,8 @@ import * as http from 'node:http';
 import {db} from './db';
 import {Submission, SubmissionResult} from '../models/submissions';
 
-const LAMBDA_JUDGE_URL='https://judge.profound.academy/check';
+// const LAMBDA_JUDGE_URL='https://judge.profound.academy/check';
+const LAMBDA_JUDGE_URL='https://jdc8h3yyag.execute-api.us-east-1.amazonaws.com/Prod/check/';
 const PROCESS_SUBMISSION_CALLBACK_URL='https://us-central1-profound-academy.cloudfunctions.net/processSubmissionResult';
 
 

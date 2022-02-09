@@ -9,7 +9,7 @@ import {Course, Exercise as ExerciseModel} from "../models/courses";
 import {AuthContext} from "../App";
 import CourseDrawer from "./drawer/Drawer";
 import Exercise from "./exercise/Exercise";
-import {getLocalizedParam, safeParse} from "../util";
+import {safeParse} from "../util";
 import StatusPage from "./StatusPage";
 
 const CourseEditor = lazy(() => import('./CourseEditor'));
@@ -51,8 +51,6 @@ function CurrentCourseView({openPage}: {openPage: (page: string) => void}) {
     }, [exerciseId, auth?.currentUserId, course?.id]);
 
     const openExercise = useCallback((exercise: ExerciseModel) => {
-        exercise.title = getLocalizedParam(exercise.title);
-        exercise.pageId = getLocalizedParam(exercise.pageId);
         openPage(exercise.id);
         setCurrentExercise(exercise);
     }, [openPage]);

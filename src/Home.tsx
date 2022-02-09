@@ -1,4 +1,4 @@
-import React, {useContext, useState} from "react";
+import React, {useContext, useState, memo} from "react";
 import {AuthContext} from "./App";
 import ActivityHeatmap from "./user/ActivityHeatmap";
 import CourseList from "./course/CourseList";
@@ -18,7 +18,7 @@ const BigImage = styled('img')({
     marginRight: 'auto',
 });
 
-function Header() {
+function HeaderView() {
     const [showSignInOptions, setShowSignInOptions] = useState(false);
     const auth = useContext(AuthContext);
     const landingPageImageURL = 'https://firebasestorage.googleapis.com/v0/b/profound-academy.appspot.com/o/images%2Fwebsite-landing.jpg?alt=media&token=a0d2a928-9de7-4886-a0ad-ca584a82b011';
@@ -39,6 +39,8 @@ function Header() {
         }
     </>
 }
+const Header = memo(HeaderView);
+
 
 function Home() {
     const auth = useContext(AuthContext);
@@ -51,4 +53,4 @@ function Home() {
     </>
 }
 
-export default Home;
+export default memo(Home);

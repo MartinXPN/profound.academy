@@ -13,13 +13,13 @@ import {CourseContext} from "./Course";
 import {Equalizer} from "@mui/icons-material";
 import {Stack, Typography} from "@mui/material";
 import useAsyncEffect from "use-async-effect";
-import {useHistory} from "react-router-dom";
+import {useNavigate} from "react-router-dom";
 import ClickableTableCell from "../common/ClickableTableCell";
 import SmallAvatar from "../common/SmallAvatar";
 
 
 function RankingTable({metric}: {metric: string}) {
-    const history = useHistory();
+    const navigate = useNavigate();
     const {course} = useContext(CourseContext);
     const [page, setPage] = useState(0);
     const rowsPerPage = 20;
@@ -90,8 +90,8 @@ function RankingTable({metric}: {metric: string}) {
     }, unsubscribe => unsubscribe && unsubscribe(), [course, levelOpen, exerciseMetric]);
 
     const onUserClicked = useCallback((userId: string) => {
-        history.push(`/users/${userId}`);
-    }, [history]);
+        navigate(`/users/${userId}`);
+    }, [navigate]);
 
 
     const onLevelClicked = useCallback((level: number) => {

@@ -7,7 +7,7 @@ import StyledFirebaseAuth from 'react-firebaseui/StyledFirebaseAuth';
 import firebase from 'firebase/app';
 import 'firebase/auth';
 import {AuthContext} from "../App";
-import {useHistory} from "react-router-dom";
+import {useNavigate} from "react-router-dom";
 
 // Configure FirebaseUI.
 const uiConfig = {
@@ -53,7 +53,7 @@ export const SignIn = memo(function SignIn() {
 
 export function AppBarProfile() {
     const auth = useContext(AuthContext);
-    const history = useHistory();
+    const navigate = useNavigate();
 
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
     const open = Boolean(anchorEl);
@@ -66,8 +66,8 @@ export function AppBarProfile() {
         await firebase.auth().signOut();
     }
     const onUserProfileClicked = useCallback(() => {
-        history.push(`/users/${auth.currentUserId}`);
-    }, [auth.currentUserId, history]);
+        navigate(`/users/${auth.currentUserId}`);
+    }, [auth.currentUserId, navigate]);
 
     return <>
         <IconButton

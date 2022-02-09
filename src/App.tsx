@@ -1,5 +1,5 @@
-import React, {createContext, useEffect} from 'react';
-import {BrowserRouter as Router, Switch, Route} from 'react-router-dom';
+import React, {Suspense, createContext, lazy, useEffect} from 'react';
+import {BrowserRouter as Router, Route, Routes} from 'react-router-dom';
 
 import firebase from 'firebase/app';
 import 'firebase/auth';
@@ -8,12 +8,13 @@ import "./firebase";
 
 import { ThemeProvider, StyledEngineProvider, createTheme } from '@mui/material/styles';
 
-import Home from "./Home";
-import Course from "./course/Course";
-import UserProfile from "./user/UserProfile";
 import {updateUserInfo} from "./services/users";
 import {useStickyState} from "./util";
-import CourseEditor from "./course/CourseEditor";
+import Home from './Home';
+import UserProfile from './user/UserProfile';
+// Do not include the Course and the editor in the main bundle as they're pretty heavy
+const Course = lazy(() => import('./course/Course'));
+const CourseEditor = lazy(() => import('./course/CourseEditor'));
 
 
 firebase.analytics();
@@ -62,7 +63,6 @@ function App() {
 
 
     return (
-        <Router>
         <StyledEngineProvider injectFirst>
             <ThemeProvider theme={theme}>
             <AuthContext.Provider value={{
@@ -71,16 +71,20 @@ function App() {
                 currentUserId: currentUser?.uid ?? undefined,
                 setCurrentUser: setCurrentUser,
             }}>
-            <Switch>
-                <Route exact path="/"><Home/></Route>
-                <Route exact path={'/users/:userId'}><UserProfile/></Route>
-                <Route exact path={'/new'}><CourseEditor/></Route>
-                <Route path={'/:courseId'}><Course/></Route>
-            </Switch>
+            <Router>
+            <Suspense fallback={<div>Loading...</div>}>
+                <Routes>
+                    <Route path="/" element={<Home/>} />
+                    <Route path="/users/:userId" element={<UserProfile/>} />
+                    <Route path="/new" element={<CourseEditor/>} />
+                    <Route path=":courseId" element={<Course/>} />
+                    <Route path=":courseId/*" element={<Course/>} />
+                </Routes>
+            </Suspense>
+            </Router>
             </AuthContext.Provider>
             </ThemeProvider>
         </StyledEngineProvider>
-        </Router>
     );
 }
 

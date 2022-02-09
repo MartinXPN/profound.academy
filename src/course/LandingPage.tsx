@@ -6,20 +6,15 @@ import {Typography} from "@mui/material";
 import {AuthContext} from "../App";
 import {CourseContext} from "./Course";
 import {Edit} from "@mui/icons-material";
-import {useHistory, useRouteMatch} from "react-router-dom";
+import {useNavigate} from "react-router-dom";
 import Box from "@mui/material/Box";
 
 
 function LandingPage({onStartCourseClicked}: {onStartCourseClicked: () => void}) {
     const auth = useContext(AuthContext);
     const {course} = useContext(CourseContext);
-    const history = useHistory();
-    const match = useRouteMatch();
-
-    const onEditClicked = () => {
-        const url = match.url.replace(/\/$/, '');
-        history.push(`${url}/edit`);
-    }
+    const navigate = useNavigate();
+    const onEditClicked = () => navigate('edit');
 
     const renderer = ({ days, hours, minutes, seconds, completed }:
                           {days: number, hours: number, minutes: number, seconds: number, completed: boolean}) => {

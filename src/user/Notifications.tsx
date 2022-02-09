@@ -5,13 +5,13 @@ import NotificationsIcon from '@mui/icons-material/Notifications';
 import {AuthContext} from "../App";
 import {Notification} from "../models/notifications";
 import {onNotificationsChanged, readNotification} from "../services/notifications";
-import {useHistory} from "react-router-dom";
+import {useNavigate} from "react-router-dom";
 import {Done} from "@mui/icons-material";
 
 
 export default function AppBarNotifications() {
     const auth = useContext(AuthContext);
-    const history = useHistory();
+    const navigate = useNavigate();
 
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
     const open = Boolean(anchorEl);
@@ -25,8 +25,8 @@ export default function AppBarNotifications() {
         if( !auth.currentUserId )
             return;
         await readNotification(auth.currentUserId, notification.id);
-        history.push(notification.url);
-    }, [auth.currentUserId, history]);
+        navigate(notification.url);
+    }, [auth.currentUserId, navigate]);
 
     useEffect(() => {
         if( !auth.currentUserId ) {

@@ -1,5 +1,5 @@
 import React, {useContext, useEffect, useState, memo} from "react";
-import {useHistory} from "react-router-dom";
+import {useNavigate} from "react-router-dom";
 
 import { styled, useTheme, Theme, CSSObject } from '@mui/material/styles';
 import Box from '@mui/material/Box';
@@ -113,13 +113,13 @@ function CourseDrawer({onItemSelected, onStatusClicked, onCreateExerciseClicked}
     const auth = useContext(AuthContext);
     const {course} = useContext(CourseContext);
     const theme = useTheme();
-    const history = useHistory();
+    const navigate = useNavigate();
     const [open, setOpen] = useState(false);
     const [progress, setProgress] = useState<Progress | null>(null);
 
     const handleDrawerOpen = () => setOpen(true);
     const handleDrawerClose = () => setOpen(false);
-    const onHomeClicked = () => history.push('/');
+    const onHomeClicked = () => navigate('/');
     const isCourseInstructor = course && auth.currentUserId && course.instructors.includes(auth.currentUserId);
 
 

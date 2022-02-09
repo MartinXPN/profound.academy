@@ -9,7 +9,7 @@ import LocalizationProvider from '@mui/lab/LocalizationProvider';
 import DateTimePicker from '@mui/lab/DateTimePicker';
 import {styled} from "@mui/material/styles";
 import Content from "./Content";
-import {useHistory} from "react-router-dom";
+import {useNavigate} from "react-router-dom";
 import {getUsers, searchUser, uploadPicture} from "../services/users";
 import {doesExist, updateCourse} from "../services/courses";
 import {User} from "../models/users";
@@ -63,7 +63,7 @@ const fileTypes = ['jpeg', 'jpg', 'png', 'webp'];
 
 
 function CourseEditor({course}: {course?: Course | null}) {
-    const history = useHistory();
+    const navigate = useNavigate();
     const auth = useContext(AuthContext);
     const [openSnackbar, setOpenSnackbar] = useState(false);
 
@@ -106,10 +106,10 @@ function CourseEditor({course}: {course?: Course | null}) {
             data.title, data.author, data.instructors, data.details, data.introduction
         );
 
-        history.push(`/${data.id}`);
+        navigate(`/${data.id}`);
         setOpenSnackbar(true);
     }
-    const onCancel = () => history.goBack();
+    const onCancel = () => navigate(-1);
 
     const handleImageChange = useCallback(async (file: File) => {
         if( !auth.currentUserId )

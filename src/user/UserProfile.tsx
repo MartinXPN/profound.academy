@@ -14,6 +14,8 @@ function UserProfile() {
     const [currentTab, setCurrentTab] = useState('overview');
     console.log(userId);
 
+    if( !userId )
+        return <></>
     return <>
         <ProfileAppBar />
 

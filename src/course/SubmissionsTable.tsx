@@ -13,7 +13,6 @@ import {SubmissionResult} from "../models/submissions";
 import moment from "moment/moment";
 import SubmissionBackdrop from "./SubmissionBackdrop";
 import {statusToColor} from "./colors";
-import {RouteComponentProps, withRouter} from "react-router-dom";
 import {lastExerciseId} from "./Course";
 import {BottomLoading} from "../common/loading";
 import {Stack, Typography} from "@mui/material";
@@ -22,6 +21,7 @@ import ClickableTableCell from "../common/ClickableTableCell";
 import {LANGUAGES} from "../models/language";
 import {getLocalizedParam} from "../util";
 import Box from "@mui/material/Box";
+import {useNavigate} from "react-router-dom";
 
 
 interface Column {
@@ -45,7 +45,8 @@ const columns: Column[] = [
 ];
 
 
-interface Props extends RouteComponentProps<any> {
+interface Props {
+    navigate: any,
     reset: number;
     onLoadNext: (startAfterId: string | null, onChange: (submissions: SubmissionResult[], more: boolean) => void) => Promise<() => void>;
     columns: Column[];
@@ -59,7 +60,7 @@ interface State {
     updateSubscriptions: (() => void)[],
 }
 
-class SubmissionsTableC extends Component<Props, State> {
+class SubmissionsTable extends Component<Props, State> {
     constructor(props: Props) {
         super(props);
         this.state = {page: 0, hasMore: true, pageSubmissions: [], updateSubscriptions: []};
@@ -77,12 +78,12 @@ class SubmissionsTableC extends Component<Props, State> {
 
     onSubmissionClicked = (submission: SubmissionResult) => this.setState({displayedSubmission: submission});
     onCloseSubmission = () => this.setState({displayedSubmission: undefined});
-    onUserClicked = (userId: string) => this.props.history.push(`/users/${userId}`);
-    onExerciseClicked = (courseId: string, exerciseId: string) => this.props.history.push(`/${courseId}/${exerciseId}`);
+    onUserClicked = (userId: string) => this.props.navigate(`/users/${userId}`);
+    onExerciseClicked = (courseId: string, exerciseId: string) => this.props.navigate(`/${courseId}/${exerciseId}`);
     onCourseClicked = (courseId: string) => {
         const lastEx = lastExerciseId(this.context.auth?.currentUserId, courseId);
-        if( lastEx )    this.props.history.push(`/${courseId}/${lastEx}`);
-        else            this.props.history.push(`/${courseId}`);
+        if( lastEx )    this.props.navigate(`/${courseId}/${lastEx}`);
+        else            this.props.navigate(`/${courseId}`);
     };
     unsubscribeAll = () => {
         console.log('unsubscribing from all the submission listeners');
@@ -188,16 +189,15 @@ class SubmissionsTableC extends Component<Props, State> {
     }
 }
 
-const SubmissionsTable = withRouter(SubmissionsTableC);
-
 
 export function UserSubmissionsTable({rowsPerPage, userId}: {rowsPerPage: number, userId: string}) {
     const onLoadNext = async (startAfterId: string | null, onChange: (submissions: SubmissionResult[], more: boolean) => void) =>
         await onUserSubmissionsChanged(userId, startAfterId ?? null, rowsPerPage, onChange);
 
     const [reset, setReset] = useState(0);
+    const navigate = useNavigate();
     useEffect(() => setReset(r => r + 1), [userId]);
-    return <SubmissionsTable reset={reset} onLoadNext={onLoadNext} columns={columns.filter(c => c.id !== 'userDisplayName')}/>
+    return <SubmissionsTable reset={reset} navigate={navigate} onLoadNext={onLoadNext} columns={columns.filter(c => c.id !== 'userDisplayName')}/>
 }
 
 export function UserDateSubmissionsTable({rowsPerPage, userId, startDate, endDate}: {rowsPerPage: number, userId: string, startDate: Date, endDate: Date}) {
@@ -205,8 +205,9 @@ export function UserDateSubmissionsTable({rowsPerPage, userId, startDate, endDat
         await onUserSubmissionsChanged(userId, startAfterId ?? null, rowsPerPage, onChange, startDate, endDate, 'asc');
 
     const [reset, setReset] = useState(0);
+    const navigate = useNavigate();
     useEffect(() => setReset(r => r + 1), [userId]);
-    return <SubmissionsTable reset={reset} onLoadNext={onLoadNext} columns={columns.filter(c => c.id !== 'userDisplayName')}/>
+    return <SubmissionsTable reset={reset} navigate={navigate} onLoadNext={onLoadNext} columns={columns.filter(c => c.id !== 'userDisplayName')}/>
 }
 
 
@@ -215,8 +216,9 @@ export function CourseSubmissionsTable({rowsPerPage, course}: {rowsPerPage: numb
         await onCourseSubmissionsChanged(course.id, startAfterId ?? null, rowsPerPage, onChange);
 
     const [reset, setReset] = useState(0);
+    const navigate = useNavigate();
     useEffect(() => setReset(r => r + 1), [course.id]);
-    return <SubmissionsTable reset={reset} onLoadNext={onLoadNext} columns={columns.filter(c => c.id !== 'courseTitle')}/>
+    return <SubmissionsTable reset={reset} navigate={navigate} onLoadNext={onLoadNext} columns={columns.filter(c => c.id !== 'courseTitle')}/>
 }
 
 export function ExerciseSubmissionsTable({rowsPerPage, course, exercise, mode}: {rowsPerPage: number, course: Course, exercise: Exercise, mode: 'all' | 'best'}) {
@@ -224,6 +226,7 @@ export function ExerciseSubmissionsTable({rowsPerPage, course, exercise, mode}: 
         await onSubmissionsChanged(course.id, exercise.id, mode, startAfterId ?? null, rowsPerPage, onChange);
 
     const [reset, setReset] = useState(0);
+    const navigate = useNavigate();
     useEffect(() => setReset(r => r + 1), [course.id, exercise.id, mode]);
-    return <SubmissionsTable reset={reset} onLoadNext={onLoadNext} columns={columns.filter(c => c.id !== 'courseTitle' && c.id !== 'exerciseTitle')}/>
+    return <SubmissionsTable reset={reset} navigate={navigate} onLoadNext={onLoadNext} columns={columns.filter(c => c.id !== 'courseTitle' && c.id !== 'exerciseTitle')}/>
 }

@@ -8,7 +8,7 @@ import {deleteComment, onCommentRepliesChanged, updateComment, vote} from "../..
 import Reply from "./Reply";
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import Menu from "@mui/material/Menu";
-import {useHistory} from "react-router-dom";
+import {useNavigate} from "react-router-dom";
 import moment from "moment";
 import Box from "@mui/material/Box";
 import {styled} from "@mui/material/styles";
@@ -80,7 +80,7 @@ function CommentView({comment, allowReply}: {
     comment: Comment,
     allowReply: boolean
 }) {
-    const history = useHistory();
+    const navigate = useNavigate();
     const auth = useContext(AuthContext);
 
     const [replies, setReplies] = useState<Comment[]>([]);
@@ -122,8 +122,8 @@ function CommentView({comment, allowReply}: {
     }, [comment.id]);
 
     const onUserClicked = useCallback((userId: string) => {
-        history.push(`/users/${userId}`);
-    }, [history]);
+        navigate(`/users/${userId}`);
+    }, [navigate]);
 
     return <>
         <ListItem key={comment.id} alignItems="flex-start">

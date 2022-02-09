@@ -1,5 +1,5 @@
-import React, {createContext, useCallback, useContext, useEffect, useState} from "react";
-import {Route, Switch, useHistory, useParams, useRouteMatch} from "react-router-dom";
+import React, {createContext, memo, lazy, useCallback, useContext, useEffect, useState, Suspense} from "react";
+import {Route, Routes, useNavigate, useParams} from "react-router-dom";
 
 import {styled} from '@mui/material/styles';
 
@@ -11,7 +11,8 @@ import CourseDrawer from "./drawer/Drawer";
 import Exercise from "./exercise/Exercise";
 import {getLocalizedParam, safeParse} from "../util";
 import StatusPage from "./StatusPage";
-import CourseEditor from "./CourseEditor";
+
+const CourseEditor = lazy(() => import('./CourseEditor'));
 
 
 const DrawerHeader = styled('div')(({ theme }) => ({
@@ -85,7 +86,7 @@ function CurrentCourseView({openPage}: {openPage: (page: string) => void}) {
 
     let content;
     if (exerciseId === 'status' )       content = <StatusPage />
-    else if (exerciseId === 'edit' )    content = <CourseEditor course={course} />
+    else if (exerciseId === 'edit' )    content = <Suspense fallback={<></>}><CourseEditor course={course} /></Suspense>
     else                                content = <Exercise launchCourse={launchCourse} />
     return <>
         <CurrentExerciseContext.Provider value={{exercise: currentExercise}}>
@@ -111,35 +112,29 @@ const Root = styled('div')({
 
 function CourseView() {
     const auth = useContext(AuthContext);
-    const history = useHistory();
-    const match = useRouteMatch();
+    const navigate = useNavigate();
     const {courseId} = useParams<{ courseId: string }>();
     const [course, setCourse] = useState<Course | null>(null);
 
     useAsyncEffect(async () => {
+        if( !courseId )
+            return;
         const course = await getCourse(courseId);
         setCourse(course);
     }, [courseId, auth]);
 
-    const openPage = useCallback((pageId: string) => {
-        const url = match.url.replace(/\/$/, '');
-        history.push(`${url}/${pageId}`);
-    }, [history, match.url]);
+    const openPage = useCallback((pageId: string) => navigate(pageId), [navigate]);
 
     if( !course )
         return <></>
     return (
         <CourseContext.Provider value={{course: course}}>
-        <Switch>
-            <Route path={`${match.path}/:exerciseId?`}>
-
-            <Root>
-                <CurrentCourseView openPage={openPage} />
-            </Root>
-            </Route>
-        </Switch>
+        <Routes>
+            <Route path=":exerciseId" element={<Root><CurrentCourseView openPage={openPage} /></Root>} />
+            <Route path="" element={<Root><CurrentCourseView openPage={openPage} /></Root>} />
+        </Routes>
         </CourseContext.Provider>
     );
 }
 
-export default CourseView;
+export default memo(CourseView);

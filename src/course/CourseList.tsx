@@ -9,7 +9,7 @@ import Box from "@mui/material/Box";
 import {Course} from '../models/courses';
 import {getAllCourses, getCompletedCourses, getUserCourses} from "../services/courses";
 import useAsyncEffect from "use-async-effect";
-import {useHistory} from "react-router-dom";
+import {useNavigate} from "react-router-dom";
 import {useStickyState} from "../util";
 import {lastExerciseId} from "./Course";
 import {AuthContext} from "../App";
@@ -26,7 +26,7 @@ function CourseList({variant, title, userId}: {
     variant: 'allCourses' | 'userCourses' | 'completedCourses', title: string, userId?: string
 }) {
     const auth = useContext(AuthContext);
-    const history = useHistory();
+    const navigate = useNavigate();
     const [courses, setCourses] = useStickyState<Course[] | null>(null, `${variant}-${userId}`);
     const [hasInstructorPermissions, setHasInstructorPermissions] = useStickyState(false, `isInstructor-${userId}`);
     const isCurrentUserCourses = userId && auth.currentUserId === userId && variant === 'userCourses';
@@ -53,12 +53,12 @@ function CourseList({variant, title, userId}: {
         setHasInstructorPermissions(isInstructor);
     }, [isCurrentUserCourses, auth.currentUserId, setHasInstructorPermissions]);
 
-    const onCreateCourseClicked = useCallback(() => history.push('/new'), [history]);
+    const onCreateCourseClicked = useCallback(() => navigate('/new'), [navigate]);
     const onCourseSelected = useCallback((courseId: string) => {
         const lastEx = lastExerciseId(auth?.currentUserId, courseId);
-        if( lastEx )    history.push(`/${courseId}/${lastEx}`);
-        else            history.push(`/${courseId}`);
-    }, [auth?.currentUserId, history]);
+        if( lastEx )    navigate(`/${courseId}/${lastEx}`);
+        else            navigate(`/${courseId}`);
+    }, [auth?.currentUserId, navigate]);
 
 
     if( !courses || courses.length === 0 )

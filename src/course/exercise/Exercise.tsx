@@ -1,5 +1,5 @@
 import {useParams} from "react-router-dom";
-import React, {useCallback, useContext, useState} from "react";
+import React, {lazy, useCallback, useContext, useState, memo, Suspense} from "react";
 import {AuthContext} from "../../App";
 import {getLocalizedParam, useStickyState} from "../../util";
 import LandingPage from "../LandingPage";
@@ -17,11 +17,12 @@ import OutlinedButton from "../../common/OutlinedButton";
 import Box from "@mui/material/Box";
 import CodeDrafts from "../CodeDrafts";
 import {Edit} from "@mui/icons-material";
-import ExerciseEditor from "./ExerciseEditor";
 import {EXERCISE_TYPES} from "../../models/courses";
 
+const ExerciseEditor = lazy(() => import('./ExerciseEditor'));
 
-export default function Exercise({launchCourse}: {launchCourse: () => void}) {
+
+function Exercise({launchCourse}: {launchCourse: () => void}) {
     const auth = useContext(AuthContext);
     const {course} = useContext(CourseContext);
     const {exercise} = useContext(CurrentExerciseContext);
@@ -80,7 +81,7 @@ export default function Exercise({launchCourse}: {launchCourse: () => void}) {
                     {currentTab === 'bestSubmissions' && <ExerciseSubmissionsTable rowsPerPage={5} course={course} exercise={exercise} mode="best" />}
                     {currentTab === 'allSubmissions' && <ExerciseSubmissionsTable rowsPerPage={5} course={course} exercise={exercise} mode="all" />}
                     {currentTab === 'codeDrafts' && <CodeDrafts onCodeDraftSelected={setCodeDraftId} />}
-                    {currentTab === 'edit' && <ExerciseEditor cancelEditing={() => setCurrentTab('description')} exerciseTypeChanged={setExerciseType} />}
+                    {currentTab === 'edit' && <Suspense fallback={<></>}><ExerciseEditor cancelEditing={() => setCurrentTab('description')} exerciseTypeChanged={setExerciseType} /></Suspense>}
                 </Box>
 
                 <Box width="100%" height="100%">
@@ -99,3 +100,5 @@ export default function Exercise({launchCourse}: {launchCourse: () => void}) {
         }
     </>
 }
+
+export default memo(Exercise);

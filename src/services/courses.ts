@@ -140,9 +140,13 @@ export const updateExercise = async (
     memoryLimit?: number, timeLimit?: number, outputLimit?: number,
     floatPrecision?: number, comparisonMode?: 'whole' | 'token' | 'custom',
 ) => {
-    return db.exercise(courseId, exerciseId).set({
-        title: title,
-        pageId: pageId,
+    const previousValues = (await db.exercise(courseId, exerciseId).get()).data();
+    const prevOrder = previousValues?.order ?? 0;
+    const prevScore = previousValues?.score ?? 0;
+    const prevLevelName = `${Math.trunc(prevOrder)}`;
+    const newLevelName = `${Math.trunc(order)}`;
+
+    await db.exercise(courseId, exerciseId).set({
         order: order,
         score: score,
         allowedAttempts: allowedAttempts,
@@ -155,6 +159,31 @@ export const updateExercise = async (
         floatPrecision:  floatPrecision,
         comparisonMode: comparisonMode,
     }, {merge: true});
+    await db.exercise(courseId, exerciseId).update({
+        title: title,
+        pageId: pageId,
+    });
+
+    // update the course as well (levelExercises and levelScores)
+    if( prevLevelName !== newLevelName ) {
+        await db.course(courseId).set({
+            // @ts-ignore
+            levelExercises: {
+                ...(prevLevelName !== '0' && {[prevLevelName]: firebase.firestore.FieldValue.increment(-1)}),
+                ...(newLevelName !== '0' && {[newLevelName]: firebase.firestore.FieldValue.increment(1)}),
+            },
+            levelScores: {
+                ...(prevLevelName !== '0' && {[prevLevelName]: firebase.firestore.FieldValue.increment(-prevScore)}),
+                ...(newLevelName !== '0' && {[newLevelName]: firebase.firestore.FieldValue.increment(score)}),
+            },
+        }, {merge: true});
+    }
+    else if( prevScore !== score && newLevelName !== '0' ) {
+        await db.course(courseId).set({
+            // @ts-ignore
+            levelScores: {[newLevelName]: firebase.firestore.FieldValue.increment(score - prevScore)},
+        }, {merge: true});
+    }
 }
 
 export const updateTestCases = async (

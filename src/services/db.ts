@@ -3,7 +3,7 @@ import 'firebase/firestore';
 
 import {Activity, User, UserInfoUpdate, UserRole} from "../models/users";
 import {Notification} from "../models/notifications";
-import {Course, Exercise, ExerciseProgress, Progress} from "../models/courses";
+import {Course, Exercise, ExercisePrivateFields, ExerciseProgress, Progress} from "../models/courses";
 import {Submission, SubmissionResult, SubmissionSensitiveRecords, SubmissionStatus} from "../models/submissions";
 import {Comment, Vote} from "../models/forum";
 import {CodeDraft} from "../models/codeDrafts";
@@ -37,6 +37,7 @@ const db = {
     course: (courseId: string) => dataPoint<Course>('courses').doc(courseId),
     exercises: (courseId: string) => dataPoint<Exercise>(`courses/${courseId}/exercises`),
     exercise: (courseId: string, exerciseId: string) => dataPoint<Exercise>(`courses/${courseId}/exercises`).doc(exerciseId),
+    exercisePrivateFields: (courseId: string, exerciseId: string) => dataPoint<ExercisePrivateFields>(`courses/${courseId}/exercises/${exerciseId}/private`).doc('fields'),
     progress: (courseId: string) => dataPoint<Progress>(`courses/${courseId}/progress`),
     userProgress: (courseId: string, userId: string) => dataPoint<Progress>(`courses/${courseId}/progress`).doc(userId),
     allUserProgress: (userId: string) => firebase.firestore().collectionGroup('progress').withConverter(converter<Progress>()).where('userId', '==', userId),

@@ -48,6 +48,11 @@ export interface Exercise {
     options?: string[];
 }
 
+export interface ExercisePrivateFields {
+    id: string;
+    answer?: string;
+}
+
 export interface Course {
     id: string;
     img: string;

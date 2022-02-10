@@ -6,7 +6,7 @@ import LocalizedFields, {FieldSchema, fieldSchema} from "./LocalizedFields";
 import Box from "@mui/material/Box";
 import {LANGUAGE_KEYS} from "../../models/language";
 import AutocompleteSearch from "../../common/AutocompleteSearch";
-import {getCourses, searchCourses, updateExercise} from "../../services/courses";
+import {getCourses, getExercisePrivateFields, searchCourses, updateExercise} from "../../services/courses";
 
 import {Controller, useForm, FormProvider} from "react-hook-form";
 import {zodResolver} from "@hookform/resolvers/zod";
@@ -16,6 +16,7 @@ import CodeForm from "./CodeForm";
 import TextAnswerForm from "./TextAnswerForm";
 import CheckboxesForm from "./CheckboxesForm";
 import MultipleChoiceForm from "./MultipleChoiceForm";
+import useAsyncEffect from "use-async-effect";
 
 
 const baseSchema = {
@@ -45,6 +46,7 @@ const textSchema = object({
     ...baseSchema,
     exerciseType: literal('textAnswer'),
     question: string().min(3).max(300),
+    answer: string().min(1).max(300),
 });
 const checkboxesSchema = object({
     ...baseSchema,
@@ -112,6 +114,8 @@ function ExerciseEditor({cancelEditing, exerciseTypeChanged}: {
             outputLimit: exercise?.outputLimit ?? 1,
             floatPrecision: exercise?.floatPrecision ?? 0.0001,
             comparisonMode: exercise?.comparisonMode ?? 'token',
+            question: exercise?.question,
+            options: exercise?.options,
         }
     }, [exercise]);
 
@@ -137,6 +141,15 @@ function ExerciseEditor({cancelEditing, exerciseTypeChanged}: {
 
     // @ts-ignore
     useEffect(() => reset(getDefaultFieldValues()), [exercise, getDefaultFieldValues, reset]);
+    useAsyncEffect(async () => {
+        if( course?.id && exercise?.id && exercise?.exerciseType
+            && ['textAnswer', 'checkboxes', 'multipleChoice'].includes(exercise.exerciseType as string) ) {
+            const fields = await getExercisePrivateFields(course.id, exercise.id);
+
+            if( fields?.answer )
+                setValue('answer', fields.answer, {shouldTouch: true});
+        }
+    }, [exercise]);
     const onCancel = () => cancelEditing();
     const onSubmit = async (data: Schema) => {
         if( !course || !exercise )
@@ -158,6 +171,8 @@ function ExerciseEditor({cancelEditing, exerciseTypeChanged}: {
             data.unlockContent,
             // @ts-ignore
             data.allowedLanguages, data.memoryLimit, data.timeLimit, data.outputLimit, data.floatPrecision, data.comparisonMode,
+            // @ts-ignore
+            data.question, data.answer, data.options,
         );
         setOpenSnackbar(true);
     };

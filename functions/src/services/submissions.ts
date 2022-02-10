@@ -149,7 +149,7 @@ export const processResult = async (
         if (currentBest?.status === 'Solved')
             alreadySolved = true;
 
-        console.log(`Already solved (${submissionResult.id}): ${alreadySolved}`);
+        functions.logger.info(`Already solved (${submissionResult.id}): ${alreadySolved}`);
         updateBest(transaction, submissionResult, currentBest);
 
         // save the sensitive information to /submissions/${submissionId}/private/${userId}

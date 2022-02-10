@@ -10,7 +10,7 @@ import {getCourses, searchCourses, updateExercise} from "../../services/courses"
 
 import {Controller, useForm, FormProvider} from "react-hook-form";
 import {zodResolver} from "@hookform/resolvers/zod";
-import {infer as Infer, object, string, array, enum as zodEnum, number, boolean} from "zod";
+import {infer as Infer, object, string, array, enum as zodEnum, literal, number, boolean, union} from "zod";
 import TestCasesForm from "./TestCasesForm";
 import CodeForm from "./CodeForm";
 import TextAnswerForm from "./TextAnswerForm";
@@ -22,15 +22,18 @@ import MultipleChoiceForm from "./MultipleChoiceForm";
 const EXERCISE_TYPE_NAMES: readonly [string, ...string[]] = Object.keys(EXERCISE_TYPES);
 // @ts-ignore
 const LANGUAGE_NAMES: readonly [string, ...string[]] = Object.keys(LANGUAGES);
-const schema = object({
+const baseSchema = {
     localizedFields: array(fieldSchema).nonempty(),
     isPublic: boolean(),
     level: number().nonnegative().int(),
     levelOrder: number().nonnegative().int(),
     score: number().min(0).max(1000).int(),
     allowedAttempts: number().min(1).max(100).int(),
-    exerciseType: zodEnum(EXERCISE_TYPE_NAMES),
     unlockContent: array(string().min(20).max(35)),
+} as const;
+const testCasesSchema = object({
+    ...baseSchema,
+    exerciseType: literal('testCases'),
     allowedLanguages: array(zodEnum(LANGUAGE_NAMES)).nonempty(),
     memoryLimit: number().min(10).max(1000),
     timeLimit: number().min(0.001).max(30),
@@ -38,6 +41,27 @@ const schema = object({
     floatPrecision: number().min(0.00000000000001).max(0.1),
     comparisonMode: zodEnum(COMPARISON_MODES),
 });
+const codeSchema = object({
+    ...baseSchema,
+    exerciseType: literal('code'),
+});
+const textSchema = object({
+    ...baseSchema,
+    exerciseType: literal('textAnswer'),
+    question: string().min(3).max(300),
+});
+const checkboxesSchema = object({
+    ...baseSchema,
+    exerciseType: literal('checkboxes'),
+    question: string().min(3).max(300),
+});
+const multipleChoiceSchema = object({
+    ...baseSchema,
+    exerciseType: literal('multipleChoice'),
+    question: string().min(3).max(300),
+});
+
+const schema = union([codeSchema, testCasesSchema, textSchema, checkboxesSchema, multipleChoiceSchema]);
 type Schema = Infer<typeof schema>;
 
 
@@ -108,7 +132,10 @@ function ExerciseEditor({cancelEditing, exerciseTypeChanged}: {
     // @ts-ignore
     const exerciseType: keyof typeof EXERCISE_TYPES = watch('exerciseType');
     const onExerciseTypeChanged = (newType: keyof typeof EXERCISE_TYPES) => {
-        setValue('exerciseType', newType as string, {shouldTouch: true});
+        if (newType !== 'code' && newType !== 'testCases' && newType !== 'textAnswer' && newType !== 'checkboxes' && newType !== 'multipleChoice')
+            throw Error(`Wrong exercise type: ${newType}`);
+
+        setValue('exerciseType', newType, {shouldTouch: true});
         exerciseTypeChanged(newType);
     }
     const nameToExerciseType = (name: string) => Object.keys(EXERCISE_TYPES).find(key => EXERCISE_TYPES[key].displayName === name);
@@ -134,9 +161,8 @@ function ExerciseEditor({cancelEditing, exerciseTypeChanged}: {
             data.allowedAttempts,
             data.exerciseType,
             data.unlockContent,
-            data.allowedLanguages,
-            data.memoryLimit, data.timeLimit, data.outputLimit,
-            data.floatPrecision, data.comparisonMode,
+            // @ts-ignore
+            data.allowedLanguages, data.memoryLimit, data.timeLimit, data.outputLimit, data.floatPrecision, data.comparisonMode,
         );
         setOpenSnackbar(true);
     };

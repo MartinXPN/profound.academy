@@ -136,7 +136,7 @@ export const updateExercise = async (
     order: number, score: number, allowedAttempts: number,
     exerciseType: keyof typeof EXERCISE_TYPES,
     unlockContent: string[],
-    allowedLanguages: (keyof typeof LANGUAGES)[],
+    allowedLanguages?: (keyof typeof LANGUAGES)[],
     memoryLimit?: number, timeLimit?: number, outputLimit?: number,
     floatPrecision?: number, comparisonMode?: 'whole' | 'token' | 'custom',
 ) => {

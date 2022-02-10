@@ -4,7 +4,7 @@ import {COMPARISON_MODES, Course, Exercise, EXERCISE_TYPES} from '../../models/c
 import {Alert, Autocomplete, Button, FormControlLabel, Snackbar, Stack, Switch, TextField} from "@mui/material";
 import LocalizedFields, {FieldSchema, fieldSchema} from "./LocalizedFields";
 import Box from "@mui/material/Box";
-import {LANGUAGES} from "../../models/language";
+import {LANGUAGE_KEYS} from "../../models/language";
 import AutocompleteSearch from "../../common/AutocompleteSearch";
 import {getCourses, searchCourses, updateExercise} from "../../services/courses";
 
@@ -18,14 +18,10 @@ import CheckboxesForm from "./CheckboxesForm";
 import MultipleChoiceForm from "./MultipleChoiceForm";
 
 
-// @ts-ignore
-const EXERCISE_TYPE_NAMES: readonly [string, ...string[]] = Object.keys(EXERCISE_TYPES);
-// @ts-ignore
-const LANGUAGE_NAMES: readonly [string, ...string[]] = Object.keys(LANGUAGES);
 const baseSchema = {
     localizedFields: array(fieldSchema).nonempty(),
     isPublic: boolean(),
-    level: number().nonnegative().int(),
+    level: number().positive().int(),
     levelOrder: number().nonnegative().int(),
     score: number().min(0).max(1000).int(),
     allowedAttempts: number().min(1).max(100).int(),
@@ -34,7 +30,7 @@ const baseSchema = {
 const testCasesSchema = object({
     ...baseSchema,
     exerciseType: literal('testCases'),
-    allowedLanguages: array(zodEnum(LANGUAGE_NAMES)).nonempty(),
+    allowedLanguages: array(zodEnum(LANGUAGE_KEYS)).nonempty(),
     memoryLimit: number().min(10).max(1000),
     timeLimit: number().min(0.001).max(30),
     outputLimit: number().min(0.001).max(10),
@@ -99,7 +95,7 @@ function ExerciseEditor({cancelEditing, exerciseTypeChanged}: {
     const handleCloseSnackbar = () => setOpenSnackbar(false);
 
     const getDefaultFieldValues = useCallback(() => {
-        const level = exercise?.order ? Math.trunc(exercise.order) : 0;
+        const level = exercise?.order ? Math.trunc(exercise.order) : 1;
         const levelOrder = exercise?.order ? parseInt((exercise.order - level).toFixed(3).substring(2)) : 0;
         return {
             localizedFields: getExerciseLocalizedFields(exercise, 'enUS'),
@@ -129,7 +125,6 @@ function ExerciseEditor({cancelEditing, exerciseTypeChanged}: {
     errors && Object.keys(errors).length && console.log('errors:', errors);
     const isPublic = watch('isPublic');
 
-    // @ts-ignore
     const exerciseType: keyof typeof EXERCISE_TYPES = watch('exerciseType');
     const onExerciseTypeChanged = (newType: keyof typeof EXERCISE_TYPES) => {
         if (newType !== 'code' && newType !== 'testCases' && newType !== 'textAnswer' && newType !== 'checkboxes' && newType !== 'multipleChoice')

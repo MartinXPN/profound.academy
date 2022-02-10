@@ -44,6 +44,8 @@ export interface Exercise {
     outputLimit?: number;
     floatPrecision?: number;
     comparisonMode?: typeof COMPARISON_MODES[number];
+    question?: string;
+    options?: string[];
 }
 
 export interface Course {

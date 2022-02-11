@@ -57,6 +57,8 @@ const multipleChoiceSchema = object({
     ...baseSchema,
     exerciseType: literal('multipleChoice'),
     question: string().min(3).max(300),
+    answer: string().min(1).max(200),
+    options: array(string().min(1).max(200)).nonempty(),
 });
 
 const schema = union([codeSchema, testCasesSchema, textSchema, checkboxesSchema, multipleChoiceSchema]);
@@ -255,7 +257,11 @@ function ExerciseEditor({cancelEditing, exerciseTypeChanged}: {
                               value={EXERCISE_TYPES[field.value].displayName}
                               options={Object.keys(EXERCISE_TYPES).map(key => EXERCISE_TYPES[key].displayName)}
                               onChange={(event, value: string | null) => value && onExerciseTypeChanged(nameToExerciseType(value)!)}
-                              renderInput={(params) => <TextField {...params} label="Exercise type"/>}/>
+                              renderInput={(params) => (
+                                  <TextField
+                                      {...params} label="Exercise type"
+                                      error={Boolean(errors.exerciseType)} helperText={errors.exerciseType?.message} />
+                              )}/>
             )} />
             <br/>
 

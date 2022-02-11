@@ -51,14 +51,14 @@ const submitLambdaJudge = async (submission: Submission, exercise: Exercise): Pr
 
 const submitAnswerCheck = async (submission: Submission, exercise: Exercise) => {
     const course = (await db.course(submission.course.id).get()).data();
-    const target = (await db.exercisePrivateFields(submission.course.id, submission.exercise.id).get()).data();
+    const target = (await db.exercisePrivateFields(submission.course.id, submission.exercise.id).get()).data()?.answer;
     const answer = Object.values(submission.code ?? {})[0];
     functions.logger.info(`The answer was: ${answer} with target: ${target}`);
 
     if (!target) throw Error(`The exercise ${submission.exercise.id} does not have an answer`);
     if (!course) throw Error(`The course ${submission.course.id} does not exist`);
 
-    const isCorrect = answer.trim() === target.answer?.trim();
+    const isCorrect = answer.trim() === target.trim();
     return processResult({
         ...submission,
         isBest: false,

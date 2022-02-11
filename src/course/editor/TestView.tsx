@@ -2,14 +2,7 @@ import {TestCase} from "../../models/courses";
 import { TextField, Typography } from "@mui/material";
 import React, {memo, useEffect, useState} from "react";
 import {statusToColor} from "../colors";
-import {styled} from "@mui/material/styles";
-
-
-const StatusTypography = styled(Typography)({
-    fontWeight: 'bold',
-    paddingTop: '8px',
-    paddingBottom: '8px',
-});
+import {StatusTypography} from "../../common/StatusTypography";
 
 
 function TestView({testCase, message, output, error, readOnly, status, memory, time, onSaveTest}: {

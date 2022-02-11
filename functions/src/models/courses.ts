@@ -44,6 +44,13 @@ export interface Exercise {
     outputLimit?: number;
     floatPrecision?: number;
     comparisonMode?: typeof COMPARISON_MODES[number];
+    question?: string;
+    options?: string[];
+}
+
+export interface ExercisePrivateFields {
+    id: string;
+    answer?: string;
 }
 
 export interface Course {

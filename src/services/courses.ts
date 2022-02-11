@@ -136,9 +136,10 @@ export const updateExercise = async (
     order: number, score: number, allowedAttempts: number,
     exerciseType: keyof typeof EXERCISE_TYPES,
     unlockContent: string[],
-    allowedLanguages: (keyof typeof LANGUAGES)[],
+    allowedLanguages?: (keyof typeof LANGUAGES)[],
     memoryLimit?: number, timeLimit?: number, outputLimit?: number,
     floatPrecision?: number, comparisonMode?: 'whole' | 'token' | 'custom',
+    question?: string, answer?: string, options?: string[],
 ) => {
     const previousValues = (await db.exercise(courseId, exerciseId).get()).data();
     const prevOrder = previousValues?.order ?? 0;
@@ -158,11 +159,15 @@ export const updateExercise = async (
         outputLimit: outputLimit,
         floatPrecision:  floatPrecision,
         comparisonMode: comparisonMode,
+        question: question,
+        options: options,
     }, {merge: true});
     await db.exercise(courseId, exerciseId).update({
         title: title,
         pageId: pageId,
     });
+    if( answer )
+        await db.exercisePrivateFields(courseId, exerciseId).set({answer: answer}, {merge: true});
 
     // update the course as well (levelExercises and levelScores)
     if( prevLevelName !== newLevelName ) {
@@ -184,6 +189,11 @@ export const updateExercise = async (
             levelScores: {[newLevelName]: firebase.firestore.FieldValue.increment(score - prevScore)},
         }, {merge: true});
     }
+}
+
+export const getExercisePrivateFields = async (courseId: string, exerciseId: string) => {
+    const snapshot = await db.exercisePrivateFields(courseId, exerciseId).get();
+    return snapshot.data();
 }
 
 export const updateTestCases = async (

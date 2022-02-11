@@ -60,9 +60,7 @@ function TestCasesForm() {
                     options={Object.keys(LANGUAGES).map(key => LANGUAGES[key].displayName)}
                     renderInput={(params) => (
                         <TextField {...params} label="Allowed languages"
-                                   error={Boolean(errors.allowedLanguages)}
-                            // @ts-ignore
-                                   helperText={errors.allowedLanguages?.message}/>
+                                   error={Boolean(errors.allowedLanguages)} helperText={errors.allowedLanguages?.message}/>
                     )} />
             )} />
 

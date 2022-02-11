@@ -1,5 +1,5 @@
 import {useParams} from "react-router-dom";
-import React, {lazy, useCallback, useContext, useState, memo, Suspense} from "react";
+import React, {lazy, useCallback, useContext, useState, memo, Suspense, useEffect} from "react";
 import {AuthContext} from "../../App";
 import {getLocalizedParam, useStickyState} from "../../util";
 import LandingPage from "../LandingPage";
@@ -18,6 +18,9 @@ import Box from "@mui/material/Box";
 import CodeDrafts from "../CodeDrafts";
 import {Edit} from "@mui/icons-material";
 import {EXERCISE_TYPES} from "../../models/courses";
+import TextAnswer from "./TextAnswer";
+import Checkboxes from "./Checkboxes";
+import MultipleChoice from "./MultipleChoice";
 
 const ExerciseEditor = lazy(() => import('./ExerciseEditor'));
 
@@ -36,6 +39,7 @@ function Exercise({launchCourse}: {launchCourse: () => void}) {
     const [codeDraftId, setCodeDraftId] = useState<string | null>(null);
     const isCourseInstructor = course && auth.currentUserId && course.instructors.includes(auth.currentUserId);
 
+    useEffect(() => setExerciseType(exercise?.exerciseType ?? 'testCases'), [exercise]);
     if(auth?.isSignedIn && showSignIn)
         setShowSignIn(false);
 
@@ -47,6 +51,14 @@ function Exercise({launchCourse}: {launchCourse: () => void}) {
 
     if( !course )
         return <></>
+    let right = <></>;
+    if( exerciseType === 'testCases' || exerciseType === 'code' ) {
+        if( !!codeDraftId && currentTab === 'codeDrafts' )  right = <Editor disableCodeSync userId={codeDraftId} />
+        else                                                right = <Editor />
+    }
+    else if( exerciseType === 'textAnswer' )                right = <TextAnswer />
+    else if( exerciseType === 'checkboxes' )                right = <Checkboxes />
+    else if( exerciseType === 'multipleChoice' )            right = <MultipleChoice />
     return <>
         {/* Display the landing page with an option to start the course if it wasn't started yet */
             !exerciseId &&
@@ -92,9 +104,8 @@ function Exercise({launchCourse}: {launchCourse: () => void}) {
                                 <SignIn />
                             </Stack>
                         </Grid>
-                        : !!codeDraftId && currentTab === 'codeDrafts'
-                            ? <Editor disableCodeSync userId={codeDraftId} />
-                            : <Editor />}
+                        : <>{right}</>
+                    }
                 </Box>
             </SplitPane>
         }

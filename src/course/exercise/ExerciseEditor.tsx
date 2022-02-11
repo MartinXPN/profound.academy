@@ -4,40 +4,62 @@ import {COMPARISON_MODES, Course, Exercise, EXERCISE_TYPES} from '../../models/c
 import {Alert, Autocomplete, Button, FormControlLabel, Snackbar, Stack, Switch, TextField} from "@mui/material";
 import LocalizedFields, {FieldSchema, fieldSchema} from "./LocalizedFields";
 import Box from "@mui/material/Box";
-import {LANGUAGES} from "../../models/language";
+import {LANGUAGE_KEYS} from "../../models/language";
 import AutocompleteSearch from "../../common/AutocompleteSearch";
-import {getCourses, searchCourses, updateExercise} from "../../services/courses";
+import {getCourses, getExercisePrivateFields, searchCourses, updateExercise} from "../../services/courses";
 
 import {Controller, useForm, FormProvider} from "react-hook-form";
 import {zodResolver} from "@hookform/resolvers/zod";
-import {infer as Infer, object, string, array, enum as zodEnum, number, boolean} from "zod";
+import {infer as Infer, object, string, array, enum as zodEnum, literal, number, boolean, union} from "zod";
 import TestCasesForm from "./TestCasesForm";
 import CodeForm from "./CodeForm";
 import TextAnswerForm from "./TextAnswerForm";
 import CheckboxesForm from "./CheckboxesForm";
 import MultipleChoiceForm from "./MultipleChoiceForm";
+import useAsyncEffect from "use-async-effect";
 
 
-// @ts-ignore
-const EXERCISE_TYPE_NAMES: readonly [string, ...string[]] = Object.keys(EXERCISE_TYPES);
-// @ts-ignore
-const LANGUAGE_NAMES: readonly [string, ...string[]] = Object.keys(LANGUAGES);
-const schema = object({
+const baseSchema = {
     localizedFields: array(fieldSchema).nonempty(),
     isPublic: boolean(),
-    level: number().nonnegative().int(),
+    level: number().positive().int(),
     levelOrder: number().nonnegative().int(),
     score: number().min(0).max(1000).int(),
     allowedAttempts: number().min(1).max(100).int(),
-    exerciseType: zodEnum(EXERCISE_TYPE_NAMES),
     unlockContent: array(string().min(20).max(35)),
-    allowedLanguages: array(zodEnum(LANGUAGE_NAMES)).nonempty(),
+} as const;
+const testCasesSchema = object({
+    ...baseSchema,
+    exerciseType: literal('testCases'),
+    allowedLanguages: array(zodEnum(LANGUAGE_KEYS)).nonempty(),
     memoryLimit: number().min(10).max(1000),
     timeLimit: number().min(0.001).max(30),
     outputLimit: number().min(0.001).max(10),
     floatPrecision: number().min(0.00000000000001).max(0.1),
     comparisonMode: zodEnum(COMPARISON_MODES),
 });
+const codeSchema = object({
+    ...baseSchema,
+    exerciseType: literal('code'),
+});
+const textSchema = object({
+    ...baseSchema,
+    exerciseType: literal('textAnswer'),
+    question: string().min(3).max(300),
+    answer: string().min(1).max(300),
+});
+const checkboxesSchema = object({
+    ...baseSchema,
+    exerciseType: literal('checkboxes'),
+    question: string().min(3).max(300),
+});
+const multipleChoiceSchema = object({
+    ...baseSchema,
+    exerciseType: literal('multipleChoice'),
+    question: string().min(3).max(300),
+});
+
+const schema = union([codeSchema, testCasesSchema, textSchema, checkboxesSchema, multipleChoiceSchema]);
 type Schema = Infer<typeof schema>;
 
 
@@ -75,7 +97,7 @@ function ExerciseEditor({cancelEditing, exerciseTypeChanged}: {
     const handleCloseSnackbar = () => setOpenSnackbar(false);
 
     const getDefaultFieldValues = useCallback(() => {
-        const level = exercise?.order ? Math.trunc(exercise.order) : 0;
+        const level = exercise?.order ? Math.trunc(exercise.order) : 1;
         const levelOrder = exercise?.order ? parseInt((exercise.order - level).toFixed(3).substring(2)) : 0;
         return {
             localizedFields: getExerciseLocalizedFields(exercise, 'enUS'),
@@ -92,6 +114,8 @@ function ExerciseEditor({cancelEditing, exerciseTypeChanged}: {
             outputLimit: exercise?.outputLimit ?? 1,
             floatPrecision: exercise?.floatPrecision ?? 0.0001,
             comparisonMode: exercise?.comparisonMode ?? 'token',
+            question: exercise?.question,
+            options: exercise?.options,
         }
     }, [exercise]);
 
@@ -105,16 +129,27 @@ function ExerciseEditor({cancelEditing, exerciseTypeChanged}: {
     errors && Object.keys(errors).length && console.log('errors:', errors);
     const isPublic = watch('isPublic');
 
-    // @ts-ignore
     const exerciseType: keyof typeof EXERCISE_TYPES = watch('exerciseType');
     const onExerciseTypeChanged = (newType: keyof typeof EXERCISE_TYPES) => {
-        setValue('exerciseType', newType as string, {shouldTouch: true});
+        if (newType !== 'code' && newType !== 'testCases' && newType !== 'textAnswer' && newType !== 'checkboxes' && newType !== 'multipleChoice')
+            throw Error(`Wrong exercise type: ${newType}`);
+
+        setValue('exerciseType', newType, {shouldTouch: true});
         exerciseTypeChanged(newType);
     }
     const nameToExerciseType = (name: string) => Object.keys(EXERCISE_TYPES).find(key => EXERCISE_TYPES[key].displayName === name);
 
     // @ts-ignore
     useEffect(() => reset(getDefaultFieldValues()), [exercise, getDefaultFieldValues, reset]);
+    useAsyncEffect(async () => {
+        if( course?.id && exercise?.id && exercise?.exerciseType
+            && ['textAnswer', 'checkboxes', 'multipleChoice'].includes(exercise.exerciseType as string) ) {
+            const fields = await getExercisePrivateFields(course.id, exercise.id);
+
+            if( fields?.answer )
+                setValue('answer', fields.answer, {shouldTouch: true});
+        }
+    }, [exercise]);
     const onCancel = () => cancelEditing();
     const onSubmit = async (data: Schema) => {
         if( !course || !exercise )
@@ -134,9 +169,10 @@ function ExerciseEditor({cancelEditing, exerciseTypeChanged}: {
             data.allowedAttempts,
             data.exerciseType,
             data.unlockContent,
-            data.allowedLanguages,
-            data.memoryLimit, data.timeLimit, data.outputLimit,
-            data.floatPrecision, data.comparisonMode,
+            // @ts-ignore
+            data.allowedLanguages, data.memoryLimit, data.timeLimit, data.outputLimit, data.floatPrecision, data.comparisonMode,
+            // @ts-ignore
+            data.question, data.answer, data.options,
         );
         setOpenSnackbar(true);
     };

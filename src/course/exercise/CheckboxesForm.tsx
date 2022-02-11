@@ -8,7 +8,6 @@ function CheckboxesForm() {
                 An editor for checkbox questions is coming soon...
             </Typography>
         </Grid>
-
     </>
 }
 

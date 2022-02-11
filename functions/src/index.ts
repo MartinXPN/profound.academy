@@ -3,15 +3,14 @@ import * as functions from 'firebase-functions';
 import * as express from 'express';
 import {fetchNotionPage} from './services/notion';
 import {notifyOnComment} from './services/notifications';
-import {processResult, submit} from './services/submissions';
 
 import {Submission} from './models/submissions';
 import {Comment} from './models/forum';
 import {updateInfoQueue} from './services/users';
 import {getS3UploadSignedUrl, isCourseInstructor} from './services/courses';
+import {submit} from './services/submissions';
+import {processResult} from './services/submissionResults';
 
-// Start writing Firebase Functions
-// https://firebase.google.com/docs/functions/typescript
 
 const corss = cors({origin: true});
 
@@ -42,7 +41,7 @@ export const getNotionPage = functions.https.onRequest(async (req, res) => {
     });
 });
 
-exports.getS3UploadUrl = functions.https.onCall(async (data, context) => {
+export const getS3UploadUrl = functions.https.onCall(async (data, context) => {
     if (!await isCourseInstructor(data.courseId, context.auth?.uid))
         throw Error(`User ${context.auth?.uid} tried to modify tests of ${data.courseId} course`);
 

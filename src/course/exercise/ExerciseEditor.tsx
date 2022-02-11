@@ -52,6 +52,8 @@ const checkboxesSchema = object({
     ...baseSchema,
     exerciseType: literal('checkboxes'),
     question: string().min(3).max(300),
+    answer: string().max(200),
+    options: array(string().min(1).max(200)).nonempty(),
 });
 const multipleChoiceSchema = object({
     ...baseSchema,

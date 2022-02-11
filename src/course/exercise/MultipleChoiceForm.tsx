@@ -9,7 +9,6 @@ function MultipleChoiceForm() {
     const {control, watch, formState: {errors}, setValue} = useFormContext();
     const options: string[] | undefined = watch('options');
     const answer = watch('answer');
-    console.log('options:', options);
 
     const remove = (index: number) => setValue('options', options ? options.filter((option, i) => i !== index) : undefined, {shouldTouch: true});
     const append = () => setValue('options', options ? [...options, ''] : [''], {shouldTouch: true});

@@ -21,7 +21,7 @@ function CheckboxesForm() {
 
     const updateAnswer = (prevItem?: string, curItem?: string) => {
         let ans = answer ? answer.split(SEP) : [];
-        ans = ans.filter((val: string) => val !== prevItem);
+        ans = ans.filter((val: string) => val !== prevItem && options && options.includes(val));
         curItem && ans.push(curItem);
         ans.sort();
         ans = ans.join(SEP);
@@ -44,14 +44,14 @@ function CheckboxesForm() {
                         secondaryAction={<IconButton edge="end" title="Delete" onClick={() => remove(index)}><CloseIcon /></IconButton>}>
 
                         <Checkbox
-                            checked={answer.includes(item)}
+                            checked={!!answer && answer.includes(item)}
                             onChange={e => e.target.checked ? updateAnswer(undefined, item) : updateAnswer(item)} />
                         <TextField
                             required multiline fullWidth
                             variant="standard" placeholder={`Option ${index + 1}`}
                             value={item}
                             onChange={e => {
-                                if( answer.includes(item) )
+                                if( answer && answer.includes(item) )
                                     updateAnswer(item, e.target.value);
                                 update(index, e.target.value);
                             }}

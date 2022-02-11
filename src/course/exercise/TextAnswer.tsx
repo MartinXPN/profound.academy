@@ -11,12 +11,13 @@ import {StatusTypography} from "../../common/StatusTypography";
 import {Done} from "@mui/icons-material";
 import Box from "@mui/material/Box";
 
+
 function TextAnswer() {
     const auth = useContext(AuthContext);
     const {course} = useContext(CourseContext);
     const {exercise} = useContext(CurrentExerciseContext);
 
-    const [answer, setAnswer] =  useStickyState<string>('', `code-${auth.currentUserId}-${exercise?.id}`);
+    const [answer, setAnswer] =  useStickyState<string>('', `answer-${auth.currentUserId}-${exercise?.id}`);
     const [submitted, setSubmitted] = useState(false);
     const [submissionResult, setSubmissionResult] = useStickyState<SubmissionResult | null>(null, `submissionRes-${auth.currentUserId}-${exercise?.id}`);
 

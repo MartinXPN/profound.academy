@@ -1,7 +1,7 @@
 import React, {useCallback, useContext, useEffect, useState} from "react";
 import { Button, Divider, List, TextField, Typography } from "@mui/material";
 import {onExerciseCommentsChanged, saveComment} from "../../services/forum";
-import {Comment} from '../../models/forum';
+import {Comment} from 'models/forum';
 import CommentView from "./CommentView";
 import {AuthContext} from "../../App";
 import { styled } from '@mui/material/styles';

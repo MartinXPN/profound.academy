@@ -1,4 +1,4 @@
-import {SubmissionStatus} from "../models/submissions";
+import {SubmissionStatus} from "models/submissions";
 
 function adjust(color: string, amount: number) {
     return '#' + color.replace(/^#/, '')

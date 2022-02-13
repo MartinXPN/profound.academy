@@ -6,7 +6,7 @@ import AceEditor from "react-ace";
 import "ace-builds/webpack-resolver";
 import "ace-builds/src-noconflict/ext-language_tools";
 import useAsyncEffect from "use-async-effect";
-import {TextSelection} from "../../models/codeDrafts";
+import {TextSelection} from "models/codeDrafts";
 
 
 

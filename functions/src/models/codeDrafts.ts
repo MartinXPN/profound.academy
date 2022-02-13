@@ -10,8 +10,9 @@ export interface TextSelection {
 export interface CodeDraft {
     id: string;
     userDisplayName: string;
+    userImageUrl?: string;
     code?: { [key: string]: string };
     selection?: TextSelection;
     language: keyof typeof LANGUAGES;
-    updatedAt: firebase.firestore.FieldValue;
+    updatedAt: firebase.firestore.Timestamp;
 }

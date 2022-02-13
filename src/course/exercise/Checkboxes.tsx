@@ -3,9 +3,9 @@ import {Button, CircularProgress, FormControl, FormControlLabel, FormLabel, Grid
 import {AuthContext} from "../../App";
 import {CourseContext, CurrentExerciseContext} from "../Course";
 import {useStickyState} from "../../util";
-import {SubmissionResult} from "../../models/submissions";
+import {SubmissionResult} from "models/submissions";
 import {onSubmissionResultChanged, submitSolution} from "../../services/submissions";
-import {LANGUAGES} from "../../models/language";
+import {LANGUAGES} from "models/language";
 import {Done} from "@mui/icons-material";
 import Box from "@mui/material/Box";
 import {StatusTypography} from "../../common/StatusTypography";

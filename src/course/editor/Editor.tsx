@@ -3,15 +3,15 @@ import Code from "./Code";  // needs to be before getModeForPath so that Ace is 
 import Console from "./Console";
 import {getModeForPath} from 'ace-builds/src-noconflict/ext-modelist';
 import {useStickyState} from "../../util";
-import {TestCase} from "../../models/courses";
+import {TestCase} from "models/courses";
 import {onRunResultChanged, onSubmissionResultChanged, submitSolution} from "../../services/submissions";
 import {AuthContext} from "../../App";
-import {SubmissionResult} from "../../models/submissions";
+import {SubmissionResult} from "models/submissions";
 import {onCodeChanged, saveCode} from "../../services/codeDrafts";
-import {TextSelection} from "../../models/codeDrafts";
+import {TextSelection} from "models/codeDrafts";
 import {CourseContext, CurrentExerciseContext} from "../Course";
 import {SplitPane} from "react-multi-split-pane";
-import {Language, LANGUAGES} from "../../models/language";
+import {Language, LANGUAGES} from "models/language";
 import Box from "@mui/material/Box";
 import Settings from "./Settings";
 

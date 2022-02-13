@@ -20,6 +20,7 @@
     "axios": "^0.25.0",
     "firebase": "^8.10.1",
     "katex": "^0.15.2",
+    "models": "file:functions/src/models",
     "moment": "^2.29.1",
     "notion-types": "^4.15.0",
     "prismjs": "^1.26.0",

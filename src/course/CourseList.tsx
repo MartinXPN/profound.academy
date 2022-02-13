@@ -6,7 +6,7 @@ import InfoIcon from '@mui/icons-material/Info';
 import {Add} from "@mui/icons-material";
 import Box from "@mui/material/Box";
 
-import {Course} from '../models/courses';
+import {Course} from 'models/courses';
 import {getAllCourses, getCompletedCourses, getUserCourses} from "../services/courses";
 import useAsyncEffect from "use-async-effect";
 import {useNavigate} from "react-router-dom";

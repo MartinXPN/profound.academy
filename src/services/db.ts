@@ -1,12 +1,12 @@
 import firebase from 'firebase/app';
 import 'firebase/firestore';
 
-import {Activity, User, UserInfoUpdate, UserRole} from "../models/users";
-import {Notification} from "../models/notifications";
-import {Course, Exercise, ExercisePrivateFields, ExerciseProgress, Progress} from "../models/courses";
-import {Submission, SubmissionResult, SubmissionSensitiveRecords, SubmissionStatus} from "../models/submissions";
-import {Comment, Vote} from "../models/forum";
-import {CodeDraft} from "../models/codeDrafts";
+import {Activity, User, UserInfoUpdate, UserRole} from "models/users";
+import {Notification} from "models/notifications";
+import {Course, Exercise, ExercisePrivateFields, ExerciseProgress, Progress} from "models/courses";
+import {Submission, SubmissionResult, SubmissionSensitiveRecords, SubmissionStatus} from "models/submissions";
+import {Comment, Vote} from "models/forum";
+import {CodeDraft} from "models/codeDrafts";
 
 // Add ids when getting the data and removing when sending it
 const converter = <T>() => ({

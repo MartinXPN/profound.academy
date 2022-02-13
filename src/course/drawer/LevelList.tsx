@@ -7,12 +7,12 @@ import ListItemText from '@mui/material/ListItemText';
 import {ArrowDropUp, ArrowDropDown, Equalizer} from "@mui/icons-material";
 import ArrowRightIcon from '@mui/icons-material/ArrowRight';
 
-import {Exercise, ExerciseProgress} from "../../models/courses";
+import {Exercise, ExerciseProgress} from "models/courses";
 import {statusToStyledBackground} from "../colors";
 import {Typography} from "@mui/material";
 import {onCourseExerciseProgressChanged, onCourseLevelExercisesChanged} from "../../services/courses";
 import {AuthContext} from "../../App";
-import {SubmissionStatus} from "../../models/submissions";
+import {SubmissionStatus} from "models/submissions";
 import {CourseContext, CurrentExerciseContext} from "../Course";
 import {getLocalizedParam} from '../../util';
 

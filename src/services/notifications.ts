@@ -1,5 +1,5 @@
 import {db} from "./db";
-import {Notification} from "../models/notifications";
+import {Notification} from "models/notifications";
 import firebase from "firebase/app";
 
 export const onNotificationsChanged = (userId: string,

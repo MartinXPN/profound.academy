@@ -3,9 +3,9 @@ import {Button, CircularProgress, Grid, RadioGroup, Radio, FormControlLabel, For
 import {AuthContext} from "../../App";
 import {CourseContext, CurrentExerciseContext} from "../Course";
 import {useStickyState} from "../../util";
-import {SubmissionResult} from "../../models/submissions";
+import {SubmissionResult} from "models/submissions";
 import {onSubmissionResultChanged, submitSolution} from "../../services/submissions";
-import {LANGUAGES} from "../../models/language";
+import {LANGUAGES} from "models/language";
 import Box from "@mui/material/Box";
 import {StatusTypography} from "../../common/StatusTypography";
 import {statusToColor} from "../colors";

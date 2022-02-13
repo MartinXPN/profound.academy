@@ -4,7 +4,7 @@ import 'firebase/firestore';
 
 export const firebaseConfig = {
     apiKey: "AIzaSyCoZzYEGYmfNgEwVN2thZcAmQ7NBqnzlBQ",
-    authDomain: "profound-academy.firebaseapp.com",
+    authDomain: "profound.academy",
     projectId: "profound-academy",
     storageBucket: "profound-academy.appspot.com",
     messagingSenderId: "344681371914",

@@ -1,8 +1,7 @@
 import firebase from "firebase/app";
 
 import {db} from "./db";
-import {Comment} from '../models/forum';
-import {Exercise} from "../models/courses";
+import {Comment} from 'models/forum';
 
 
 export const onExerciseCommentsChanged = (courseId: string,
@@ -45,8 +44,7 @@ export const getCommentReplies = async (commentId: string) => {
 export const saveComment = async (courseId: string, exerciseId: string,
                                   userId: string, displayName: string, avatarUrl: string | null,
                                   text: string) => {
-    // @ts-ignore
-    const exercise = db.exercise(courseId, exerciseId) as Exercise;
+    const exercise = db.exercise(courseId, exerciseId);
     const comment: Comment = {
         id: '-1',
         userId: userId,
@@ -64,8 +62,7 @@ export const saveComment = async (courseId: string, exerciseId: string,
 export const saveReply = async (commentId: string,
                                 userId: string, displayName: string, avatarUrl: string | null,
                                 text: string) => {
-    // @ts-ignore
-    const comment = db.forumComment(commentId) as Comment;
+    const comment = db.forumComment(commentId);
     const reply: Comment = {
         id: '-1',
         userId: userId,

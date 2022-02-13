@@ -1,7 +1,7 @@
 import {db} from "./db";
-import {LANGUAGES} from "../models/language";
+import {LANGUAGES} from "models/language";
 import firebase from "firebase";
-import {CodeDraft, TextSelection} from "../models/codeDrafts";
+import {CodeDraft, TextSelection} from "models/codeDrafts";
 
 export const saveCode = async (
     courseId: string,

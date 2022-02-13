@@ -1,10 +1,10 @@
 import React, {memo, useCallback, useContext, useEffect, useState} from "react";
 import {CourseContext, CurrentExerciseContext} from "../Course";
-import {COMPARISON_MODES, Course, Exercise, EXERCISE_TYPES} from '../../models/courses';
+import {COMPARISON_MODES, Course, Exercise, EXERCISE_TYPES} from 'models/courses';
 import {Alert, Autocomplete, Button, FormControlLabel, Snackbar, Stack, Switch, TextField} from "@mui/material";
 import LocalizedFields, {FieldSchema, fieldSchema} from "./LocalizedFields";
 import Box from "@mui/material/Box";
-import {LANGUAGE_KEYS} from "../../models/language";
+import {LANGUAGE_KEYS} from "models/language";
 import AutocompleteSearch from "../../common/AutocompleteSearch";
 import {getCourses, getExercisePrivateFields, searchCourses, updateExercise} from "../../services/courses";
 

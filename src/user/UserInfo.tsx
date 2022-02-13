@@ -6,7 +6,7 @@ import Box from "@mui/material/Box";
 import {Edit} from "@mui/icons-material";
 import {AuthContext} from "../App";
 import {FileUploader} from "react-drag-drop-files";
-import {User} from "../models/users";
+import {User} from "models/users";
 import {onUserInfoChanged, updateUserInfo, uploadProfilePicture} from "../services/users";
 
 

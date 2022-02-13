@@ -5,7 +5,7 @@ import {styled} from '@mui/material/styles';
 
 import {createCourseExercise, getCourse, getExercise, getFirstExercise} from "../services/courses";
 import useAsyncEffect from "use-async-effect";
-import {Course, Exercise as ExerciseModel} from "../models/courses";
+import {Course, Exercise as ExerciseModel} from "models/courses";
 import {AuthContext} from "../App";
 import CourseDrawer from "./drawer/Drawer";
 import Exercise from "./exercise/Exercise";

@@ -1,5 +1,5 @@
 import React, {memo, useCallback, useContext, useEffect, useState} from "react";
-import {Course} from "../models/courses";
+import {Course} from "models/courses";
 import {AuthContext} from "../App";
 import {Button, FormControlLabel, Stack, TextField, Typography, Switch, Grid, Alert, Snackbar, MenuItem} from "@mui/material";
 import Box from "@mui/material/Box";
@@ -12,7 +12,7 @@ import Content from "./Content";
 import {useNavigate} from "react-router-dom";
 import {getUsers, searchUser, uploadPicture} from "../services/users";
 import {doesExist, updateCourse} from "../services/courses";
-import {User} from "../models/users";
+import {User} from "models/users";
 import AutocompleteSearch from "../common/AutocompleteSearch";
 
 import { Controller, useForm } from "react-hook-form";

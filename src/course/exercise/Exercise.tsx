@@ -17,7 +17,7 @@ import OutlinedButton from "../../common/OutlinedButton";
 import Box from "@mui/material/Box";
 import CodeDrafts from "../CodeDrafts";
 import {Edit} from "@mui/icons-material";
-import {EXERCISE_TYPES} from "../../models/courses";
+import {EXERCISE_TYPES} from "models/courses";
 import TextAnswer from "./TextAnswer";
 import Checkboxes from "./Checkboxes";
 import MultipleChoice from "./MultipleChoice";

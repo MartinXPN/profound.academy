@@ -4,7 +4,7 @@ import 'react-calendar-heatmap/dist/styles.css';
 import {Collapse, Tooltip, Typography} from "@mui/material";
 import moment from "moment/moment";
 import useAsyncEffect from "use-async-effect";
-import {Activity} from "../models/users";
+import {Activity} from "models/users";
 import {getUserActivity} from "../services/users";
 import {tomorrow, useStickyState} from "../util";
 import Box from "@mui/material/Box";

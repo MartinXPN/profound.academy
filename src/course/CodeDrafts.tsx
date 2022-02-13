@@ -1,5 +1,5 @@
 import {memo, useContext, useEffect, useState} from "react";
-import {CodeDraft} from "../models/codeDrafts";
+import {CodeDraft} from "models/codeDrafts";
 import useAsyncEffect from "use-async-effect";
 import {CourseContext, CurrentExerciseContext} from "./Course";
 import {getCodeDrafts} from "../services/codeDrafts";

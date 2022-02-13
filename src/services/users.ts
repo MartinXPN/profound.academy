@@ -1,5 +1,5 @@
 import {db} from "./db";
-import {Activity, User} from "../models/users";
+import {Activity, User} from "models/users";
 import firebase from "firebase";
 
 export const getUserActivity = async (userId: string) => {

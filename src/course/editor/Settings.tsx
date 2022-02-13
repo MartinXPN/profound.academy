@@ -4,7 +4,7 @@ import ClickAwayListener from '@mui/base/ClickAwayListener';
 import {Add, Remove} from "@mui/icons-material";
 import SettingsIcon from '@mui/icons-material/Settings';
 import {themesByName} from 'ace-builds/src-noconflict/ext-themelist';
-import {LANGUAGES} from "../../models/language";
+import {LANGUAGES} from "models/language";
 import Paper from "@mui/material/Paper";
 
 function Settings({increaseFontSize, decreaseFontSize, theme, setTheme, language, setLanguage}: {

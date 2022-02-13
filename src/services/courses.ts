@@ -1,8 +1,8 @@
 import {db} from "./db";
-import {Course, Exercise, EXERCISE_TYPES, ExerciseProgress, Progress} from "../models/courses";
+import {Course, Exercise, EXERCISE_TYPES, ExerciseProgress, Progress} from "models/courses";
 import firebase from "firebase/app";
-import {SubmissionStatus} from "../models/submissions";
-import {LANGUAGES} from "../models/language";
+import {SubmissionStatus} from "models/submissions";
+import {LANGUAGES} from "models/language";
 import axios from "axios";
 
 export const getNotionPageMap = async (pageId: string) => {

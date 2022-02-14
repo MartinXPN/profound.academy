@@ -10,6 +10,7 @@ import { ThemeProvider, StyledEngineProvider, createTheme } from '@mui/material/
 
 import {updateUserInfo} from "./services/users";
 import {useStickyState} from "./util";
+import ErrorBoundary from './common/ErrorBoundary';
 import Home from './Home';
 import UserProfile from './user/UserProfile';
 // Do not include the Course and the editor in the main bundle as they're pretty heavy
@@ -71,6 +72,7 @@ function App() {
                 currentUserId: currentUser?.uid ?? undefined,
                 setCurrentUser: setCurrentUser,
             }}>
+            <ErrorBoundary>
             <Router>
             <Suspense fallback={<div>Loading...</div>}>
                 <Routes>
@@ -82,6 +84,7 @@ function App() {
                 </Routes>
             </Suspense>
             </Router>
+            </ErrorBoundary>
             </AuthContext.Provider>
             </ThemeProvider>
         </StyledEngineProvider>

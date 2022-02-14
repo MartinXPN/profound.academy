@@ -52,12 +52,7 @@ function Console({onSubmitClicked, onRunClicked, isProcessing, submissionResult}
 
     const handleRun = () => onRunClicked(tests);
 
-    const onTestSelected = useCallback((newTest: number | null) => {
-        if( newTest === selectedTest )
-            setSelectedTest(null);
-        else
-            setSelectedTest(newTest);
-    }, [selectedTest]);
+    const onTestSelected = useCallback((newTest: number | null) => setSelectedTest(newTest === selectedTest ? null : newTest), [selectedTest]);
     const onSaveTest = useCallback((index: number, input: string, target: string) => {
         let newTests = [...tests];
         newTests[index] = {

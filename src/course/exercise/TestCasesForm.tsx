@@ -1,6 +1,6 @@
 import React, {memo, useCallback, useContext, useEffect, useState} from "react";
-import {Autocomplete, LinearProgress, Stack, TextField, Typography} from "@mui/material";
-import {Controller, useFormContext} from "react-hook-form";
+import {Autocomplete, Badge, IconButton, LinearProgress, Stack, TextField, Typography} from "@mui/material";
+import {Controller, useFieldArray, useFormContext} from "react-hook-form";
 import {LANGUAGES} from "models/language";
 import {COMPARISON_MODES} from "models/courses";
 import {styled} from "@mui/material/styles";
@@ -8,6 +8,10 @@ import Box from "@mui/material/Box";
 import {FileUploader} from "react-drag-drop-files";
 import {updateTestCases} from "../../services/courses";
 import {CourseContext, CurrentExerciseContext} from "../Course";
+import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
+import HighlightOffTwoToneIcon from "@mui/icons-material/HighlightOffTwoTone";
+import ToggleButton from "@mui/material/ToggleButton";
+import {Add} from "@mui/icons-material";
 
 const UploadBackground = styled(Box)({
     width: '100%',
@@ -32,14 +36,29 @@ function TestCasesForm() {
     const {control, watch, formState: {errors}} = useFormContext();
     const [progress, setProgress] = useState(0);
     const [error, setError] = useState<string | null>(null);
+    const [selectedTest, setSelectedTest] = useState<number | null>(null);
 
     useEffect(() => {
         setProgress(0);
         setError(null);
     }, [exercise?.id]);
+    const onTestSelected = useCallback((newTest: number | null) => setSelectedTest(newTest === selectedTest ? null : newTest), [selectedTest]);
 
     const nameToLanguageId = (name: string) => Object.keys(LANGUAGES).find(key => LANGUAGES[key].displayName === name);
     const comparisonMode = watch('comparisonMode');
+    const { fields, append, remove } = useFieldArray({control, name: 'testCases'});
+    const watchTests = watch('testCases');
+    const tests = fields.map((field, index) => {
+        return {...field, ...watchTests[index]};
+    });
+    const removeTest = (index: number) => {
+        setSelectedTest(1 <= index && index < tests.length ? index - 1 : null);
+        remove(index);
+    }
+    const addTest = () => {
+        setSelectedTest(tests.length);
+        append({input: '', target: ''});
+    }
 
     const handleUpload = useCallback( async (file: File) => {
         if( !course || !exercise )
@@ -117,6 +136,49 @@ function TestCasesForm() {
             )}/>
         </Stack>
 
+        <Typography variant="h6" marginBottom={2} marginTop={8}>Test cases (public and private)</Typography>
+        <Stack direction="row" alignItems="center" alignContent="center">
+            <Typography marginRight={1}>Public tests: </Typography>
+            <ToggleButtonGroup size="small">
+                {tests.map((test, index) => {
+                    return (<div key={index.toString()}>
+                        <Badge invisible={selectedTest !== index} badgeContent={
+                            <HighlightOffTwoToneIcon
+                                fontSize="small" sx={{ color: '#515151', "&:focus,&:hover": {cursor: 'pointer'}}}
+                                onClick={() => removeTest(index)}/>
+                        }>
+                            <ToggleButton value={index} id={`${index}`}
+                                          onClick={() => onTestSelected(index)}
+                                          color={(!Boolean(errors.testCases?.[index]?.input) && !Boolean(errors.testCases?.[index]?.target)) ? 'standard' : 'error'}
+                                          sx={{paddingLeft: 3, paddingRight: 3}}
+                                          selected={true}>
+                                <Typography>{index + 1}</Typography>
+                            </ToggleButton>
+                        </Badge>
+                    </div>)}
+                )}
+            </ToggleButtonGroup>
+            <IconButton sx={{padding: '12px'}} onClick={addTest} size="large"><Add /></IconButton>
+        </Stack>
+        {selectedTest !== null && 0 <= selectedTest && selectedTest < tests.length && tests.map((test, index) => index === selectedTest && <>
+            <Stack spacing={1} hidden={selectedTest !== index}>
+                <Controller name={`testCases.${index}.input`} control={control} render={({ field: { ref, ...field } }) => (
+                    <TextField
+                        multiline fullWidth variant="outlined" label="Input" placeholder="Start typing the input..."
+                        error={Boolean(errors.testCases?.[index]?.input)} helperText={errors.testCases?.[index]?.input?.message}
+                        inputRef={ref} {...field} />
+                )}/>
+
+                <Controller name={`testCases.${index}.target`} control={control} render={({ field: { ref, ...field } }) => (
+                    <TextField
+                        multiline fullWidth variant="outlined" label="Expected output" placeholder="Start typing the expected output..."
+                        error={Boolean(errors.testCases?.[index]?.target)} helperText={errors.testCases?.[index]?.target?.message}
+                        inputRef={ref} {...field} />
+                )}/>
+            </Stack>
+        </>)}
+        <br/>
+
         <Box justifyContent="center" justifyItems="center" justifySelf="center">
             <FileUploader
                 handleChange={handleUpload}
@@ -126,7 +188,7 @@ function TestCasesForm() {
                 types={fileTypes}>
 
                 <UploadBackground boxShadow={3}>
-                    <Typography color="common.white" align="center">Test cases (.zip)</Typography>
+                    <Typography color="common.white" align="center">Private test cases (.zip)</Typography>
                     <Typography color="common.white" align="center" variant="body2">Drag & Drop here or click to select</Typography>
                     <br/>
                     {(0 < progress  && progress < 100) && <Box width="100%"><LinearProgress variant="determinate" value={progress} /></Box>}

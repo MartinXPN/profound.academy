@@ -1,5 +1,5 @@
 import {db} from "./db";
-import {Course, Exercise, EXERCISE_TYPES, ExerciseProgress, Progress} from "models/courses";
+import {Course, Exercise, EXERCISE_TYPES, ExerciseProgress, Progress, TestCase} from "models/courses";
 import firebase from "firebase/app";
 import {SubmissionStatus} from "models/submissions";
 import {LANGUAGES} from "models/language";
@@ -138,7 +138,7 @@ export const updateExercise = async (
     unlockContent: string[],
     allowedLanguages?: (keyof typeof LANGUAGES)[],
     memoryLimit?: number, timeLimit?: number, outputLimit?: number,
-    floatPrecision?: number, comparisonMode?: 'whole' | 'token' | 'custom',
+    floatPrecision?: number, comparisonMode?: 'whole' | 'token' | 'custom', testCases?: TestCase[],
     question?: string, answer?: string, options?: string[],
 ) => {
     const previousValues = (await db.exercise(courseId, exerciseId).get()).data();
@@ -159,6 +159,7 @@ export const updateExercise = async (
         outputLimit: outputLimit,
         floatPrecision:  floatPrecision,
         comparisonMode: comparisonMode,
+        testCases: testCases,
         question: question,
         options: options,
     }, {merge: true});

@@ -37,6 +37,10 @@ const testCasesSchema = object({
     outputLimit: number().min(0.001).max(10),
     floatPrecision: number().min(0.00000000000001).max(0.1),
     comparisonMode: zodEnum(COMPARISON_MODES),
+    testCases: array(object({
+        input: string().max(10000),
+        target: string().max(10000),
+    })).max(25),
 });
 const codeSchema = object({
     ...baseSchema,
@@ -117,6 +121,7 @@ function ExerciseEditor({cancelEditing, exerciseTypeChanged}: {
             timeLimit: exercise?.timeLimit ?? 1,
             outputLimit: exercise?.outputLimit ?? 1,
             floatPrecision: exercise?.floatPrecision ?? 0.0001,
+            testCases: exercise?.testCases ?? [],
             comparisonMode: exercise?.comparisonMode ?? 'token',
             question: exercise?.question,
             options: exercise?.options,
@@ -174,7 +179,7 @@ function ExerciseEditor({cancelEditing, exerciseTypeChanged}: {
             data.exerciseType,
             data.unlockContent,
             // @ts-ignore
-            data.allowedLanguages, data.memoryLimit, data.timeLimit, data.outputLimit, data.floatPrecision, data.comparisonMode,
+            data.allowedLanguages, data.memoryLimit, data.timeLimit, data.outputLimit, data.floatPrecision, data.comparisonMode, data.testCases,
             // @ts-ignore
             data.question, data.answer, data.options,
         );

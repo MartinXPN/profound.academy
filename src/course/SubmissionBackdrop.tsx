@@ -1,6 +1,6 @@
-import {useContext, useState} from "react";
+import React, {useContext, useState} from "react";
 import useAsyncEffect from "use-async-effect";
-import { Backdrop, CircularProgress, ClickAwayListener, Paper } from "@mui/material";
+import {Backdrop, CircularProgress, ClickAwayListener, IconButton, Paper, Stack, Typography} from "@mui/material";
 import {styled} from "@mui/material/styles";
 import {SubmissionResult} from "models/submissions";
 import {getSubmissionCode} from "../services/submissions";
@@ -8,11 +8,14 @@ import {AuthContext} from "../App";
 import Code from "./editor/Code";
 import {LANGUAGES} from "models/language";
 import {getModeForPath} from "ace-builds/src-noconflict/ext-modelist";
+import {Close} from "@mui/icons-material";
+import SmallAvatar from "../common/SmallAvatar";
 
 
 const CodeBackdrop = styled(Backdrop)(({theme}) => ({
     zIndex: theme.zIndex.drawer + 1,
     color: 'white',
+    padding: theme.spacing(4),
 }));
 
 function SubmissionBackdrop({submission, onClose}: {submission: SubmissionResult, onClose: () => void}) {
@@ -49,17 +52,21 @@ function SubmissionBackdrop({submission, onClose}: {submission: SubmissionResult
     return (<>
         <CodeBackdrop open={open}>
             <ClickAwayListener onClickAway={handleClose}>
-                {!submissionCode
-                    ?
-                    <CircularProgress color="inherit"/>
-                    :
-                    <Paper sx={{position: 'relative', height: '90%', width: '70%'}}>
-                        <Code theme="tomorrow" fontSize={14}
-                              language={editorLanguage}
-                              readOnly
-                              code={submissionCode} />
-                    </Paper>
-                }
+                <Paper sx={{position: 'relative', height: '100%', width: '70%', borderRadius: 4, overflowY: 'auto'}}>
+                    <Stack direction="row" alignItems="center" alignContent="center" margin={1} marginLeft={4}>
+                        <SmallAvatar src={submission.userImageUrl} />
+                        {submission.userDisplayName}
+                        <Typography variant="body2" color="text.secondary" noWrap>&nbsp; • &nbsp;</Typography>
+                        <Typography variant="body2" color="text.secondary" noWrap sx={{flex: 1}}>{submission.id}</Typography>
+                        <IconButton onClick={handleClose} size="large"><Close /></IconButton>
+                    </Stack>
+                    {!submissionCode
+                        ? <CircularProgress color="inherit"/>
+                        : <Code readOnly theme="tomorrow" fontSize={14}
+                              language={editorLanguage} code={submissionCode} />
+                    }
+                    <Typography variant="body2" color="text.secondary" noWrap textAlign="center">Instructors will see results per test case here</Typography>
+                </Paper>
             </ClickAwayListener>
         </CodeBackdrop>
     </>);

@@ -1,5 +1,4 @@
 import React, {memo, useCallback, useContext, useEffect, useState} from "react";
-import Paper from '@mui/material/Paper';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
@@ -106,80 +105,78 @@ function RankingTable({metric, showProgress}: {metric: string, showProgress?: bo
 
 
     return (
-        <Paper sx={{width: '100%'}}>
-            <TableContainer sx={{ maxHeight: 'calc(100vh - 64px)' }}>
-                <Table stickyHeader>
-                    <TableHead>
-                        <TableRow>
-                            <TableCell key="#" align="center" sx={{minWidth: 20}}>#</TableCell>
-                            <TableCell key="userDisplayName" align="left" sx={{minWidth: 100}}>User</TableCell>
-                            <TableCell key="total" align="right" sx={{width: 50}}>Total</TableCell>
+        <TableContainer sx={{ maxHeight: 'calc(100vh - 64px)', width: '100%' }}>
+            <Table stickyHeader>
+                <TableHead>
+                    <TableRow>
+                        <TableCell key="#" align="center" sx={{minWidth: 20}}>#</TableCell>
+                        <TableCell key="userDisplayName" align="left" sx={{minWidth: 100}}>User</TableCell>
+                        <TableCell key="total" align="right" sx={{width: 50}}>Total</TableCell>
 
-                            {(maxLevel >= 1) && Array(maxLevel).fill(1).map((_, level) => {
-                                const levelName = (level + 1).toString();
-                                return <>
-                                    {maxLevel >= 2 &&
-                                    <TableCell key={level} align="right" onClick={() => onLevelClicked(level)} sx={{"&:focus,&:hover": {cursor: 'pointer'}, width: 50}}>
-                                        <Typography variant="subtitle1" sx={{verticalAlign: 'middle', display: 'inline-flex'}}>
-                                            <Equalizer /> {level}
-                                        </Typography>
-                                        <Typography variant="body2">
-                                            {course && course?.levelExercises && course.levelExercises[levelName] ? course.levelExercises[levelName] * 100 : '?'}
-                                        </Typography>
-                                    </TableCell>}
+                        {(maxLevel >= 1) && Array(maxLevel).fill(1).map((_, level) => {
+                            const levelName = (level + 1).toString();
+                            return <>
+                                {maxLevel >= 2 &&
+                                <TableCell key={level} align="right" onClick={() => onLevelClicked(level)} sx={{"&:focus,&:hover": {cursor: 'pointer'}, width: 50}}>
+                                    <Typography variant="subtitle1" sx={{verticalAlign: 'middle', display: 'inline-flex'}}>
+                                        <Equalizer /> {level}
+                                    </Typography>
+                                    <Typography variant="body2">
+                                        {course && course?.levelExercises && course.levelExercises[levelName] ? course.levelExercises[levelName] * 100 : '?'}
+                                    </Typography>
+                                </TableCell>}
 
-                                    {levelOpen[levelName] && levelName in levelExercises && levelExercises[levelName].map((ex, index) =>
-                                        <TableCell key={ex.id} align="right" sx={{width: 50}}>
-                                            {index + 1}
-                                        </TableCell>)
-                                    }
-                                </>
-                            })}
-                        </TableRow>
-                    </TableHead>
+                                {levelOpen[levelName] && levelName in levelExercises && levelExercises[levelName].map((ex, index) =>
+                                    <TableCell key={ex.id} align="right" sx={{width: 50}}>
+                                        {index + 1}
+                                    </TableCell>)
+                                }
+                            </>
+                        })}
+                    </TableRow>
+                </TableHead>
 
-                    <TableBody>
-                        {progress.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row, index) =>
-                        <TableRow hover role="checkbox" tabIndex={-1} key={row.id}>
-                            <TableCell key="#" align="center">{page * rowsPerPage + index + 1}</TableCell>
-                            <ClickableTableCell key="userDisplayName" align="left" onClick={() => onUserClicked(row.id)}>
-                                <Stack direction="row" alignItems="center" alignContent="center">
-                                    <SmallAvatar src={row.userImageUrl} />
-                                    {row.userDisplayName}
-                                </Stack>
-                            </ClickableTableCell>
-                            <TableCell key="total" align="right" sx={{color: showProgress ? statusColors.solved: 'standard', fontWeight: 'bold'}}>
-                                { /* @ts-ignore */ }
-                                {showProgress ? '+' : ''}{metric in row ? row[metric].toFixed(0): '-' }
-                            </TableCell>
+                <TableBody>
+                    {progress.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row, index) =>
+                    <TableRow hover role="checkbox" tabIndex={-1} key={row.id}>
+                        <TableCell key="#" align="center">{page * rowsPerPage + index + 1}</TableCell>
+                        <ClickableTableCell key="userDisplayName" align="left" onClick={() => onUserClicked(row.id)}>
+                            <Stack direction="row" alignItems="center" alignContent="center">
+                                <SmallAvatar src={row.userImageUrl} />
+                                {row.userDisplayName}
+                            </Stack>
+                        </ClickableTableCell>
+                        <TableCell key="total" align="right" sx={{color: showProgress ? statusColors.solved: 'standard', fontWeight: 'bold'}}>
+                            { /* @ts-ignore */ }
+                            {showProgress ? '+' : ''}{metric in row ? row[metric].toFixed(0): '-' }
+                        </TableCell>
 
-                            {(maxLevel >= 1) && Array(maxLevel).fill(1).map((_, level) => {
-                                const levelName = (level + 1).toString();
-                                // @ts-ignore
-                                const levelScore = row?.[levelMetric]?.[levelName];
-                                return <>
-                                    {maxLevel >= 2 &&
-                                    <TableCell key={levelName} align="right">
-                                        {levelScore ? levelScore.toFixed(0) : '-'}
-                                    </TableCell>}
+                        {(maxLevel >= 1) && Array(maxLevel).fill(1).map((_, level) => {
+                            const levelName = (level + 1).toString();
+                            // @ts-ignore
+                            const levelScore = row?.[levelMetric]?.[levelName];
+                            return <>
+                                {maxLevel >= 2 &&
+                                <TableCell key={levelName} align="right">
+                                    {levelScore ? levelScore.toFixed(0) : '-'}
+                                </TableCell>}
 
 
-                                    {levelOpen[levelName] && levelName in levelExercises && levelExercises[levelName].map(ex => {
-                                        const exerciseScore = levelExerciseProgress?.[levelName]?.[row.id]?.[ex.id];
-                                        return <>
-                                            <TableCell key={ex.id} align="right">
-                                                {exerciseScore ? exerciseScore.toFixed(0) : '-'}
-                                            </TableCell>
-                                        </>
-                                    })}
-                                </>
-                            })}
-                        </TableRow>
-                        )}
-                    </TableBody>
-                </Table>
-            </TableContainer>
-        </Paper>
+                                {levelOpen[levelName] && levelName in levelExercises && levelExercises[levelName].map(ex => {
+                                    const exerciseScore = levelExerciseProgress?.[levelName]?.[row.id]?.[ex.id];
+                                    return <>
+                                        <TableCell key={ex.id} align="right">
+                                            {exerciseScore ? exerciseScore.toFixed(0) : '-'}
+                                        </TableCell>
+                                    </>
+                                })}
+                            </>
+                        })}
+                    </TableRow>
+                    )}
+                </TableBody>
+            </Table>
+        </TableContainer>
     );
 }
 

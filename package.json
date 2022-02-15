@@ -37,6 +37,7 @@
     "react-notion-x": "^4.15.0",
     "react-router-dom": "^6.2.1",
     "react-scripts": "^5.0.0",
+    "recharts": "^2.1.9",
     "source-map-explorer": "^2.5.2",
     "typescript": "^4.5.5",
     "use-async-effect": "^2.2.5",

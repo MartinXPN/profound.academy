@@ -4,6 +4,7 @@ import firebase from "firebase/app";
 import {SubmissionStatus} from "models/submissions";
 import {LANGUAGES} from "models/language";
 import axios from "axios";
+import {Insight} from "models/lib/courses";
 
 export const getNotionPageMap = async (pageId: string) => {
     const GET_NOTION_ENDPOINT = 'https://us-central1-profound-academy.cloudfunctions.net/getNotionPage';
@@ -27,14 +28,21 @@ export const doesExist = async (courseId: string) => {
 
 export const getCourse = async (id: string) => {
     const snapshot = await db.course(id).get();
-    const course: Course = snapshot.data() as Course;
-    return course;
+    return snapshot.data() as Course;
 }
 
 export const getCourses = async (courseIds: string[]) => {
     const courses: Course[] = await Promise.all(courseIds.map(id => getCourse(id)));
     console.log('Got courses:', courses);
     return courses;
+}
+
+export const onCourseInsightsChanged = (courseId: string, onChanged: (insights: Insight | null) => void) => {
+    return db.courseInsights(courseId).onSnapshot(snapshot => {
+        const insights = snapshot.data();
+        console.log('course insights changed:', insights);
+        onChanged(insights ?? null);
+    });
 }
 
 export const searchCourses = async (title: string, limit: number = 20) => {

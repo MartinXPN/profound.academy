@@ -73,6 +73,10 @@ service cloud.firestore {
           allow read: if isCourseInstructor(request, courseId) || isCurrentUser(request, userId);
         }
       }
+
+      match /insights/{insightType} {
+        allow read: if isCourseInstructor(request, courseId);
+      }
     }
     match /{path=**}/{metric}/{level} {
       allow read: if isCurrentUser(request, resource.data.userId) || isCourseInstructor(request, resource.data.courseId) || get(/databases/$(database)/documents/courses/$(resource.data.courseId)).data.rankingVisibility == 'public';

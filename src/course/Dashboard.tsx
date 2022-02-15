@@ -5,8 +5,9 @@ import {onCourseInsightsChanged} from "../services/courses";
 import {CourseContext} from "./Course";
 import {Insight} from "models/lib/courses";
 import {CartesianGrid, Line, LineChart, Tooltip, XAxis, Label} from "recharts";
+import {statusColors} from "./colors";
 
-function CourseMetricStat({title, icon, value}: {title: string, icon: ReactElement, value?: number}) {
+function CourseMetricStat({title, icon, value, difference}: {title: string, icon: ReactElement, value?: number, difference?: number}) {
     return <>
         <Grid container direction="column">
             <Box marginLeft="auto" marginRight="auto" textAlign="center">
@@ -14,8 +15,12 @@ function CourseMetricStat({title, icon, value}: {title: string, icon: ReactEleme
                     {icon} {title}
                 </Grid>
             </Box>
+
             <Box marginLeft="auto" marginRight="auto" textAlign="center">
-                {value ? <Typography variant="h5" textAlign="center">{value}</Typography> : <CircularProgress/>}
+                <Grid container direction="row" alignItems="center">
+                    {value ? <Typography variant="h5" textAlign="center">{value}</Typography> : <CircularProgress/>}
+                    {difference && <Typography variant="h6" textAlign="center" noWrap sx={{color: statusColors.solved}}>&nbsp; (+{difference})</Typography>}
+                </Grid>
             </Box>
         </Grid>
     </>
@@ -56,7 +61,7 @@ function Dashboard() {
                 <CourseMetricStat title="Runs" icon={<Send fontSize="large" />} value={courseInsights?.runs} />
                 <CourseMetricStat title="Submissions" icon={<Done fontSize="large" />} value={courseInsights?.submissions} />
                 <CourseMetricStat title="Solved" icon={<ThumbUpAlt fontSize="large" />} value={courseInsights?.solved} />
-                <CourseMetricStat title="Users" icon={<Person fontSize="large" />} value={courseInsights?.users} />
+                <CourseMetricStat title="Users" icon={<Person fontSize="large" />} value={courseInsights?.users} difference={5} />
             </Stack>
         </Grid>
     </>

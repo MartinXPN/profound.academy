@@ -16,9 +16,10 @@ import useAsyncEffect from "use-async-effect";
 import {useNavigate} from "react-router-dom";
 import ClickableTableCell from "../common/ClickableTableCell";
 import SmallAvatar from "../common/SmallAvatar";
+import {statusColors} from "./colors";
 
 
-function RankingTable({metric}: {metric: string}) {
+function RankingTable({metric, showProgress}: {metric: string, showProgress?: boolean}) {
     const navigate = useNavigate();
     const {course} = useContext(CourseContext);
     const [page, setPage] = useState(0);
@@ -110,15 +111,15 @@ function RankingTable({metric}: {metric: string}) {
                 <Table stickyHeader>
                     <TableHead>
                         <TableRow>
-                            <TableCell key="#" align="center" style={{minWidth: 20}}>#</TableCell>
-                            <TableCell key="userDisplayName" align="left" style={{minWidth: 100}}>User</TableCell>
-                            <TableCell key="total" align="right" style={{width: 50}}>Total</TableCell>
+                            <TableCell key="#" align="center" sx={{minWidth: 20}}>#</TableCell>
+                            <TableCell key="userDisplayName" align="left" sx={{minWidth: 100}}>User</TableCell>
+                            <TableCell key="total" align="right" sx={{width: 50}}>Total</TableCell>
 
                             {(maxLevel >= 1) && Array(maxLevel).fill(1).map((_, level) => {
                                 const levelName = (level + 1).toString();
                                 return <>
                                     {maxLevel >= 2 &&
-                                    <TableCell key={level} align="right" style={{width: 50}} onClick={() => onLevelClicked(level)} sx={{"&:focus,&:hover": {cursor: 'pointer'}}}>
+                                    <TableCell key={level} align="right" onClick={() => onLevelClicked(level)} sx={{"&:focus,&:hover": {cursor: 'pointer'}, width: 50}}>
                                         <Typography variant="subtitle1" sx={{verticalAlign: 'middle', display: 'inline-flex'}}>
                                             <Equalizer /> {level}
                                         </Typography>
@@ -128,7 +129,7 @@ function RankingTable({metric}: {metric: string}) {
                                     </TableCell>}
 
                                     {levelOpen[levelName] && levelName in levelExercises && levelExercises[levelName].map((ex, index) =>
-                                        <TableCell key={ex.id} align="right" style={{width: 50}}>
+                                        <TableCell key={ex.id} align="right" sx={{width: 50}}>
                                             {index + 1}
                                         </TableCell>)
                                     }
@@ -147,8 +148,10 @@ function RankingTable({metric}: {metric: string}) {
                                     {row.userDisplayName}
                                 </Stack>
                             </ClickableTableCell>
-                            { /* @ts-ignore */ }
-                            <TableCell key="total" align="right">{metric in row ? row[metric].toFixed(0): '-' }</TableCell>
+                            <TableCell key="total" align="right" sx={{color: showProgress ? statusColors.solved: 'standard', fontWeight: 'bold'}}>
+                                { /* @ts-ignore */ }
+                                {showProgress ? '+' : ''}{metric in row ? row[metric].toFixed(0): '-' }
+                            </TableCell>
 
                             {(maxLevel >= 1) && Array(maxLevel).fill(1).map((_, level) => {
                                 const levelName = (level + 1).toString();

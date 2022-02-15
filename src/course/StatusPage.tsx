@@ -32,7 +32,7 @@ function StatusPage() {
 
             {currentTab === 'submissions' && <CourseSubmissionsTable rowsPerPage={5} course={course} />}
             {currentTab === 'ranking' && <RankingTable metric="score"/>}
-            {currentTab === 'lastWeeksProgress' && <RankingTable metric={`score_${moment().format('YYYY_MM_WW')}`}/>}
+            {currentTab === 'lastWeeksProgress' && <RankingTable metric={`score_${moment().format('YYYY_MM_WW')}`} showProgress/>}
             {currentTab === 'upsolving' && <RankingTable metric="upsolveScore"/>}
         </Box>
     </>

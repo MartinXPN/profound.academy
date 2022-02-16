@@ -36,7 +36,8 @@ const db = {
 
     courses: dataPoint<Course>('courses'),
     course: (courseId: string) => dataPoint<Course>('courses').doc(courseId),
-    courseInsights: (courseId: string) => dataPoint<Insight>(`courses/${courseId}/insights`).doc('overall'),
+    courseInsights: (courseId: string) => dataPoint<Insight>(`courses/${courseId}/insights`),
+    courseOverallInsights: (courseId: string) => dataPoint<Insight>(`courses/${courseId}/insights`).doc('overall'),
     exercises: (courseId: string) => dataPoint<Exercise>(`courses/${courseId}/exercises`),
     exercise: (courseId: string, exerciseId: string) => dataPoint<Exercise>(`courses/${courseId}/exercises`).doc(exerciseId),
     exercisePrivateFields: (courseId: string, exerciseId: string) => dataPoint<ExercisePrivateFields>(`courses/${courseId}/exercises/${exerciseId}/private`).doc('fields'),

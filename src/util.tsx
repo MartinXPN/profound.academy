@@ -54,12 +54,12 @@ export const getLocalizedParam = (param: string | {[key: string]: string}): stri
     return new LocalizedStrings(localeToParamText).value;
 };
 
-
-export const tomorrow = (d: Date): Date => {
+export const dateDayDiff = (d: Date, days: number): Date => {
     const res = new Date(d);
-    res.setDate(res.getDate() + 1);
+    res.setDate(res.getDate() + days);
     return res;
 };
+export const tomorrow = (d: Date): Date => dateDayDiff(d, 1);
 
 export const notionPageToId = (page: string): string => {
     return page.split('-').at(-1) ?? '';

@@ -5,6 +5,8 @@ import {SubmissionStatus} from "models/submissions";
 import {LANGUAGES} from "models/language";
 import axios from "axios";
 import {Insight} from "models/lib/courses";
+import moment from "moment/moment";
+import {dateDayDiff} from "../util";
 
 export const getNotionPageMap = async (pageId: string) => {
     const GET_NOTION_ENDPOINT = 'https://us-central1-profound-academy.cloudfunctions.net/getNotionPage';
@@ -37,12 +39,38 @@ export const getCourses = async (courseIds: string[]) => {
     return courses;
 }
 
-export const onCourseInsightsChanged = (courseId: string, onChanged: (insights: Insight | null) => void) => {
-    return db.courseInsights(courseId).onSnapshot(snapshot => {
+export const onCourseInsightsChanged = (courseId: string, onChanged: (insights: Insight) => void) => {
+    return db.courseOverallInsights(courseId).onSnapshot(snapshot => {
         const insights = snapshot.data();
         console.log('course insights changed:', insights);
-        onChanged(insights ?? null);
+        onChanged(insights ?? {runs: 0, solved: 0, submissions: 0, users: 0});
     });
+}
+
+export const onCourseHistoricalInsightsChanged = (courseId: string, start: Date, end: Date, onChanged: (insights: Insight[]) => void) => {
+    const format = (date: Date) => moment(date).locale('en').format('YYYY-MM-DD');
+    const startDate = format(start);
+    const endDate = format(end);
+    console.log('startDate:', start, startDate);
+    console.log('endDate:', end, endDate);
+
+    return db.courseInsights(courseId)
+        .where('date', '>=', startDate)
+        .where('date', '<', endDate)
+        .onSnapshot(snapshot => {
+            const insights = snapshot.docs.map(d => d.data());
+            console.log('course historical insights changed:', insights);
+            const res = []
+            let date = start;
+            while( date < end ) {
+                const formattedDate = format(date);
+                const insight = insights.filter(i => i.date === formattedDate);
+                res.push(insight.length > 0 ? insight[0] : {date: formattedDate, runs: 0, solved: 0, submissions: 0, users: 0});
+                date = dateDayDiff(date, 1);
+            }
+            console.log('res:', res);
+            onChanged(res);
+        });
 }
 
 export const searchCourses = async (title: string, limit: number = 20) => {

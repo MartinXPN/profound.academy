@@ -94,6 +94,7 @@ export interface Progress {
 }
 
 export interface Insight {
+    date?: string;
     runs: number;
     solved: number;
     submissions: number;

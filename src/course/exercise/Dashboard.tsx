@@ -15,7 +15,7 @@ function CircularProgressWithLabel(props: CircularProgressProps & { value: numbe
             }}>
                 <Stack direction="column">
                     <Typography textAlign="center">{`${Math.round(props.value)}%`}</Typography>
-                    <Typography textAlign="center" variant="caption" color="text.secondary">Accuracy</Typography>
+                    <Typography textAlign="center" variant="caption" color="text.secondary">Success</Typography>
                 </Stack>
             </Box>
         </Box>

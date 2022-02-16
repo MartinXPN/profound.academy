@@ -5,24 +5,26 @@ import {onCourseHistoricalInsightsChanged, onCourseInsightsChanged} from "../ser
 import {CourseContext} from "./Course";
 import {Insight} from "models/lib/courses";
 import {CartesianGrid, Line, ComposedChart, Tooltip, XAxis, YAxis, Label} from "recharts";
-import {statusColors} from "./colors";
 import {dateDayDiff} from "../util";
 import moment from "moment";
 import {Payload} from "recharts/types/component/DefaultTooltipContent";
+import {useTheme} from "@mui/material/styles";
 
 function CourseMetricStat({title, icon, value, difference}: {title: string, icon: ReactElement, value?: number, difference?: number}) {
+    const theme = useTheme();
     return <>
         <Grid container direction="column">
-            <Box marginLeft="auto" marginRight="auto" textAlign="center">
+            <Box marginX="auto" textAlign="center">
                 <Grid container direction="row" alignItems="center">
-                    {icon} {title}
+                    {value ? <Typography variant="h6" textAlign="center">{value}</Typography> : <CircularProgress/>}
+                    {!!difference && difference > 0 && <Typography variant="h6" textAlign="center" noWrap sx={{color: theme.palette.success.light}}>&nbsp; (+{difference})</Typography>}
+                    {!!difference && difference < 0 && <Typography variant="h6" textAlign="center" noWrap sx={{color: theme.palette.error.main}}>&nbsp; ({difference})</Typography>}
                 </Grid>
             </Box>
 
-            <Box marginLeft="auto" marginRight="auto" textAlign="center">
+            <Box marginX="auto" textAlign="center">
                 <Grid container direction="row" alignItems="center">
-                    {value ? <Typography variant="h5" textAlign="center">{value}</Typography> : <CircularProgress/>}
-                    {difference && <Typography variant="h6" textAlign="center" noWrap sx={{color: statusColors.solved}}>&nbsp; (+{difference})</Typography>}
+                    {icon} &nbsp; {title}
                 </Grid>
             </Box>
         </Grid>
@@ -48,7 +50,7 @@ const MetricChart = memo(({weekData, prevWeekData, metric, title}: {
 }) => {
     return <>
         <Box marginY={4}>
-            <ComposedChart width={320} height={200} margin={{top: 0, right: 0, bottom: 0, left: 0}}>
+            <ComposedChart width={300} height={200}>
                 <XAxis xAxisId={0} tick={false}>
                     <Label value={title} offset={0} position="insideBottom" />
                 </XAxis>
@@ -69,6 +71,14 @@ function Dashboard() {
     const [courseInsights, setCourseInsights] = useState<Insight | null>(null);
     const [weekCourseDailyInsights, setWeekCourseDailyInsights] = useState<Insight[]>([]);
     const [lastWeekCourseDailyInsights, setLastWeekCourseDailyInsights] = useState<Insight[]>([]);
+
+
+    const diff = (metric: string) => {
+        return weekCourseDailyInsights.map((insight, index) => {
+            // @ts-ignore
+            return (insight?.[metric] ?? 0 as number) - (lastWeekCourseDailyInsights[index]?.[metric] ?? 0 as number)
+        }).reduce((prev, cur) => prev + cur, 0);
+    }
 
     // Overall course insights
     useEffect(() => {
@@ -91,21 +101,19 @@ function Dashboard() {
     }, [course?.id]);
 
     return <>
-        <Grid container direction="column" alignItems="center" justifyContent="center">
-            <Grid container direction="row" alignItems="center">
-                <MetricChart weekData={weekCourseDailyInsights} prevWeekData={lastWeekCourseDailyInsights} metric="runs" title="Runs" />
-                <MetricChart weekData={weekCourseDailyInsights} prevWeekData={lastWeekCourseDailyInsights} metric="submissions" title="Submissions" />
-                <MetricChart weekData={weekCourseDailyInsights} prevWeekData={lastWeekCourseDailyInsights} metric="solved" title="Solved" />
-                <MetricChart weekData={weekCourseDailyInsights} prevWeekData={lastWeekCourseDailyInsights} metric="users" title="New users" />
-            </Grid>
-
-            <Stack maxWidth="100%" width="50em" direction="row" marginY={5} marginX="auto" gap={1}>
-                <CourseMetricStat title="Runs" icon={<Send fontSize="large" />} value={courseInsights?.runs} />
-                <CourseMetricStat title="Submissions" icon={<Done fontSize="large" />} value={courseInsights?.submissions} />
-                <CourseMetricStat title="Solved" icon={<ThumbUpAlt fontSize="large" />} value={courseInsights?.solved} />
-                <CourseMetricStat title="Users" icon={<Person fontSize="large" />} value={courseInsights?.users} difference={5} />
-            </Stack>
+        <Grid container justifyItems="center" justifyContent="center">
+            <Grid item alignItems="center"><MetricChart weekData={weekCourseDailyInsights} prevWeekData={lastWeekCourseDailyInsights} metric="runs" title="Runs" /></Grid>
+            <Grid item alignItems="center"><MetricChart weekData={weekCourseDailyInsights} prevWeekData={lastWeekCourseDailyInsights} metric="submissions" title="Submissions" /></Grid>
+            <Grid item alignItems="center"><MetricChart weekData={weekCourseDailyInsights} prevWeekData={lastWeekCourseDailyInsights} metric="solved" title="Solved" /></Grid>
+            <Grid item alignItems="center"><MetricChart weekData={weekCourseDailyInsights} prevWeekData={lastWeekCourseDailyInsights} metric="users" title="New users" /></Grid>
         </Grid>
+
+        <Stack maxWidth="100%" width="50em" direction="row" marginY={5} marginX="auto" gap={1}>
+            <CourseMetricStat title="Runs" icon={<Send fontSize="large" />} value={courseInsights?.runs} difference={diff('runs')} />
+            <CourseMetricStat title="Submissions" icon={<Done fontSize="large" />} value={courseInsights?.submissions} difference={diff('submissions')} />
+            <CourseMetricStat title="Solved" icon={<ThumbUpAlt fontSize="large" />} value={courseInsights?.solved} difference={diff('solved')} />
+            <CourseMetricStat title="Users" icon={<Person fontSize="large" />} value={courseInsights?.users} difference={diff('users')} />
+        </Stack>
     </>
 }
 

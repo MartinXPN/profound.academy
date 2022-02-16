@@ -16,6 +16,7 @@
   "engines": {
     "node": "14"
   },
+  "eslintIgnore": ["*.spec.ts", "world.js", "test"],
   "main": "lib/index.js",
   "dependencies": {
     "aws-sdk": "^2.1072.0",

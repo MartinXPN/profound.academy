@@ -42,11 +42,11 @@ const updateActivity = (
     functions.logger.info('Updating the user activity...');
     const submissionDate = submission.createdAt.toDate();
     const submissionDay = moment(submissionDate).format('YYYY-MM-DD');
+    const year = moment(submissionDate).format('YYYY');
 
-    transaction.set(db.activity(submission.userId).doc(submissionDay), {
-        // @ts-ignore
-        count: firestore.FieldValue.increment(1),
-        date: submissionDay,
+    // @ts-ignore
+    transaction.set(db.activity(submission.userId).doc(year), {
+        [submissionDay]: firestore.FieldValue.increment(1),
     }, {merge: true});
     functions.logger.info('Updated the user activity!');
 };

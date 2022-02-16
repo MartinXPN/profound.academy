@@ -4,7 +4,6 @@ import 'react-calendar-heatmap/dist/styles.css';
 import {Collapse, Tooltip, Typography} from "@mui/material";
 import moment from "moment/moment";
 import useAsyncEffect from "use-async-effect";
-import {Activity} from "models/users";
 import {getUserActivity} from "../services/users";
 import {tomorrow, useStickyState} from "../util";
 import Box from "@mui/material/Box";
@@ -13,14 +12,15 @@ import {UserDateSubmissionsTable} from "../course/SubmissionsTable";
 
 
 function ActivityHeatmap({userId}: {userId: string}) {
-    const [activity, setActivity] = useStickyState<Activity[] | null>(null, `activity-${userId}`);
-    const [totalActivity, setTotalActivity] = useStickyState<number | null>(null, `totalActivity-${userId}`);
+    const [activity, setActivity] = useStickyState<{date: string, count: number}[] | null>(null, `daily-activity-${userId}`);
+    const [totalActivity, setTotalActivity] = useStickyState<number>(0, `totalActivity-${userId}`);
     const [selectedDate, setSelectedDate] = useState<{ date: Date, formattedDate: string } | null>(null);
 
     useAsyncEffect(async () => {
         const activity = await getUserActivity(userId);
-        setActivity(activity);
-        setTotalActivity(activity.reduce((sum, a) => sum + a.count, 0));
+        const dailyActivity = Object.keys(activity).filter(key => key !== 'id').map(date => ({date: date, count: activity[date]}));
+        setActivity(dailyActivity);
+        setTotalActivity(dailyActivity.reduce((sum, a) => sum + a.count, 0));
     }, [userId]);
 
     const onDateClicked = (date: Date, formattedDate: string) => {

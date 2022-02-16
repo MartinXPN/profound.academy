@@ -4,9 +4,11 @@ import firebase from "firebase";
 
 export const getUserActivity = async (userId: string) => {
     const snapshot = await db.activity(userId).get();
-    const activity: Activity[] = snapshot.docs.map(x => x.data());
+    const activity: Activity[] = snapshot.docs.map(x => x.data()) ?? [];
     console.log('Got activity:', activity);
-    return activity;
+    const daily: {[key: string]: number} = activity.reduce((res, item) =>  ({...res, ...item}), {});
+    console.log('=> daily:', daily);
+    return daily;
 }
 
 export const onUserInfoChanged = (userId: string, onChanged: (user: User | null) => void) => {

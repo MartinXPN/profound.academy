@@ -2,9 +2,9 @@ import {Course} from './courses';
 import firebase from 'firebase';
 
 export interface Activity {
-    id: string;
-    date: string;           // 2021-11-20
-    count: number;          // how many problems were solved during that day
+    // @ts-ignore
+    id: string;             // year (2021 or 2022, etc)
+    [key: string]: number;  // {2021-11-20: 10}
 }
 
 export interface Badge {

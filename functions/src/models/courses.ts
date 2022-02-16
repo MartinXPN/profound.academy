@@ -98,5 +98,6 @@ export interface Insight {
     runs: number;
     solved: number;
     submissions: number;
+    totalScore?: number;
     users?: number;
 }

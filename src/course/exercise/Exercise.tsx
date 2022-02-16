@@ -21,6 +21,7 @@ import {EXERCISE_TYPES} from "models/courses";
 import TextAnswer from "./TextAnswer";
 import Checkboxes from "./Checkboxes";
 import MultipleChoice from "./MultipleChoice";
+import Dashboard from "./Dashboard";
 
 const ExerciseEditor = lazy(() => import('./ExerciseEditor'));
 
@@ -89,7 +90,7 @@ function Exercise({launchCourse}: {launchCourse: () => void}) {
                         {isCourseInstructor && <OutlinedButton selected={currentTab === 'edit'} endIcon={<Edit />} onClick={() => setCurrentTab('edit')}>Edit</OutlinedButton>}
                     </Grid>
 
-                    {currentTab === 'description' && <><Content notionPage={getLocalizedParam(exercise.pageId)}/>{auth.isSignedIn && <Forum/>}</>}
+                    {currentTab === 'description' && <>{isCourseInstructor && <Dashboard/>}<Content notionPage={getLocalizedParam(exercise.pageId)}/>{auth.isSignedIn && <Forum/>}</>}
                     {currentTab === 'bestSubmissions' && <ExerciseSubmissionsTable rowsPerPage={5} course={course} exercise={exercise} mode="best" />}
                     {currentTab === 'allSubmissions' && <ExerciseSubmissionsTable rowsPerPage={5} course={course} exercise={exercise} mode="all" />}
                     {currentTab === 'codeDrafts' && <CodeDrafts onCodeDraftSelected={setCodeDraftId} />}

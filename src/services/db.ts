@@ -41,6 +41,7 @@ const db = {
     exercises: (courseId: string) => dataPoint<Exercise>(`courses/${courseId}/exercises`),
     exercise: (courseId: string, exerciseId: string) => dataPoint<Exercise>(`courses/${courseId}/exercises`).doc(exerciseId),
     exercisePrivateFields: (courseId: string, exerciseId: string) => dataPoint<ExercisePrivateFields>(`courses/${courseId}/exercises/${exerciseId}/private`).doc('fields'),
+    exerciseInsights: (courseId: string, exerciseId: string) => dataPoint<Insight>(`courses/${courseId}/exercises/${exerciseId}/insights`).doc('overall'),
     progress: (courseId: string) => dataPoint<Progress>(`courses/${courseId}/progress`),
     userProgress: (courseId: string, userId: string) => dataPoint<Progress>(`courses/${courseId}/progress`).doc(userId),
     allUserProgress: (userId: string) => firebase.firestore().collectionGroup('progress').withConverter(converter<Progress>()).where('userId', '==', userId),

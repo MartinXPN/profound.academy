@@ -64,6 +64,10 @@ service cloud.firestore {
           allow read: if isCourseInstructor(request, courseId);
           allow write: if isCourseInstructor(request, courseId);
         }
+
+        match /insights/{insightType} {
+          allow read: if isCourseInstructor(request, courseId);
+        }
       }
 
       match /progress/{userId} {

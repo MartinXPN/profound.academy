@@ -228,6 +228,14 @@ export const updateExercise = async (
     }
 }
 
+export const onExerciseInsightsChanged = (courseId: string, exerciseId: string, onChanged: (insights: Insight) => void) => {
+    return db.exerciseInsights(courseId, exerciseId).onSnapshot(snapshot => {
+        const insights = snapshot.data();
+        console.log('exercise insights changed:', insights);
+        onChanged(insights ?? {runs: 0, solved: 0, submissions: 0, users: 0});
+    });
+}
+
 export const getExercisePrivateFields = async (courseId: string, exerciseId: string) => {
     const snapshot = await db.exercisePrivateFields(courseId, exerciseId).get();
     return snapshot.data();

@@ -2,6 +2,7 @@
 
 ## Project specific files ##
 .runtimeconfig.json
+test_data/
 
 # IntelliJ
 .idea/

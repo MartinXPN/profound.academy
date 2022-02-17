@@ -4,6 +4,7 @@ import * as functions from 'firebase-functions';
 import * as moment from 'moment';
 import {db} from './db';
 import {SubmissionResult} from '../models/submissions';
+import {recordInsights} from './insights';
 
 
 const updateBest = (
@@ -101,7 +102,11 @@ export const processResult = async (
     if (submissionResult.isTestRun) {
         // save the results to /runs/userId/private/<submissionId>
         functions.logger.info(`Updating the run: ${submissionResult.id} with ${JSON.stringify(submissionResult)}`);
-        await db.run(userId, submissionResult.id).set(submissionResult);
+        await firestore().runTransaction(async (transaction) => {
+            transaction.set(db.run(userId, submissionResult.id), submissionResult);
+            const [courseId, exerciseId] = [submissionResult.course.id, submissionResult.exercise.id];
+            recordInsights(transaction, 'runs', courseId, exerciseId, submissionResult.createdAt.toDate());
+        });
         return;
     }
     const [courseSnapshot, exerciseSnapshot, user] = await Promise.all([
@@ -151,8 +156,14 @@ export const processResult = async (
         transaction.set(db.submissionSensitiveRecords(submissionResult.userId, submissionResult.id), sensitiveData);
         functions.logger.info(`Saved the submission: ${JSON.stringify(code)}`);
 
-        if (!alreadySolved)
+        // update insights and activity
+        const date = submissionResult.createdAt.toDate();
+        recordInsights(transaction, 'submissions', course.id, exercise.id, date);
+        recordInsights(transaction, 'totalScore', course.id, exercise.id, date, submissionResult.score);
+        if (!alreadySolved) {
             updateActivity(transaction, submissionResult);
+            recordInsights(transaction, 'solved', course.id, exercise.id, date);
+        }
     });
 
     // another transaction to update user metrics

@@ -3,7 +3,6 @@ import React, {lazy, useCallback, useContext, useState, memo, Suspense, useEffec
 import {AuthContext} from "../../App";
 import {getLocalizedParam, useStickyState} from "../../util";
 import LandingPage from "../LandingPage";
-import {startCourse} from "../../services/courses";
 import {SignIn} from "../../user/Auth";
 import Editor from "../editor/Editor";
 import {CourseContext, CurrentExerciseContext} from "../Course";
@@ -64,13 +63,9 @@ function Exercise({launchCourse}: {launchCourse: () => void}) {
         {/* Display the landing page with an option to start the course if it wasn't started yet */
             !exerciseId &&
             <Box paddingBottom="12em">
-                <LandingPage onStartCourseClicked={async () => {
-                    if (auth && auth.currentUser && auth.currentUser.uid) {
-                        await startCourse(auth.currentUser.uid, course.id);
-                        launchCourse();
-                    } else {
-                        setShowSignIn(true);
-                    }
+                <LandingPage onStartCourseClicked={() => {
+                    if (auth && auth.currentUser && auth.currentUser.uid)   launchCourse();
+                    else                                                    setShowSignIn(true);
                 }}/>
 
                 {showSignIn && <SignIn />}

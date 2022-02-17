@@ -5,6 +5,8 @@ import {db} from './db';
 import {Submission} from '../models/submissions';
 import {Exercise} from '../models/courses';
 import {processResult} from './submissionResults';
+import {recordNewUserInsight} from './insights';
+import {firestore} from 'firebase-admin';
 
 // const LAMBDA_JUDGE_URL='https://judge.profound.academy/check';
 const LAMBDA_JUDGE_URL='https://jdc8h3yyag.execute-api.us-east-1.amazonaws.com/Prod/check/';
@@ -79,6 +81,9 @@ export const submit = async (submission: Submission): Promise<http.ClientRequest
     if (!exercise)
         throw Error(`Exercise does not exist: ${submission.exercise.id}`);
 
+    await firestore().runTransaction(async (transaction) => {
+        await recordNewUserInsight(transaction, submission.userId, submission.course.id, submission.createdAt.toDate());
+    });
     // TODO: Add number of attempts check here
     if (submission.language === 'txt')
         return submitAnswerCheck(submission, exercise);

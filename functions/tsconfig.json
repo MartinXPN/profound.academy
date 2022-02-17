@@ -7,9 +7,10 @@
     "sourceMap": true,
     "strict": true,
     "target": "es2017",
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "rootDirs": ["src", "test"]
   },
   "compileOnSave": true,
   "include": ["src/**/*"],
-  "exclude": ["node_modules", "**/*.spec.ts"]
+  "exclude": ["node_modules", "**/*.spec.ts", "test", "firebase-export-*"]
 }

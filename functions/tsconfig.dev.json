@@ -1,5 +1,15 @@
 {
-  "include": [
-    ".eslintrc.js"
-  ]
+  "compilerOptions": {
+    "module": "commonjs",
+    "noImplicitReturns": true,
+    "noUnusedLocals": true,
+    "outDir": "lib",
+    "strict": true,
+    "target": "es2017",
+    "skipLibCheck": true,
+    "rootDirs": ["src", "test"]
+  },
+  "compileOnSave": true,
+  "include": ["src/**/*", "test/**/*", ".eslintrc.js"],
+  "exclude": ["node_modules", "**/*.spec.ts"]
 }

@@ -92,3 +92,12 @@ export interface Progress {
     levelSolved?: { [key: string]: number };                // {level: #solved}
     exerciseSolved?: ExerciseProgress<SubmissionStatus>;    // [subcollection] progress = {exId: status}
 }
+
+export interface Insight {
+    date?: string;
+    runs: number;
+    solved: number;
+    submissions: number;
+    totalScore?: number;
+    users?: number;
+}

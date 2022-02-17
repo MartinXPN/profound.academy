@@ -4,6 +4,7 @@ import * as functions from 'firebase-functions';
 import * as moment from 'moment';
 import {db} from './db';
 import {SubmissionResult} from '../models/submissions';
+import {recordInsights} from './insights';
 
 
 const updateBest = (
@@ -42,11 +43,11 @@ const updateActivity = (
     functions.logger.info('Updating the user activity...');
     const submissionDate = submission.createdAt.toDate();
     const submissionDay = moment(submissionDate).format('YYYY-MM-DD');
+    const year = moment(submissionDate).format('YYYY');
 
-    transaction.set(db.activity(submission.userId).doc(submissionDay), {
-        // @ts-ignore
-        count: firestore.FieldValue.increment(1),
-        date: submissionDay,
+    // @ts-ignore
+    transaction.set(db.activity(submission.userId).doc(year), {
+        [submissionDay]: firestore.FieldValue.increment(1),
     }, {merge: true});
     functions.logger.info('Updated the user activity!');
 };
@@ -101,7 +102,11 @@ export const processResult = async (
     if (submissionResult.isTestRun) {
         // save the results to /runs/userId/private/<submissionId>
         functions.logger.info(`Updating the run: ${submissionResult.id} with ${JSON.stringify(submissionResult)}`);
-        await db.run(userId, submissionResult.id).set(submissionResult);
+        await firestore().runTransaction(async (transaction) => {
+            transaction.set(db.run(userId, submissionResult.id), submissionResult);
+            const [courseId, exerciseId] = [submissionResult.course.id, submissionResult.exercise.id];
+            recordInsights(transaction, 'runs', courseId, exerciseId, submissionResult.createdAt.toDate());
+        });
         return;
     }
     const [courseSnapshot, exerciseSnapshot, user] = await Promise.all([
@@ -151,8 +156,14 @@ export const processResult = async (
         transaction.set(db.submissionSensitiveRecords(submissionResult.userId, submissionResult.id), sensitiveData);
         functions.logger.info(`Saved the submission: ${JSON.stringify(code)}`);
 
-        if (!alreadySolved)
+        // update insights and activity
+        const date = submissionResult.createdAt.toDate();
+        recordInsights(transaction, 'submissions', course.id, exercise.id, date);
+        recordInsights(transaction, 'totalScore', course.id, exercise.id, date, submissionResult.score);
+        if (!alreadySolved) {
             updateActivity(transaction, submissionResult);
+            recordInsights(transaction, 'solved', course.id, exercise.id, date);
+        }
     });
 
     // another transaction to update user metrics

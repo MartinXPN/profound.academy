@@ -64,6 +64,10 @@ service cloud.firestore {
           allow read: if isCourseInstructor(request, courseId);
           allow write: if isCourseInstructor(request, courseId);
         }
+
+        match /insights/{insightType} {
+          allow read: if isCourseInstructor(request, courseId);
+        }
       }
 
       match /progress/{userId} {
@@ -72,6 +76,10 @@ service cloud.firestore {
         match /exerciseSolved/{level} {
           allow read: if isCourseInstructor(request, courseId) || isCurrentUser(request, userId);
         }
+      }
+
+      match /insights/{insightType} {
+        allow read: if isCourseInstructor(request, courseId);
       }
     }
     match /{path=**}/{metric}/{level} {

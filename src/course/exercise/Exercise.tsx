@@ -3,7 +3,6 @@ import React, {lazy, useCallback, useContext, useState, memo, Suspense, useEffec
 import {AuthContext} from "../../App";
 import {getLocalizedParam, useStickyState} from "../../util";
 import LandingPage from "../LandingPage";
-import {startCourse} from "../../services/courses";
 import {SignIn} from "../../user/Auth";
 import Editor from "../editor/Editor";
 import {CourseContext, CurrentExerciseContext} from "../Course";
@@ -21,6 +20,7 @@ import {EXERCISE_TYPES} from "models/courses";
 import TextAnswer from "./TextAnswer";
 import Checkboxes from "./Checkboxes";
 import MultipleChoice from "./MultipleChoice";
+import Dashboard from "./Dashboard";
 
 const ExerciseEditor = lazy(() => import('./ExerciseEditor'));
 
@@ -63,13 +63,9 @@ function Exercise({launchCourse}: {launchCourse: () => void}) {
         {/* Display the landing page with an option to start the course if it wasn't started yet */
             !exerciseId &&
             <Box paddingBottom="12em">
-                <LandingPage onStartCourseClicked={async () => {
-                    if (auth && auth.currentUser && auth.currentUser.uid) {
-                        await startCourse(auth.currentUser.uid, course.id);
-                        launchCourse();
-                    } else {
-                        setShowSignIn(true);
-                    }
+                <LandingPage onStartCourseClicked={() => {
+                    if (auth && auth.currentUser && auth.currentUser.uid)   launchCourse();
+                    else                                                    setShowSignIn(true);
                 }}/>
 
                 {showSignIn && <SignIn />}
@@ -89,7 +85,7 @@ function Exercise({launchCourse}: {launchCourse: () => void}) {
                         {isCourseInstructor && <OutlinedButton selected={currentTab === 'edit'} endIcon={<Edit />} onClick={() => setCurrentTab('edit')}>Edit</OutlinedButton>}
                     </Grid>
 
-                    {currentTab === 'description' && <><Content notionPage={getLocalizedParam(exercise.pageId)}/>{auth.isSignedIn && <Forum/>}</>}
+                    {currentTab === 'description' && <>{isCourseInstructor && <Dashboard/>}<Content notionPage={getLocalizedParam(exercise.pageId)}/>{auth.isSignedIn && <Forum/>}</>}
                     {currentTab === 'bestSubmissions' && <ExerciseSubmissionsTable rowsPerPage={5} course={course} exercise={exercise} mode="best" />}
                     {currentTab === 'allSubmissions' && <ExerciseSubmissionsTable rowsPerPage={5} course={course} exercise={exercise} mode="all" />}
                     {currentTab === 'codeDrafts' && <CodeDrafts onCodeDraftSelected={setCodeDraftId} />}

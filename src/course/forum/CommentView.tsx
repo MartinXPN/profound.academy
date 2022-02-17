@@ -96,10 +96,7 @@ function CommentView({comment, allowReply}: {
         if( !showReplies )
             return;
 
-        const unsubscribe = onCommentRepliesChanged(comment.id, (replies) => {
-            console.log('Got replies:', replies);
-            replies && setReplies(replies);
-        });
+        const unsubscribe = onCommentRepliesChanged(comment.id, replies => replies && setReplies(replies));
         return () => unsubscribe();
     }, [comment.id, showReplies]);
 
@@ -116,14 +113,8 @@ function CommentView({comment, allowReply}: {
         await updateComment(comment.id, text);
         setIsEditing(false);
     }, [comment.id, text]);
-    const onDelete = useCallback(async () => {
-        await deleteComment(comment.id);
-        console.log('Removed the comment!!');
-    }, [comment.id]);
-
-    const onUserClicked = useCallback((userId: string) => {
-        navigate(`/users/${userId}`);
-    }, [navigate]);
+    const onDelete = useCallback(async () => await deleteComment(comment.id), [comment.id]);
+    const onUserClicked = useCallback((userId: string) => navigate(`/users/${userId}`), [navigate]);
 
     return <>
         <ListItem key={comment.id} alignItems="flex-start">

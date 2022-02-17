@@ -3,7 +3,7 @@ import * as admin from 'firebase-admin';
 import {CodeDraft} from '../models/codeDrafts';
 import {Activity, User, UserInfoUpdate, UserRole} from '../models/users';
 import {Notification} from '../models/notifications';
-import {Course, Exercise, ExerciseProgress, Progress, ExercisePrivateFields} from '../models/courses';
+import {Course, Exercise, ExerciseProgress, Progress, ExercisePrivateFields, Insight} from '../models/courses';
 import {Submission, SubmissionResult, SubmissionSensitiveRecords, SubmissionStatus} from '../models/submissions';
 import {Comment, Vote} from '../models/forum';
 
@@ -39,9 +39,12 @@ const db = {
 
     courses: dataPoint<Course>('courses'),
     course: (courseId: string) => dataPoint<Course>('courses').doc(courseId),
+    courseInsights: (courseId: string) => dataPoint<Insight>(`courses/${courseId}/insights`),
+    courseOverallInsights: (courseId: string) => dataPoint<Insight>(`courses/${courseId}/insights`).doc('overall'),
     exercises: (courseId: string) => dataPoint<Exercise>(`courses/${courseId}/exercises`),
     exercise: (courseId: string, exerciseId: string) => dataPoint<Exercise>(`courses/${courseId}/exercises`).doc(exerciseId),
     exercisePrivateFields: (courseId: string, exerciseId: string) => dataPoint<ExercisePrivateFields>(`courses/${courseId}/exercises/${exerciseId}/private`).doc('fields'),
+    exerciseInsights: (courseId: string, exerciseId: string) => dataPoint<Insight>(`courses/${courseId}/exercises/${exerciseId}/insights`).doc('overall'),
     progress: (courseId: string) => dataPoint<Progress>(`courses/${courseId}/progress`),
     userProgress: (courseId: string, userId: string) => dataPoint<Progress>(`courses/${courseId}/progress`).doc(userId),
     allUserProgress: (userId: string) => firestore().collectionGroup('progress').withConverter(converter<Progress>()).where('userId', '==', userId),

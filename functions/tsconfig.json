@@ -12,5 +12,5 @@
   },
   "compileOnSave": true,
   "include": ["src/**/*"],
-  "exclude": ["node_modules", "**/*.spec.ts", "test"]
+  "exclude": ["node_modules", "**/*.spec.ts", "test", "firebase-export-*"]
 }

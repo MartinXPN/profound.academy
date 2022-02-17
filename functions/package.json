@@ -14,7 +14,7 @@
     "test": "mocha './test/**/*.ts' --reporter spec --require ts-node/register --recursive"
   },
   "engines": {
-    "node": "14"
+    "node": "16"
   },
   "eslintIgnore": [
     "*.spec.ts",

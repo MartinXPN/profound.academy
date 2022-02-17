@@ -2,7 +2,6 @@ import {firestore} from 'firebase-admin';
 import * as functions from 'firebase-functions';
 import * as moment from 'moment';
 import {db} from './db';
-import firebase from 'firebase';
 
 const format = (date: Date) => moment(date).locale('en').format('YYYY-MM-DD');
 
@@ -55,7 +54,7 @@ export const recordNewUserInsight = async (
     } else {
         functions.logger.info(`The user already has ${user.courses.length} courses. Adding to the list`);
         transaction.set(db.user(userId), {   // @ts-ignore
-            courses: firebase.firestore.FieldValue.arrayUnion(course),
+            courses: firestore.FieldValue.arrayUnion(course),
         }, {merge: true});
     }
 

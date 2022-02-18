@@ -4,7 +4,7 @@ import {Controller, useFormContext} from "react-hook-form";
 import CloseIcon from "@mui/icons-material/Close";
 import AddIcon from "@mui/icons-material/Add";
 
-const SEP = '$#%#@!)*(&';
+const SEP = '﻿\n';
 
 function CheckboxesForm() {
     const {control, watch, formState: {errors}, setValue} = useFormContext();

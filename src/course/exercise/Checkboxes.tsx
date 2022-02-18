@@ -11,7 +11,7 @@ import Box from "@mui/material/Box";
 import {StatusTypography} from "../../common/StatusTypography";
 import {statusToColor} from "../colors";
 
-const SEP = '$#%#@!)*(&';
+const SEP = '﻿\n';
 
 function Checkboxes() {
     const auth = useContext(AuthContext);

@@ -160,10 +160,9 @@ export const processResult = async (
         const date = submissionResult.createdAt.toDate();
         recordInsights(transaction, 'submissions', course.id, exercise.id, date);
         recordInsights(transaction, 'totalScore', course.id, exercise.id, date, submissionResult.score);
-        if (!alreadySolved) {
+        submissionResult.status === 'Solved' && recordInsights(transaction, 'solved', course.id, exercise.id, date);
+        if (!alreadySolved)
             updateActivity(transaction, submissionResult);
-            recordInsights(transaction, 'solved', course.id, exercise.id, date);
-        }
     });
 
     // another transaction to update user metrics

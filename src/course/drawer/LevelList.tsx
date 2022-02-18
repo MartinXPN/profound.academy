@@ -4,7 +4,7 @@ import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
-import {ArrowDropUp, ArrowDropDown, Equalizer} from "@mui/icons-material";
+import {ArrowDropUp, ArrowDropDown, Equalizer, Edit} from "@mui/icons-material";
 import ArrowRightIcon from '@mui/icons-material/ArrowRight';
 
 import {Exercise, ExerciseProgress} from "models/courses";
@@ -17,12 +17,13 @@ import {CourseContext, CurrentExerciseContext} from "../Course";
 import {getLocalizedParam} from '../../util';
 
 
-function LevelList({levelNumber, levelStatus, onItemSelected, isDrawerOpen, isSingleLevel}: {
+function LevelList({levelNumber, levelStatus, onItemSelected, isDrawerOpen, isSingleLevel, drafts}: {
     levelNumber: number,
     levelStatus: 'Solved' | 'In Progress' | 'Unavailable',
     onItemSelected: (exercise: Exercise) => void,
     isDrawerOpen: boolean,
-    isSingleLevel: boolean
+    isSingleLevel: boolean,
+    drafts?: boolean,
 }) {
     const auth = useContext(AuthContext);
     const {course} = useContext(CourseContext);
@@ -73,12 +74,18 @@ function LevelList({levelNumber, levelStatus, onItemSelected, isDrawerOpen, isSi
         <List disablePadding>
             {!isSingleLevel &&
                 <ListItem button key={`level-${levelNumber}`} onClick={onLevelClicked} style={levelStyle}>
-                    <ListItemIcon>
+                    {drafts
+                    ? <ListItemIcon>
+                            <Edit/>
+                            {isDrawerOpen && <Typography variant="subtitle1">Drafts</Typography>}
+                            {open ? <ArrowDropUp/> : <ArrowDropDown/>}
+                        </ListItemIcon>
+                    : <ListItemIcon>
                         <Equalizer/>
                         {!isDrawerOpen && <Typography variant="subtitle1">{levelNumber}</Typography>}
                         {isDrawerOpen && <Typography variant="subtitle1">Level {levelNumber}</Typography>}
                         {open ? <ArrowDropUp/> : <ArrowDropDown/>}
-                    </ListItemIcon>
+                    </ListItemIcon>}
                 </ListItem>
             }
             {open && levelExercises.map((ex, index) =>

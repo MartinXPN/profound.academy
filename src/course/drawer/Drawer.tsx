@@ -174,6 +174,13 @@ function CourseDrawer({onItemSelected, onStatusClicked, onCreateExerciseClicked}
                     <ListItemIcon><QueryStatsIcon/></ListItemIcon>
                     <ListItemText primary="Status"/>
                 </ListItem>
+                {isCourseInstructor && <LevelList
+                    drafts
+                    levelNumber={-1}
+                    levelStatus={'In Progress'}
+                    onItemSelected={onItemSelected}
+                    isDrawerOpen={open}
+                    isSingleLevel={false}/>}
 
                 {Object.entries(course.levelExercises).map(([levelName, numExercises]) => {
                     const index = parseInt(levelName) - 1;

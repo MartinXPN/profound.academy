@@ -26,14 +26,16 @@ function Editor({disableCodeSync, userId}: {disableCodeSync?: boolean, userId?: 
     const [code, setCode] = useStickyState<string>('', `code-${currentUserId}-${exercise?.id}`);
     const [selection, setSelection] = useState<TextSelection>({start: { row: 0, column: 0 }, end: { row: 0, column: 0 }});
     const [theme, setTheme] = useStickyState('tomorrow', `editorTheme-${currentUserId}`);
-    const [language, setLanguage] = useStickyState<Language | null>(course?.preferredLanguage ?? null, `${course?.id}-language-${currentUserId}`);
+    const [language, setLanguage] = useStickyState<Language | null>(null, `${course?.id}-${exercise?.id}-language-${currentUserId}`);
     const [fontSize, setFontSize] = useStickyState(14, `fontSize-${auth?.currentUser?.uid}`);
     const [splitPos, setSplitPos] = useStickyState<number[] | null>(null, `consoleSplitPos-${auth?.currentUserId}`);
 
     const [submissionResult, setSubmissionResult] = useStickyState<SubmissionResult | null>(null, `submissionRes-${currentUserId}-${exercise?.id}`);
     const [submitted, setSubmitted] = useState(false);
+    if( language === null && exercise && exercise.allowedLanguages && exercise?.allowedLanguages.length > 0 )
+        setLanguage(LANGUAGES[exercise?.allowedLanguages[0]]);
 
-    const filename = `main.${language.extension}`;
+    const filename = `main.${language?.extension ?? 'txt'}`;
     const editorLanguage = getModeForPath(filename).name;
     const decreaseFontSize = useCallback(() => setFontSize(Math.max(fontSize - 1, 5)), [fontSize, setFontSize]);
     const increaseFontSize = useCallback(() => setFontSize(Math.min(fontSize + 1, 30)), [fontSize, setFontSize]);
@@ -122,7 +124,7 @@ function Editor({disableCodeSync, userId}: {disableCodeSync?: boolean, userId?: 
                 <Box top={0} right={0} position="absolute">
                     <Settings increaseFontSize={increaseFontSize} decreaseFontSize={decreaseFontSize}
                               theme={theme} setTheme={setTheme}
-                              language={language.languageCode} setLanguage={(id) => setLanguage(LANGUAGES[id])}/>
+                              language={language?.languageCode ?? 'txt'} setLanguage={(id) => setLanguage(LANGUAGES[id])}/>
                 </Box>
             </Box>
 

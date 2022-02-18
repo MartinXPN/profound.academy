@@ -1,4 +1,4 @@
-import React, {memo, useCallback, useEffect, useState} from "react";
+import React, {memo, useCallback, useContext, useEffect, useState} from "react";
 import {Autocomplete, IconButton, Stack, TextField} from "@mui/material";
 import ClickAwayListener from '@mui/base/ClickAwayListener';
 import {Add, Remove} from "@mui/icons-material";
@@ -6,6 +6,7 @@ import SettingsIcon from '@mui/icons-material/Settings';
 import {themesByName} from 'ace-builds/src-noconflict/ext-themelist';
 import {LANGUAGES} from "models/language";
 import Paper from "@mui/material/Paper";
+import {CurrentExerciseContext} from "../Course";
 
 function Settings({increaseFontSize, decreaseFontSize, theme, setTheme, language, setLanguage}: {
     increaseFontSize: () => void,
@@ -15,7 +16,9 @@ function Settings({increaseFontSize, decreaseFontSize, theme, setTheme, language
     language: keyof typeof LANGUAGES,
     setLanguage: (language: keyof typeof LANGUAGES) => void,
 }) {
+    const {exercise} = useContext(CurrentExerciseContext);
     const [showConfigs, setShowConfigs] = useState(false);
+
     const onSettingsClicked = useCallback(() => {
         setShowConfigs(!showConfigs)
     }, [showConfigs]);
@@ -35,11 +38,13 @@ function Settings({increaseFontSize, decreaseFontSize, theme, setTheme, language
     useEffect(() => {
         const nameToLanguageId = {};
         for( const [id, language] of Object.entries(LANGUAGES) ) {
-            // @ts-ignore
-            nameToLanguageId[language.displayName] = id;
+            if( exercise?.allowedLanguages?.includes(id) ) {
+                // @ts-ignore
+                nameToLanguageId[language.displayName] = id;
+            }
         }
         setNameToLanguageId(nameToLanguageId);
-    }, []);
+    }, [exercise?.allowedLanguages]);
 
 
     return <>

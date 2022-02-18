@@ -1,4 +1,4 @@
-import {Language, LANGUAGES} from './language';
+import {LANGUAGES} from './language';
 import firebase from 'firebase';
 import {SubmissionStatus} from './submissions';
 
@@ -68,7 +68,6 @@ export interface Course {
     introduction: string; // notion id for the introduction page
     levelExercises: { [key: string]: number };
     exercises: Exercise[];
-    preferredLanguage: Language;
 }
 
 

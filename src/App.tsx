@@ -11,7 +11,7 @@ import { ThemeProvider, StyledEngineProvider, createTheme } from '@mui/material/
 import {updateUserInfo} from "./services/users";
 import {useStickyState} from "./util";
 import ErrorBoundary from './common/ErrorBoundary';
-import Home from './Home';
+import Home from './home/Home';
 import UserProfile from './user/UserProfile';
 // Do not include the Course and the editor in the main bundle as they're pretty heavy
 const Course = lazy(() => import('./course/Course'));

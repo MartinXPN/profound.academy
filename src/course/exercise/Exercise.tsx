@@ -40,6 +40,10 @@ function Exercise({launchCourse}: {launchCourse: () => void}) {
     const isCourseInstructor = course && auth.currentUserId && course.instructors.includes(auth.currentUserId);
 
     useEffect(() => setExerciseType(exercise?.exerciseType ?? 'code'), [exercise]);
+    useEffect(() => {
+        if( isCourseInstructor && exercise?.order === 0 )
+            setCurrentTab('edit');
+    }, [exercise, isCourseInstructor]);
     if(auth?.isSignedIn && showSignIn)
         setShowSignIn(false);
 

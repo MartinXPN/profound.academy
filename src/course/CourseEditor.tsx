@@ -11,26 +11,18 @@ import {styled} from "@mui/material/styles";
 import Content from "./Content";
 import {useNavigate} from "react-router-dom";
 import {getUsers, searchUser, uploadPicture} from "../services/users";
-import {doesExist, updateCourse} from "../services/courses";
+import {genCourseId, updateCourse} from "../services/courses";
 import {User} from "models/users";
 import AutocompleteSearch from "../common/AutocompleteSearch";
 
 import { Controller, useForm } from "react-hook-form";
 import {zodResolver} from "@hookform/resolvers/zod";
-import {boolean, infer as Infer, date, object, string, array, enum as zodEnum, ZodIssueCode} from "zod";
+import {boolean, infer as Infer, date, object, string, array, enum as zodEnum} from "zod";
 import {notionPageToId} from "../util";
 import {Moment} from "moment";
 
 
-const validIdCharacters = new RegExp(/^[a-z0-9-]*$/);
 const schema = object({
-    id: string().min(5).max(40)
-        .superRefine(async (val, ctx) => {
-            if( !val )
-                return ctx.addIssue({code: ZodIssueCode.custom, message: 'ID is required to create a course'})
-            if( !validIdCharacters.test(val) )
-                return ctx.addIssue({code: ZodIssueCode.custom, message: 'Should only contain lowercase latin letters, numbers, and hyphens (-)'})
-        }),
     img: string().url(),
     revealsAt: date(),
     freezeAt: date(),
@@ -39,7 +31,6 @@ const schema = object({
     allowViewingSolutions: boolean(),
     title: string().min(3).max(128),
     author: string().min(3).max(128),
-    details: string().min(3).max(128),
     introduction: string().min(20).max(35),
     instructors: array(string().min(25).max(30)),
 });
@@ -69,7 +60,6 @@ function CourseEditor({course}: {course?: Course | null}) {
 
     const getDefaultFieldValues = useCallback(() => {
         return {
-            id: course?.id,
             img: course?.img,
             revealsAt: course?.revealsAt ? course.revealsAt.toDate() : new Date(),
             freezeAt: course?.freezeAt ? course.freezeAt.toDate() : new Date(),
@@ -79,12 +69,11 @@ function CourseEditor({course}: {course?: Course | null}) {
             title: course?.title,
             author: course?.author,
             instructors: course?.instructors,
-            details: course?.details,
             introduction: course?.introduction,
         }
     }, [course]);
 
-    const {control, watch, handleSubmit, formState: { errors, isValid }, setValue, reset, setError} = useForm<Schema>({
+    const {control, watch, handleSubmit, formState: { errors, isValid }, setValue, reset} = useForm<Schema>({
         mode: 'onChange',
         resolver: zodResolver(schema),
         defaultValues: getDefaultFieldValues(),
@@ -93,20 +82,17 @@ function CourseEditor({course}: {course?: Course | null}) {
     useEffect(() => reset(getDefaultFieldValues()), [course, getDefaultFieldValues, reset]);
 
     const onSubmit = async (data: Schema) => {
-        if( course && course.id && data.id !== course.id )
-            return setError('id', {message: 'You cannot change the id of an existing course'});
-        if( !course && await doesExist(data.id) )
-            return setError('id', {message: 'A course with this ID already exists'});
+        const id = course?.id ?? await genCourseId(data.title);
 
-        console.log('submit!', data)
+        console.log('submit!', id, data)
         await updateCourse(
-            data.id, data.img,
+            id, data.img,
             data.revealsAt, data.freezeAt,
             data.visibility, data.rankingVisibility, data.allowViewingSolutions,
-            data.title, data.author, data.instructors, data.details, data.introduction
+            data.title, data.author, data.instructors, data.introduction
         );
 
-        navigate(`/${data.id}`);
+        navigate(`/${id}`);
         setOpenSnackbar(true);
     }
     const onCancel = () => navigate(-1);
@@ -147,11 +133,11 @@ function CourseEditor({course}: {course?: Course | null}) {
             </Stack>
 
             <Stack direction="row" justifyContent="top" alignItems="top" alignContent="top" spacing={2}>
-                <Controller name="id" control={control} render={({ field: { ref, ...field } }) => (
-                    <TextField required label="ID" variant="outlined" placeholder="ID of the course"
-                               error={Boolean(errors.id)} helperText={errors.id?.message}
-                               inputRef={ref} {...field} inputProps={{ readOnly: Boolean(course) }} sx={{flex: 1}}  />
-                )} />
+                <Controller name="title" control={control} render={({ field: { ref, ...field } }) => (
+                    <TextField required label="Title" variant="outlined" placeholder="Course Title"
+                               error={Boolean(errors.title)} helperText={errors.title?.message}
+                               inputRef={ref} {...field} sx={{flex: 1}} />
+                )}/>
 
                 <Controller name="visibility" control={control} render={({ field: { ref, ...field } }) => (
                     <TextField select label="Visibility" variant="outlined" inputRef={ref} {...field}>
@@ -160,20 +146,6 @@ function CourseEditor({course}: {course?: Course | null}) {
                         <MenuItem value="private">Private</MenuItem>
                     </TextField>
                 )} />
-            </Stack>
-
-            <Stack direction="row" spacing={2}>
-                <Controller name="title" control={control} render={({ field: { ref, ...field } }) => (
-                    <TextField required label="Title" variant="outlined" placeholder="Course Title"
-                               error={Boolean(errors.title)} helperText={errors.title?.message}
-                               inputRef={ref} {...field} sx={{flex: 1}} />
-                )}/>
-
-                <Controller name="details" control={control} render={({ field: { ref, ...field } }) => (
-                    <TextField required multiline label="Description" variant="outlined" placeholder="Details"
-                               error={Boolean(errors.details)} helperText={errors.details?.message}
-                               inputRef={ref} {...field} sx={{flex: 1}} />
-                )}/>
             </Stack>
 
             <Controller name="img" control={control} render={({field}) => <>

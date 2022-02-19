@@ -62,7 +62,6 @@ export interface Course {
     title: string;
     author: string;
     instructors: string[],
-    details: string;
     introduction: string; // notion id for the introduction page
     levelExercises: { [key: string]: number };
     exercises: Exercise[];

@@ -1,8 +1,7 @@
 import React, {memo, useCallback, useContext} from 'react';
 import {styled} from '@mui/material/styles';
-import {ImageList, ImageListItem, ImageListItemBar, IconButton, Grid} from '@mui/material';
-import {Tooltip, Typography} from "@mui/material";
-import InfoIcon from '@mui/icons-material/Info';
+import {ImageList, ImageListItem, ImageListItemBar, Grid} from '@mui/material';
+import {Typography} from "@mui/material";
 import {Add} from "@mui/icons-material";
 import Box from "@mui/material/Box";
 
@@ -79,17 +78,7 @@ function CourseList({variant, title, userId}: {
                     <ClickableImageListItem key={item.id} onClick={() => onCourseSelected(item.id)}>
                         <img src={item.img} alt={item.title} loading="lazy" 
                              style={{width: '100%', height: '100%', objectFit: 'cover'}} />
-                        <ImageListItemBar
-                            title={item.title}
-                            subtitle={<span>by: {item.author}</span>}
-                            actionIcon={
-                                <IconButton size="large" sx={{color: 'rgba(255, 255, 255, 0.70)'}}>
-                                    <Tooltip title={item.details} placement="top-start">
-                                        <InfoIcon fontSize='small'/>
-                                    </Tooltip>
-                                </IconButton>
-                            }
-                        />
+                        <ImageListItemBar title={item.title} subtitle={<span>by: {item.author}</span>} />
                     </ClickableImageListItem>
                 ))}
             </ImageList>

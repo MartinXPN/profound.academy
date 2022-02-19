@@ -28,6 +28,28 @@ export const doesExist = async (courseId: string) => {
     return snapshot.exists;
 }
 
+export const genCourseId = async (title: string) => {
+    const chars = 'abcdefghijklmnopqrstuvwxyz0123456789-';
+    const genChar = () => chars.charAt(Math.floor(Math.random() * chars.length));
+    if( title.length < 3 || title.length > 150 )
+        throw Error('title should be of length [3; 150]');
+    let id = title.trim().toLowerCase()
+        .replaceAll(' ', '-')
+        .replace(/[^0-9a-z-]/gi, '');
+
+    while (id.length < 5)
+        id += genChar();
+
+    for( let len = 0; ; ++len ) {
+        const exists = await doesExist(id);
+        if( !exists )
+            return id;
+        if( len === 0 )
+            id += '-' + genChar() + genChar();
+        id += genChar();
+    }
+}
+
 export const getCourse = async (id: string) => {
     const snapshot = await db.course(id).get();
     return snapshot.data() as Course;
@@ -110,7 +132,7 @@ export const updateCourse = async (
     id: string, img: string,
     revealsAt: Date, freezesAt: Date,
     visibility: 'public' | 'unlisted' | 'private', rankingVisibility: 'public' | 'private', allowViewingSolutions: boolean,
-    title: string, author: string, instructors: string[], details: string, introduction: string) => {
+    title: string, author: string, instructors: string[], introduction: string) => {
     console.log('update course:', id, img, revealsAt, freezesAt, visibility, rankingVisibility, allowViewingSolutions);
     const exists = await doesExist(id);
     return db.course(id).set({
@@ -123,7 +145,6 @@ export const updateCourse = async (
         title: title,
         author: author,
         instructors: instructors,
-        details: details,
         introduction: introduction,
         ...(!exists && {levelExercises: {'1': 0}}),
     }, {merge: true});

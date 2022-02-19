@@ -24,6 +24,7 @@ function ActivityHeatmap({userId}: {userId: string}) {
     }, [userId]);
 
     const onDateClicked = (date: Date, formattedDate: string) => {
+        console.log('date clicked:', date, formattedDate);
         if( !selectedDate || selectedDate.formattedDate !== formattedDate )
             setSelectedDate({date: date, formattedDate: formattedDate});
         else
@@ -33,6 +34,14 @@ function ActivityHeatmap({userId}: {userId: string}) {
     const endDate = new Date();
     const startDate = new Date();
     startDate.setFullYear(startDate.getFullYear() - 1);
+    startDate.setHours(0);
+    startDate.setMinutes(0);
+    startDate.setSeconds(0);
+    startDate.setMilliseconds(0);
+    endDate.setHours(0);
+    endDate.setMinutes(0);
+    endDate.setSeconds(0);
+    endDate.setMilliseconds(0);
 
     return <>
         <style>{`

@@ -11,7 +11,6 @@ import {getCourses, getExercisePrivateFields, searchCourses, updateExercise} fro
 import {Controller, useForm, FormProvider} from "react-hook-form";
 import {zodResolver} from "@hookform/resolvers/zod";
 import {infer as Infer, object, string, array, enum as zodEnum, literal, number, boolean, union} from "zod";
-import TestCasesForm from "./TestCasesForm";
 import CodeForm from "./CodeForm";
 import TextAnswerForm from "./TextAnswerForm";
 import CheckboxesForm from "./CheckboxesForm";
@@ -28,9 +27,9 @@ const baseSchema = {
     allowedAttempts: number().min(1).max(100).int(),
     unlockContent: array(string().min(20).max(35)),
 } as const;
-const testCasesSchema = object({
+const codeSchema = object({
     ...baseSchema,
-    exerciseType: literal('testCases'),
+    exerciseType: literal('code'),
     allowedLanguages: array(zodEnum(LANGUAGE_KEYS)).nonempty(),
     memoryLimit: number().min(10).max(1000),
     timeLimit: number().min(0.001).max(30),
@@ -41,10 +40,6 @@ const testCasesSchema = object({
         input: string().max(10000),
         target: string().max(10000),
     })).max(25),
-});
-const codeSchema = object({
-    ...baseSchema,
-    exerciseType: literal('code'),
 });
 const textSchema = object({
     ...baseSchema,
@@ -67,7 +62,7 @@ const multipleChoiceSchema = object({
     options: array(string().min(1).max(200)).nonempty(),
 });
 
-const schema = union([codeSchema, testCasesSchema, textSchema, checkboxesSchema, multipleChoiceSchema]);
+const schema = union([codeSchema, textSchema, checkboxesSchema, multipleChoiceSchema]);
 type Schema = Infer<typeof schema>;
 
 
@@ -114,7 +109,7 @@ function ExerciseEditor({cancelEditing, exerciseTypeChanged}: {
             levelOrder: levelOrder,
             score:  exercise?.score ?? 100,
             allowedAttempts: exercise?.allowedAttempts ?? 100,
-            exerciseType: exercise?.exerciseType ?? 'testCases',
+            exerciseType: exercise?.exerciseType ?? 'code',
             unlockContent: exercise?.unlockContent ?? [],
             allowedLanguages: exercise?.allowedLanguages ?? [],
             memoryLimit: exercise?.memoryLimit ?? 512,
@@ -140,7 +135,7 @@ function ExerciseEditor({cancelEditing, exerciseTypeChanged}: {
 
     const exerciseType: keyof typeof EXERCISE_TYPES = watch('exerciseType');
     const onExerciseTypeChanged = (newType: keyof typeof EXERCISE_TYPES) => {
-        if (newType !== 'code' && newType !== 'testCases' && newType !== 'textAnswer' && newType !== 'checkboxes' && newType !== 'multipleChoice')
+        if (newType !== 'code' && newType !== 'textAnswer' && newType !== 'checkboxes' && newType !== 'multipleChoice')
             throw Error(`Wrong exercise type: ${newType}`);
 
         setValue('exerciseType', newType, {shouldTouch: true});
@@ -273,7 +268,6 @@ function ExerciseEditor({cancelEditing, exerciseTypeChanged}: {
             <br/>
 
             {exerciseType === 'code' && <CodeForm />}
-            {exerciseType === 'testCases' && <TestCasesForm />}
             {exerciseType === 'textAnswer' && <TextAnswerForm />}
             {exerciseType === 'checkboxes' && <CheckboxesForm />}
             {exerciseType === 'multipleChoice' && <MultipleChoiceForm />}

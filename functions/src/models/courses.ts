@@ -10,10 +10,8 @@ export interface ExerciseType {
 }
 
 export const EXERCISE_TYPES: { [key: string]: ExerciseType } = {
-    testCases: {id: 'testCases', displayName: 'Test cases',
-        description: 'An exercise with predefined test cases (input/output or unittest)'},
     code: {id: 'code', displayName: 'Code',
-        description: 'An exercise with editable test cases - judge is defined within the platform'},
+        description: 'An exercise with predefined test cases (input/output or unittest)'},
     textAnswer: {id: 'textAnswer', displayName: 'Text answer',
         description: 'An exercise with a single correct text-based answer (can be a number as well)'},
     checkboxes: {id: 'checkboxes', displayName: 'Checkboxes',

@@ -32,14 +32,14 @@ function Exercise({launchCourse}: {launchCourse: () => void}) {
     console.log('exercise:', exercise);
 
     const {exerciseId} = useParams<{ exerciseId: string }>();
-    const [exerciseType, setExerciseType] = useState<keyof typeof EXERCISE_TYPES>(exercise?.exerciseType ?? 'testCases');
+    const [exerciseType, setExerciseType] = useState<keyof typeof EXERCISE_TYPES>(exercise?.exerciseType ?? 'code');
     const [showSignIn, setShowSignIn] = useState(false);
     const [splitPos, setSplitPos] = useStickyState<number[] | null>(null, `splitPos-${auth?.currentUserId}`);
     const [currentTab, setCurrentTab] = useState<'description' | 'allSubmissions' | 'bestSubmissions' | 'codeDrafts' | 'edit'>('description');
     const [codeDraftId, setCodeDraftId] = useState<string | null>(null);
     const isCourseInstructor = course && auth.currentUserId && course.instructors.includes(auth.currentUserId);
 
-    useEffect(() => setExerciseType(exercise?.exerciseType ?? 'testCases'), [exercise]);
+    useEffect(() => setExerciseType(exercise?.exerciseType ?? 'code'), [exercise]);
     if(auth?.isSignedIn && showSignIn)
         setShowSignIn(false);
 
@@ -52,7 +52,7 @@ function Exercise({launchCourse}: {launchCourse: () => void}) {
     if( !course )
         return <></>
     let right = <></>;
-    if( exerciseType === 'testCases' || exerciseType === 'code' ) {
+    if( exerciseType === 'code' ) {
         if( !!codeDraftId && currentTab === 'codeDrafts' )  right = <Editor disableCodeSync userId={codeDraftId} />
         else                                                right = <Editor />
     }

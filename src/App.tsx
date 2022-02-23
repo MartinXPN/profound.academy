@@ -11,8 +11,9 @@ import { ThemeProvider, StyledEngineProvider, createTheme } from '@mui/material/
 import {updateUserInfo} from "./services/users";
 import {useStickyState} from "./util";
 import ErrorBoundary from './common/ErrorBoundary';
-import Home from './Home';
+import Home from './home/Home';
 import UserProfile from './user/UserProfile';
+import StaticContent from "./home/StaticContent";
 // Do not include the Course and the editor in the main bundle as they're pretty heavy
 const Course = lazy(() => import('./course/Course'));
 const CourseEditor = lazy(() => import('./course/CourseEditor'));
@@ -77,6 +78,9 @@ function App() {
             <Suspense fallback={<div>Loading...</div>}>
                 <Routes>
                     <Route path="/" element={<Home/>} />
+                    <Route path="/about" element={<StaticContent notionPage="95e3c00cd1d744cd9bff906885af6a87"/>} />
+                    <Route path="/privacy" element={<StaticContent notionPage="a55965cadfd74c89bc9ceb869e9b1090"/>} />
+                    <Route path="/terms" element={<StaticContent notionPage="76764fc54cc144d9b788ddff3907d0d5"/>} />
                     <Route path="/users/:userId" element={<UserProfile/>} />
                     <Route path="/new" element={<CourseEditor/>} />
                     <Route path=":courseId" element={<Course/>} />

@@ -3,7 +3,8 @@ import * as admin from 'firebase-admin';
 import {CodeDraft} from '../models/codeDrafts';
 import {Activity, User, UserInfoUpdate, UserRole} from '../models/users';
 import {Notification} from '../models/notifications';
-import {Course, Exercise, ExerciseProgress, Progress, ExercisePrivateFields, Insight} from '../models/courses';
+import {Exercise, ExerciseProgress, ExercisePrivateFields,
+    Course, Progress, Insight, CoursePrivateFields} from '../models/courses';
 import {Submission, SubmissionResult, SubmissionSensitiveRecords, SubmissionStatus} from '../models/submissions';
 import {Comment, Vote} from '../models/forum';
 
@@ -39,6 +40,7 @@ const db = {
 
     courses: dataPoint<Course>('courses'),
     course: (courseId: string) => dataPoint<Course>('courses').doc(courseId),
+    coursePrivateFields: (courseId: string) => dataPoint<CoursePrivateFields>(`courses/${courseId}/private`).doc('fields'),
     courseInsights: (courseId: string) => dataPoint<Insight>(`courses/${courseId}/insights`),
     courseOverallInsights: (courseId: string) => dataPoint<Insight>(`courses/${courseId}/insights`).doc('overall'),
     exercises: (courseId: string) => dataPoint<Exercise>(`courses/${courseId}/exercises`),

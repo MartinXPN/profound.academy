@@ -49,9 +49,14 @@ service cloud.firestore {
     function isCourseInstructor(request, courseId) {
       return request.auth != null && request.auth.uid in get(/databases/$(database)/documents/courses/$(courseId)).data.instructors;
     }
-    // All the courses are public
+    function isInvited(auth, courseId) {
+      return auth != null && auth.token != null && auth.token.email in get(/databases/$(database)/documents/courses/$(courseId)/private/fields).data.invites;
+    }
+    // All the public and unlisted courses should be accessible
     match /courses/{courseId} {
-      allow read;
+      allow read: if isCourseInstructor(request, courseId)
+                     || (get(/databases/$(database)/documents/courses/$(courseId)).data.visibility != 'private')
+                     || (get(/databases/$(database)/documents/courses/$(courseId)).data.visibility == 'private' && isInvited(request.auth, courseId));
       allow create: if hasInstructorRole(request.auth);
       allow update: if isCourseInstructor(request, courseId);
 

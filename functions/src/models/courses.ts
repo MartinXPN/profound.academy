@@ -67,6 +67,11 @@ export interface Course {
     exercises: Exercise[];
 }
 
+export interface CoursePrivateFields {
+    id: string;
+    invites?: string[];     // list of invited users (emails)
+}
+
 
 export interface ExerciseProgress<T> {
     id: string;                                 // level

@@ -60,7 +60,7 @@ function CourseList({variant, title, userId}: {
     }, [auth?.currentUserId, navigate]);
 
 
-    if( !courses || courses.length === 0 )
+    if( !courses || (courses.length === 0 && !hasInstructorPermissions) )
         return <></>
     return <>
         <Typography variant="h5" textAlign="center" marginTop={2}>{title}</Typography>

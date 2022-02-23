@@ -23,7 +23,7 @@
     "models": "file:functions/src/models",
     "moment": "^2.29.1",
     "notion-types": "^4.15.0",
-    "prismjs": "^1.26.0",
+    "prismjs": "^1.27.0",
     "react": "^17.0.2",
     "react-ace": "^9.5.0",
     "react-calendar-heatmap": "^1.8.1",

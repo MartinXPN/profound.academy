@@ -11,7 +11,7 @@ function Footer() {
 
     return <>
         <Grid container justifyContent="center" alignContent="center" alignItems="center" spacing={4} paddingY={4} paddingX={8}>
-            <Grid item><Typography>Copyright &copy; 2022 Profound Academy</Typography></Grid>
+            <Grid item><Typography>Copyright &copy;2022 Profound Academy</Typography></Grid>
             <Grid item><Link component="button" variant="body2" onClick={onAboutClicked}>About</Link></Grid>
             <Grid item><Link component="button" variant="body2" onClick={onPrivacyClicked}>Privacy Policy</Link></Grid>
             <Grid item><Link component="button" variant="body2" onClick={onTermsClicked}>Terms and Conditions</Link></Grid>

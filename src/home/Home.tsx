@@ -7,6 +7,8 @@ import {AppBarProfile} from "../user/Auth";
 import AppBarNotifications from "../user/Notifications";
 import Box from "@mui/material/Box";
 import LandingPage from "./LandingPage";
+import Footer from "./Footer";
+import {Divider} from "@mui/material";
 
 
 function HeaderView() {
@@ -29,10 +31,14 @@ function Home() {
     const auth = useContext(AuthContext);
 
     return <>
-        <Header/>
-        {auth?.currentUserId && <ActivityHeatmap userId={auth.currentUserId} />}
-        {auth.currentUserId && <CourseList variant="userCourses" title="My Curriculum" userId={auth.currentUserId}/>}
-        <CourseList variant="allCourses" title="All Courses" />
+        <Box minHeight="100vh">
+            <Header/>
+            {auth?.currentUserId && <ActivityHeatmap userId={auth.currentUserId} />}
+            {auth.currentUserId && <CourseList variant="userCourses" title="My Curriculum" userId={auth.currentUserId}/>}
+            <CourseList variant="allCourses" title="All Courses" />
+        </Box>
+        <Divider />
+        <Footer />
     </>
 }
 

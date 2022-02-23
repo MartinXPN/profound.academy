@@ -49,11 +49,11 @@ function LandingPage() {
         <Box position="relative" minHeight="100vh" maxWidth="100vw" width="100%" overflow="hidden">
             <TopOval />
             <Grid container direction="row">
-                <Grid item padding="5em" xs={9} sm={10} md={6} lg={5} xl={3}>
+                <Grid item xs={11} sm={10} md={6} lg={5} xl={3} padding="5em">
                     <img width="100%" src={landingPageImageURL} alt="Landing page cover"/>
                 </Grid>
-                <StartActions item paddingX="1em" xs={12} sm={12} md={6} lg={7} xl={9}>
-                    <Typography variant="h2" sx={{fontWeight: 'bold'}}>
+                <StartActions item xs={12} sm={12} md={6} lg={7} xl={9} paddingX="1em">
+                    <Typography variant="h3" sx={{fontWeight: 'bold'}}>
                         Get in-depth knowledge
                     </Typography>
                     <Typography variant="h6" sx={{color: '#bdbdbd'}}>

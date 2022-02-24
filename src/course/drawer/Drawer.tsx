@@ -23,7 +23,7 @@ import {Progress} from "models/courses";
 import AppBarNotifications from "../../user/Notifications";
 import LevelList from "./LevelList";
 import {AuthContext} from "../../App";
-import {onUserProgressChanged} from "../../services/courses";
+import {onUserProgressChanged} from "../../services/progress";
 import {CourseContext} from "../Course";
 import Countdown from "react-countdown";
 import {Typography} from "@mui/material";

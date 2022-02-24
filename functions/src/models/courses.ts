@@ -69,7 +69,8 @@ export interface Course {
 
 export interface CoursePrivateFields {
     id: string;
-    invites?: string[];     // list of invited users (emails)
+    invitedEmails?: string[],   // list of invited users (emails)
+    invitedUsers?: string[];    // list of invited users (ids)
 }
 
 

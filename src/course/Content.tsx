@@ -12,7 +12,7 @@ import CircularProgress from "@mui/material/CircularProgress";
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
 
-import {getNotionPageMap} from "../services/courses";
+import {getNotionPageMap} from "../services/notion";
 import {getAllDependencies} from "./prismutil";
 import {Decoration} from "notion-types/src/core";
 

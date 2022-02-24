@@ -6,7 +6,8 @@ import LocalizedFields, {FieldSchema, fieldSchema} from "./LocalizedFields";
 import Box from "@mui/material/Box";
 import {LANGUAGE_KEYS} from "models/language";
 import AutocompleteSearch from "../../common/AutocompleteSearch";
-import {getCourses, getExercisePrivateFields, searchCourses, updateExercise} from "../../services/courses";
+import {getCourses, searchCourses} from "../../services/courses";
+import {getExercisePrivateFields, updateExercise} from "../../services/exercises";
 
 import {Controller, useForm, FormProvider} from "react-hook-form";
 import {zodResolver} from "@hookform/resolvers/zod";

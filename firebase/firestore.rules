@@ -50,7 +50,9 @@ service cloud.firestore {
       return request.auth != null && request.auth.uid in get(/databases/$(database)/documents/courses/$(courseId)).data.instructors;
     }
     function isInvited(auth, courseId) {
-      return auth != null && auth.token != null && auth.token.email in get(/databases/$(database)/documents/courses/$(courseId)/private/fields).data.invites;
+      let coursePrivates = get(/databases/$(database)/documents/courses/$(courseId)/private/fields).data;
+      return auth != null && auth.uid != null && auth.token != null
+             && (auth.token.email in coursePrivates.invitedEmails || auth.uid in coursePrivates.invitedUsers);
     }
     // All the public and unlisted courses should be accessible
     match /courses/{courseId} {
@@ -59,6 +61,11 @@ service cloud.firestore {
                      || (get(/databases/$(database)/documents/courses/$(courseId)).data.visibility == 'private' && isInvited(request.auth, courseId));
       allow create: if hasInstructorRole(request.auth);
       allow update: if isCourseInstructor(request, courseId);
+
+      match /private/fields {
+        allow read: if isCourseInstructor(request, courseId);
+        allow write: if isCourseInstructor(request, courseId);
+      }
 
       // All the exercises are public when they are revealed
       match /exercises/{exerciseId} {

@@ -11,15 +11,17 @@ import {styled} from "@mui/material/styles";
 import Content from "./Content";
 import {useNavigate} from "react-router-dom";
 import {getUsers, searchUser, uploadPicture} from "../services/users";
-import {genCourseId, updateCourse} from "../services/courses";
+import {genCourseId, onCoursePrivateFieldsChanged, updateCourse} from "../services/courses";
 import {User} from "models/users";
 import AutocompleteSearch from "../common/AutocompleteSearch";
 
-import { Controller, useForm } from "react-hook-form";
+import {Controller, useForm, FormProvider} from "react-hook-form";
 import {zodResolver} from "@hookform/resolvers/zod";
 import {boolean, infer as Infer, date, object, string, array, enum as zodEnum} from "zod";
 import {notionPageToId} from "../util";
 import {Moment} from "moment";
+import CourseInvitations from "./CourseInvitations";
+import {CoursePrivateFields} from "models/lib/courses";
 
 
 const schema = object({
@@ -33,6 +35,9 @@ const schema = object({
     author: string().min(3).max(128),
     introduction: string().min(20).max(35),
     instructors: array(string().min(25).max(30)),
+
+    // private fields
+    invitedEmails: array(string().email()).max(1000),
 });
 type Schema = Infer<typeof schema>;
 
@@ -57,6 +62,7 @@ function CourseEditor({course}: {course?: Course | null}) {
     const navigate = useNavigate();
     const auth = useContext(AuthContext);
     const [openSnackbar, setOpenSnackbar] = useState(false);
+    const [privateFields, setPrivateFields] = useState<CoursePrivateFields | null>(null);
 
     const getDefaultFieldValues = useCallback(() => {
         return {
@@ -70,16 +76,29 @@ function CourseEditor({course}: {course?: Course | null}) {
             author: course?.author,
             instructors: course?.instructors,
             introduction: course?.introduction,
-        }
-    }, [course]);
 
-    const {control, watch, handleSubmit, formState: { errors, isValid }, setValue, reset} = useForm<Schema>({
+            invitedEmails: privateFields?.invitedEmails ?? [],
+        }
+    }, [course, privateFields]);
+
+    const formMethods = useForm<Schema>({
         mode: 'onChange',
         resolver: zodResolver(schema),
         defaultValues: getDefaultFieldValues(),
     });
+    const {control, watch, handleSubmit, formState: { errors, isValid }, setValue, reset} = formMethods;
     const introId = watch('introduction', course?.introduction);
+    errors && Object.keys(errors).length && console.log('errors:', errors);
     useEffect(() => reset(getDefaultFieldValues()), [course, getDefaultFieldValues, reset]);
+    useEffect(() => {
+        if( !course?.id )
+            return;
+
+        return onCoursePrivateFieldsChanged(course.id, (privateFields) => {
+            setPrivateFields(privateFields);
+            reset(getDefaultFieldValues());
+        })
+    }, [course, getDefaultFieldValues, reset]);
 
     const onSubmit = async (data: Schema) => {
         const id = course?.id ?? await genCourseId(data.title);
@@ -123,6 +142,7 @@ function CourseEditor({course}: {course?: Course | null}) {
         </>
 
     return <>
+        <FormProvider {...formMethods}>
         <form onSubmit={handleSubmit(onSubmit)}>
         <Box maxWidth="48em" marginLeft="auto" marginRight="auto" marginTop="2em" marginBottom="2em">
         <Stack direction="column" spacing={3}>
@@ -230,11 +250,14 @@ function CourseEditor({course}: {course?: Course | null}) {
                 )} />
             </Stack>
 
+            <CourseInvitations />
+
             <br/><br/><br/>
             {introId && <Content notionPage={introId} />}
         </Stack>
         </Box>
         </form>
+        </FormProvider>
 
         <Snackbar open={openSnackbar} autoHideDuration={6000} onClose={handleCloseSnackbar}>
             <Alert onClose={handleCloseSnackbar} severity="success" sx={{ width: '100%' }}>

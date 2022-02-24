@@ -6,7 +6,7 @@ import {COMPARISON_MODES} from "models/courses";
 import {styled} from "@mui/material/styles";
 import Box from "@mui/material/Box";
 import {FileUploader} from "react-drag-drop-files";
-import {updateTestCases} from "../../services/courses";
+import {updateTestCases} from "../../services/exercises";
 import {CourseContext, CurrentExerciseContext} from "../Course";
 import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 import HighlightOffTwoToneIcon from "@mui/icons-material/HighlightOffTwoTone";

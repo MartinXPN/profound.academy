@@ -3,7 +3,8 @@ import {Route, Routes, useNavigate, useParams} from "react-router-dom";
 
 import {styled} from '@mui/material/styles';
 
-import {createCourseExercise, getCourse, getExercise, getFirstExercise} from "../services/courses";
+import {getCourse} from "../services/courses";
+import {createCourseExercise, getExercise, getFirstExercise} from "../services/exercises";
 import useAsyncEffect from "use-async-effect";
 import {Course, Exercise as ExerciseModel} from "models/courses";
 import {AuthContext} from "../App";

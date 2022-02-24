@@ -11,7 +11,7 @@ import {styled} from "@mui/material/styles";
 import Content from "./Content";
 import {useNavigate} from "react-router-dom";
 import {getUsers, searchUser, uploadPicture} from "../services/users";
-import {genCourseId, onCoursePrivateFieldsChanged, updateCourse} from "../services/courses";
+import {genCourseId, onCoursePrivateFieldsChanged, updateCourse, updateCoursePrivateFields} from "../services/courses";
 import {User} from "models/users";
 import AutocompleteSearch from "../common/AutocompleteSearch";
 
@@ -89,32 +89,41 @@ function CourseEditor({course}: {course?: Course | null}) {
     const {control, watch, handleSubmit, formState: { errors, isValid }, setValue, reset} = formMethods;
     const introId = watch('introduction', course?.introduction);
     errors && Object.keys(errors).length && console.log('errors:', errors);
-    useEffect(() => reset(getDefaultFieldValues()), [course, getDefaultFieldValues, reset]);
+    useEffect(() => reset(getDefaultFieldValues()), [course, reset, privateFields, getDefaultFieldValues]);
     useEffect(() => {
         if( !course?.id )
             return;
-
-        return onCoursePrivateFieldsChanged(course.id, (privateFields) => {
+        return onCoursePrivateFieldsChanged(course.id, privateFields => {
             setPrivateFields(privateFields);
-            reset(getDefaultFieldValues());
-        })
-    }, [course, getDefaultFieldValues, reset]);
+        });
+    }, [course, reset]);
 
-    const onSubmit = async (data: Schema) => {
+    const onSubmit = async (data: Schema, navigateToCourse: boolean) => {
         const id = course?.id ?? await genCourseId(data.title);
 
         console.log('submit!', id, data)
-        await updateCourse(
-            id, data.img,
-            data.revealsAt, data.freezeAt,
-            data.visibility, data.rankingVisibility, data.allowViewingSolutions,
-            data.title, data.author, data.instructors, data.introduction
-        );
+        await Promise.all([
+            updateCourse(
+                id, data.img,
+                data.revealsAt, data.freezeAt,
+                data.visibility, data.rankingVisibility, data.allowViewingSolutions,
+                data.title, data.author, data.instructors, data.introduction
+            ),
+            updateCoursePrivateFields(id, data.invitedEmails)
+        ]);
 
-        navigate(`/${id}`);
+        if( navigateToCourse )
+            navigate(`/${id}`);
         setOpenSnackbar(true);
     }
     const onCancel = () => navigate(-1);
+    const onSendInvites = async () => {
+        console.log('onSendInvites');
+        await handleSubmit(data => onSubmit(data, false))();
+        if( !errors && !Object.keys(errors).length ) {
+            console.log('Sending emails...');
+        }
+    }
 
     const handleImageChange = useCallback(async (file: File) => {
         if( !auth.currentUserId )
@@ -143,7 +152,7 @@ function CourseEditor({course}: {course?: Course | null}) {
 
     return <>
         <FormProvider {...formMethods}>
-        <form onSubmit={handleSubmit(onSubmit)}>
+        <form onSubmit={handleSubmit(data => onSubmit(data, true))}>
         <Box maxWidth="48em" marginLeft="auto" marginRight="auto" marginTop="2em" marginBottom="2em">
         <Stack direction="column" spacing={3}>
             <Stack direction="row" spacing={1} justifyContent="center" alignItems="center" alignContent="center">
@@ -250,7 +259,7 @@ function CourseEditor({course}: {course?: Course | null}) {
                 )} />
             </Stack>
 
-            <CourseInvitations />
+            <CourseInvitations onSendInvites={onSendInvites} />
 
             <br/><br/><br/>
             {introId && <Content notionPage={introId} />}

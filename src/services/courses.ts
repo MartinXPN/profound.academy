@@ -147,3 +147,9 @@ export const updateCourse = async (
     }, {merge: true});
 }
 
+export const updateCoursePrivateFields = (id: string, invitedEmails?: string[], invitedUsers?: string[]) => {
+    return db.coursePrivateFields(id).set({
+        invitedEmails: invitedEmails,
+        invitedUsers: invitedUsers,
+    }, {merge: true});
+}

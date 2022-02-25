@@ -8,6 +8,7 @@ import {Submission, SubmissionResult, SubmissionSensitiveRecords, SubmissionStat
 import {Comment, Vote} from "models/forum";
 import {CodeDraft} from "models/codeDrafts";
 import {Insight} from "models/lib/courses";
+import {CoursePrivateFields} from "../../functions/src/models/courses";
 
 // Add ids when getting the data and removing when sending it
 const converter = <T>() => ({
@@ -36,6 +37,7 @@ const db = {
 
     courses: dataPoint<Course>('courses'),
     course: (courseId: string) => dataPoint<Course>('courses').doc(courseId),
+    coursePrivateFields: (courseId: string) => dataPoint<CoursePrivateFields>(`courses/${courseId}/private`).doc('fields'),
     courseInsights: (courseId: string) => dataPoint<Insight>(`courses/${courseId}/insights`),
     courseOverallInsights: (courseId: string) => dataPoint<Insight>(`courses/${courseId}/insights`).doc('overall'),
     exercises: (courseId: string) => dataPoint<Exercise>(`courses/${courseId}/exercises`),

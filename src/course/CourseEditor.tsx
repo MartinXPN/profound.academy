@@ -1,7 +1,8 @@
 import React, {memo, useCallback, useContext, useEffect, useState} from "react";
 import {Course} from "models/courses";
 import {AuthContext} from "../App";
-import {Button, FormControlLabel, Stack, TextField, Typography, Switch, Grid, Alert, Snackbar, MenuItem} from "@mui/material";
+import {Button, FormControlLabel, Stack, TextField, Typography, Switch, Grid, Alert, Snackbar, MenuItem, Collapse, ListItemIcon, ListItemText, ListItemButton} from "@mui/material";
+import {GroupAdd} from "@mui/icons-material";
 import Box from "@mui/material/Box";
 import {FileUploader} from "react-drag-drop-files";
 import AdapterMoment from '@mui/lab/AdapterMoment';
@@ -11,15 +12,24 @@ import {styled} from "@mui/material/styles";
 import Content from "./Content";
 import {useNavigate} from "react-router-dom";
 import {getUsers, searchUser, uploadPicture} from "../services/users";
-import {genCourseId, updateCourse} from "../services/courses";
+import {
+    genCourseId,
+    onCoursePrivateFieldsChanged,
+    sendCourseInviteEmails,
+    updateCourse,
+    updateCoursePrivateFields
+} from "../services/courses";
 import {User} from "models/users";
 import AutocompleteSearch from "../common/AutocompleteSearch";
 
-import { Controller, useForm } from "react-hook-form";
+import {Controller, useForm, FormProvider} from "react-hook-form";
 import {zodResolver} from "@hookform/resolvers/zod";
 import {boolean, infer as Infer, date, object, string, array, enum as zodEnum} from "zod";
 import {notionPageToId} from "../util";
 import {Moment} from "moment";
+import CourseInvitations from "./CourseInvitations";
+import {CoursePrivateFields} from "models/lib/courses";
+import {ExpandLess, ExpandMore} from "@mui/icons-material";
 
 
 const schema = object({
@@ -33,6 +43,11 @@ const schema = object({
     author: string().min(3).max(128),
     introduction: string().min(20).max(35),
     instructors: array(string().min(25).max(30)),
+
+    // private fields
+    invitedEmails: array(string().email()).max(1000),
+    mailSubject: string().min(3).max(1000).optional(),
+    mailText: string().min(10).max(5000).optional(),
 });
 type Schema = Infer<typeof schema>;
 
@@ -57,6 +72,10 @@ function CourseEditor({course}: {course?: Course | null}) {
     const navigate = useNavigate();
     const auth = useContext(AuthContext);
     const [openSnackbar, setOpenSnackbar] = useState(false);
+    const [invitesOpen, setInvitesOpen] = useState(false);
+    const [privateFields, setPrivateFields] = useState<CoursePrivateFields | null>(null);
+
+    const onInviteUsersClicked = () => setInvitesOpen(open => !open)
 
     const getDefaultFieldValues = useCallback(() => {
         return {
@@ -70,18 +89,31 @@ function CourseEditor({course}: {course?: Course | null}) {
             author: course?.author,
             instructors: course?.instructors,
             introduction: course?.introduction,
-        }
-    }, [course]);
 
-    const {control, watch, handleSubmit, formState: { errors, isValid }, setValue, reset} = useForm<Schema>({
+            invitedEmails: privateFields?.invitedEmails ?? [],
+            mailSubject: privateFields?.mailSubject ?? undefined,
+            mailText: privateFields?.mailText ?? undefined,
+        }
+    }, [course, privateFields]);
+
+    const formMethods = useForm<Schema>({
         mode: 'onChange',
         resolver: zodResolver(schema),
         defaultValues: getDefaultFieldValues(),
     });
+    const {control, watch, handleSubmit, formState: { errors, isValid }, setValue, reset} = formMethods;
     const introId = watch('introduction', course?.introduction);
-    useEffect(() => reset(getDefaultFieldValues()), [course, getDefaultFieldValues, reset]);
+    errors && Object.keys(errors).length && console.log('errors:', errors);
+    useEffect(() => reset(getDefaultFieldValues()), [course, reset, privateFields, getDefaultFieldValues]);
+    useEffect(() => {
+        if( !course?.id )
+            return;
+        return onCoursePrivateFieldsChanged(course.id, privateFields => {
+            setPrivateFields(privateFields);
+        });
+    }, [course, reset]);
 
-    const onSubmit = async (data: Schema) => {
+    const onSubmit = async (data: Schema, navigateToCourse: boolean) => {
         const id = course?.id ?? await genCourseId(data.title);
 
         console.log('submit!', id, data)
@@ -91,11 +123,25 @@ function CourseEditor({course}: {course?: Course | null}) {
             data.visibility, data.rankingVisibility, data.allowViewingSolutions,
             data.title, data.author, data.instructors, data.introduction
         );
+        console.log('updated the course:', id);
+        // needs to happen sequentially for the instructor to have permission to update private fields
+        await updateCoursePrivateFields(id, data.invitedEmails, undefined, data.mailSubject, data.mailText);
 
-        navigate(`/${id}`);
+        if( navigateToCourse )
+            navigate(`/${id}`);
         setOpenSnackbar(true);
+        return id;
     }
     const onCancel = () => navigate(-1);
+    const onSendInvites = async () => {
+        console.log('onSendInvites');
+        await handleSubmit(async data => {
+            const courseId = await onSubmit(data, false);
+            await sendCourseInviteEmails(courseId);
+            if( course?.id !== courseId )
+                navigate(`/${courseId}/edit`);
+        })();
+    }
 
     const handleImageChange = useCallback(async (file: File) => {
         if( !auth.currentUserId )
@@ -123,7 +169,8 @@ function CourseEditor({course}: {course?: Course | null}) {
         </>
 
     return <>
-        <form onSubmit={handleSubmit(onSubmit)}>
+        <FormProvider {...formMethods}>
+        <form onSubmit={handleSubmit(data => onSubmit(data, true))}>
         <Box maxWidth="48em" marginLeft="auto" marginRight="auto" marginTop="2em" marginBottom="2em">
         <Stack direction="column" spacing={3}>
             <Stack direction="row" spacing={1} justifyContent="center" alignItems="center" alignContent="center">
@@ -230,11 +277,25 @@ function CourseEditor({course}: {course?: Course | null}) {
                 )} />
             </Stack>
 
-            <br/><br/><br/>
+            <>
+                <ListItemButton onClick={onInviteUsersClicked}>
+                    <ListItemIcon>
+                        <GroupAdd />
+                    </ListItemIcon>
+                    <ListItemText primary="Invite users" />
+                    {invitesOpen ? <ExpandLess /> : <ExpandMore />}
+                </ListItemButton>
+                <Collapse in={invitesOpen}>
+                    <CourseInvitations onSendInvites={onSendInvites} />
+                </Collapse>
+            </>
+
+            <br/>
             {introId && <Content notionPage={introId} />}
         </Stack>
         </Box>
         </form>
+        </FormProvider>
 
         <Snackbar open={openSnackbar} autoHideDuration={6000} onClose={handleCloseSnackbar}>
             <Alert onClose={handleCloseSnackbar} severity="success" sx={{ width: '100%' }}>

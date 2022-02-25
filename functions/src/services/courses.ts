@@ -1,3 +1,4 @@
+import {firestore} from 'firebase-admin';
 import * as AWS from 'aws-sdk';
 import * as functions from 'firebase-functions';
 import {db} from './db';
@@ -32,4 +33,45 @@ export const isCourseInstructor = async (courseId?: string, userId?: string): Pr
         return false;
 
     return course.instructors.includes(userId);
+};
+
+export const sendInviteEmails = async (
+    courseId: string,
+): Promise<boolean> => {
+    functions.logger.info(`Sending invite emails for the course: ${courseId}`);
+
+    const privateFields = (await db.coursePrivateFields(courseId).get()).data();
+    const alreadySendEmails = new Set(privateFields?.sentEmails ?? []);
+    const diffEmails = privateFields?.invitedEmails?.filter((e: string) => !alreadySendEmails.has(e)) ?? [];
+    functions.logger.info(`Sending invite emails to: ${diffEmails}`);
+    if (diffEmails.length === 0) {
+        functions.logger.info('There are no emails to be sent!');
+        return false;
+    }
+
+    const footer = `Sign in with your email to accept the invitation here: https://profound.academy/${courseId}`;
+    const batch = firestore().batch();
+    for (const email of diffEmails) {
+        const id = db.mails.doc().id;
+        batch.set(db.mails.doc(id), {
+            to: email,
+            message: {
+                subject: privateFields?.mailSubject,
+                text: (privateFields?.mailText ?? '') + '\n\n' + footer,
+            },
+        });
+    }
+    functions.logger.info('Committing all the changes...');
+    await batch.commit();
+
+    functions.logger.info('Updating sentEmails of the course');
+    if (!privateFields || !privateFields.sentEmails || privateFields.sentEmails.length === 0)
+        await db.coursePrivateFields(courseId).set({sentEmails: diffEmails}, {merge: true});
+    else
+        await db.coursePrivateFields(courseId).set({   // @ts-ignore
+            sentEmails: firestore.FieldValue.arrayUnion(diffEmails),
+        }, {merge: true});
+
+    functions.logger.info('Done');
+    return true;
 };

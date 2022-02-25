@@ -7,7 +7,8 @@ import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 
 import {Exercise, Progress} from "models/courses";
-import {getCourseLevelExercises, onLevelExerciseProgressChanged, onProgressChanged} from "../services/courses";
+import {onLevelExerciseProgressChanged, onProgressChanged} from "../services/progress";
+import {getCourseLevelExercises} from "../services/exercises";
 import {CourseContext} from "./Course";
 import {Equalizer} from "@mui/icons-material";
 import {Stack, Typography} from "@mui/material";

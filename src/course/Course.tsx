@@ -3,7 +3,8 @@ import {Route, Routes, useNavigate, useParams} from "react-router-dom";
 
 import {styled} from '@mui/material/styles';
 
-import {createCourseExercise, getCourse, getExercise, getFirstExercise} from "../services/courses";
+import {getCourse, registerForCourse} from "../services/courses";
+import {createCourseExercise, getExercise, getFirstExercise} from "../services/exercises";
 import useAsyncEffect from "use-async-effect";
 import {Course, Exercise as ExerciseModel} from "models/courses";
 import {AuthContext} from "../App";
@@ -11,6 +12,7 @@ import CourseDrawer from "./drawer/Drawer";
 import Exercise from "./exercise/Exercise";
 import {safeParse} from "../util";
 import StatusPage from "./StatusPage";
+import LandingPage from "../home/LandingPage";
 
 const CourseEditor = lazy(() => import('./CourseEditor'));
 
@@ -62,6 +64,11 @@ function CurrentCourseView({openPage}: {openPage: (page: string) => void}) {
         const firstExercise = await getFirstExercise(course.id);
         openExercise(firstExercise);
     }, [course, openExercise]);
+    const registerCourse = useCallback(async () => {
+        if( !course || !auth.currentUserId )   return;
+        console.log('Registering for the course!');
+        await registerForCourse(auth.currentUserId, course.id);
+    }, [auth.currentUserId, course]);
     const createExercise = useCallback(async () => {
         if( !course )   return;
         const ex = await createCourseExercise(course.id);
@@ -85,7 +92,7 @@ function CurrentCourseView({openPage}: {openPage: (page: string) => void}) {
     let content;
     if (exerciseId === 'status' )       content = <StatusPage />
     else if (exerciseId === 'edit' )    content = <Suspense fallback={<></>}><CourseEditor course={course} /></Suspense>
-    else                                content = <Exercise launchCourse={launchCourse} />
+    else                                content = <Exercise launchCourse={launchCourse} registerCourse={registerCourse} />
     return <>
         <CurrentExerciseContext.Provider value={{exercise: currentExercise}}>
             <CourseDrawer
@@ -124,7 +131,7 @@ function CourseView() {
     const openPage = useCallback((pageId: string) => navigate(pageId), [navigate]);
 
     if( !course )
-        return <></>
+        return <LandingPage />
     return (
         <CourseContext.Provider value={{course: course}}>
         <Routes>

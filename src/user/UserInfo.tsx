@@ -142,11 +142,7 @@ function UserName({user}: {user: User}) {
 
 function UserInfo({userId}: {userId: string}) {
     const [user, setUser] = useState<User | null>(null);
-    useEffect(() => {
-        return onUserInfoChanged(userId, (user) => {
-            setUser(user);
-        })
-    }, [userId]);
+    useEffect(() => onUserInfoChanged(userId, user => setUser(user)), [userId]);
 
     return <>
         <UserInfoRoot>

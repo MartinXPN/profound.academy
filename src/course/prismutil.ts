@@ -275,5 +275,30 @@ export const getAllDependencies = (lang: string | string[]): string[] => {
         // @ts-ignore
         return [...res, ...getAllDependencies(langDependencies[currentName])];
     }
-    return res;
+    return [...new Set(res)];
+};
+
+export class DependencyLoader {
+    private readonly languages: string | string[];
+    private startedLoading: Set<string>;
+    constructor(languages: string | string[]) {
+        this.languages = languages;
+        this.startedLoading = new Set<string>();
+    }
+
+    /// DFS
+    private loadLanguage = async (lang: string): Promise<void> => {
+        // console.log('loadLanguage', lang, 'startedLoading:', this.startedLoading);
+        this.startedLoading.add(lang);
+        const dep = getAllDependencies(lang);
+
+        await Promise.all(dep.filter(l => !this.startedLoading.has(l)).map(async l => this.loadLanguage(l)));
+        await import(`prismjs/components/prism-${lang}.min`);
+    }
+
+    load = async () => {
+        if( typeof this.languages === 'string' )
+            return this.loadLanguage(this.languages);
+        return Promise.all(this.languages.map(async l => this.loadLanguage(l)));
+    }
 }

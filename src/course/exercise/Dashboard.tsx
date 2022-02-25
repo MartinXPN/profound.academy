@@ -1,7 +1,7 @@
 import {memo, useContext, useEffect, useState} from "react";
 import {CircularProgress, CircularProgressProps, Grid, Typography, Box, Stack} from "@mui/material";
 import {Insight} from "models/lib/courses";
-import {onExerciseInsightsChanged} from "../../services/courses";
+import {onExerciseInsightsChanged} from "../../services/exercises";
 import {CourseContext, CurrentExerciseContext} from "../Course";
 
 function CircularProgressWithLabel(props: CircularProgressProps & { value: number }) {

@@ -1,4 +1,4 @@
-import React, {useContext} from "react";
+import React, {useContext, memo, useEffect, useState} from "react";
 import Content from "./Content";
 import Button from "@mui/material/Button";
 import Countdown from "react-countdown";
@@ -8,13 +8,27 @@ import {CourseContext} from "./Course";
 import {Edit} from "@mui/icons-material";
 import {useNavigate} from "react-router-dom";
 import Box from "@mui/material/Box";
+import {onUserInfoChanged} from "../services/users";
+import {useTheme} from "@mui/material/styles";
 
 
-function LandingPage({onStartCourseClicked}: {onStartCourseClicked: () => void}) {
+function CourseLandingPage({onStartCourseClicked, onRegisterCourseClicked}: {
+    onStartCourseClicked: () => void,
+    onRegisterCourseClicked: () => void,
+}) {
     const auth = useContext(AuthContext);
     const {course} = useContext(CourseContext);
     const navigate = useNavigate();
+    const theme = useTheme();
     const onEditClicked = () => navigate('edit');
+    const [registered, setRegistered] = useState(false);
+    useEffect(() => {
+        if( !course?.id || !auth.currentUserId )
+            return;
+
+        return onUserInfoChanged(auth.currentUserId, user => setRegistered(!!user && !!user.courses && user.courses.filter(c => c.id === course.id).length > 0));
+    }, [auth.currentUserId, course?.id]);
+
 
     const renderer = ({ days, hours, minutes, seconds, completed }:
                           {days: number, hours: number, minutes: number, seconds: number, completed: boolean}) => {
@@ -24,6 +38,8 @@ function LandingPage({onStartCourseClicked}: {onStartCourseClicked: () => void})
                 <br/><br/><br/>
                 <Typography variant="h5">Starts in</Typography>
                 <Typography variant="h2">{days * 24 + hours}:{minutes.toString().padStart(2, '0')}:{seconds.toString().padStart(2, '0')}</Typography>
+                {!registered && <Button color="primary" variant="contained" onClick={onRegisterCourseClicked}>REGISTER</Button>}
+                {registered && <Typography fontWeight="bold" sx={{color: theme.palette.success.light}}>Registered!</Typography>}
             </>;
     };
 
@@ -48,4 +64,4 @@ function LandingPage({onStartCourseClicked}: {onStartCourseClicked: () => void})
     </>
 }
 
-export default LandingPage;
+export default memo(CourseLandingPage);

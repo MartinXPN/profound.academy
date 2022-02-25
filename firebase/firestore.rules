@@ -44,16 +44,29 @@ service cloud.firestore {
 
 
     function hasInstructorRole(auth) {
-      return auth != null && exists(/databases/$(database)/documents/users/$(auth.uid)/roles/instructor);
+      return auth != null && auth.uid != null && exists(/databases/$(database)/documents/users/$(auth.uid)/roles/instructor);
     }
     function isCourseInstructor(request, courseId) {
       return request.auth != null && request.auth.uid in get(/databases/$(database)/documents/courses/$(courseId)).data.instructors;
     }
-    // All the courses are public
+    function isInvited(auth, courseId) {
+      let coursePrivates = get(/databases/$(database)/documents/courses/$(courseId)/private/fields).data;
+      return auth != null && auth.uid != null && auth.token != null
+             && (auth.token.email in coursePrivates.invitedEmails || auth.uid in coursePrivates.invitedUsers);
+    }
+    // All the public and unlisted courses should be accessible
     match /courses/{courseId} {
-      allow read;
+      allow read: if isCourseInstructor(request, courseId)
+                     || !exists(/databases/$(database)/documents/courses/$(courseId))
+                     || (get(/databases/$(database)/documents/courses/$(courseId)).data.visibility != 'private')
+                     || (get(/databases/$(database)/documents/courses/$(courseId)).data.visibility == 'private' && isInvited(request.auth, courseId));
       allow create: if hasInstructorRole(request.auth);
       allow update: if isCourseInstructor(request, courseId);
+
+      match /private/fields {
+        allow read: if isCourseInstructor(request, courseId);
+        allow write: if isCourseInstructor(request, courseId);
+      }
 
       // All the exercises are public when they are revealed
       match /exercises/{exerciseId} {

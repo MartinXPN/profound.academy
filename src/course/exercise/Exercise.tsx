@@ -25,7 +25,7 @@ import Dashboard from "./Dashboard";
 const ExerciseEditor = lazy(() => import('./ExerciseEditor'));
 
 
-function Exercise({launchCourse}: {launchCourse: () => void}) {
+function Exercise({launchCourse, registerCourse}: {launchCourse: () => void, registerCourse: () => void}) {
     const auth = useContext(AuthContext);
     const {course} = useContext(CourseContext);
     const {exercise} = useContext(CurrentExerciseContext);
@@ -67,10 +67,15 @@ function Exercise({launchCourse}: {launchCourse: () => void}) {
         {/* Display the landing page with an option to start the course if it wasn't started yet */
             !exerciseId &&
             <Box paddingBottom="12em">
-                <CourseLandingPage onStartCourseClicked={() => {
-                    if (auth && auth.currentUser && auth.currentUser.uid)   launchCourse();
-                    else                                                    setShowSignIn(true);
-                }}/>
+                <CourseLandingPage
+                    onStartCourseClicked={() => {
+                        if (auth && auth.currentUser && auth.currentUser.uid)   launchCourse();
+                        else                                                    setShowSignIn(true);
+                    }}
+                    onRegisterCourseClicked={() => {
+                        if (auth && auth.currentUser && auth.currentUser.uid)   registerCourse();
+                        else                                                    setShowSignIn(true);
+                    }} />
 
                 {showSignIn && <SignIn />}
             </Box>

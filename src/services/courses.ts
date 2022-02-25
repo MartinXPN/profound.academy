@@ -158,3 +158,9 @@ export const updateCoursePrivateFields = (
         mailText: mailText,
     }, {merge: true});
 }
+
+export const sendCourseInviteEmails = async (courseId: string) => {
+    await firebase.functions().httpsCallable('sendCourseInviteEmails')({
+        courseId: courseId,
+    });
+}

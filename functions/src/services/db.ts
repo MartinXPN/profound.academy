@@ -67,6 +67,8 @@ const db = {
     submissionSensitiveRecords: (userId: string, submissionId: string) => dataPoint<SubmissionSensitiveRecords>(`/submissions/${submissionId}/private`).doc(userId),
 
     codeDraft: (courseId: string, exerciseId: string, userId: string) => dataPoint<CodeDraft>(`codeDrafts/${courseId}/${exerciseId}`).doc(userId),
+
+    mails: dataPoint('mail'),
 };
 /* eslint-enable max-len, @typescript-eslint/explicit-module-boundary-types */
 export {db};

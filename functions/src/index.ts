@@ -7,7 +7,7 @@ import {notifyOnComment} from './services/notifications';
 import {Submission} from './models/submissions';
 import {Comment} from './models/forum';
 import {updateInfoQueue} from './services/users';
-import {getS3UploadSignedUrl, isCourseInstructor} from './services/courses';
+import {getS3UploadSignedUrl, isCourseInstructor, sendInviteEmails} from './services/courses';
 import {submit} from './services/submissions';
 import {processResult} from './services/submissionResults';
 
@@ -39,6 +39,14 @@ export const getNotionPage = functions.https.onRequest(async (req, res) => {
         functions.logger.info(`recordMap #chars: ${JSON.stringify(recordMap).length}`);
         res.status(200).send(recordMap);
     });
+});
+
+export const sendCourseInviteEmails = functions.https.onCall(async (data, context) => {
+    if (!await isCourseInstructor(data.courseId, context.auth?.uid))
+        throw Error(`User ${context.auth?.uid} tried to send invites for ${data.courseId} course`);
+
+    functions.logger.info(`sendInviteEmails: ${JSON.stringify(data)}`);
+    return await sendInviteEmails(data.courseId);
 });
 
 export const getS3UploadUrl = functions.https.onCall(async (data, context) => {

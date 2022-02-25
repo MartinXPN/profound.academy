@@ -12,7 +12,13 @@ import {styled} from "@mui/material/styles";
 import Content from "./Content";
 import {useNavigate} from "react-router-dom";
 import {getUsers, searchUser, uploadPicture} from "../services/users";
-import {genCourseId, onCoursePrivateFieldsChanged, updateCourse, updateCoursePrivateFields} from "../services/courses";
+import {
+    genCourseId,
+    onCoursePrivateFieldsChanged,
+    sendCourseInviteEmails,
+    updateCourse,
+    updateCoursePrivateFields
+} from "../services/courses";
 import {User} from "models/users";
 import AutocompleteSearch from "../common/AutocompleteSearch";
 
@@ -124,14 +130,15 @@ function CourseEditor({course}: {course?: Course | null}) {
         if( navigateToCourse )
             navigate(`/${id}`);
         setOpenSnackbar(true);
+        return id;
     }
     const onCancel = () => navigate(-1);
     const onSendInvites = async () => {
         console.log('onSendInvites');
-        await handleSubmit(data => onSubmit(data, false))();
-        if( !errors && !Object.keys(errors).length ) {
-            console.log('Sending emails...');
-        }
+        await handleSubmit(async data => {
+            const courseId = await onSubmit(data, false);
+            await sendCourseInviteEmails(courseId);
+        })();
     }
 
     const handleImageChange = useCallback(async (file: File) => {

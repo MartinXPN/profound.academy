@@ -71,6 +71,8 @@ export interface CoursePrivateFields {
     id: string;
     invitedEmails?: string[],   // list of invited users (emails)
     invitedUsers?: string[];    // list of invited users (ids)
+    mailSubject?: string;       // subject of the invitation email
+    mailText?: string;          // contents of the invitation email
 }
 
 

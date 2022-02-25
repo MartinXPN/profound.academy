@@ -147,9 +147,14 @@ export const updateCourse = async (
     }, {merge: true});
 }
 
-export const updateCoursePrivateFields = (id: string, invitedEmails?: string[], invitedUsers?: string[]) => {
+export const updateCoursePrivateFields = (
+    id: string, invitedEmails?: string[], invitedUsers?: string[],
+    mailSubject?: string, mailText?: string
+) => {
     return db.coursePrivateFields(id).set({
         invitedEmails: invitedEmails,
         invitedUsers: invitedUsers,
+        mailSubject: mailSubject,
+        mailText: mailText,
     }, {merge: true});
 }

@@ -40,6 +40,8 @@ const schema = object({
 
     // private fields
     invitedEmails: array(string().email()).max(1000),
+    mailSubject: string().min(3).max(1000).optional(),
+    mailText: string().min(10).max(5000).optional(),
 });
 type Schema = Infer<typeof schema>;
 
@@ -83,6 +85,8 @@ function CourseEditor({course}: {course?: Course | null}) {
             introduction: course?.introduction,
 
             invitedEmails: privateFields?.invitedEmails ?? [],
+            mailSubject: privateFields?.mailSubject,
+            mailText: privateFields?.mailText,
         }
     }, [course, privateFields]);
 
@@ -114,7 +118,7 @@ function CourseEditor({course}: {course?: Course | null}) {
                 data.visibility, data.rankingVisibility, data.allowViewingSolutions,
                 data.title, data.author, data.instructors, data.introduction
             ),
-            updateCoursePrivateFields(id, data.invitedEmails)
+            updateCoursePrivateFields(id, data.invitedEmails, undefined, data.mailSubject, data.mailText),
         ]);
 
         if( navigateToCourse )
@@ -277,7 +281,7 @@ function CourseEditor({course}: {course?: Course | null}) {
                 </Collapse>
             </>
 
-            <br/><br/><br/>
+            <br/>
             {introId && <Content notionPage={introId} />}
         </Stack>
         </Box>

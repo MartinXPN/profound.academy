@@ -13,7 +13,7 @@ function CourseInvitations({onSendInvites}: {onSendInvites: () => Promise<void>}
     console.log('currentSearch:', currentSearch);
 
     return <>
-        <Stack direction="row" spacing={2} alignItems="top">
+        <Stack direction="row" spacing={2} alignItems="top" marginBottom={4}>
             <Controller name="invitedEmails" control={control} render={({ field }) => (
                 <Autocomplete
                     multiple freeSolo disableClearable autoSelect sx={{flex: 1}}
@@ -52,8 +52,19 @@ function CourseInvitations({onSendInvites}: {onSendInvites: () => Promise<void>}
                     )} />
             )}/>
 
-            <Button size="large" variant="outlined" onClick={onSendInvites} sx={{height: '4em'}}>Send invite</Button>
+            <Button size="large" variant="outlined" onClick={onSendInvites} sx={{height: '3em'}}>Send invite</Button>
         </Stack>
+
+        <Controller name="mailSubject" control={control} render={({ field: { ref, ...field } }) => (
+            <TextField fullWidth label="Subject" variant="outlined" placeholder="Invitation email subject"
+                       error={Boolean(errors.mailSubject)} helperText={errors.mailSubject?.message}
+                       inputRef={ref} {...field} sx={{marginBottom: 2}} />
+        )}/>
+        <Controller name="mailText" control={control} render={({ field: { ref, ...field } }) => (
+            <TextField fullWidth multiline label="Mail text" variant="outlined" placeholder="Invite users to participate..."
+                       error={Boolean(errors.mailText)} helperText={errors.mailText?.message}
+                       inputRef={ref} {...field} sx={{marginBottom: 2}} />
+        )}/>
     </>
 }
 

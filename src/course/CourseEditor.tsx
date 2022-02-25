@@ -91,8 +91,8 @@ function CourseEditor({course}: {course?: Course | null}) {
             introduction: course?.introduction,
 
             invitedEmails: privateFields?.invitedEmails ?? [],
-            mailSubject: privateFields?.mailSubject,
-            mailText: privateFields?.mailText,
+            mailSubject: privateFields?.mailSubject ?? undefined,
+            mailText: privateFields?.mailText ?? undefined,
         }
     }, [course, privateFields]);
 
@@ -117,15 +117,15 @@ function CourseEditor({course}: {course?: Course | null}) {
         const id = course?.id ?? await genCourseId(data.title);
 
         console.log('submit!', id, data)
-        await Promise.all([
-            updateCourse(
-                id, data.img,
-                data.revealsAt, data.freezeAt,
-                data.visibility, data.rankingVisibility, data.allowViewingSolutions,
-                data.title, data.author, data.instructors, data.introduction
-            ),
-            updateCoursePrivateFields(id, data.invitedEmails, undefined, data.mailSubject, data.mailText),
-        ]);
+        await updateCourse(
+            id, data.img,
+            data.revealsAt, data.freezeAt,
+            data.visibility, data.rankingVisibility, data.allowViewingSolutions,
+            data.title, data.author, data.instructors, data.introduction
+        );
+        console.log('updated the course:', id);
+        // needs to happen sequentially for the instructor to have permission to update private fields
+        await updateCoursePrivateFields(id, data.invitedEmails, undefined, data.mailSubject, data.mailText);
 
         if( navigateToCourse )
             navigate(`/${id}`);

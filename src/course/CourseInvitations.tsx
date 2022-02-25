@@ -56,12 +56,12 @@ function CourseInvitations({onSendInvites}: {onSendInvites: () => Promise<void>}
         </Stack>
 
         <Controller name="mailSubject" control={control} render={({ field: { ref, ...field } }) => (
-            <TextField required fullWidth label="Subject" variant="outlined" placeholder="Invitation email subject"
+            <TextField fullWidth label="Subject" variant="outlined" placeholder="Invitation email subject"
                        error={Boolean(errors.mailSubject)} helperText={errors.mailSubject?.message}
                        inputRef={ref} {...field} sx={{marginBottom: 2}} />
         )}/>
         <Controller name="mailText" control={control} render={({ field: { ref, ...field } }) => (
-            <TextField required fullWidth multiline label="Mail text" variant="outlined" placeholder="Invite users to participate..."
+            <TextField fullWidth multiline label="Mail text" variant="outlined" placeholder="Invite users to participate..."
                        error={Boolean(errors.mailText)} helperText={errors.mailText?.message}
                        inputRef={ref} {...field} sx={{marginBottom: 2}} />
         )}/>

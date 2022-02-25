@@ -35,9 +35,16 @@ export const registerForCourse = async (userId: string, courseId: string) => {
 }
 
 export const doesExist = async (courseId: string) => {
-    const snapshot = await db.course(courseId).get();
-    console.log(`${courseId} exists: ${snapshot.exists}`);
-    return snapshot.exists;
+    console.log('checking if', courseId, 'exists');
+    try {
+        const snapshot = await db.course(courseId).get();
+        console.log(`${courseId} exists: ${snapshot.exists}`);
+        return snapshot.exists;
+    }
+    catch (e) {
+        console.error(e);
+        return false;
+    }
 }
 
 export const genCourseId = async (title: string) => {

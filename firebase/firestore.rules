@@ -44,7 +44,7 @@ service cloud.firestore {
 
 
     function hasInstructorRole(auth) {
-      return auth != null && exists(/databases/$(database)/documents/users/$(auth.uid)/roles/instructor);
+      return auth != null && auth.uid != null && exists(/databases/$(database)/documents/users/$(auth.uid)/roles/instructor);
     }
     function isCourseInstructor(request, courseId) {
       return request.auth != null && request.auth.uid in get(/databases/$(database)/documents/courses/$(courseId)).data.instructors;
@@ -57,6 +57,7 @@ service cloud.firestore {
     // All the public and unlisted courses should be accessible
     match /courses/{courseId} {
       allow read: if isCourseInstructor(request, courseId)
+                     || !exists(/databases/$(database)/documents/courses/$(courseId))
                      || (get(/databases/$(database)/documents/courses/$(courseId)).data.visibility != 'private')
                      || (get(/databases/$(database)/documents/courses/$(courseId)).data.visibility == 'private' && isInvited(request.auth, courseId));
       allow create: if hasInstructorRole(request.auth);

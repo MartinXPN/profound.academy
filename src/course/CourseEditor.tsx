@@ -1,7 +1,8 @@
 import React, {memo, useCallback, useContext, useEffect, useState} from "react";
 import {Course} from "models/courses";
 import {AuthContext} from "../App";
-import {Button, FormControlLabel, Stack, TextField, Typography, Switch, Grid, Alert, Snackbar, MenuItem} from "@mui/material";
+import {Button, FormControlLabel, Stack, TextField, Typography, Switch, Grid, Alert, Snackbar, MenuItem, Collapse, ListItemIcon, ListItemText, ListItemButton} from "@mui/material";
+import {GroupAdd} from "@mui/icons-material";
 import Box from "@mui/material/Box";
 import {FileUploader} from "react-drag-drop-files";
 import AdapterMoment from '@mui/lab/AdapterMoment';
@@ -22,6 +23,7 @@ import {notionPageToId} from "../util";
 import {Moment} from "moment";
 import CourseInvitations from "./CourseInvitations";
 import {CoursePrivateFields} from "models/lib/courses";
+import {ExpandLess, ExpandMore} from "@mui/icons-material";
 
 
 const schema = object({
@@ -62,7 +64,10 @@ function CourseEditor({course}: {course?: Course | null}) {
     const navigate = useNavigate();
     const auth = useContext(AuthContext);
     const [openSnackbar, setOpenSnackbar] = useState(false);
+    const [invitesOpen, setInvitesOpen] = useState(false);
     const [privateFields, setPrivateFields] = useState<CoursePrivateFields | null>(null);
+
+    const onInviteUsersClicked = () => setInvitesOpen(open => !open)
 
     const getDefaultFieldValues = useCallback(() => {
         return {
@@ -259,7 +264,18 @@ function CourseEditor({course}: {course?: Course | null}) {
                 )} />
             </Stack>
 
-            <CourseInvitations onSendInvites={onSendInvites} />
+            <>
+                <ListItemButton onClick={onInviteUsersClicked}>
+                    <ListItemIcon>
+                        <GroupAdd />
+                    </ListItemIcon>
+                    <ListItemText primary="Invite users" />
+                    {invitesOpen ? <ExpandLess /> : <ExpandMore />}
+                </ListItemButton>
+                <Collapse in={invitesOpen}>
+                    <CourseInvitations onSendInvites={onSendInvites} />
+                </Collapse>
+            </>
 
             <br/><br/><br/>
             {introId && <Content notionPage={introId} />}

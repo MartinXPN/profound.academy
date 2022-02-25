@@ -6,7 +6,10 @@ import {LANGUAGES} from "models/language";
 import {Insight} from "models/lib/courses";
 
 export const getFirstExercise = async (courseId: string) => {
-    const exercise = await db.exercises(courseId).orderBy("order", "asc").limit(1).get();
+    const exercise = await db.exercises(courseId)
+        .orderBy("order", "asc")
+        .where("order", ">=", 1)
+        .limit(1).get();
     return exercise.docs?.[0]?.data() ?? null;
 }
 
@@ -154,4 +157,3 @@ export const updateTestCases = async (
     onProgressChanged(100);
     console.log('uploaded the zip file:', res);
 }
-

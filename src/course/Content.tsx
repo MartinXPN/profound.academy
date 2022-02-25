@@ -13,7 +13,7 @@ import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
 
 import {getNotionPageMap} from "../services/notion";
-import {getAllDependencies} from "./prismutil";
+import {DependencyLoader, getAllDependencies} from "./prismutil";
 import {Decoration} from "notion-types/src/core";
 
 
@@ -26,12 +26,23 @@ function Content({notionPage}: {notionPage: string}) {
         isMounted.current = true;
         setRecordMap(null);
         setErrors(null);
-        let map: ExtendedRecordMap;
+        let map: ExtendedRecordMap | null = null;
         try {
             map = await getNotionPageMap(notionPage);
+        }
+        catch(e) {
+            console.error(e);
+            setRecordMap(null);
+            setErrors(`Could not get Notion page with id: ${notionPage}`);
+        }
+
+        try {
+            if( !map || !map.block )
+                return;
 
             const allLanguages: string[] = [];
             Object.keys(map.block).map(hash => {
+                if( !map ) return null;
                 const b = map.block[hash];
                 if( b.value?.type === 'code' ) {
                     const deps = b.value.properties.language.map(l => getAllDependencies(l as string[]));
@@ -41,18 +52,21 @@ function Content({notionPage}: {notionPage: string}) {
                 return b;
             });
 
-            console.log('loading all languages:', allLanguages);
-            await Promise.all(allLanguages.map(l => import(`prismjs/components/prism-${l}`)));
-
+            const unique = [...new Set(allLanguages)];
+            await new DependencyLoader(unique).load();
+            console.log('loaded:', unique);
+            setErrors(null);
+        }
+        catch(e) {
+            console.error(e);
+            setErrors('Could not properly highlight the page');
+        }
+        finally {
             // @ts-ignore
             isMounted.current && setRecordMap(map);
             highlightAll();
         }
-        catch(e) {
-            console.error(e);
-            setRecordMap(null);
-            setErrors(`Could not get Notion page with id: ${notionPage}`);
-        }
+
     }, () => isMounted.current = false, [notionPage]);
 
     return <>

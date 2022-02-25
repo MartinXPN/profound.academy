@@ -7,8 +7,8 @@ import {Insight} from "models/lib/courses";
 
 export const getFirstExercise = async (courseId: string) => {
     const exercise = await db.exercises(courseId)
-        .orderBy("order", "asc")
-        .where("order", ">=", 1)
+        .orderBy('order', 'asc')
+        .where('order', '>=', 1)
         .limit(1).get();
     return exercise.docs?.[0]?.data() ?? null;
 }

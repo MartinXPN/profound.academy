@@ -138,6 +138,8 @@ function CourseEditor({course}: {course?: Course | null}) {
         await handleSubmit(async data => {
             const courseId = await onSubmit(data, false);
             await sendCourseInviteEmails(courseId);
+            if( course?.id !== courseId )
+                navigate(`/${courseId}/edit`);
         })();
     }
 

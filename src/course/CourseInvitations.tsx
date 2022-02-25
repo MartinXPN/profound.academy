@@ -7,7 +7,7 @@ function CourseInvitations({onSendInvites}: {onSendInvites: () => Promise<void>}
     const {control, formState: {errors}, watch, setValue} = useFormContext();
     const [currentSearch, setCurrentSearch] = useState<string>('');
     const emails = watch('invitedEmails');
-    const onEmailsChanged = (emails: string[]) => setValue('invitedEmails', emails);
+    const onEmailsChanged = (emails: string[]) => setValue('invitedEmails', emails, {shouldTouch: true});
 
     console.log('emails:', emails);
     console.log('currentSearch:', currentSearch);

@@ -12,6 +12,7 @@ import CourseDrawer from "./drawer/Drawer";
 import Exercise from "./exercise/Exercise";
 import {safeParse} from "../util";
 import StatusPage from "./StatusPage";
+import LandingPage from "../home/LandingPage";
 
 const CourseEditor = lazy(() => import('./CourseEditor'));
 
@@ -125,7 +126,7 @@ function CourseView() {
     const openPage = useCallback((pageId: string) => navigate(pageId), [navigate]);
 
     if( !course )
-        return <></>
+        return <LandingPage />
     return (
         <CourseContext.Provider value={{course: course}}>
         <Routes>

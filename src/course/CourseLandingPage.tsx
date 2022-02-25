@@ -10,7 +10,7 @@ import {useNavigate} from "react-router-dom";
 import Box from "@mui/material/Box";
 
 
-function LandingPage({onStartCourseClicked}: {onStartCourseClicked: () => void}) {
+function CourseLandingPage({onStartCourseClicked}: {onStartCourseClicked: () => void}) {
     const auth = useContext(AuthContext);
     const {course} = useContext(CourseContext);
     const navigate = useNavigate();
@@ -48,4 +48,4 @@ function LandingPage({onStartCourseClicked}: {onStartCourseClicked: () => void})
     </>
 }
 
-export default LandingPage;
+export default CourseLandingPage;

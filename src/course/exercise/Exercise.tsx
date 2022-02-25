@@ -2,7 +2,7 @@ import {useParams} from "react-router-dom";
 import React, {lazy, useCallback, useContext, useState, memo, Suspense, useEffect} from "react";
 import {AuthContext} from "../../App";
 import {getLocalizedParam, useStickyState} from "../../util";
-import LandingPage from "../LandingPage";
+import CourseLandingPage from "../CourseLandingPage";
 import {SignIn} from "../../user/Auth";
 import Editor from "../editor/Editor";
 import {CourseContext, CurrentExerciseContext} from "../Course";
@@ -67,7 +67,7 @@ function Exercise({launchCourse}: {launchCourse: () => void}) {
         {/* Display the landing page with an option to start the course if it wasn't started yet */
             !exerciseId &&
             <Box paddingBottom="12em">
-                <LandingPage onStartCourseClicked={() => {
+                <CourseLandingPage onStartCourseClicked={() => {
                     if (auth && auth.currentUser && auth.currentUser.uid)   launchCourse();
                     else                                                    setShowSignIn(true);
                 }}/>

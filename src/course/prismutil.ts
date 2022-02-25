@@ -280,26 +280,25 @@ export const getAllDependencies = (lang: string | string[]): string[] => {
 
 export class DependencyLoader {
     private readonly languages: string | string[];
-    private loaded: Set<string>;
+    private startedLoading: Set<string>;
     constructor(languages: string | string[]) {
         this.languages = languages;
-        this.loaded = new Set<string>();
+        this.startedLoading = new Set<string>();
     }
 
     /// DFS
-    private loadLanguage = async (lang: string[]) => {
-        // console.log('loadLanguage', lang, 'loaded:', this.loaded);
-        lang.forEach(l => this.loaded.add(l));
+    private loadLanguage = async (lang: string): Promise<void> => {
+        // console.log('loadLanguage', lang, 'startedLoading:', this.startedLoading);
+        this.startedLoading.add(lang);
         const dep = getAllDependencies(lang);
 
-        if( dep.length === lang.length )
-            return await Promise.all(dep.map(l => import(`prismjs/components/prism-${l}.min`)));
-        await Promise.all(dep.filter(l => !this.loaded.has(l)).map(async (l) => await this.loadLanguage([l])));
+        await Promise.all(dep.filter(l => !this.startedLoading.has(l)).map(async l => this.loadLanguage(l)));
+        await import(`prismjs/components/prism-${lang}.min`);
     }
 
     load = async () => {
         if( typeof this.languages === 'string' )
-            return this.loadLanguage([this.languages]);
-        return Promise.all(this.languages.map(async (l) => await this.loadLanguage([l])));
+            return this.loadLanguage(this.languages);
+        return Promise.all(this.languages.map(async l => this.loadLanguage(l)));
     }
 }

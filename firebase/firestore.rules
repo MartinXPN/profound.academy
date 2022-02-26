@@ -58,8 +58,8 @@ service cloud.firestore {
     match /courses/{courseId} {
       allow read: if isCourseInstructor(request, courseId)
                      || !exists(/databases/$(database)/documents/courses/$(courseId))
-                     || (get(/databases/$(database)/documents/courses/$(courseId)).data.visibility != 'private')
-                     || (get(/databases/$(database)/documents/courses/$(courseId)).data.visibility == 'private' && isInvited(request.auth, courseId));
+                     || resource.data.visibility != 'private'
+                     || (resource.data.visibility == 'private' && isInvited(request.auth, courseId));
       allow create: if hasInstructorRole(request.auth);
       allow update: if isCourseInstructor(request, courseId);
 

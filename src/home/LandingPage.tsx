@@ -41,7 +41,7 @@ const StartActions = styled(Grid)(({ theme }) => ({
 }));
 
 
-function LandingPage() {
+function LandingPage({error}: {error?: string}) {
     const [showSignInOptions, setShowSignInOptions] = useState(false);
     const landingPageImageURL = 'https://firebasestorage.googleapis.com/v0/b/profound-academy.appspot.com/o/images%2Fwebsite-landing-removebg.png?alt=media&token=ebd74cb6-4eab-4ac8-87af-6ef0442ab699';
 
@@ -59,6 +59,7 @@ function LandingPage() {
                     <Typography variant="h6" sx={{color: '#bdbdbd'}}>
                         Explore various courses that guide your journey from beginner to advanced level
                     </Typography>
+                    {!!error && <Typography variant="h6" color="error">{error}</Typography>}
                     <Box alignContent="center" textAlign="center" paddingTop={4}>
                         {showSignInOptions
                             ? <SignIn />

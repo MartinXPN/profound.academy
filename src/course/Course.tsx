@@ -120,18 +120,26 @@ function CourseView() {
     const navigate = useNavigate();
     const {courseId} = useParams<{ courseId: string }>();
     const [course, setCourse] = useState<Course | null>(null);
+    const [error, setError] = useState<string | null>(null);
 
     useAsyncEffect(async () => {
         if( !courseId )
             return;
-        const course = await getCourse(courseId);
-        setCourse(course);
+        try {
+            const course = await getCourse(courseId);
+            setError(null);
+            setCourse(course);
+        }
+        catch (e) {
+            console.error(e);
+            setError('You are not allowed to view the course. Please sign in or return to homepage');
+        }
     }, [courseId, auth]);
 
     const openPage = useCallback((pageId: string) => navigate(pageId), [navigate]);
 
-    if( !course )
-        return <LandingPage />
+    if( error )     return <LandingPage error={error} />
+    if( !course )   return <></>
     return (
         <CourseContext.Provider value={{course: course}}>
         <Routes>

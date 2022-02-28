@@ -1,4 +1,4 @@
-import firebase from "firebase";
+import firebase from 'firebase/app';
 import 'firebase/firestore';
 // import 'firebase/functions';
 // import 'firebase/storage';
@@ -14,7 +14,6 @@ export const firebaseConfig = {
 };
 
 firebase.initializeApp(firebaseConfig);
-
 
 // configure the database to ignore undefined values
 const db = firebase.firestore();

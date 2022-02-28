@@ -135,6 +135,7 @@ function ExerciseEditor({cancelEditing, exerciseTypeChanged}: {
     const isPublic = watch('isPublic');
 
     const exerciseType: keyof typeof EXERCISE_TYPES = watch('exerciseType');
+    console.log('exerciseType:', exerciseType);
     const onExerciseTypeChanged = (newType: keyof typeof EXERCISE_TYPES) => {
         if (newType !== 'code' && newType !== 'textAnswer' && newType !== 'checkboxes' && newType !== 'multipleChoice')
             throw Error(`Wrong exercise type: ${newType}`);

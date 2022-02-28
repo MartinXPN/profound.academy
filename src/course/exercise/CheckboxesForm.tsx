@@ -33,7 +33,8 @@ function CheckboxesForm() {
             <Controller name="question" control={control} render={({ field: { ref, ...field } }) => (
                 <TextField
                     required multiline fullWidth variant="outlined" placeholder="How would you do this?" label="Question"
-                    error={Boolean(errors.question) || Boolean(errors.answer)} helperText={errors.question?.message ?? errors.answer?.message}
+                    error={Boolean(errors.question) || Boolean(errors.answer)}
+                    helperText={errors.question?.message ?? (errors.answer?.message ? ('Answer: ' + errors.answer?.message) : null)}
                     inputRef={ref} {...field} />
             )}/>
 

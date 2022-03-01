@@ -3,8 +3,6 @@ import {BrowserRouter as Router, Route, Routes} from 'react-router-dom';
 
 import firebase from 'firebase/app';
 import 'firebase/auth';
-import 'firebase/analytics';
-import 'firebase/performance';
 import './firebase';
 
 import { ThemeProvider, StyledEngineProvider, createTheme } from '@mui/material/styles';

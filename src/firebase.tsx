@@ -1,5 +1,7 @@
 import firebase from 'firebase/app';
 import 'firebase/firestore';
+import 'firebase/analytics';
+import 'firebase/performance';
 // import 'firebase/functions';
 // import 'firebase/storage';
 
@@ -19,6 +21,11 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 db.settings({ignoreUndefinedProperties: true});
 
+const perf = firebase.performance();
+console.log('perf enabled:', perf.dataCollectionEnabled);
+
+const analytics = firebase.analytics();
+console.log('analytics:', analytics);
 
 // if (window.location.hostname === 'localhost') {
 //     console.log('Using localhost => configuring the app to use emulators...');

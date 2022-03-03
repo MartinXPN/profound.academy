@@ -199,7 +199,7 @@ function CourseEditor({course}: {course?: Course | null}) {
                 <Box width={300} height={180}>
                     <FileUploader
                         handleChange={handleImageChange}
-                        minSize={0.01}
+                        minSize={0.0001}
                         maxSize={1}
                         name="file"
                         types={fileTypes}>

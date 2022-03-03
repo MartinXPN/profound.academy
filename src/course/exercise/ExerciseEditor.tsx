@@ -130,7 +130,7 @@ function ExerciseEditor({cancelEditing, exerciseTypeChanged}: {
         // @ts-ignore
         defaultValues: getDefaultFieldValues(),
     });
-    const {control, watch, handleSubmit, formState: {errors, isValid}, reset, setValue} = formMethods;
+    const {control, watch, handleSubmit, formState: {errors, isValid, isDirty}, reset, setValue} = formMethods;
     errors && Object.keys(errors).length && console.log('errors:', errors);
     const isPublic = watch('isPublic');
 
@@ -181,6 +181,9 @@ function ExerciseEditor({cancelEditing, exerciseTypeChanged}: {
         );
         setOpenSnackbar(true);
     };
+    const onReEvaluate = async () => {
+        console.log('re-evaluating all the submissions...');
+    }
 
     if( !exercise )
         return <></>
@@ -189,6 +192,7 @@ function ExerciseEditor({cancelEditing, exerciseTypeChanged}: {
         <form onSubmit={handleSubmit(onSubmit)}>
         <Box m={1} marginBottom={16}>
             <Stack direction="row" spacing={1} marginTop={4} marginBottom={2} justifyContent="right" alignItems="center" alignContent="center">
+                <Button size="medium" variant="outlined" color="warning" disabled={!isValid || isDirty} onClick={onReEvaluate}>Re-evaluate submissions</Button>
                 <Button size="large" variant="outlined" type="submit" disabled={!isValid && false}>Save</Button>
                 <Button size="large" variant="outlined" onClick={onCancel}>Cancel</Button>
             </Stack>

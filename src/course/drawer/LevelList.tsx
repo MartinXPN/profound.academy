@@ -46,11 +46,16 @@ function LevelList({levelNumber, levelStatus, onItemSelected, isDrawerOpen, isSi
     }, [exercise, levelNumber]);
 
     useEffect(() => {
-        if( !course || !open )
+        if( !course || !open || !exercise?.id )
             return;
 
-        return onCourseLevelExercisesChanged(course.id, levelNumber + 1, setLevelExercises);
-    }, [course, open, levelNumber, isCourseOpen]);
+        return onCourseLevelExercisesChanged(course.id, levelNumber + 1, (exercises => {
+            setLevelExercises(exercises);
+            const cur = exercises.filter(e => e.id === exercise.id);
+            if( cur.length === 1 )
+                onItemSelected(cur[0]);
+        }));
+    }, [course, exercise?.id, onItemSelected, open, levelNumber, isCourseOpen]);
 
     useEffect(() => {
         if( !open || !auth.currentUserId || !course )

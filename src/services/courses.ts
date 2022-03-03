@@ -154,12 +154,15 @@ export const getCompletedCourses = async (userId: string) => {
 }
 
 export const updateCourse = async (
+    userId: string,
     id: string, img: string,
     revealsAt: Date, freezesAt: Date,
     visibility: 'public' | 'unlisted' | 'private', rankingVisibility: 'public' | 'private', allowViewingSolutions: boolean,
     title: string, author: string, instructors: string[], introduction: string) => {
     console.log('update course:', id, img, revealsAt, freezesAt, visibility, rankingVisibility, allowViewingSolutions);
     const exists = await doesExist(id);
+    if( !exists )
+        await registerForCourse(userId, id);
     return db.course(id).set({
         img: img,
         revealsAt: firebase.firestore.Timestamp.fromDate(revealsAt),

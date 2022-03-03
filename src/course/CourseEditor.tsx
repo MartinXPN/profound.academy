@@ -114,10 +114,13 @@ function CourseEditor({course}: {course?: Course | null}) {
     }, [course, reset]);
 
     const onSubmit = async (data: Schema, navigateToCourse: boolean) => {
+        if( !auth.currentUserId )
+            return;
         const id = course?.id ?? await genCourseId(data.title);
 
         console.log('submit!', id, data)
         await updateCourse(
+            auth.currentUserId,
             id, data.img,
             data.revealsAt, data.freezeAt,
             data.visibility, data.rankingVisibility, data.allowViewingSolutions,
@@ -137,6 +140,8 @@ function CourseEditor({course}: {course?: Course | null}) {
         console.log('onSendInvites');
         await handleSubmit(async data => {
             const courseId = await onSubmit(data, false);
+            if( !courseId )
+                return;
             await sendCourseInviteEmails(courseId);
             if( course?.id !== courseId )
                 navigate(`/${courseId}/edit`);
@@ -199,7 +204,7 @@ function CourseEditor({course}: {course?: Course | null}) {
                 <Box width={300} height={180}>
                     <FileUploader
                         handleChange={handleImageChange}
-                        minSize={0.01}
+                        minSize={0.0001}
                         maxSize={1}
                         name="file"
                         types={fileTypes}>

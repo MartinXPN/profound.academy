@@ -69,13 +69,18 @@ export const genCourseId = async (title: string) => {
     }
 }
 
-export const getCourse = async (id: string) => {
-    const snapshot = await db.course(id).get();
-    return snapshot.data() as Course;
+export const getCourse = async (id: string): Promise<Course | null> => {
+    try {
+        const snapshot = await db.course(id).get();
+        return snapshot.data() ?? null;
+    }
+    catch {
+        return null;
+    }
 }
 
 export const getCourses = async (courseIds: string[]) => {
-    const courses: Course[] = await Promise.all(courseIds.map(id => getCourse(id)));
+    const courses: Course[] = (await Promise.all(courseIds.map(id => getCourse(id)))).filter(c => !!c) as Course[];
     console.log('Got courses:', courses);
     return courses;
 }
@@ -137,7 +142,7 @@ export const getUserCourses = async (userId: string) => {
     if (!us || !us.courses)
         return [];
 
-    const courses: Course[] = await Promise.all(us.courses.map(x => getCourse(x.id)));
+    const courses: Course[] = await getCourses(us.courses.map(c => c.id));
     console.log('User courses:', courses);
     return courses;
 }
@@ -148,18 +153,21 @@ export const getCompletedCourses = async (userId: string) => {
     if (!us || !us.completed)
         return [];
 
-    const courses: Course[] = await Promise.all(us.completed.map(x => getCourse(x.id)));
+    const courses: Course[] = await getCourses(us.completed.map(c => c.id));
     console.log('Completed courses:', courses);
     return courses;
 }
 
 export const updateCourse = async (
+    userId: string,
     id: string, img: string,
     revealsAt: Date, freezesAt: Date,
     visibility: 'public' | 'unlisted' | 'private', rankingVisibility: 'public' | 'private', allowViewingSolutions: boolean,
     title: string, author: string, instructors: string[], introduction: string) => {
     console.log('update course:', id, img, revealsAt, freezesAt, visibility, rankingVisibility, allowViewingSolutions);
     const exists = await doesExist(id);
+    if( !exists )
+        await registerForCourse(userId, id);
     return db.course(id).set({
         img: img,
         revealsAt: firebase.firestore.Timestamp.fromDate(revealsAt),

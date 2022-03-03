@@ -188,8 +188,7 @@ function ExerciseEditor({cancelEditing, exerciseTypeChanged}: {
         <FormProvider {...formMethods}>
         <form onSubmit={handleSubmit(onSubmit)}>
         <Box m={1} marginBottom={16}>
-            <Stack direction="row" spacing={1} marginTop={4} justifyContent="center" alignItems="center" alignContent="center">
-                <TextField label="ID" variant="outlined" value={exercise.id} size="small" sx={{flex: 1, marginRight: 3}} inputProps={{readOnly: true}}/>
+            <Stack direction="row" spacing={1} marginTop={4} marginBottom={2} justifyContent="right" alignItems="center" alignContent="center">
                 <Button size="large" variant="outlined" type="submit" disabled={!isValid && false}>Save</Button>
                 <Button size="large" variant="outlined" onClick={onCancel}>Cancel</Button>
             </Stack>

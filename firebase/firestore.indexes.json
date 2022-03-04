@@ -85,6 +85,20 @@
       ]
     },
     {
+      "collectionGroup": "exerciseScore_2022_03_09",
+      "queryScope": "COLLECTION_GROUP",
+      "fields": [
+        {
+          "fieldPath": "courseId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "level",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
       "collectionGroup": "exerciseUpsolveScore",
       "queryScope": "COLLECTION_GROUP",
       "fields": [

@@ -19,8 +19,8 @@ import {getLocalizedParam} from '../../util';
 import {useParams} from "react-router-dom";
 
 
-function LevelList({levelNumber, levelStatus, onItemSelected, isDrawerOpen, isSingleLevel, drafts}: {
-    levelNumber: number,
+function LevelList({levelName, levelStatus, onItemSelected, isDrawerOpen, isSingleLevel, drafts}: {
+    levelName: string,
     levelStatus: 'Solved' | 'In Progress' | 'Unavailable',
     onItemSelected: (exercise: Exercise) => void,
     isDrawerOpen: boolean,
@@ -35,36 +35,42 @@ function LevelList({levelNumber, levelStatus, onItemSelected, isDrawerOpen, isSi
     const [open, setOpen] = useState(isSingleLevel);
     const [progress, setProgress] = useState<ExerciseProgress<SubmissionStatus> | null>(null);
     const isCourseOpen = course && course.revealsAt.toDate() < new Date();
+    const levelNumber = parseInt(levelName);
 
     useEffect(() => {
+        if( isSingleLevel ) {
+            setOpen(true);
+            return;
+        }
         if( !exercise )
             return;
-        const isExerciseInLevel = levelNumber + 1 <= exercise.order && exercise.order < levelNumber + 2;
+        const exerciseLevel = Math.trunc(exercise.order).toString();
+        const isExerciseInLevel = exerciseLevel === levelName;
 
         if( !open )
             setOpen(isExerciseInLevel);
         // intentionally leave out open - because we might want to close the level by clicking
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [exercise, levelNumber]);
+    }, [exercise, levelName, isSingleLevel]);
 
     useEffect(() => {
-        if( !course || !open || !exercise?.id )
+        if( !course || !open || !exerciseId )
             return;
 
-        return onCourseLevelExercisesChanged(course.id, levelNumber + 1, (exercises => {
+        return onCourseLevelExercisesChanged(course.id, levelNumber, (exercises => {
             setLevelExercises(exercises);
-            const cur = exercises.filter(e => e.id === exercise.id);
+            const cur = exercises.filter(e => e.id === exerciseId);
             if( cur.length === 1 && exerciseId === cur[0].id )
                 onItemSelected(cur[0]);
         }));
-    }, [course, exercise?.id, exerciseId, onItemSelected, open, levelNumber, isCourseOpen]);
+    }, [course, exerciseId, onItemSelected, open, levelNumber, isCourseOpen]);
 
     useEffect(() => {
         if( !open || !auth.currentUserId || !course )
             return;
 
-        return onCourseExerciseProgressChanged(course.id, auth.currentUserId, (levelNumber + 1).toString(), setProgress);
-    }, [open, levelNumber, auth, course, isCourseOpen]);
+        return onCourseExerciseProgressChanged(course.id, auth.currentUserId, levelName, setProgress);
+    }, [open, levelName, auth, course, isCourseOpen]);
 
     const onLevelClicked = () => setOpen(!open);
     const getStatusStyle = (id: string) => {
@@ -81,7 +87,7 @@ function LevelList({levelNumber, levelStatus, onItemSelected, isDrawerOpen, isSi
     return <>
         <List disablePadding>
             {!isSingleLevel &&
-                <ListItem button key={`level-${levelNumber}`} onClick={onLevelClicked} style={levelStyle}>
+                <ListItem button key={`level-${levelName}`} onClick={onLevelClicked} style={levelStyle}>
                     {drafts
                     ? <ListItemIcon>
                             <Edit/>
@@ -90,15 +96,15 @@ function LevelList({levelNumber, levelStatus, onItemSelected, isDrawerOpen, isSi
                         </ListItemIcon>
                     : <ListItemIcon>
                         <Equalizer/>
-                        {!isDrawerOpen && <Typography variant="subtitle1">{levelNumber}</Typography>}
-                        {isDrawerOpen && <Typography variant="subtitle1">Level {levelNumber}</Typography>}
+                        {!isDrawerOpen && <Typography variant="subtitle1">{levelName}</Typography>}
+                        {isDrawerOpen && <Typography variant="subtitle1">Level {levelName}</Typography>}
                         {open ? <ArrowDropUp/> : <ArrowDropDown/>}
                     </ListItemIcon>}
                 </ListItem>
             }
             {open && levelExercises.map((ex, index) =>
                 <ListItem button key={ex.id} onClick={() => onItemSelected(ex)} style={getStatusStyle(ex.id)}>
-                    <ListItemIcon>{exercise?.id === ex.id ? <ArrowRightIcon /> : <ListItemText primary={index + 1}/>}</ListItemIcon>
+                    <ListItemIcon>{exerciseId === ex.id ? <ArrowRightIcon /> : <ListItemText primary={index + 1}/>}</ListItemIcon>
                     <ListItemText primary={getLocalizedParam(ex.title)}/>
                 </ListItem>
             )}

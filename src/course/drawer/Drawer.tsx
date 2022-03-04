@@ -177,7 +177,7 @@ function CourseDrawer({onItemSelected, onStatusClicked, onCreateExerciseClicked}
                 {isCourseInstructor && <>
                 <LevelList
                     drafts
-                    levelNumber={-1}
+                    levelName="0"
                     levelStatus={'In Progress'}
                     onItemSelected={onItemSelected}
                     isDrawerOpen={open}
@@ -186,12 +186,11 @@ function CourseDrawer({onItemSelected, onStatusClicked, onCreateExerciseClicked}
                 </>}
 
                 {Object.entries(course.levelExercises).map(([levelName, numExercises]) => {
-                    const index = parseInt(levelName) - 1;
                     const numSolved = progress && progress.levelSolved && levelName in progress.levelSolved ? progress.levelSolved[levelName] : 0;
                     const isLevelSolved = numExercises <= numSolved;
 
                     return <LevelList
-                            levelNumber={index}
+                            levelName={levelName}
                             levelStatus={isLevelSolved ? 'Solved' : 'In Progress'}
                             onItemSelected={onItemSelected}
                             isDrawerOpen={open}

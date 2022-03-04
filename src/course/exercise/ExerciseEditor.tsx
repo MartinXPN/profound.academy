@@ -18,6 +18,7 @@ import TextAnswerForm from "./TextAnswerForm";
 import CheckboxesForm from "./CheckboxesForm";
 import MultipleChoiceForm from "./MultipleChoiceForm";
 import useAsyncEffect from "use-async-effect";
+import {AlertColor} from "@mui/material/Alert/Alert";
 
 
 const baseSchema = {
@@ -98,8 +99,8 @@ function ExerciseEditor({cancelEditing, exerciseTypeChanged}: {
 }) {
     const {course} = useContext(CourseContext);
     const {exercise} = useContext(CurrentExerciseContext);
-    const [openSnackbar, setOpenSnackbar] = useState(false);
-    const handleCloseSnackbar = () => setOpenSnackbar(false);
+    const [snackbar, setSnackbar] = useState<{message: string, severity: AlertColor} | null>(null);
+    const handleCloseSnackbar = () => setSnackbar(null);
 
     const getDefaultFieldValues = useCallback(() => {
         const level = exercise?.order ? Math.trunc(exercise.order) : 1;
@@ -180,12 +181,14 @@ function ExerciseEditor({cancelEditing, exerciseTypeChanged}: {
             // @ts-ignore
             data.question, data.answer, data.options,
         );
-        setOpenSnackbar(true);
+        setSnackbar({message: 'Successfully saved the changes!', severity: 'success'});
     };
     const onReEvaluate = async () => {
         if( !course?.id || !exercise?.id )
             return;
+        setSnackbar({message: 'Resubmitting all the submissions. Please wait...', severity: 'success'});
         await reEvaluateSubmissions(course.id, exercise.id);
+        setSnackbar({message: 'Done! Go to All submissions for more information', severity: 'success'});
     };
 
     if( !exercise )
@@ -282,9 +285,9 @@ function ExerciseEditor({cancelEditing, exerciseTypeChanged}: {
         </form>
         </FormProvider>
 
-        <Snackbar open={openSnackbar} autoHideDuration={6000} onClose={handleCloseSnackbar}>
-            <Alert onClose={handleCloseSnackbar} severity="success" sx={{ width: '100%' }}>
-                Successfully saved the changes!
+        <Snackbar open={!!snackbar} autoHideDuration={6000} onClose={handleCloseSnackbar}>
+            <Alert onClose={handleCloseSnackbar} severity={snackbar?.severity} sx={{ width: '100%' }}>
+                {snackbar?.message}
             </Alert>
         </Snackbar>
     </>

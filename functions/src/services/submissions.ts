@@ -148,7 +148,7 @@ export const reEvaluate = async (courseId: string, exerciseId: string): Promise<
             const [user, prevSolved, prevScore, upsolveScore] = data;
             const weekly = moment().format('YYYY_MM_WW');
             functions.logger.info(`weekly score path: ${weekly}`);
-            console.log('user:', user, 'prevSolved:', prevSolved, 'upsolve:', upsolveScore);
+            console.log('user:', user);  // , 'prevSolved:', prevSolved, 'upsolve:', upsolveScore
 
             updateUserMetric(transaction, 'solved', user, courseId, exerciseId, level,
                 prevSolved?.progress?.[exerciseId] === 'Solved' ? 1 : 0, 0, 0, true);

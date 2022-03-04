@@ -8,6 +8,7 @@ import {LANGUAGE_KEYS} from "models/language";
 import AutocompleteSearch from "../../common/AutocompleteSearch";
 import {getCourses, searchCourses} from "../../services/courses";
 import {getExercisePrivateFields, updateExercise} from "../../services/exercises";
+import { reEvaluateSubmissions } from "../../services/submissions";
 
 import {Controller, useForm, FormProvider} from "react-hook-form";
 import {zodResolver} from "@hookform/resolvers/zod";
@@ -182,8 +183,10 @@ function ExerciseEditor({cancelEditing, exerciseTypeChanged}: {
         setOpenSnackbar(true);
     };
     const onReEvaluate = async () => {
-        console.log('re-evaluating all the submissions...');
-    }
+        if( !course?.id || !exercise?.id )
+            return;
+        await reEvaluateSubmissions(course.id, exercise.id);
+    };
 
     if( !exercise )
         return <></>

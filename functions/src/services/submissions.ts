@@ -66,7 +66,7 @@ const submitAnswerCheck = async (submission: Submission, exercise: Exercise) => 
         isBest: false,
         status: isCorrect ? 'Solved' : 'Wrong answer',
         memory: 0, time: 0,
-        score: isCorrect ? (exercise.score ?? 100) : 0,
+        score: isCorrect ? (exercise.score ?? 100) : 0,  // TODO: move this to processResult()
         courseTitle: course.title,
         exerciseTitle: exercise.title,
     }, submission.userId, submission.id);
@@ -88,4 +88,44 @@ export const submit = async (submission: Submission): Promise<http.ClientRequest
     if (submission.language === 'txt')
         return submitAnswerCheck(submission, exercise);
     return submitLambdaJudge(submission, exercise);
+};
+
+export const reEvaluate = async (courseId: string, exerciseId: string): Promise<void> => {
+    functions.logger.info(`Re-evaluating submissions for ${courseId} ${exerciseId}`);
+    const courseRef = db.course(courseId);
+    const exerciseRef = db.exercise(courseId, exerciseId);
+
+    return firestore().runTransaction(async (transaction) => {
+        const query = await transaction.get(db.submissionResults.where('exercise', '==', exerciseRef));
+        const submissions = query.docs.map((s) => s.data());
+        console.log('#submissions:', submissions.length);
+
+        const newSubmissions = await Promise.all(submissions.map(async (submission) => {
+            const code = (await db.submissionSensitiveRecords(submission.userId, submission.id).get()).data()?.code;
+            if (!code)
+                return null;
+            return {
+                id: submission.id,
+                code: code,
+                course: courseRef,
+                createdAt: submission.createdAt,
+                exercise: exerciseRef,
+                isTestRun: submission.isTestRun,
+                language: submission.language,
+                userDisplayName: submission.userDisplayName,
+                userId: submission.userId,
+            };
+        }));
+
+        await Promise.all(newSubmissions.map(async (submission) => {
+            if (!submission)
+                return;
+            const {id, ...submissionData} = submission;
+            const ref = db.submissionQueue(submission.userId).doc();
+            // @ts-ignore
+            transaction.set(ref, submissionData);
+            console.log('added doc with id:', ref.id, ' -- removed doc with id:', id);
+            transaction.delete(db.submissionResult(id));
+        }));
+    });
 };

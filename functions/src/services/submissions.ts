@@ -1,12 +1,14 @@
 import * as functions from 'firebase-functions';
 import * as https from 'https';
 import * as http from 'node:http';
+import * as moment from 'moment';
 import {db} from './db';
 import {Submission} from '../models/submissions';
 import {Exercise} from '../models/courses';
 import {processResult} from './submissionResults';
 import {recordNewUserInsight} from './insights';
 import {firestore} from 'firebase-admin';
+import {updateUserMetric} from './metrics';
 
 // const LAMBDA_JUDGE_URL='https://judge.profound.academy/check';
 const LAMBDA_JUDGE_URL='https://jdc8h3yyag.execute-api.us-east-1.amazonaws.com/Prod/check/';
@@ -94,6 +96,11 @@ export const reEvaluate = async (courseId: string, exerciseId: string): Promise<
     functions.logger.info(`Re-evaluating submissions for ${courseId} ${exerciseId}`);
     const courseRef = db.course(courseId);
     const exerciseRef = db.exercise(courseId, exerciseId);
+    const exercise = (await exerciseRef.get()).data();
+    if (!exercise)
+        return;
+
+    const level = Math.floor(exercise.order).toString();
 
     return firestore().runTransaction(async (transaction) => {
         const query = await transaction.get(db.submissionResults.where('exercise', '==', exerciseRef));
@@ -101,7 +108,8 @@ export const reEvaluate = async (courseId: string, exerciseId: string): Promise<
         console.log('#submissions:', submissions.length);
 
         const newSubmissions = await Promise.all(submissions.map(async (submission) => {
-            const code = (await db.submissionSensitiveRecords(submission.userId, submission.id).get()).data()?.code;
+            const sensitiveRecordsRef = db.submissionSensitiveRecords(submission.userId, submission.id);
+            const code = (await transaction.get(sensitiveRecordsRef)).data()?.code;
             if (!code)
                 return null;
             return {
@@ -116,7 +124,46 @@ export const reEvaluate = async (courseId: string, exerciseId: string): Promise<
                 userId: submission.userId,
             };
         }));
+        const users = new Set(newSubmissions.map((s) => s?.userId));
+        console.log('users:', users);
 
+        const prevData = await Promise.all(Array.from(users).map(async (user) => {
+            if (!user)
+                return;
+            return Promise.all([
+                user,
+                (await transaction.get(db.userProgress(courseId, user)
+                    .collection('exerciseSolved').doc(level))).data(),
+                (await transaction.get(db.userProgress(courseId, user)
+                    .collection('exerciseScore').doc(level))).data(),
+                (await transaction.get(db.userProgress(courseId, user)
+                    .collection('exerciseUpsolveScore').doc(level))).data(),
+            ]);
+        }));
+
+        // reset user metrics
+        await Promise.all(prevData.map(async (data) => {
+            if (!data)
+                return;
+            const [user, prevSolved, prevScore, upsolveScore] = data;
+            const weekly = moment().format('YYYY_MM_WW');
+            functions.logger.info(`weekly score path: ${weekly}`);
+            console.log('user:', user, 'prevSolved:', prevSolved, 'upsolve:', upsolveScore);
+
+            updateUserMetric(transaction, 'solved', user, courseId, exerciseId, level,
+                prevSolved?.progress?.[exerciseId] === 'Solved' ? 1 : 0, 0, 0, true);
+
+            updateUserMetric(transaction, 'score', user, courseId, exerciseId, level,
+                prevScore?.progress?.[exerciseId] ?? 0, 0, 0, true);
+
+            updateUserMetric(transaction, `score_${weekly}`, user, courseId, exerciseId, level,
+                prevScore?.progress?.[exerciseId] ?? 0, 0, 0, true);
+
+            updateUserMetric(transaction, 'upsolveScore', user, courseId, exerciseId, level,
+                upsolveScore?.progress?.[exerciseId] ?? 0, 0, 0, true);
+        }));
+
+        // submit again
         await Promise.all(newSubmissions.map(async (submission) => {
             if (!submission)
                 return;

@@ -5,6 +5,7 @@ import * as moment from 'moment';
 import {db} from './db';
 import {SubmissionResult} from '../models/submissions';
 import {recordInsights} from './insights';
+import {updateUserMetric} from './metrics';
 
 
 const updateBest = (
@@ -53,38 +54,6 @@ const updateActivity = (
 };
 
 
-const updateUserMetric = (
-    transaction: firestore.Transaction,
-    metric: string,
-    userId: string,
-    courseId: string,
-    exerciseId: string,
-    level: string,
-    prev: number,
-    cur: number,
-    res: number | string,
-) => {
-    if (cur < prev) {
-        functions.logger.info(`Not updating: ${metric} prev: ${prev}, cur: ${cur}`);
-        return;
-    }
-
-    const uppercaseMetric = metric.charAt(0).toUpperCase() + metric.slice(1);
-    functions.logger.info(`Updating metric: ${metric} with prev ${prev} to cur ${cur}`);
-    transaction.set(db.userProgress(courseId, userId), {
-        [metric]: firestore.FieldValue.increment(cur - prev),
-        [`level${uppercaseMetric}`]: {[level]: firestore.FieldValue.increment(cur - prev)},
-    }, {merge: true});
-    transaction.set(db.userProgress(courseId, userId).collection(`exercise${uppercaseMetric}`).doc(level), {
-        // workaround to be able to do Collection-Group queries
-        'userId': userId,
-        'courseId': courseId,
-        'level': level,
-        'progress': {[exerciseId]: res},
-    }, {merge: true});
-};
-
-
 export const processResult = async (
     judgeResult: SubmissionResult,
     userId: string,
@@ -94,7 +63,7 @@ export const processResult = async (
     const submission = (await db.submissionQueue(userId).doc(submissionId).get()).data();
     const {code, ...submissionResult} = {...submission, ...judgeResult, id: submissionId, isBest: false};
     functions.logger.info(`submissionResult: ${JSON.stringify(submissionResult)}`);
-
+    const submissionDate = submissionResult.createdAt.toDate();
 
     if (!judgeResult)
         throw Error('Submission result is null');
@@ -105,7 +74,7 @@ export const processResult = async (
         await firestore().runTransaction(async (transaction) => {
             transaction.set(db.run(userId, submissionResult.id), submissionResult);
             const [courseId, exerciseId] = [submissionResult.course.id, submissionResult.exercise.id];
-            recordInsights(transaction, 'runs', courseId, exerciseId, submissionResult.createdAt.toDate());
+            recordInsights(transaction, 'runs', courseId, exerciseId, submissionDate);
         });
         return;
     }
@@ -157,10 +126,10 @@ export const processResult = async (
         functions.logger.info(`Saved the submission: ${JSON.stringify(code)}`);
 
         // update insights and activity
-        const date = submissionResult.createdAt.toDate();
-        recordInsights(transaction, 'submissions', course.id, exercise.id, date);
-        recordInsights(transaction, 'totalScore', course.id, exercise.id, date, submissionResult.score);
-        submissionResult.status === 'Solved' && recordInsights(transaction, 'solved', course.id, exercise.id, date);
+        recordInsights(transaction, 'submissions', course.id, exercise.id, submissionDate);
+        recordInsights(transaction, 'totalScore', course.id, exercise.id, submissionDate, submissionResult.score);
+        if (submissionResult.status === 'Solved')
+            recordInsights(transaction, 'solved', course.id, exercise.id, submissionDate);
         if (!alreadySolved)
             updateActivity(transaction, submissionResult);
     });
@@ -178,7 +147,9 @@ export const processResult = async (
             updateUserMetric(transaction, 'score', submissionResult.userId, course.id, exercise.id, level,
                 prevScore?.progress?.[exercise.id] ?? 0, submissionResult.score, submissionResult.score);
             // update weekly score metrics
-            updateUserMetric(transaction, `score_${moment().format('YYYY_MM_WW')}`,
+            const weekly = moment(submissionDate).format('YYYY_MM_WW');
+            functions.logger.info(`weekly score path: ${weekly}`);
+            updateUserMetric(transaction, `score_${weekly}`,
                 submissionResult.userId, course.id, exercise.id, level,
                 prevScore?.progress?.[exercise.id] ?? 0, submissionResult.score, submissionResult.score);
         } else {

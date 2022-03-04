@@ -147,3 +147,11 @@ export const getSubmissionCode = async (userId: string, submissionId: string) =>
         throw Error('The record does not exist!');
     return records.code;
 }
+
+export const reEvaluateSubmissions = async (courseId: string, exerciseId: string) => {
+    console.log('re-evaluating all the submissions...:', courseId, exerciseId);
+    return await firebase.functions().httpsCallable('reEvaluateSubmissions')({
+        courseId: courseId,
+        exerciseId: exerciseId,
+    });
+}

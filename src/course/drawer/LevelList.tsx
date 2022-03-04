@@ -16,6 +16,7 @@ import {AuthContext} from "../../App";
 import {SubmissionStatus} from "models/submissions";
 import {CourseContext, CurrentExerciseContext} from "../Course";
 import {getLocalizedParam} from '../../util';
+import {useParams} from "react-router-dom";
 
 
 function LevelList({levelNumber, levelStatus, onItemSelected, isDrawerOpen, isSingleLevel, drafts}: {
@@ -27,6 +28,7 @@ function LevelList({levelNumber, levelStatus, onItemSelected, isDrawerOpen, isSi
     drafts?: boolean,
 }) {
     const auth = useContext(AuthContext);
+    const {exerciseId} = useParams<{ exerciseId: string }>();
     const {course} = useContext(CourseContext);
     const {exercise} = useContext(CurrentExerciseContext);
     const [levelExercises, setLevelExercises] = useState<Exercise[]>([]);
@@ -46,11 +48,16 @@ function LevelList({levelNumber, levelStatus, onItemSelected, isDrawerOpen, isSi
     }, [exercise, levelNumber]);
 
     useEffect(() => {
-        if( !course || !open )
+        if( !course || !open || !exercise?.id )
             return;
 
-        return onCourseLevelExercisesChanged(course.id, levelNumber + 1, setLevelExercises);
-    }, [course, open, levelNumber, isCourseOpen]);
+        return onCourseLevelExercisesChanged(course.id, levelNumber + 1, (exercises => {
+            setLevelExercises(exercises);
+            const cur = exercises.filter(e => e.id === exercise.id);
+            if( cur.length === 1 && exerciseId === cur[0].id )
+                onItemSelected(cur[0]);
+        }));
+    }, [course, exercise?.id, exerciseId, onItemSelected, open, levelNumber, isCourseOpen]);
 
     useEffect(() => {
         if( !open || !auth.currentUserId || !course )

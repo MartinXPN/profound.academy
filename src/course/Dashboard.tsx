@@ -76,7 +76,7 @@ function Dashboard() {
     const diff = (metric: string) => {
         return weekCourseDailyInsights.map((insight, index) => {
             // @ts-ignore
-            return (insight?.[metric] ?? 0 as number) - (lastWeekCourseDailyInsights[index]?.[metric] ?? 0 as number)
+            return (insight?.[metric] ?? 0); //- (lastWeekCourseDailyInsights[index]?.[metric] ?? 0)
         }).reduce((prev, cur) => prev + cur, 0);
     }
 

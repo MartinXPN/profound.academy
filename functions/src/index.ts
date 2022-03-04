@@ -1,14 +1,14 @@
 import * as cors from 'cors';
 import * as functions from 'firebase-functions';
 import * as express from 'express';
-import {fetchNotionPage} from './services/notion';
-import {notifyOnComment} from './services/notifications';
 
 import {Submission} from './models/submissions';
 import {Comment} from './models/forum';
+import {fetchNotionPage} from './services/notion';
+import {notifyOnComment} from './services/notifications';
 import {updateInfoQueue} from './services/users';
 import {getS3UploadSignedUrl, isCourseInstructor, sendInviteEmails} from './services/courses';
-import {submit} from './services/submissions';
+import {submit, reEvaluate} from './services/submissions';
 import {processResult} from './services/submissionResults';
 
 
@@ -47,6 +47,14 @@ export const sendCourseInviteEmails = functions.https.onCall(async (data, contex
 
     functions.logger.info(`sendInviteEmails: ${JSON.stringify(data)}`);
     return await sendInviteEmails(data.courseId);
+});
+
+export const reEvaluateSubmissions = functions.https.onCall(async (data, context) => {
+    if (!await isCourseInstructor(data.courseId, context.auth?.uid))
+        throw Error(`User ${context.auth?.uid} tried to reEvaluate submissions: ${data.courseId} ${data.exerciseId}`);
+
+    functions.logger.info(`reEvaluateSubmissions: ${JSON.stringify(data)}`);
+    return await reEvaluate(data.courseId, data.exerciseId);
 });
 
 export const getS3UploadUrl = functions.https.onCall(async (data, context) => {

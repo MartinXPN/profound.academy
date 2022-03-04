@@ -8,6 +8,7 @@ import {LANGUAGE_KEYS} from "models/language";
 import AutocompleteSearch from "../../common/AutocompleteSearch";
 import {getCourses, searchCourses} from "../../services/courses";
 import {getExercisePrivateFields, updateExercise} from "../../services/exercises";
+import { reEvaluateSubmissions } from "../../services/submissions";
 
 import {Controller, useForm, FormProvider} from "react-hook-form";
 import {zodResolver} from "@hookform/resolvers/zod";
@@ -17,6 +18,7 @@ import TextAnswerForm from "./TextAnswerForm";
 import CheckboxesForm from "./CheckboxesForm";
 import MultipleChoiceForm from "./MultipleChoiceForm";
 import useAsyncEffect from "use-async-effect";
+import {AlertColor} from "@mui/material/Alert/Alert";
 
 
 const baseSchema = {
@@ -97,8 +99,8 @@ function ExerciseEditor({cancelEditing, exerciseTypeChanged}: {
 }) {
     const {course} = useContext(CourseContext);
     const {exercise} = useContext(CurrentExerciseContext);
-    const [openSnackbar, setOpenSnackbar] = useState(false);
-    const handleCloseSnackbar = () => setOpenSnackbar(false);
+    const [snackbar, setSnackbar] = useState<{message: string, severity: AlertColor} | null>(null);
+    const handleCloseSnackbar = () => setSnackbar(null);
 
     const getDefaultFieldValues = useCallback(() => {
         const level = exercise?.order ? Math.trunc(exercise.order) : 1;
@@ -130,7 +132,7 @@ function ExerciseEditor({cancelEditing, exerciseTypeChanged}: {
         // @ts-ignore
         defaultValues: getDefaultFieldValues(),
     });
-    const {control, watch, handleSubmit, formState: {errors, isValid}, reset, setValue} = formMethods;
+    const {control, watch, handleSubmit, formState: {errors, isValid, isDirty}, reset, setValue} = formMethods;
     errors && Object.keys(errors).length && console.log('errors:', errors);
     const isPublic = watch('isPublic');
 
@@ -179,7 +181,14 @@ function ExerciseEditor({cancelEditing, exerciseTypeChanged}: {
             // @ts-ignore
             data.question, data.answer, data.options,
         );
-        setOpenSnackbar(true);
+        setSnackbar({message: 'Successfully saved the changes!', severity: 'success'});
+    };
+    const onReEvaluate = async () => {
+        if( !course?.id || !exercise?.id )
+            return;
+        setSnackbar({message: 'Resubmitting all the submissions. Please wait...', severity: 'success'});
+        await reEvaluateSubmissions(course.id, exercise.id);
+        setSnackbar({message: 'Done! Go to All submissions for more information', severity: 'success'});
     };
 
     if( !exercise )
@@ -189,6 +198,7 @@ function ExerciseEditor({cancelEditing, exerciseTypeChanged}: {
         <form onSubmit={handleSubmit(onSubmit)}>
         <Box m={1} marginBottom={16}>
             <Stack direction="row" spacing={1} marginTop={4} marginBottom={2} justifyContent="right" alignItems="center" alignContent="center">
+                <Button size="medium" variant="outlined" color="warning" disabled={!isValid || isDirty} onClick={onReEvaluate}>Re-evaluate submissions</Button>
                 <Button size="large" variant="outlined" type="submit" disabled={!isValid && false}>Save</Button>
                 <Button size="large" variant="outlined" onClick={onCancel}>Cancel</Button>
             </Stack>
@@ -275,9 +285,9 @@ function ExerciseEditor({cancelEditing, exerciseTypeChanged}: {
         </form>
         </FormProvider>
 
-        <Snackbar open={openSnackbar} autoHideDuration={6000} onClose={handleCloseSnackbar}>
-            <Alert onClose={handleCloseSnackbar} severity="success" sx={{ width: '100%' }}>
-                Successfully saved the changes!
+        <Snackbar open={!!snackbar} autoHideDuration={6000} onClose={handleCloseSnackbar}>
+            <Alert onClose={handleCloseSnackbar} severity={snackbar?.severity} sx={{ width: '100%' }}>
+                {snackbar?.message}
             </Alert>
         </Snackbar>
     </>

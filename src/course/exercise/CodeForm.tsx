@@ -73,7 +73,7 @@ function CodeForm() {
         <Stack direction="row" spacing={1}>
             <Controller name="allowedLanguages" control={control} render={({field}) => (
                 <Autocomplete
-                    sx={{ width: 200 }} ref={field.ref} multiple autoHighlight autoSelect disableCloseOnSelect disableClearable
+                    sx={{ width: 200 }} ref={field.ref} multiple autoHighlight disableCloseOnSelect disableClearable
                     value={field.value.map((l: string) => LANGUAGES[l].displayName)}
                     onChange={(event, values: string[] | null) => values && field.onChange(values.map(v => nameToLanguageId(v)!))}
                     options={Object.keys(LANGUAGES).map(key => LANGUAGES[key].displayName)}

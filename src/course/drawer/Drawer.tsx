@@ -26,7 +26,7 @@ import {AuthContext} from "../../App";
 import {onUserProgressChanged} from "../../services/progress";
 import {CourseContext} from "../Course";
 import Countdown from "react-countdown";
-import {Typography} from "@mui/material";
+import {Divider, Typography} from "@mui/material";
 
 
 const drawerWidth = 240;
@@ -174,13 +174,16 @@ function CourseDrawer({onItemSelected, onStatusClicked, onCreateExerciseClicked}
                     <ListItemIcon><QueryStatsIcon/></ListItemIcon>
                     <ListItemText primary="Status"/>
                 </ListItem>
-                {isCourseInstructor && <LevelList
+                {isCourseInstructor && <>
+                <LevelList
                     drafts
                     levelNumber={-1}
                     levelStatus={'In Progress'}
                     onItemSelected={onItemSelected}
                     isDrawerOpen={open}
-                    isSingleLevel={false}/>}
+                    isSingleLevel={false} />
+                <Divider />
+                </>}
 
                 {Object.entries(course.levelExercises).map(([levelName, numExercises]) => {
                     const index = parseInt(levelName) - 1;

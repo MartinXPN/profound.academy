@@ -54,7 +54,7 @@ function LevelList({levelName, levelStatus, onItemSelected, isDrawerOpen, isSing
     }, [exercise, levelName, isSingleLevel]);
 
     useEffect(() => {
-        if( !course || !open || !exerciseId )
+        if( !course || !open )
             return;
 
         return onCourseLevelExercisesChanged(course.id, levelNumber, (exercises => {

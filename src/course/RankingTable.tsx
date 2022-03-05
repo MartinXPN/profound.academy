@@ -39,15 +39,9 @@ function RankingTable({metric, showProgress}: {metric: string, showProgress?: bo
             return;
         return onProgressChanged(course.id, metric, progress => {
             setProgress(progress);
-            // @ts-ignore
-            const maxLevel = progress.map(p => levelMetric in p ? p[levelMetric] as number : {'1': 0})
-                .map(scores => scores
-                    ? Object.keys(scores)
-                        .map(level => parseInt(level))
-                        .reduce((prev, cur) => Math.max(prev, cur), 0)
-                    : 0)
-                .reduce((prev, cur) => Math.max(prev, cur), 0);
-
+            const maxLevel = Object.keys(course.levelExercises)
+                .map(k => parseInt(k))
+                .reduce((prev, cur) => Math.max(prev, cur), 1);
             setMaxLevel(maxLevel);
 
             // single-level rankings should always be open
@@ -95,8 +89,7 @@ function RankingTable({metric, showProgress}: {metric: string, showProgress?: bo
     }, [navigate]);
 
 
-    const onLevelClicked = useCallback((level: number) => {
-        const levelName = (level + 1).toString();
+    const onLevelClicked = useCallback((levelName: string) => {
         console.log(`level ${levelName} clicked!`);
         if( !(levelName in levelOpen) || !levelOpen[levelName] )
             setLevelOpen({...levelOpen, [levelName]: true});
@@ -114,13 +107,13 @@ function RankingTable({metric, showProgress}: {metric: string, showProgress?: bo
                         <TableCell key="userDisplayName" align="left" sx={{minWidth: 100}}>User</TableCell>
                         <TableCell key="total" align="right" sx={{width: 50}}>Total</TableCell>
 
-                        {(maxLevel >= 1) && Array(maxLevel).fill(1).map((_, level) => {
-                            const levelName = (level + 1).toString();
+                        {(maxLevel >= 1) && Array(maxLevel).fill(1).map((_, index) => {
+                            const levelName = (index + 1).toString();
                             return <>
                                 {maxLevel >= 2 &&
-                                <TableCell key={level} align="right" onClick={() => onLevelClicked(level)} sx={{"&:focus,&:hover": {cursor: 'pointer'}, width: 50}}>
+                                <TableCell key={levelName} align="right" onClick={() => onLevelClicked(levelName)} sx={{"&:focus,&:hover": {cursor: 'pointer'}, width: 50}}>
                                     <Typography variant="subtitle1" sx={{verticalAlign: 'middle', display: 'inline-flex'}}>
-                                        <Equalizer /> {level}
+                                        <Equalizer /> {levelName}
                                     </Typography>
                                     <Typography variant="body2">
                                         {course && course?.levelExercises && course.levelExercises[levelName] ? course.levelExercises[levelName] * 100 : '?'}
@@ -152,8 +145,8 @@ function RankingTable({metric, showProgress}: {metric: string, showProgress?: bo
                             {showProgress ? '+' : ''}{metric in row ? row[metric].toFixed(0): '-' }
                         </TableCell>
 
-                        {(maxLevel >= 1) && Array(maxLevel).fill(1).map((_, level) => {
-                            const levelName = (level + 1).toString();
+                        {(maxLevel >= 1) && Array(maxLevel).fill(1).map((_, index) => {
+                            const levelName = (index + 1).toString();
                             // @ts-ignore
                             const levelScore = row?.[levelMetric]?.[levelName];
                             return <>

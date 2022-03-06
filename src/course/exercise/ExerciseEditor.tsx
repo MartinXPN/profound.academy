@@ -107,7 +107,7 @@ function ExerciseEditor({cancelEditing, exerciseTypeChanged}: {
         const levelOrder = exercise?.order ? parseInt((exercise.order - level).toFixed(3).substring(2)) : 0;
         return {
             localizedFields: getExerciseLocalizedFields(exercise, 'enUS'),
-            isPublic: Boolean(exercise &&  exercise.order && exercise.order > 0),
+            isPublic: Boolean(exercise &&  exercise.order && exercise.order >= 1),
             level: level,
             levelOrder: levelOrder,
             score:  exercise?.score ?? 100,

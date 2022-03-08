@@ -5,7 +5,7 @@ import {Activity, User, UserInfoUpdate, UserRole} from '../models/users';
 import {Notification} from '../models/notifications';
 import {Exercise, ExerciseProgress, ExercisePrivateFields,
     Course, Progress, Insight, CoursePrivateFields} from '../models/courses';
-import {Submission, SubmissionResult, SubmissionSensitiveRecords, SubmissionStatus} from '../models/submissions';
+import {Submission, SubmissionResult, SubmissionSensitiveRecords} from '../models/submissions';
 import {Comment, Vote} from '../models/forum';
 
 admin.initializeApp({credential: admin.credential.applicationDefault()});
@@ -50,7 +50,6 @@ const db = {
     progress: (courseId: string) => dataPoint<Progress>(`courses/${courseId}/progress`),
     userProgress: (courseId: string, userId: string) => dataPoint<Progress>(`courses/${courseId}/progress`).doc(userId),
     allUserProgress: (userId: string) => firestore().collectionGroup('progress').withConverter(converter<Progress>()).where('userId', '==', userId),
-    courseExerciseProgress: (courseId: string, userId: string, level: string) => dataPoint<ExerciseProgress<SubmissionStatus>>(`courses/${courseId}/progress/${userId}/exerciseSolved`).doc(level),
     levelExerciseProgress: <T>(courseId: string, level: string, metric: string) => firestore().collectionGroup(metric).withConverter(converter<ExerciseProgress<T>>())
         .where('courseId', '==', courseId).where('level', '==', level),
 

@@ -78,15 +78,48 @@ export const submit = async (submission: Submission): Promise<http.ClientRequest
     if (!submission.isTestRun && submission.testCases)
         throw Error('Final submissions cannot have test cases');
 
+    const course = (await db.course(submission.course.id).get()).data();
     const exercise = (await db.exercise(submission.course.id, submission.exercise.id).get()).data();
     functions.logger.info(`submission exercise: ${JSON.stringify(exercise)}`);
-    if (!exercise)
-        throw Error(`Exercise does not exist: ${submission.exercise.id}`);
+    if (!exercise || !course)
+        throw Error(`Exercise or course do not exist: ${submission.exercise.id} ${submission.course.id}`);
 
-    await firestore().runTransaction(async (transaction) => {
+    const levelName = Math.trunc(exercise.order).toString();
+    const canSubmit = await firestore().runTransaction(async (transaction) => {
+        // new attempt
+        const attempts = (await transaction.get(db.userProgress(course.id, submission.userId)
+            .collection('exerciseAttempts').doc(levelName))).data();
+        functions.logger.info(`Attempts: ${JSON.stringify(attempts)}`);
+        const numAttempts = attempts?.progress?.[exercise.id] ?? 0;
+        const allowedAttempts = exercise?.allowedAttempts ?? 100;
+        functions.logger.info(`#Attempts: ${numAttempts}, Allowed attempts: ${allowedAttempts}`);
+
+        // new submission
         await recordNewUserInsight(transaction, submission.userId, submission.course.id, submission.createdAt.toDate());
+
+        // Do not allow a new attempts if the number exceeds the allowed threshold
+        if (allowedAttempts <= numAttempts) {
+            functions.logger.info('Do not allow this submission');
+            transaction.set(db.submissionResult(submission.id), {
+                ...submission,
+                isBest: false, memory: 0, time: 0, score: 0,
+                status: 'Unavailable',
+                message: `Exceeded the number of allowed attempts (${allowedAttempts})`,
+                courseTitle: course.title,
+                exerciseTitle: exercise.title,
+            });
+            return false;
+        }
+        updateUserMetric(transaction, 'attempts', submission.userId, course.id, exercise.id, levelName,
+            numAttempts, numAttempts + 1, numAttempts + 1);
+        functions.logger.info(`Updated attempts to ${numAttempts + 1}`);
+        return true;
     });
-    // TODO: Add number of attempts check here
+
+    if (!canSubmit)
+        return;
+
+    functions.logger.info('Submitting solution to the judge...');
     if (submission.language === 'txt')
         return submitAnswerCheck(submission, exercise);
     return submitLambdaJudge(submission, exercise);

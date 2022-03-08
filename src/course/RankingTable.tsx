@@ -1,4 +1,4 @@
-import React, {memo, useCallback, useContext, useEffect, useState} from "react";
+import React, {Component, memo, useCallback, useContext, useEffect, useState} from "react";
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
@@ -17,7 +17,38 @@ import {useNavigate} from "react-router-dom";
 import ClickableTableCell from "../common/ClickableTableCell";
 import SmallAvatar from "../common/SmallAvatar";
 import {statusColors} from "./colors";
+import {NavigateFunction} from "react-router";
 
+
+interface Props {
+    navigate: NavigateFunction,
+    metric: string,
+    showProgress?: boolean,
+}
+
+interface State {
+    page: number;
+    hasMore: boolean;
+    progress: Progress[],
+    maxLevel: number,
+    levelOpen: {[key: string]: boolean},
+    levelExerciseProgress: {[key: string]: {[key: string]: {[key: string]: number}}},
+    levelExercises: {[key: string]: Exercise[]}
+}
+
+
+class Ranking extends Component<Props, State> {
+    constructor(props: Props) {
+        super(props);
+        this.state = {
+            page: 0, hasMore: true, progress: [], maxLevel: 0,
+            levelOpen: {}, levelExerciseProgress: {}, levelExercises: {}
+        };
+        this.uppercaseMetric = props.metric.charAt(0).toUpperCase() + props.metric.slice(1);
+        this.levelMetric = 'level' + props.uppercaseMetric;
+        this.exerciseMetric = 'exercise' + props.uppercaseMetric;
+    }
+}
 
 function RankingTable({metric, showProgress}: {metric: string, showProgress?: boolean}) {
     const navigate = useNavigate();
@@ -84,9 +115,7 @@ function RankingTable({metric, showProgress}: {metric: string, showProgress?: bo
         }
     }, unsubscribe => unsubscribe && unsubscribe(), [course, levelOpen, exerciseMetric]);
 
-    const onUserClicked = useCallback((userId: string) => {
-        navigate(`/users/${userId}`);
-    }, [navigate]);
+    const onUserClicked = useCallback((userId: string) => navigate(`/users/${userId}`), [navigate]);
 
 
     const onLevelClicked = useCallback((levelName: string) => {

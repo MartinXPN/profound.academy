@@ -22,6 +22,7 @@ import {LANGUAGES} from "models/language";
 import {getLocalizedParam} from "../util";
 import Box from "@mui/material/Box";
 import {useNavigate} from "react-router-dom";
+import {NavigateFunction} from "react-router";
 
 
 interface Column {
@@ -46,7 +47,7 @@ const columns: Column[] = [
 
 
 interface Props {
-    navigate: any,
+    navigate: NavigateFunction,
     reset: number;
     onLoadNext: (startAfterId: string | null, onChange: (submissions: SubmissionResult[], more: boolean) => void) => Promise<() => void>;
     columns: Column[];

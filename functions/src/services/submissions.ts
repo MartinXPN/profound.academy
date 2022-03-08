@@ -67,8 +67,7 @@ const submitAnswerCheck = async (submission: Submission, exercise: Exercise) => 
         ...submission,
         isBest: false,
         status: isCorrect ? 'Solved' : 'Wrong answer',
-        memory: 0, time: 0,
-        score: isCorrect ? (exercise.score ?? 100) : 0,  // TODO: move this to processResult()
+        memory: 0, time: 0, score: isCorrect ? 100 : 0,
         courseTitle: course.title,
         exerciseTitle: exercise.title,
     }, submission.userId, submission.id);
@@ -102,8 +101,8 @@ export const submit = async (submission: Submission): Promise<http.ClientRequest
             functions.logger.info('Do not allow this submission');
             transaction.set(db.submissionResult(submission.id), {
                 ...submission,
-                isBest: false, memory: 0, time: 0, score: 0,
                 status: 'Unavailable',
+                isBest: false, memory: 0, time: 0, score: 0,
                 message: `Exceeded the number of allowed attempts (${allowedAttempts})`,
                 courseTitle: course.title,
                 exerciseTitle: exercise.title,

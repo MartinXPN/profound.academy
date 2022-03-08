@@ -132,7 +132,7 @@ export const reEvaluate = async (courseId: string, exerciseId: string): Promise<
     if (!exercise)
         return;
 
-    const level = Math.floor(exercise.order).toString();
+    const level = Math.trunc(exercise.order).toString();
 
     return firestore().runTransaction(async (transaction) => {
         const query = await transaction.get(db.submissionResults.where('exercise', '==', exerciseRef));

@@ -96,7 +96,7 @@ export const processResult = async (
 
     const status = typeof submissionResult.status === 'string' ? submissionResult.status :
         submissionResult.status.reduce((prev, cur) => cur === 'Solved' ? prev : cur, 'Solved');
-    const level = Math.floor(exercise.order).toString();
+    const level = Math.trunc(exercise.order).toString();
     submissionResult.userDisplayName = user.displayName;
     submissionResult.userImageUrl = user.photoURL;
     submissionResult.courseTitle = course.title;

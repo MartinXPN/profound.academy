@@ -90,9 +90,13 @@ export const processResult = async (
     if (!exercise)
         throw Error(`Exercise with id ${submissionResult.exercise.id} does not exist`);
 
+    functions.logger.info(`Setting the score to exerciseScore instead of judgeScore (${submissionResult.score})...`);
+    submissionResult.score = submissionResult.score / 100.0 * (exercise.score ?? 100);
+    functions.logger.info(`Exercise score is set to: ${submissionResult.score}`);
+
     const status = typeof submissionResult.status === 'string' ? submissionResult.status :
         submissionResult.status.reduce((prev, cur) => cur === 'Solved' ? prev : cur, 'Solved');
-    const level = Math.floor(exercise.order).toString();
+    const level = Math.trunc(exercise.order).toString();
     submissionResult.userDisplayName = user.displayName;
     submissionResult.userImageUrl = user.photoURL;
     submissionResult.courseTitle = course.title;

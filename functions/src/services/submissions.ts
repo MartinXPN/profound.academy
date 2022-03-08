@@ -67,8 +67,7 @@ const submitAnswerCheck = async (submission: Submission, exercise: Exercise) => 
         ...submission,
         isBest: false,
         status: isCorrect ? 'Solved' : 'Wrong answer',
-        memory: 0, time: 0,
-        score: isCorrect ? (exercise.score ?? 100) : 0,  // TODO: move this to processResult()
+        memory: 0, time: 0, score: isCorrect ? 100 : 0,
         courseTitle: course.title,
         exerciseTitle: exercise.title,
     }, submission.userId, submission.id);
@@ -102,8 +101,8 @@ export const submit = async (submission: Submission): Promise<http.ClientRequest
             functions.logger.info('Do not allow this submission');
             transaction.set(db.submissionResult(submission.id), {
                 ...submission,
-                isBest: false, memory: 0, time: 0, score: 0,
                 status: 'Unavailable',
+                isBest: false, memory: 0, time: 0, score: 0,
                 message: `Exceeded the number of allowed attempts (${allowedAttempts})`,
                 courseTitle: course.title,
                 exerciseTitle: exercise.title,
@@ -133,7 +132,7 @@ export const reEvaluate = async (courseId: string, exerciseId: string): Promise<
     if (!exercise)
         return;
 
-    const level = Math.floor(exercise.order).toString();
+    const level = Math.trunc(exercise.order).toString();
 
     return firestore().runTransaction(async (transaction) => {
         const query = await transaction.get(db.submissionResults.where('exercise', '==', exerciseRef));
@@ -171,6 +170,8 @@ export const reEvaluate = async (courseId: string, exerciseId: string): Promise<
                     .collection('exerciseScore').doc(level))).data(),
                 (await transaction.get(db.userProgress(courseId, user)
                     .collection('exerciseUpsolveScore').doc(level))).data(),
+                (await transaction.get(db.userProgress(courseId, user)
+                    .collection('exerciseAttempts').doc(level))).data(),
             ]);
         }));
 
@@ -178,7 +179,7 @@ export const reEvaluate = async (courseId: string, exerciseId: string): Promise<
         await Promise.all(prevData.map(async (data) => {
             if (!data)
                 return;
-            const [user, prevSolved, prevScore, upsolveScore] = data;
+            const [user, prevSolved, prevScore, upsolveScore, prevAttempts] = data;
             const weekly = moment().format('YYYY_MM_WW');
             functions.logger.info(`weekly score path: ${weekly}`);
             console.log('user:', user);  // , 'prevSolved:', prevSolved, 'upsolve:', upsolveScore
@@ -194,6 +195,9 @@ export const reEvaluate = async (courseId: string, exerciseId: string): Promise<
 
             updateUserMetric(transaction, 'upsolveScore', user, courseId, exerciseId, level,
                 upsolveScore?.progress?.[exerciseId] ?? 0, 0, 0, true);
+
+            updateUserMetric(transaction, 'attempts', user, courseId, exerciseId, level,
+                prevAttempts?.progress?.[exerciseId] ?? 0, 0, 0, true);
         }));
 
         // submit again

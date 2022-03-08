@@ -170,6 +170,8 @@ export const reEvaluate = async (courseId: string, exerciseId: string): Promise<
                     .collection('exerciseScore').doc(level))).data(),
                 (await transaction.get(db.userProgress(courseId, user)
                     .collection('exerciseUpsolveScore').doc(level))).data(),
+                (await transaction.get(db.userProgress(courseId, user)
+                    .collection('exerciseAttempts').doc(level))).data(),
             ]);
         }));
 
@@ -177,7 +179,7 @@ export const reEvaluate = async (courseId: string, exerciseId: string): Promise<
         await Promise.all(prevData.map(async (data) => {
             if (!data)
                 return;
-            const [user, prevSolved, prevScore, upsolveScore] = data;
+            const [user, prevSolved, prevScore, upsolveScore, prevAttempts] = data;
             const weekly = moment().format('YYYY_MM_WW');
             functions.logger.info(`weekly score path: ${weekly}`);
             console.log('user:', user);  // , 'prevSolved:', prevSolved, 'upsolve:', upsolveScore
@@ -193,6 +195,9 @@ export const reEvaluate = async (courseId: string, exerciseId: string): Promise<
 
             updateUserMetric(transaction, 'upsolveScore', user, courseId, exerciseId, level,
                 upsolveScore?.progress?.[exerciseId] ?? 0, 0, 0, true);
+
+            updateUserMetric(transaction, 'attempts', user, courseId, exerciseId, level,
+                prevAttempts?.progress?.[exerciseId] ?? 0, 0, 0, true);
         }));
 
         // submit again

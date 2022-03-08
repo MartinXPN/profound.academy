@@ -159,6 +159,7 @@ export const langDependencies = {
 
 export const langAliases = {
     "c++": "cpp",
+    "plain text": 'markup',
     "html": "markup",
     "xml": "markup",
     "svg": "markup",

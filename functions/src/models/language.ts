@@ -13,6 +13,7 @@ export const LANGUAGES: { [key: string]: Language } = {
     // 'C++20': {extension: 'cpp', languageCode: 'C++20', displayName: 'C++20'}, not yet supported by our AWS lambda
     'python': {extension: 'py', languageCode: 'python', displayName: 'Python'},
     'python3': {extension: 'py', languageCode: 'python3', displayName: 'Python 3'},
+    'C#': {extension: 'cs', languageCode: 'C#', displayName: 'C#'},
 };
 
-export const LANGUAGE_KEYS = ['txt', 'C++11', 'C++14', 'C++17', 'python', 'python3'] as const;
+export const LANGUAGE_KEYS = ['txt', 'C++11', 'C++14', 'C++17', 'python', 'python3', 'C#'] as const;

@@ -4,9 +4,15 @@ import {SubmissionStatus} from "models/submissions";
 
 export const onProgressChanged = (
     courseId: string, metric: string,
+    startAfterId: string | null, numItems: number,
     onChanged: (progress: Progress[]) => void
 ) => {
-    return db.progress(courseId).orderBy(metric, 'desc').onSnapshot(snapshot => {
+    let query = db.progress(courseId).orderBy(metric, 'desc');
+    if( startAfterId )
+        query = query.startAfter(startAfterId);
+    query = query.limit(numItems);
+
+    return query.onSnapshot(snapshot => {
         const res = snapshot.docs.map(d => d.data());
         console.log(`${metric} - progress changed:`, res);
         onChanged(res ?? []);
@@ -15,11 +21,16 @@ export const onProgressChanged = (
 
 export const onLevelExerciseProgressChanged = <T>(
     courseId: string, level: string, metric: string,
+    userIds: string[] | null,
     onChanged: (userIdToProgress: { [key: string]: { [key: string]: T } }) => void
 ) => {
     if( !metric.startsWith('exercise') )
         throw Error(`Invalid metric provided: ${metric}`);
-    return db.levelExerciseProgress(courseId, level, metric).onSnapshot(snapshot => {
+    let query = db.levelExerciseProgress(courseId, level, metric);
+    if( userIds )
+        query = query.where('userId', 'in', userIds);
+
+    return query.onSnapshot(snapshot => {
         // @ts-ignore
         const res: ExerciseProgress<T>[] = snapshot.docs.map(d => d.data());
         console.log('Level progress updated:', res);

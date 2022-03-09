@@ -19,8 +19,8 @@ import SmallAvatar from "../common/SmallAvatar";
 import {statusColors} from "./colors";
 
 
-function RankingPage({metric, numRows, startAfterId, showProgress, levelOpen, maxLevel, levelExercises}: {
-    metric: string, numRows: number, startAfterId: string | null,
+function RankingPage({metric, numRows, startAfterId, startIndex, showProgress, levelOpen, maxLevel, levelExercises}: {
+    metric: string, numRows: number, startAfterId: string | null, startIndex: number,
     showProgress?: boolean,
     levelOpen: {[key: string]: boolean}, maxLevel: number,
     levelExercises: {[key: string]: Exercise[]},
@@ -28,6 +28,7 @@ function RankingPage({metric, numRows, startAfterId, showProgress, levelOpen, ma
     const navigate = useNavigate();
     const {course} = useContext(CourseContext);
     const [progress, setProgress] = useState<Progress[]>([]);
+    const [userIds, setUserIds] = useState<string[]>([]);
     const [levelExerciseProgress, setLevelExerciseProgress] = useState<{[key: string]: {[key: string]: {[key: string]: number}}}>({});
 
     const uppercaseMetric = metric.charAt(0).toUpperCase() + metric.slice(1);
@@ -39,8 +40,11 @@ function RankingPage({metric, numRows, startAfterId, showProgress, levelOpen, ma
     useEffect(() => {
         if( !course )
             return;
-        return onProgressChanged(course.id, metric, progress => setProgress(progress));
-    }, [course, metric, levelMetric]);
+        return onProgressChanged(course.id, metric, startAfterId, numRows, progress => {
+            setUserIds(progress.map(p => p.id));
+            setProgress(progress);
+        });
+    }, [course, metric, levelMetric, startAfterId, numRows]);
 
     useAsyncEffect(async () => {
         if( !course )
@@ -52,7 +56,7 @@ function RankingPage({metric, numRows, startAfterId, showProgress, levelOpen, ma
                 continue;
 
             console.log(`${level} is open! getting metric: ${exerciseMetric}`);
-            unsubscribe[level] = onLevelExerciseProgressChanged<number>(course.id, level, exerciseMetric, userIdToProgress => {
+            unsubscribe[level] = onLevelExerciseProgressChanged<number>(course.id, level, exerciseMetric, userIds, userIdToProgress => {
                 const current: {[key: string]: {[key: string]: number}} = {};
                 Object.entries(userIdToProgress).forEach(([userId, progress]) => {
                     current[userId] = progress;
@@ -67,13 +71,12 @@ function RankingPage({metric, numRows, startAfterId, showProgress, levelOpen, ma
                 u();
             });
         }
-    }, unsubscribe => unsubscribe && unsubscribe(), [course, levelOpen, exerciseMetric]);
+    }, unsubscribe => unsubscribe && unsubscribe(), [course, levelOpen, exerciseMetric, startAfterId, numRows]);
 
-    const page = 0;
     return <>
-        {progress.slice(page * numRows, page * numRows + numRows).map((row, index) =>
+        {progress.map((row, index) =>
             <TableRow hover role="checkbox" tabIndex={-1} key={row.id}>
-                <TableCell key="#" align="center">{page * numRows + index + 1}</TableCell>
+                <TableCell key="#" align="center">{startIndex + index}</TableCell>
                 <ClickableTableCell key="userDisplayName" align="left" onClick={() => onUserClicked(row.id)}>
                     <Stack direction="row" alignItems="center" alignContent="center">
                         <SmallAvatar src={row.userImageUrl} />
@@ -186,7 +189,8 @@ function RankingTable({metric, showProgress}: {metric: string, showProgress?: bo
 
                 <TableBody>
                     <RankingPage
-                        metric={metric} numRows={20} startAfterId={null}
+                        // Firestore 'in' filters support a maximum of 10 elements in the value array
+                        metric={metric} numRows={10} startAfterId={null} startIndex={1}
                         showProgress={showProgress}
                         levelOpen={levelOpen} maxLevel={maxLevel} levelExercises={levelExercises} />
                 </TableBody>

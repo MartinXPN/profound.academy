@@ -119,6 +119,7 @@ function RankingPage({metric, numRows, startAfterId, startIndex, showProgress, l
 }
 
 function RankingTable({metric, showProgress}: {metric: string, showProgress?: boolean}) {
+    const navigate = useNavigate();
     const {course} = useContext(CourseContext);
     const [hasMore, setHasMore] = useState(true);
     const [maxLevel, setMaxLevel] = useState(0);
@@ -161,6 +162,7 @@ function RankingTable({metric, showProgress}: {metric: string, showProgress?: bo
         console.log(`level ${levelName} clicked! => setting open: ${open}`);
         setLevelOpen({...levelOpen, [levelName]: open});
     }, [levelOpen]);
+    const onExerciseClicked = useCallback((exerciseId: string) => navigate(`/${course?.id}/${exerciseId}`), [course?.id, navigate]);
 
     const onPageUserIdsChanged = useCallback((index: number, userIds: string[]) => {
         setLastIds(lastIds => {
@@ -208,7 +210,9 @@ function RankingTable({metric, showProgress}: {metric: string, showProgress?: bo
                                 </TableCell>}
 
                                 {levelOpen[levelName] && levelName in levelExercises && levelExercises[levelName].map((ex, index) =>
-                                    <TableCell key={ex.id} align="right" sx={{width: 50}}>{index + 1}</TableCell>
+                                    <ClickableTableCell key={ex.id} align="right" sx={{width: 50}} onClick={() => onExerciseClicked(ex.id)}>
+                                        {index + 1}
+                                    </ClickableTableCell>
                                 )}
                             </>
                         })}

@@ -2,29 +2,38 @@ import {ExerciseProgress, Progress} from "models/courses";
 import {db} from "./db";
 import {SubmissionStatus} from "models/submissions";
 
-export const onProgressChanged = (courseId: string, metric: string, onChanged: (progress: Progress[]) => void ) => {
+export const onProgressChanged = async (
+    courseId: string, metric: string,
+    startAfterId: string | null, numItems: number,
+    onChanged: (progress: Progress[]) => void
+) => {
+    console.log('building query with:', startAfterId);
+    let query = db.progress(courseId).orderBy(metric, 'desc');
+    if( startAfterId ) {
+        const startAfter = await db.userProgress(courseId, startAfterId).get();
+        query = query.startAfter(startAfter);
+    }
+    query = query.limit(numItems);
 
-    return db.progress(courseId).orderBy(metric, 'desc').onSnapshot(snapshot => {
+    return query.onSnapshot(snapshot => {
         const res = snapshot.docs.map(d => d.data());
         console.log(`${metric} - progress changed:`, res);
         onChanged(res ?? []);
-    })
-}
-
-export const onUserProgressChanged = (courseId: string, userId: string, onChanged: (progress: Progress | null) => void) => {
-    return db.userProgress(courseId, userId).onSnapshot(snapshot => {
-        const res = snapshot.data();
-        console.log('User progress updated:', res);
-        onChanged(res ?? null);
     });
 }
 
-export const onLevelExerciseProgressChanged = <T>(courseId: string, level: string,
-                                                  metric: string,
-                                                  onChanged: (userIdToProgress: { [key: string]: { [key: string]: T } }) => void) => {
+export const onLevelExerciseProgressChanged = <T>(
+    courseId: string, level: string, metric: string,
+    userIds: string[] | null,
+    onChanged: (userIdToProgress: { [key: string]: { [key: string]: T } }) => void
+) => {
     if( !metric.startsWith('exercise') )
         throw Error(`Invalid metric provided: ${metric}`);
-    return db.levelExerciseProgress(courseId, level, metric).onSnapshot(snapshot => {
+    let query = db.levelExerciseProgress(courseId, level, metric);
+    if( userIds && userIds.length > 0 )
+        query = query.where('userId', 'in', userIds);
+
+    return query.onSnapshot(snapshot => {
         // @ts-ignore
         const res: ExerciseProgress<T>[] = snapshot.docs.map(d => d.data());
         console.log('Level progress updated:', res);
@@ -33,14 +42,25 @@ export const onLevelExerciseProgressChanged = <T>(courseId: string, level: strin
         }, {});
         console.log(userIdToProgress);
         onChanged(userIdToProgress);
-    })
+    });
 }
 
 
-export const onCourseExerciseProgressChanged = (courseId: string,
-                                                userId: string,
-                                                level: string,
-                                                onChanged: (progress: ExerciseProgress<SubmissionStatus> | null) => void) => {
+export const onUserProgressChanged = (
+    courseId: string, userId: string,
+    onChanged: (progress: Progress | null) => void
+) => {
+    return db.userProgress(courseId, userId).onSnapshot(snapshot => {
+        const res = snapshot.data();
+        console.log('User progress updated:', res);
+        onChanged(res ?? null);
+    });
+}
+
+export const onCourseExerciseProgressChanged = (
+    courseId: string, userId: string, level: string,
+    onChanged: (progress: ExerciseProgress<SubmissionStatus> | null) => void
+) => {
     return db.courseExerciseProgress(courseId, userId, level).onSnapshot(snapshot => {
         const res = snapshot.data();
         console.log('Exercise Progress for level', level, ':', res);

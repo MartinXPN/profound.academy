@@ -15,7 +15,7 @@
       ]
     },
     {
-      "collectionGroup": "exerciseScore_2022_01_03",
+      "collectionGroup": "exerciseScore",
       "queryScope": "COLLECTION_GROUP",
       "fields": [
         {
@@ -24,12 +24,16 @@
         },
         {
           "fieldPath": "level",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "userId",
           "order": "ASCENDING"
         }
       ]
     },
     {
-      "collectionGroup": "exerciseScore_2022_01_04",
+      "collectionGroup": "exerciseScore_2022_03_10",
       "queryScope": "COLLECTION_GROUP",
       "fields": [
         {
@@ -39,61 +43,9 @@
         {
           "fieldPath": "level",
           "order": "ASCENDING"
-        }
-      ]
-    },
-    {
-      "collectionGroup": "exerciseScore_2022_02_05",
-      "queryScope": "COLLECTION_GROUP",
-      "fields": [
-        {
-          "fieldPath": "courseId",
-          "order": "ASCENDING"
         },
         {
-          "fieldPath": "level",
-          "order": "ASCENDING"
-        }
-      ]
-    },
-    {
-      "collectionGroup": "exerciseScore_2022_02_06",
-      "queryScope": "COLLECTION_GROUP",
-      "fields": [
-        {
-          "fieldPath": "courseId",
-          "order": "ASCENDING"
-        },
-        {
-          "fieldPath": "level",
-          "order": "ASCENDING"
-        }
-      ]
-    },
-    {
-      "collectionGroup": "exerciseScore_2022_02_07",
-      "queryScope": "COLLECTION_GROUP",
-      "fields": [
-        {
-          "fieldPath": "courseId",
-          "order": "ASCENDING"
-        },
-        {
-          "fieldPath": "level",
-          "order": "ASCENDING"
-        }
-      ]
-    },
-    {
-      "collectionGroup": "exerciseScore_2022_03_09",
-      "queryScope": "COLLECTION_GROUP",
-      "fields": [
-        {
-          "fieldPath": "courseId",
-          "order": "ASCENDING"
-        },
-        {
-          "fieldPath": "level",
+          "fieldPath": "userId",
           "order": "ASCENDING"
         }
       ]

@@ -64,6 +64,7 @@ export interface Course {
     instructors: string[],
     introduction: string; // notion id for the introduction page
     levelExercises: { [key: string]: number };
+    levelScores: { [key: string]: number };
     exercises: Exercise[];
 }
 

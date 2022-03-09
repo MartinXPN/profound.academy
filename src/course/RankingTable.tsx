@@ -16,14 +16,16 @@ import useAsyncEffect from "use-async-effect";
 import {useNavigate} from "react-router-dom";
 import ClickableTableCell from "../common/ClickableTableCell";
 import SmallAvatar from "../common/SmallAvatar";
+import {BottomLoading} from "../common/loading";
 import {statusColors} from "./colors";
 
 
-function RankingPage({metric, numRows, startAfterId, startIndex, showProgress, levelOpen, maxLevel, levelExercises}: {
+function RankingPage({metric, numRows, startAfterId, startIndex, showProgress, levelOpen, maxLevel, levelExercises, setCurrentUserIds}: {
     metric: string, numRows: number, startAfterId: string | null, startIndex: number,
     showProgress?: boolean,
     levelOpen: {[key: string]: boolean}, maxLevel: number,
     levelExercises: {[key: string]: Exercise[]},
+    setCurrentUserIds: (userIds: string[]) => void,
 }) {
     const navigate = useNavigate();
     const {course} = useContext(CourseContext);
@@ -37,14 +39,16 @@ function RankingPage({metric, numRows, startAfterId, startIndex, showProgress, l
 
     const onUserClicked = useCallback((userId: string) => navigate(`/users/${userId}`), [navigate]);
 
-    useEffect(() => {
-        if( !course )
+    useAsyncEffect(async () => {
+        if( !course?.id )
             return;
         return onProgressChanged(course.id, metric, startAfterId, numRows, progress => {
-            setUserIds(progress.map(p => p.id));
+            const userIds = progress.map(p => p.id)
+            setUserIds(userIds);
             setProgress(progress);
         });
-    }, [course, metric, levelMetric, startAfterId, numRows]);
+    }, unsubscribe => unsubscribe && unsubscribe(), [course?.id, metric, startAfterId, numRows]);
+    useEffect(() => setCurrentUserIds(userIds), [userIds, setCurrentUserIds]);
 
     useAsyncEffect(async () => {
         if( !course )
@@ -116,9 +120,13 @@ function RankingPage({metric, numRows, startAfterId, startIndex, showProgress, l
 
 function RankingTable({metric, showProgress}: {metric: string, showProgress?: boolean}) {
     const {course} = useContext(CourseContext);
+    const [hasMore, setHasMore] = useState(true);
     const [maxLevel, setMaxLevel] = useState(0);
     const [levelOpen, setLevelOpen] = useState<{[key: string]: boolean}>({});
     const [levelExercises, setLevelExercises] = useState<{[key: string]: Exercise[]}>({});
+    const [lastIds, setLastIds] = useState<(string | null)[]>([]);
+    const rowsPerPage = 10; // Can't be more because of onLevelExerciseProgressChanged
+                            // "Firestore 'in' filters support a maximum of 10 elements in the value array"
 
     useMemo(() => {
         if( !course )
@@ -154,6 +162,30 @@ function RankingTable({metric, showProgress}: {metric: string, showProgress?: bo
         setLevelOpen({...levelOpen, [levelName]: open});
     }, [levelOpen]);
 
+    const onPageUserIdsChanged = useCallback((index: number, userIds: string[]) => {
+        setLastIds(lastIds => {
+            const hasMore = userIds.length === rowsPerPage;
+            if( index >= lastIds.length - 2 ) {
+                setHasMore(hasMore);
+                // console.log('setting has more:', 'index:', index, 'lastIds.length:', lastIds.length, hasMore);
+            }
+            console.log('onPageUserIdsChanged:', index, userIds);
+            const newVal = hasMore ? userIds.at(-1)! : null;
+            if( lastIds[index] === newVal )
+                return lastIds;
+            const newUserIds = [...lastIds];
+            newUserIds[index] = newVal;
+            console.log('new last ids:', index, newUserIds);
+            return newUserIds;
+        })
+    }, []);
+
+    const loadNextPage = () => {
+        console.log('load next page...', lastIds);
+        if( lastIds.length > 0 && lastIds.at(-1) === null )
+            return;
+        setLastIds(lastIds => [...lastIds, null]);
+    }
 
     return (
         <TableContainer sx={{ maxHeight: 'calc(100vh - 64px)', width: '100%' }}>
@@ -188,13 +220,21 @@ function RankingTable({metric, showProgress}: {metric: string, showProgress?: bo
                 </TableHead>
 
                 <TableBody>
-                    <RankingPage
-                        // Firestore 'in' filters support a maximum of 10 elements in the value array
-                        metric={metric} numRows={10} startAfterId={null} startIndex={1}
-                        showProgress={showProgress}
-                        levelOpen={levelOpen} maxLevel={maxLevel} levelExercises={levelExercises} />
+                    {lastIds.map((pageId, index) => {
+                        const startAfterId = index === 0 ? null : lastIds[index - 1];
+                        if( !startAfterId && index !== 0 )
+                            return <></>
+                        return <>
+                            <RankingPage
+                                metric={metric} numRows={rowsPerPage} startAfterId={startAfterId} startIndex={index * rowsPerPage + 1}
+                                showProgress={showProgress}
+                                levelOpen={levelOpen} maxLevel={maxLevel} levelExercises={levelExercises}
+                                setCurrentUserIds={(userIds) => onPageUserIdsChanged(index, userIds)} />
+                        </>
+                    })}
                 </TableBody>
             </Table>
+            <BottomLoading hasMore={hasMore} loadMore={loadNextPage} />
         </TableContainer>
     );
 }

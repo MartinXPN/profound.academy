@@ -2,14 +2,17 @@ import {ExerciseProgress, Progress} from "models/courses";
 import {db} from "./db";
 import {SubmissionStatus} from "models/submissions";
 
-export const onProgressChanged = (
+export const onProgressChanged = async (
     courseId: string, metric: string,
     startAfterId: string | null, numItems: number,
     onChanged: (progress: Progress[]) => void
 ) => {
+    console.log('building query with:', startAfterId);
     let query = db.progress(courseId).orderBy(metric, 'desc');
-    if( startAfterId )
-        query = query.startAfter(startAfterId);
+    if( startAfterId ) {
+        const startAfter = await db.userProgress(courseId, startAfterId).get();
+        query = query.startAfter(startAfter);
+    }
     query = query.limit(numItems);
 
     return query.onSnapshot(snapshot => {
@@ -27,7 +30,7 @@ export const onLevelExerciseProgressChanged = <T>(
     if( !metric.startsWith('exercise') )
         throw Error(`Invalid metric provided: ${metric}`);
     let query = db.levelExerciseProgress(courseId, level, metric);
-    if( userIds )
+    if( userIds && userIds.length > 0 )
         query = query.where('userId', 'in', userIds);
 
     return query.onSnapshot(snapshot => {

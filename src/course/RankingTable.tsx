@@ -1,4 +1,4 @@
-import React, {Component, memo, useCallback, useContext, useEffect, useState} from "react";
+import React, {memo, useCallback, useContext, useEffect, useMemo, useState} from "react";
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
@@ -17,70 +17,30 @@ import {useNavigate} from "react-router-dom";
 import ClickableTableCell from "../common/ClickableTableCell";
 import SmallAvatar from "../common/SmallAvatar";
 import {statusColors} from "./colors";
-import {NavigateFunction} from "react-router";
 
 
-interface Props {
-    navigate: NavigateFunction,
-    metric: string,
+function RankingPage({metric, numRows, startAfterId, showProgress, levelOpen, maxLevel, levelExercises}: {
+    metric: string, numRows: number, startAfterId: string | null,
     showProgress?: boolean,
-}
-
-interface State {
-    page: number;
-    hasMore: boolean;
-    progress: Progress[],
-    maxLevel: number,
-    levelOpen: {[key: string]: boolean},
-    levelExerciseProgress: {[key: string]: {[key: string]: {[key: string]: number}}},
-    levelExercises: {[key: string]: Exercise[]}
-}
-
-
-class Ranking extends Component<Props, State> {
-    constructor(props: Props) {
-        super(props);
-        this.state = {
-            page: 0, hasMore: true, progress: [], maxLevel: 0,
-            levelOpen: {}, levelExerciseProgress: {}, levelExercises: {}
-        };
-        this.uppercaseMetric = props.metric.charAt(0).toUpperCase() + props.metric.slice(1);
-        this.levelMetric = 'level' + props.uppercaseMetric;
-        this.exerciseMetric = 'exercise' + props.uppercaseMetric;
-    }
-}
-
-function RankingTable({metric, showProgress}: {metric: string, showProgress?: boolean}) {
+    levelOpen: {[key: string]: boolean}, maxLevel: number,
+    levelExercises: {[key: string]: Exercise[]},
+}) {
     const navigate = useNavigate();
     const {course} = useContext(CourseContext);
-    const [page, setPage] = useState(0);
-    const rowsPerPage = 20;
     const [progress, setProgress] = useState<Progress[]>([]);
-    const [maxLevel, setMaxLevel] = useState(0);
-    const [levelOpen, setLevelOpen] = useState<{[key: string]: boolean}>({});
     const [levelExerciseProgress, setLevelExerciseProgress] = useState<{[key: string]: {[key: string]: {[key: string]: number}}}>({});
-    const [levelExercises, setLevelExercises] = useState<{[key: string]: Exercise[]}>({});
 
     const uppercaseMetric = metric.charAt(0).toUpperCase() + metric.slice(1);
     const levelMetric = 'level' + uppercaseMetric;
     const exerciseMetric = 'exercise' + uppercaseMetric;
 
+    const onUserClicked = useCallback((userId: string) => navigate(`/users/${userId}`), [navigate]);
+
     useEffect(() => {
         if( !course )
             return;
-        return onProgressChanged(course.id, metric, progress => {
-            setProgress(progress);
-            const maxLevel = Object.keys(course.levelExercises)
-                .map(k => parseInt(k))
-                .reduce((prev, cur) => Math.max(prev, cur), 1);
-            setMaxLevel(maxLevel);
-
-            // single-level rankings should always be open
-            if( maxLevel <= 1 )
-                setLevelOpen(lOpen => {return {...lOpen, '1': true}});
-        });
+        return onProgressChanged(course.id, metric, progress => setProgress(progress));
     }, [course, metric, levelMetric]);
-
 
     useAsyncEffect(async () => {
         if( !course )
@@ -90,12 +50,6 @@ function RankingTable({metric, showProgress}: {metric: string, showProgress?: bo
         for( const [level, isOpen] of Object.entries(levelOpen) ) {
             if( !isOpen )
                 continue;
-
-            if( !(level in levelExercises) ) {
-                const levelEx = await getCourseLevelExercises(course.id, parseInt(level));
-                const res = {...levelExercises, [level]: levelEx};
-                setLevelExercises(res);
-            }
 
             console.log(`${level} is open! getting metric: ${exerciseMetric}`);
             unsubscribe[level] = onLevelExerciseProgressChanged<number>(course.id, level, exerciseMetric, userIdToProgress => {
@@ -115,15 +69,86 @@ function RankingTable({metric, showProgress}: {metric: string, showProgress?: bo
         }
     }, unsubscribe => unsubscribe && unsubscribe(), [course, levelOpen, exerciseMetric]);
 
-    const onUserClicked = useCallback((userId: string) => navigate(`/users/${userId}`), [navigate]);
+    const page = 0;
+    return <>
+        {progress.slice(page * numRows, page * numRows + numRows).map((row, index) =>
+            <TableRow hover role="checkbox" tabIndex={-1} key={row.id}>
+                <TableCell key="#" align="center">{page * numRows + index + 1}</TableCell>
+                <ClickableTableCell key="userDisplayName" align="left" onClick={() => onUserClicked(row.id)}>
+                    <Stack direction="row" alignItems="center" alignContent="center">
+                        <SmallAvatar src={row.userImageUrl} />
+                        {row.userDisplayName}
+                    </Stack>
+                </ClickableTableCell>
+                <TableCell key="total" align="right" sx={{color: showProgress ? statusColors.solved: 'standard', fontWeight: 'bold'}}>
+                    { /* @ts-ignore */ }
+                    {showProgress ? '+' : ''}{metric in row ? row[metric].toFixed(0): '-' }
+                </TableCell>
 
+                {(maxLevel >= 1) && Array(maxLevel).fill(1).map((_, index) => {
+                    const levelName = (index + 1).toString();
+                    // @ts-ignore
+                    const levelScore = row?.[levelMetric]?.[levelName];
+                    return <>
+                        {maxLevel >= 2 &&
+                            <TableCell key={levelName} align="right">
+                                {levelScore ? levelScore.toFixed(0) : '-'}
+                            </TableCell>}
+
+
+                        {levelOpen[levelName] && levelName in levelExercises && levelExercises[levelName].map(ex => {
+                            const exerciseScore = levelExerciseProgress?.[levelName]?.[row.id]?.[ex.id];
+                            return <>
+                                <TableCell key={ex.id} align="right">
+                                    {exerciseScore ? exerciseScore.toFixed(0) : '-'}
+                                </TableCell>
+                            </>
+                        })}
+                    </>
+                })}
+            </TableRow>
+        )}
+    </>
+}
+
+function RankingTable({metric, showProgress}: {metric: string, showProgress?: boolean}) {
+    const {course} = useContext(CourseContext);
+    const [maxLevel, setMaxLevel] = useState(0);
+    const [levelOpen, setLevelOpen] = useState<{[key: string]: boolean}>({});
+    const [levelExercises, setLevelExercises] = useState<{[key: string]: Exercise[]}>({});
+
+    useMemo(() => {
+        if( !course )
+            return;
+        const maxLevel = Object.keys(course.levelExercises)
+            .map(k => parseInt(k))
+            .reduce((prev, cur) => Math.max(prev, cur), 1);
+        setMaxLevel(maxLevel);
+
+        // single-level rankings should always be open
+        if( maxLevel <= 1 )
+            setLevelOpen(lOpen => {return {...lOpen, '1': true}});
+    }, [course]);
+
+    useAsyncEffect(async () => {
+        if( !course )
+            return;
+
+        return await Promise.all(Object.entries(levelOpen).map(async ([level, isOpen]) => {
+            if( !isOpen )
+                return null;
+            if( level in levelExercises )
+                return levelExercises[level];
+
+            const levelEx = await getCourseLevelExercises(course.id, parseInt(level));
+            setLevelExercises(levelExercises => {return {...levelExercises, [level]: levelEx}});
+        }));
+    }, [course, levelOpen]);
 
     const onLevelClicked = useCallback((levelName: string) => {
-        console.log(`level ${levelName} clicked!`);
-        if( !(levelName in levelOpen) || !levelOpen[levelName] )
-            setLevelOpen({...levelOpen, [levelName]: true});
-        else
-            setLevelOpen({...levelOpen, [levelName]: false});
+        const open = !(levelName in levelOpen) || !levelOpen[levelName];
+        console.log(`level ${levelName} clicked! => setting open: ${open}`);
+        setLevelOpen({...levelOpen, [levelName]: open});
     }, [levelOpen]);
 
 
@@ -160,43 +185,10 @@ function RankingTable({metric, showProgress}: {metric: string, showProgress?: bo
                 </TableHead>
 
                 <TableBody>
-                    {progress.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row, index) =>
-                    <TableRow hover role="checkbox" tabIndex={-1} key={row.id}>
-                        <TableCell key="#" align="center">{page * rowsPerPage + index + 1}</TableCell>
-                        <ClickableTableCell key="userDisplayName" align="left" onClick={() => onUserClicked(row.id)}>
-                            <Stack direction="row" alignItems="center" alignContent="center">
-                                <SmallAvatar src={row.userImageUrl} />
-                                {row.userDisplayName}
-                            </Stack>
-                        </ClickableTableCell>
-                        <TableCell key="total" align="right" sx={{color: showProgress ? statusColors.solved: 'standard', fontWeight: 'bold'}}>
-                            { /* @ts-ignore */ }
-                            {showProgress ? '+' : ''}{metric in row ? row[metric].toFixed(0): '-' }
-                        </TableCell>
-
-                        {(maxLevel >= 1) && Array(maxLevel).fill(1).map((_, index) => {
-                            const levelName = (index + 1).toString();
-                            // @ts-ignore
-                            const levelScore = row?.[levelMetric]?.[levelName];
-                            return <>
-                                {maxLevel >= 2 &&
-                                <TableCell key={levelName} align="right">
-                                    {levelScore ? levelScore.toFixed(0) : '-'}
-                                </TableCell>}
-
-
-                                {levelOpen[levelName] && levelName in levelExercises && levelExercises[levelName].map(ex => {
-                                    const exerciseScore = levelExerciseProgress?.[levelName]?.[row.id]?.[ex.id];
-                                    return <>
-                                        <TableCell key={ex.id} align="right">
-                                            {exerciseScore ? exerciseScore.toFixed(0) : '-'}
-                                        </TableCell>
-                                    </>
-                                })}
-                            </>
-                        })}
-                    </TableRow>
-                    )}
+                    <RankingPage
+                        metric={metric} numRows={20} startAfterId={null}
+                        showProgress={showProgress}
+                        levelOpen={levelOpen} maxLevel={maxLevel} levelExercises={levelExercises} />
                 </TableBody>
             </Table>
         </TableContainer>

@@ -204,16 +204,12 @@ function RankingTable({metric, showProgress}: {metric: string, showProgress?: bo
                                     <Typography variant="subtitle1" sx={{verticalAlign: 'middle', display: 'inline-flex'}}>
                                         <Equalizer /> {levelName}
                                     </Typography>
-                                    <Typography variant="body2">
-                                        {course && course?.levelExercises && course.levelExercises[levelName] ? course.levelExercises[levelName] * 100 : '?'}
-                                    </Typography>
+                                    <Typography variant="body2">{course?.levelScores?.[levelName] ?? '?'}</Typography>
                                 </TableCell>}
 
                                 {levelOpen[levelName] && levelName in levelExercises && levelExercises[levelName].map((ex, index) =>
-                                    <TableCell key={ex.id} align="right" sx={{width: 50}}>
-                                        {index + 1}
-                                    </TableCell>)
-                                }
+                                    <TableCell key={ex.id} align="right" sx={{width: 50}}>{index + 1}</TableCell>
+                                )}
                             </>
                         })}
                     </TableRow>

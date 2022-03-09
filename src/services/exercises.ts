@@ -101,6 +101,7 @@ export const updateExercise = async (
                 ...(prevLevelName !== '0' && {[prevLevelName]: firebase.firestore.FieldValue.increment(-1)}),
                 ...(newLevelName !== '0' && {[newLevelName]: firebase.firestore.FieldValue.increment(1)}),
             },
+            // @ts-ignore
             levelScores: {
                 ...(prevLevelName !== '0' && {[prevLevelName]: firebase.firestore.FieldValue.increment(-prevScore)}),
                 ...(newLevelName !== '0' && {[newLevelName]: firebase.firestore.FieldValue.increment(score)}),

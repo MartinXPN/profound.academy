@@ -89,7 +89,7 @@ function RankingPage({metric, numRows, startAfterId, startIndex, showProgress, l
                 </ClickableTableCell>
                 <TableCell key="total" align="right" sx={{color: showProgress ? statusColors.solved: 'standard', fontWeight: 'bold'}}>
                     { /* @ts-ignore */ }
-                    {showProgress ? '+' : ''}{metric in row ? row[metric].toFixed(0): '-' }
+                    {showProgress ? '+' : ''}{metric in row ? Math.trunc(row[metric]): '-' }
                 </TableCell>
 
                 {(maxLevel >= 1) && Array(maxLevel).fill(1).map((_, index) => {
@@ -99,7 +99,7 @@ function RankingPage({metric, numRows, startAfterId, startIndex, showProgress, l
                     return <>
                         {maxLevel >= 2 &&
                             <TableCell key={levelName} align="right">
-                                {levelScore ? levelScore.toFixed(0) : '-'}
+                                {levelScore ? Math.trunc(levelScore) : '-'}
                             </TableCell>}
 
 
@@ -107,7 +107,7 @@ function RankingPage({metric, numRows, startAfterId, startIndex, showProgress, l
                             const exerciseScore = levelExerciseProgress?.[levelName]?.[row.id]?.[ex.id];
                             return <>
                                 <TableCell key={ex.id} align="right">
-                                    {exerciseScore ? exerciseScore.toFixed(0) : '-'}
+                                    {exerciseScore ? Math.trunc(exerciseScore) : '-'}
                                 </TableCell>
                             </>
                         })}

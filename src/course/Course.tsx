@@ -125,15 +125,9 @@ function CourseView() {
     useAsyncEffect(async () => {
         if( !courseId )
             return;
-        try {
-            const course = await getCourse(courseId);
-            setError(null);
-            setCourse(course);
-        }
-        catch (e) {
-            console.error(e);
-            setError('You are not allowed to view the course. Please sign in or return to homepage');
-        }
+        const course = await getCourse(courseId);
+        setCourse(course);
+        setError(course ? null : 'You are not allowed to view the course. Please sign in or return to homepage');
     }, [courseId, auth]);
 
     const openPage = useCallback((pageId: string) => navigate(pageId), [navigate]);

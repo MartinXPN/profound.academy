@@ -8,7 +8,12 @@ import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 
 import {Course, Exercise} from "models/courses";
-import {onCourseSubmissionsChanged, onSubmissionsChanged, onUserSubmissionsChanged} from "../services/submissions";
+import {
+    onCourseSubmissionsChanged,
+    onSubmissionsChanged,
+    onUserExerciseSubmissionsChanged,
+    onUserSubmissionsChanged
+} from "../services/submissions";
 import {SubmissionResult} from "models/submissions";
 import moment from "moment/moment";
 import SubmissionBackdrop from "./SubmissionBackdrop";
@@ -199,6 +204,18 @@ export function UserSubmissionsTable({rowsPerPage, userId}: {rowsPerPage: number
     const navigate = useNavigate();
     useEffect(() => setReset(r => r + 1), [userId]);
     return <SubmissionsTable reset={reset} navigate={navigate} onLoadNext={onLoadNext} columns={columns.filter(c => c.id !== 'userDisplayName')}/>
+}
+
+export function UserExerciseSubmissionsTable({rowsPerPage, userId, courseId, exerciseId}: {
+    rowsPerPage: number, userId: string, courseId: string, exerciseId: string
+}) {
+    const onLoadNext = async (startAfterId: string | null, onChange: (submissions: SubmissionResult[], more: boolean) => void) =>
+        await onUserExerciseSubmissionsChanged(userId, courseId, exerciseId, 'desc', startAfterId ?? null, rowsPerPage, onChange);
+
+    const [reset, setReset] = useState(0);
+    const navigate = useNavigate();
+    useEffect(() => setReset(r => r + 1), [userId]);
+    return <SubmissionsTable reset={reset} navigate={navigate} onLoadNext={onLoadNext} columns={columns.filter(c => c.id !== 'userDisplayName' && c.id !== 'courseTitle' && c.id !== 'exerciseTitle')}/>
 }
 
 export function UserDateSubmissionsTable({rowsPerPage, userId, startDate, endDate}: {rowsPerPage: number, userId: string, startDate: Date, endDate: Date}) {

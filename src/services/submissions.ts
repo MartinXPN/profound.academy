@@ -138,6 +138,28 @@ export const onUserSubmissionsChanged = async (
     });
 }
 
+export const onUserExerciseSubmissionsChanged = async (
+    userId: string, courseId: string, exerciseId: string, direction: 'desc' | 'asc',
+    startAfterId: string | null, numItems: number,
+    onChanged: (submissionResult: SubmissionResult[], hasMore: boolean) => void,
+) => {
+    console.log('getting user-exercise submission with:', userId, courseId, exerciseId, direction);
+    const exerciseRef = db.exercises(courseId).doc(exerciseId);
+    let query = db.submissionResults
+        .where('userId', '==', userId)
+        .where('exercise', '==', exerciseRef)
+        .orderBy('createdAt', direction ?? 'desc');
+
+    console.log('startAfterId:', startAfterId);
+    query = await submissionQuery(query, startAfterId, numItems);
+
+    return query.onSnapshot(snapshot => {
+        const submissions: SubmissionResult[] = snapshot.docs.map(d => d.data());
+        console.log('Got submissions user:', userId, submissions);
+        onChanged(submissions, submissions.length >= numItems);
+    });
+}
+
 
 export const getSubmissionCode = async (userId: string, submissionId: string) => {
     const snapshot = await db.submissionSensitiveRecords(userId, submissionId).get();

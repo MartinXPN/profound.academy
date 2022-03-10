@@ -6,7 +6,7 @@ import {AuthContext} from "../App";
 import {CourseContext} from "./Course";
 import {useStickyState} from "../util";
 import {CourseSubmissionsTable} from "./SubmissionsTable";
-import RankingTable from "./RankingTable";
+import RankingTable from "./ranking/RankingTable";
 import moment from "moment";
 import Dashboard from "./Dashboard";
 

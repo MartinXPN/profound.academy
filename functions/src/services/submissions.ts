@@ -7,6 +7,7 @@ import {Submission} from '../models/submissions';
 import {Exercise} from '../models/courses';
 import {processResult} from './submissionResults';
 import {recordNewUserInsight} from './insights';
+import * as admin from 'firebase-admin';
 import {firestore} from 'firebase-admin';
 import {updateUserMetric} from './metrics';
 
@@ -99,8 +100,11 @@ export const submit = async (submission: Submission): Promise<http.ClientRequest
         // Do not allow a new attempts if the number exceeds the allowed threshold
         if (allowedAttempts <= numAttempts) {
             functions.logger.info('Do not allow this submission');
+            const user = await admin.auth().getUser(submission.userId);
             transaction.set(db.submissionResult(submission.id), {
                 ...submission,
+                userDisplayName: user.displayName,
+                userImageUrl: user.photoURL,
                 status: 'Unavailable',
                 isBest: false, memory: 0, time: 0, score: 0,
                 message: `Exceeded the number of allowed attempts (${allowedAttempts})`,

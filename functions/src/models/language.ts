@@ -14,6 +14,7 @@ export const LANGUAGES: { [key: string]: Language } = {
     'python': {extension: 'py', languageCode: 'python', displayName: 'Python'},
     'python3': {extension: 'py', languageCode: 'python3', displayName: 'Python 3'},
     'C#': {extension: 'cs', languageCode: 'C#', displayName: 'C#'},
+    'js': {extension: 'js', languageCode: 'js', displayName: 'JavaScript (Node.js)'},
 };
 
-export const LANGUAGE_KEYS = ['txt', 'C++11', 'C++14', 'C++17', 'python', 'python3', 'C#'] as const;
+export const LANGUAGE_KEYS = ['txt', 'C++11', 'C++14', 'C++17', 'python', 'python3', 'C#', 'js'] as const;

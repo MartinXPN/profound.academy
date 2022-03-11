@@ -24,14 +24,16 @@ export const updateUserInfo = async (userId: string, displayName?: string, image
     if( !user )
         return;
 
-    if( user.displayName !== displayName || user.photoURL !== imageUrl )
-        await user.updateProfile({
-            displayName: displayName,
-            photoURL: imageUrl,
-        });
+    // Add user update to the queue (updates user info across the whole app)
+    if( user.displayName !== displayName || user.photoURL !== imageUrl ) {
+        await user.updateProfile({displayName: displayName, photoURL: imageUrl});
+        await db.userInfoUpdate(userId).set({displayName: displayName, imageUrl: imageUrl}, {merge: true});
+    }
 
-    await db.user(userId).set({displayName: displayName, imageUrl: imageUrl}, {merge: true});
-    await db.userInfoUpdate(userId).set({displayName: displayName, imageUrl: imageUrl}, {merge: true});
+    // Immediate update only if needed (updates are more expensive than reads)
+    const userInfo = (await db.user(userId).get()).data();
+    if( userInfo?.displayName !== displayName || userInfo?.imageUrl !== imageUrl )
+        await db.user(userId).set({displayName: displayName, imageUrl: imageUrl}, {merge: true});
 }
 
 export const uploadProfilePicture = async (userId: string, file: File) => {

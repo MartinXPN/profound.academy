@@ -33,7 +33,6 @@ function Exercise({launchCourse, registerCourse}: {launchCourse: () => void, reg
 
     const {exerciseId} = useParams<{ exerciseId: string }>();
     const [exerciseType, setExerciseType] = useState<keyof typeof EXERCISE_TYPES>(exercise?.exerciseType ?? 'code');
-    const [showSignIn, setShowSignIn] = useState(false);
     const [splitPos, setSplitPos] = useStickyState<number[] | null>(null, `splitPos-${auth?.currentUserId}`);
     const [currentTab, setCurrentTab] = useState<'description' | 'allSubmissions' | 'bestSubmissions' | 'codeDrafts' | 'edit'>('description');
     const [codeDraftId, setCodeDraftId] = useState<string | null>(null);
@@ -44,8 +43,6 @@ function Exercise({launchCourse, registerCourse}: {launchCourse: () => void, reg
         if( isCourseInstructor && exercise?.order === 0 )
             setCurrentTab('edit');
     }, [exercise, isCourseInstructor]);
-    if(auth?.isSignedIn && showSignIn)
-        setShowSignIn(false);
 
     console.log(splitPos);
     const onSplitChanged = useCallback((newSplit) => {
@@ -67,17 +64,8 @@ function Exercise({launchCourse, registerCourse}: {launchCourse: () => void, reg
         {/* Display the landing page with an option to start the course if it wasn't started yet */
             !exerciseId &&
             <Box paddingBottom="12em">
-                <CourseLandingPage
-                    onStartCourseClicked={() => {
-                        if (auth && auth.currentUser && auth.currentUser.uid)   launchCourse();
-                        else                                                    setShowSignIn(true);
-                    }}
-                    onRegisterCourseClicked={() => {
-                        if (auth && auth.currentUser && auth.currentUser.uid)   registerCourse();
-                        else                                                    setShowSignIn(true);
-                    }} />
-
-                {showSignIn && <SignIn />}
+                <CourseLandingPage onStartCourseClicked={launchCourse} onRegisterCourseClicked={registerCourse} />
+                {!auth.isSignedIn && <SignIn />}
             </Box>
         }
 

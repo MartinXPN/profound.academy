@@ -32,15 +32,17 @@ function CourseLandingPage({onStartCourseClicked, onRegisterCourseClicked}: {
 
     const renderer = ({ days, hours, minutes, seconds, completed }:
                           {days: number, hours: number, minutes: number, seconds: number, completed: boolean}) => {
-        return completed ?
-            <Button color="primary" variant="contained" onClick={onStartCourseClicked}>START</Button> :
-            <>
-                <br/><br/><br/>
-                <Typography variant="h5">Starts in</Typography>
-                <Typography variant="h2">{days * 24 + hours}:{minutes.toString().padStart(2, '0')}:{seconds.toString().padStart(2, '0')}</Typography>
-                {!registered && <Button color="primary" variant="contained" onClick={onRegisterCourseClicked}>REGISTER</Button>}
-                {registered && <Typography fontWeight="bold" sx={{color: theme.palette.success.light}}>Registered!</Typography>}
-            </>;
+        if( completed )
+            return <>
+                {auth.isSignedIn && <Button color="primary" variant="contained" onClick={onStartCourseClicked}>START</Button>}
+            </>
+        return <>
+            <br/><br/><br/>
+            <Typography variant="h5">Starts in</Typography>
+            <Typography variant="h2">{days * 24 + hours}:{minutes.toString().padStart(2, '0')}:{seconds.toString().padStart(2, '0')}</Typography>
+            {!registered && <Button color="primary" variant="contained" onClick={onRegisterCourseClicked}>REGISTER</Button>}
+            {registered && <Typography fontWeight="bold" sx={{color: theme.palette.success.light}}>Registered!</Typography>}
+        </>;
     };
 
     if( !course )

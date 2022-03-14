@@ -1,9 +1,7 @@
 import React, {memo, useCallback, useContext} from 'react';
 import {styled} from '@mui/material/styles';
-import {ImageList, ImageListItem, ImageListItemBar, Grid} from '@mui/material';
-import {Typography} from "@mui/material";
+import {ImageListItem, ImageListItemBar, Grid, Stack, Box, Typography} from '@mui/material';
 import {Add} from "@mui/icons-material";
-import Box from "@mui/material/Box";
 
 import {Course} from 'models/courses';
 import {getAllCourses, getCompletedCourses, getUserCourses} from "../services/courses";
@@ -22,7 +20,9 @@ const ClickableImageListItem = styled(ImageListItem)({
 
 
 function CourseList({variant, title, userId}: {
-    variant: 'allCourses' | 'userCourses' | 'completedCourses', title: string, userId?: string
+    variant: 'allCourses' | 'userCourses' | 'completedCourses',
+    title: string,
+    userId?: string
 }) {
     const auth = useContext(AuthContext);
     const navigate = useNavigate();
@@ -65,23 +65,26 @@ function CourseList({variant, title, userId}: {
     return <>
         <Typography variant="h5" textAlign="center" marginTop={2}>{title}</Typography>
         <Box display="flex" flexWrap="wrap" justifyContent="space-around" overflow="hidden">
-            <ImageList rowHeight={180} sx={{width: 600, minHeight: 300}}>
+            <Grid container alignItems="center" justifyContent="center" width={1000} maxWidth="100%" spacing={0.5}>
                 {isCurrentUserCourses && hasInstructorPermissions &&
-                <ClickableImageListItem key="create-course" onClick={onCreateCourseClicked} sx={{border: 1, borderColor: '#e1e1e1'}}>
-                    <Grid container direction="column" alignItems="center" justifyContent="center" height="100%">
+                <Grid item height={180} width={300} display="flex" flexDirection="row">
+                <ClickableImageListItem key="create-course" onClick={onCreateCourseClicked} sx={{border: 1, borderColor: '#e1e1e1', flexDirection: 'column', flexGrow: 1}}>
+                    <Stack direction="column" alignItems="center" justifyContent="center" height="100%" width="100%" flexGrow={1}>
                         <Add fontSize="large" color="action" />
                         <Typography>Create a new course</Typography>
-                    </Grid>
-                </ClickableImageListItem>}
+                    </Stack>
+                </ClickableImageListItem>
+                </Grid>}
 
                 {courses.map((item: Course) => (
-                    <ClickableImageListItem key={item.id} onClick={() => onCourseSelected(item.id)}>
-                        <img src={item.img} alt={item.title} loading="lazy" 
-                             style={{width: '100%', height: '100%', objectFit: 'cover'}} />
+                    <Grid item height={180} width={300} display="flex" flexDirection="row">
+                    <ClickableImageListItem key={item.id} onClick={() => onCourseSelected(item.id)} sx={{flexDirection: 'column', flexGrow: 1}}>
+                        <img src={item.img} alt={item.title} loading="lazy" style={{flexGrow: 1, objectFit: 'cover'}} />
                         <ImageListItemBar title={item.title} subtitle={<span>by: {item.author}</span>} />
                     </ClickableImageListItem>
+                    </Grid>
                 ))}
-            </ImageList>
+            </Grid>
         </Box>
     </>;
 }

@@ -182,7 +182,6 @@ function CodeForm() {
         <Box justifyContent="center" justifyItems="center" justifySelf="center">
             <FileUploader
                 handleChange={handleUpload}
-                minSize={0.001}
                 maxSize={100}
                 name="file"
                 types={fileTypes}>

@@ -24,6 +24,12 @@ export interface TestCase {
     target: string;
 }
 
+export interface SubtaskTestGroup {
+    count: number;
+    points: number;
+    pointsPerTest: number;
+}
+
 export interface Exercise {
     id: string;
     title: string | {[key: string]: string};        // string or mapping {locale => titleText}
@@ -42,6 +48,7 @@ export interface Exercise {
     comparisonMode?: typeof COMPARISON_MODES[number];
     question?: string;
     options?: string[];
+    testGroups?: SubtaskTestGroup[];
 }
 
 export interface ExercisePrivateFields {

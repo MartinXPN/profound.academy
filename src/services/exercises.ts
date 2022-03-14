@@ -1,5 +1,5 @@
 import {db} from "./db";
-import {Exercise, EXERCISE_TYPES, TestCase} from "models/courses";
+import {Exercise, EXERCISE_TYPES, TestCase} from "models/exercise";
 import firebase from "firebase";
 import axios from "axios";
 import {LANGUAGES} from "models/language";

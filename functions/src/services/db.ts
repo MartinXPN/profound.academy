@@ -3,8 +3,9 @@ import * as admin from 'firebase-admin';
 import {CodeDraft} from '../models/codeDrafts';
 import {Activity, User, UserInfoUpdate, UserRole} from '../models/users';
 import {Notification} from '../models/notifications';
-import {Exercise, ExerciseProgress, ExercisePrivateFields,
-    Course, Progress, Insight, CoursePrivateFields} from '../models/courses';
+import {Course, CoursePrivateFields, Insight} from '../models/courses';
+import {Exercise, ExercisePrivateFields} from '../models/exercise';
+import {Progress, ExerciseProgress} from '../models/progress';
 import {Submission, SubmissionResult, SubmissionSensitiveRecords} from '../models/submissions';
 import {Comment, Vote} from '../models/forum';
 

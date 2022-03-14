@@ -7,7 +7,8 @@ import ListItemText from '@mui/material/ListItemText';
 import {ArrowDropUp, ArrowDropDown, Equalizer, Edit} from "@mui/icons-material";
 import ArrowRightIcon from '@mui/icons-material/ArrowRight';
 
-import {Exercise, ExerciseProgress} from "models/courses";
+import {Exercise} from "models/exercise";
+import {ExerciseProgress} from "models/progress";
 import {statusToStyledBackground} from "../colors";
 import {Typography} from "@mui/material";
 import {onCourseLevelExercisesChanged} from "../../services/exercises";

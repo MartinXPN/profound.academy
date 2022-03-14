@@ -2,7 +2,7 @@ import React, {memo, useCallback, useContext, useEffect, useState} from "react";
 import {Autocomplete, Badge, IconButton, LinearProgress, Link, Stack, TextField, Typography} from "@mui/material";
 import {Controller, useFieldArray, useFormContext} from "react-hook-form";
 import {LANGUAGES} from "models/language";
-import {COMPARISON_MODES} from "models/courses";
+import {COMPARISON_MODES} from "models/exercise";
 import {styled} from "@mui/material/styles";
 import Box from "@mui/material/Box";
 import {FileUploader} from "react-drag-drop-files";

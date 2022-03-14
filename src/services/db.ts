@@ -3,7 +3,9 @@ import 'firebase/firestore';
 
 import {Activity, User, UserInfoUpdate, UserRole} from "models/users";
 import {Notification} from "models/notifications";
-import {Course, Exercise, ExercisePrivateFields, ExerciseProgress, Progress} from "models/courses";
+import {Course} from "models/courses";
+import {Exercise, ExercisePrivateFields} from "models/exercise";
+import {ExerciseProgress, Progress} from "models/progress";
 import {Submission, SubmissionResult, SubmissionSensitiveRecords, SubmissionStatus} from "models/submissions";
 import {Comment, Vote} from "models/forum";
 import {CodeDraft} from "models/codeDrafts";

@@ -17,9 +17,9 @@ import ListItemText from '@mui/material/ListItemText';
 import {Add, Home} from "@mui/icons-material";
 import QueryStatsIcon from '@mui/icons-material/QueryStats';
 
-import {Exercise} from "models/courses";
+import {Exercise} from "models/exercise";
 import {AppBarProfile} from "../../user/Auth";
-import {Progress} from "models/courses";
+import {Progress} from "models/progress";
 import AppBarNotifications from "../../user/Notifications";
 import LevelList from "./LevelList";
 import {AuthContext} from "../../App";

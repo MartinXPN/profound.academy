@@ -6,7 +6,7 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 
-import {Exercise} from "models/courses";
+import {Exercise} from "models/exercise";
 import {getCourseLevelExercises} from "../../services/exercises";
 import {CourseContext} from "../Course";
 import {Equalizer} from "@mui/icons-material";

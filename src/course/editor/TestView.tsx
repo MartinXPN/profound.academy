@@ -1,4 +1,4 @@
-import {TestCase} from "models/courses";
+import {TestCase} from "models/exercise";
 import { TextField, Typography } from "@mui/material";
 import React, {memo, useEffect, useState} from "react";
 import {statusToColor} from "../colors";

@@ -5,7 +5,7 @@ import {getLocalizedParam} from "../../util";
 import {Close} from "@mui/icons-material";
 import {UserExerciseSubmissionsTable} from "../SubmissionsTable";
 import {styled} from "@mui/material/styles";
-import {Exercise} from "models/courses";
+import {Exercise} from "models/exercise";
 
 
 const SubmissionsBackdrop = styled(Backdrop)(({theme}) => ({

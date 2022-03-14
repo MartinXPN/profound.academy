@@ -4,7 +4,7 @@ import * as http from 'node:http';
 import * as moment from 'moment';
 import {db} from './db';
 import {Submission} from '../models/submissions';
-import {Exercise} from '../models/courses';
+import {Exercise} from '../models/exercise';
 import {processResult} from './submissionResults';
 import {recordNewUserInsight} from './insights';
 import * as admin from 'firebase-admin';

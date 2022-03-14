@@ -1,4 +1,5 @@
-import {Exercise, Course, TestCase} from './courses';
+import {Course} from './courses';
+import {Exercise, TestCase} from './exercise';
 import firebase from 'firebase/app';
 import {LANGUAGES} from './language';
 

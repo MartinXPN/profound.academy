@@ -7,13 +7,9 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 
-import {Course, Exercise} from "models/courses";
-import {
-    onCourseSubmissionsChanged,
-    onSubmissionsChanged,
-    onUserExerciseSubmissionsChanged,
-    onUserSubmissionsChanged
-} from "../services/submissions";
+import {Course} from "models/courses";
+import {Exercise} from "models/exercise";
+import {onCourseSubmissionsChanged, onSubmissionsChanged, onUserExerciseSubmissionsChanged, onUserSubmissionsChanged} from "../services/submissions";
 import {SubmissionResult} from "models/submissions";
 import moment from "moment/moment";
 import SubmissionBackdrop from "./SubmissionBackdrop";

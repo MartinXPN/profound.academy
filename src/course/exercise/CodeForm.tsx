@@ -12,6 +12,7 @@ import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 import HighlightOffTwoToneIcon from "@mui/icons-material/HighlightOffTwoTone";
 import ToggleButton from "@mui/material/ToggleButton";
 import {Add} from "@mui/icons-material";
+import TestGroupsForm from "./TestGroupsForm";
 
 const UploadBackground = styled(Box)({
     width: '100%',
@@ -204,6 +205,9 @@ function CodeForm() {
                 </UploadBackground>
             </FileUploader>
         </Box>
+
+        <Typography marginTop="1em">Advanced scoring through subtasks:</Typography>
+        <TestGroupsForm />
 
 
         <Typography align="center" marginTop="10em">

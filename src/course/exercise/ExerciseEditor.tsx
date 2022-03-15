@@ -20,6 +20,7 @@ import CheckboxesForm from "./CheckboxesForm";
 import MultipleChoiceForm from "./MultipleChoiceForm";
 import useAsyncEffect from "use-async-effect";
 import {AlertColor} from "@mui/material/Alert/Alert";
+import {testGroupSchema} from "./TestGroupsForm";
 
 
 const baseSchema = {
@@ -44,6 +45,7 @@ const codeSchema = object({
         input: string().max(10000),
         target: string().max(10000),
     })).max(25),
+    testGroups: array(testGroupSchema).optional(),
 });
 const textSchema = object({
     ...baseSchema,
@@ -124,6 +126,7 @@ function ExerciseEditor({cancelEditing, exerciseTypeChanged}: {
             comparisonMode: exercise?.comparisonMode ?? 'token',
             question: exercise?.question,
             options: exercise?.options,
+            testGroups: exercise?.testGroups,
         }
     }, [exercise]);
 
@@ -178,7 +181,7 @@ function ExerciseEditor({cancelEditing, exerciseTypeChanged}: {
             data.exerciseType,
             data.unlockContent,
             // @ts-ignore
-            data.allowedLanguages, data.memoryLimit, data.timeLimit, data.outputLimit, data.floatPrecision, data.comparisonMode, data.testCases,
+            data.allowedLanguages, data.memoryLimit, data.timeLimit, data.outputLimit, data.floatPrecision, data.comparisonMode, data.testCases, data.testGroups,
             // @ts-ignore
             data.question, data.answer, data.options,
         );

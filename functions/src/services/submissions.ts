@@ -27,7 +27,7 @@ const submitLambdaJudge = async (submission: Submission, exercise: Exercise): Pr
         outputLimit: exercise?.outputLimit ?? 1,
         aggregateResults: !submission.isTestRun,
         returnOutputs: submission.isTestRun,
-        stopOnFirstFail: !submission.isTestRun,
+        stopOnFirstFail: submission.isTestRun ? false : !exercise?.testGroups,
         testGroups: submission.isTestRun ? undefined : exercise?.testGroups,
         comparisonMode: exercise?.comparisonMode ?? 'token',
         floatPrecision: exercise?.floatPrecision ?? 0.001,

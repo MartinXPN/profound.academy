@@ -133,7 +133,6 @@ function Console({onSubmitClicked, onRunClicked, isProcessing, submissionResult}
         <Box padding="10px">
             {submissionResult && submissionResult.status === 'Compilation error' &&
             <>
-                <div>{submissionResult.compileOutputs}</div>
                 <StatusTypography style={{color: statusColors.failed}}>{submissionResult.status}</StatusTypography>
                 {submissionResult.compileOutputs?.trim() && <Typography whiteSpace='pre-wrap'>{submissionResult.compileOutputs}</Typography>}
             </>}

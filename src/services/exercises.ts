@@ -1,9 +1,10 @@
 import {db} from "./db";
-import {Exercise, EXERCISE_TYPES, TestCase} from "models/courses";
+import {Exercise, EXERCISE_TYPES, TestCase} from "models/exercise";
 import firebase from "firebase";
 import axios from "axios";
 import {LANGUAGES} from "models/language";
 import {Insight} from "models/lib/courses";
+import {SubtaskTestGroup} from "models/lib/exercise";
 
 export const getFirstExercise = async (courseId: string) => {
     const exercise = await db.exercises(courseId)
@@ -61,7 +62,7 @@ export const updateExercise = async (
     unlockContent: string[],
     allowedLanguages?: (keyof typeof LANGUAGES)[],
     memoryLimit?: number, timeLimit?: number, outputLimit?: number,
-    floatPrecision?: number, comparisonMode?: 'whole' | 'token' | 'custom', testCases?: TestCase[],
+    floatPrecision?: number, comparisonMode?: 'whole' | 'token' | 'custom', testCases?: TestCase[], testGroups?: SubtaskTestGroup[],
     question?: string, answer?: string, options?: string[],
 ) => {
     const previousValues = (await db.exercise(courseId, exerciseId).get()).data();
@@ -83,6 +84,7 @@ export const updateExercise = async (
         floatPrecision:  floatPrecision,
         comparisonMode: comparisonMode,
         testCases: testCases,
+        testGroups: testGroups,
         question: question,
         options: options,
     }, {merge: true});

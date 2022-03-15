@@ -2,7 +2,7 @@ import React, {memo, useCallback, useContext, useEffect, useState} from "react";
 import {Autocomplete, Badge, IconButton, LinearProgress, Link, Stack, TextField, Typography} from "@mui/material";
 import {Controller, useFieldArray, useFormContext} from "react-hook-form";
 import {LANGUAGES} from "models/language";
-import {COMPARISON_MODES} from "models/courses";
+import {COMPARISON_MODES} from "models/exercise";
 import {styled} from "@mui/material/styles";
 import Box from "@mui/material/Box";
 import {FileUploader} from "react-drag-drop-files";
@@ -12,6 +12,7 @@ import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 import HighlightOffTwoToneIcon from "@mui/icons-material/HighlightOffTwoTone";
 import ToggleButton from "@mui/material/ToggleButton";
 import {Add} from "@mui/icons-material";
+import TestGroupsForm from "./TestGroupsForm";
 
 const UploadBackground = styled(Box)({
     width: '100%',
@@ -182,7 +183,6 @@ function CodeForm() {
         <Box justifyContent="center" justifyItems="center" justifySelf="center">
             <FileUploader
                 handleChange={handleUpload}
-                minSize={0.001}
                 maxSize={100}
                 name="file"
                 types={fileTypes}>
@@ -205,6 +205,9 @@ function CodeForm() {
                 </UploadBackground>
             </FileUploader>
         </Box>
+
+        <Typography marginTop="1em">Advanced scoring through subtasks:</Typography>
+        <TestGroupsForm />
 
 
         <Typography align="center" marginTop="10em">

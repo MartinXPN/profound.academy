@@ -3,7 +3,7 @@ import Code from "./Code";  // needs to be before getModeForPath so that Ace is 
 import Console from "./Console";
 import {getModeForPath} from 'ace-builds/src-noconflict/ext-modelist';
 import {useStickyState} from "../../util";
-import {TestCase} from "models/courses";
+import {TestCase} from "models/exercise";
 import {onRunResultChanged, onSubmissionResultChanged, submitSolution} from "../../services/submissions";
 import {AuthContext} from "../../App";
 import {SubmissionResult} from "models/submissions";

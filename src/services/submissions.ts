@@ -1,8 +1,8 @@
 import {db} from "./db";
-import {Submission, SubmissionResult} from "models/submissions";
 import firebase from "firebase/app";
 import {Language} from "models/language";
-import {TestCase} from "../../functions/src/models/courses";
+import {TestCase} from "models/exercise";
+import {Submission, SubmissionResult} from "models/submissions";
 
 
 export const submitSolution = async (userId: string,

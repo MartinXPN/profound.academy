@@ -1,4 +1,4 @@
-import {ExerciseProgress, Progress} from "models/courses";
+import {ExerciseProgress, Progress} from "models/progress";
 import {db} from "./db";
 import {SubmissionStatus} from "models/submissions";
 

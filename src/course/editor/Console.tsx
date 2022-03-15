@@ -5,7 +5,7 @@ import HighlightOffTwoToneIcon from '@mui/icons-material/HighlightOffTwoTone';
 import ToggleButton from '@mui/material/ToggleButton';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 
-import {TestCase} from "models/courses";
+import {TestCase} from "models/exercise";
 import {SubmissionResult} from "models/submissions";
 import TestView from "./TestView";
 import {statusColors, statusToColor} from "../colors";
@@ -133,7 +133,6 @@ function Console({onSubmitClicked, onRunClicked, isProcessing, submissionResult}
         <Box padding="10px">
             {submissionResult && submissionResult.status === 'Compilation error' &&
             <>
-                <div>{submissionResult.compileOutputs}</div>
                 <StatusTypography style={{color: statusColors.failed}}>{submissionResult.status}</StatusTypography>
                 {submissionResult.compileOutputs?.trim() && <Typography whiteSpace='pre-wrap'>{submissionResult.compileOutputs}</Typography>}
             </>}

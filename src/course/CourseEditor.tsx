@@ -12,13 +12,7 @@ import {styled} from "@mui/material/styles";
 import Content from "./Content";
 import {useNavigate} from "react-router-dom";
 import {getUsers, searchUser, uploadPicture} from "../services/users";
-import {
-    genCourseId,
-    onCoursePrivateFieldsChanged,
-    sendCourseInviteEmails,
-    updateCourse,
-    updateCoursePrivateFields
-} from "../services/courses";
+import {genCourseId, onCoursePrivateFieldsChanged, sendCourseInviteEmails, updateCourse, updateCoursePrivateFields} from "../services/courses";
 import {User} from "models/users";
 import AutocompleteSearch from "../common/AutocompleteSearch";
 

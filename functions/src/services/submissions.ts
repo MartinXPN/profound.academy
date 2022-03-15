@@ -4,7 +4,7 @@ import * as http from 'node:http';
 import * as moment from 'moment';
 import {db} from './db';
 import {Submission} from '../models/submissions';
-import {Exercise} from '../models/courses';
+import {Exercise} from '../models/exercise';
 import {processResult} from './submissionResults';
 import {recordNewUserInsight} from './insights';
 import * as admin from 'firebase-admin';
@@ -17,9 +17,8 @@ const PROCESS_SUBMISSION_CALLBACK_URL='https://us-central1-profound-academy.clou
 
 
 const submitLambdaJudge = async (submission: Submission, exercise: Exercise): Promise<http.ClientRequest> => {
-    const problem = submission.exercise.id;
     const data = {
-        problem: !submission.testCases ? problem : undefined,
+        problem: submission.testCases ? undefined : submission.exercise.id,
         testCases: submission.testCases,
         code: submission.code,
         language: submission.language,
@@ -29,6 +28,7 @@ const submitLambdaJudge = async (submission: Submission, exercise: Exercise): Pr
         aggregateResults: !submission.isTestRun,
         returnOutputs: submission.isTestRun,
         stopOnFirstFail: !submission.isTestRun,
+        testGroups: submission.isTestRun ? undefined : exercise?.testGroups,
         comparisonMode: exercise?.comparisonMode ?? 'token',
         floatPrecision: exercise?.floatPrecision ?? 0.001,
         callbackUrl: `${PROCESS_SUBMISSION_CALLBACK_URL}/${submission.userId}/${submission.id}`,

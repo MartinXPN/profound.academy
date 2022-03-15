@@ -2,7 +2,8 @@ import React, {memo, useCallback, useContext, useEffect, useState} from "react";
 import TableCell from '@mui/material/TableCell';
 import TableRow from '@mui/material/TableRow';
 
-import {Exercise, Progress} from "models/courses";
+import {Exercise} from "models/exercise";
+import {Progress} from "models/progress";
 import {onLevelExerciseProgressChanged, onProgressChanged} from "../../services/progress";
 import {CourseContext} from "../Course";
 import {Stack} from "@mui/material";

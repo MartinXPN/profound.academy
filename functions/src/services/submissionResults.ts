@@ -1,5 +1,4 @@
 import {firestore} from 'firebase-admin';
-import firebase from 'firebase/app';
 import * as functions from 'firebase-functions';
 import * as moment from 'moment';
 import {db} from './db';
@@ -81,7 +80,7 @@ const unlockContent = (
     if (user.courses && user.courses.length > 0) {
         functions.logger.info('Adding course to pre-existing list of courses');
         transaction.update(db.user(user.id), {
-            courses: firebase.firestore.FieldValue.arrayUnion(unlockedCourses),
+            courses: firestore.FieldValue.arrayUnion(unlockedCourses),
         });
     } else {
         functions.logger.info('Adding courses from scratch');

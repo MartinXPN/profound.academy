@@ -85,7 +85,7 @@ export const submit = async (submission: Submission): Promise<http.ClientRequest
         throw Error(`Exercise or course do not exist: ${submission.exercise.id} ${submission.course.id}`);
 
     const levelName = Math.trunc(exercise.order).toString();
-    const canSubmit = await firestore().runTransaction(async (transaction) => {
+    const canSubmit = submission.isTestRun || await firestore().runTransaction(async (transaction) => {
         // new attempt
         const attempts = (await transaction.get(db.userProgress(course.id, submission.userId)
             .collection('exerciseAttempts').doc(levelName))).data();

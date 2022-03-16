@@ -127,6 +127,7 @@ export const onCourseHistoricalInsightsChanged = (courseId: string, start: Date,
 
 export const searchCourses = async (title: string, limit: number = 20) => {
     const snapshot = await db.courses
+        .where('visibility', 'in', ['public', 'unlisted'])
         .where('title', '>=', title.toUpperCase())
         .where('title', '<=', title.toLowerCase() + '\uf8ff')
         .limit(limit)

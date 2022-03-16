@@ -1,9 +1,12 @@
 import {firestore} from 'firebase-admin';
-import * as admin from 'firebase-admin';
+import firebase from 'firebase';
 import * as functions from 'firebase-functions';
 import * as moment from 'moment';
 import {db} from './db';
 import {SubmissionResult} from '../models/submissions';
+import {Course} from '../models/courses';
+import {Exercise} from '../models/exercise';
+import {User} from '../models/users';
 import {recordInsights} from './insights';
 import {updateUserMetric} from './metrics';
 
@@ -28,7 +31,7 @@ const updateBest = (
         functions.logger.info('Did not update the bestSubmissions list');
     }
 
-    // // save the results to /submissions
+    // save the results to /submissions
     transaction.set(db.submissionResult(submission.id), submission);
 };
 
@@ -51,6 +54,55 @@ const updateActivity = (
         [submissionDay]: firestore.FieldValue.increment(1),
     }, {merge: true});
     functions.logger.info('Updated the user activity!');
+};
+
+const unlockContent = (
+    transaction: firestore.Transaction,
+    submission: SubmissionResult,
+    exercise: Exercise,
+    user?: User,
+) => {
+    if (!user) {
+        functions.logger.info(`No user to unlock content. Submission: ${submission.id}`);
+        return;
+    }
+    if (submission.status !== 'Solved') {
+        functions.logger.info(`Not unlocking content. Status: ${submission.status}`);
+        return;
+    }
+    if (!exercise.unlockContent || exercise.unlockContent.length === 0) {
+        functions.logger.info(`Exercise ${exercise.id} does not have content to unlock`);
+        return;
+    }
+
+    const isIn = (courseId: string, courses?: Course[]) => courses && courses
+        .filter((c) => c.id === courseId).length > 0;
+
+    const unlockedCourses = exercise.unlockContent
+        .filter((courseId) => !isIn(courseId, user.courses) && !isIn(courseId, user.completed))
+        .map((courseId) => db.course(courseId));
+    functions.logger.info(`There are ${unlockedCourses.length} courses to unlock!`);
+
+    if (unlockedCourses.length === 0)
+        return;
+
+    if (user.courses && user.courses.length > 0) {
+        functions.logger.info('Adding course to pre-existing list of courses');
+        transaction.update(db.user(user.id), {
+            courses: firebase.firestore.FieldValue.arrayUnion(unlockedCourses),
+        });
+    } else {
+        functions.logger.info('Adding courses from scratch');
+        transaction.update(db.user(user.id), {
+            courses: [unlockedCourses],
+        });
+    }
+
+    // Update submissionResult message
+    functions.logger.info('Updating submissionResult message...');
+    transaction.update(db.submissionResult(submission.id), {
+        message: 'Congratulations! You have unlocked new content!\nGo to homepage to view it',
+    });
 };
 
 
@@ -78,13 +130,14 @@ export const processResult = async (
         });
         return;
     }
-    const [courseSnapshot, exerciseSnapshot, user] = await Promise.all([
+    const [courseSnapshot, exerciseSnapshot, userSnapshot] = await Promise.all([
         db.course(submissionResult.course.id).get(),
         db.exercise(submissionResult.course.id, submissionResult.exercise.id).get(),
-        admin.auth().getUser(submissionResult.userId),
+        db.user(submissionResult.userId).get(),
     ]);
     const course = courseSnapshot.data();
     const exercise = exerciseSnapshot.data();
+    const user = userSnapshot.data();
     if (!course)
         throw Error(`Course with id ${submissionResult.course.id} does not exist`);
     if (!exercise)
@@ -97,8 +150,10 @@ export const processResult = async (
     const status = typeof submissionResult.status === 'string' ? submissionResult.status :
         submissionResult.status.reduce((prev, cur) => cur === 'Solved' ? prev : cur, 'Solved');
     const level = Math.trunc(exercise.order).toString();
-    submissionResult.userDisplayName = user.displayName;
-    submissionResult.userImageUrl = user.photoURL;
+    const displayName = submissionResult.userDisplayName ?? user?.displayName;
+    const imageUrl = user?.imageUrl ?? '';
+    submissionResult.userDisplayName = displayName;
+    submissionResult.userImageUrl = imageUrl;
     submissionResult.courseTitle = course.title;
     submissionResult.exerciseTitle = exercise.title;
 
@@ -134,8 +189,10 @@ export const processResult = async (
         recordInsights(transaction, 'totalScore', course.id, exercise.id, submissionDate, submissionResult.score);
         if (submissionResult.status === 'Solved')
             recordInsights(transaction, 'solved', course.id, exercise.id, submissionDate);
-        if (!alreadySolved)
+        if (!alreadySolved) {
             updateActivity(transaction, submissionResult);
+            unlockContent(transaction, submissionResult, exercise, user);
+        }
     });
 
     // another transaction to update user metrics
@@ -166,9 +223,9 @@ export const processResult = async (
 
         updateUserMetric(transaction, 'solved', submissionResult.userId, course.id, exercise.id, level,
             prevSolved?.progress?.[exercise.id] === 'Solved' ? 1 : 0, status === 'Solved' ? 1 : 0, status);
-        transaction.set(db.userProgress(course.id, user.uid), {
-            userDisplayName: user.displayName,
-            userImageUrl: user.photoURL,
+        transaction.set(db.userProgress(course.id, submissionResult.userId), {
+            userDisplayName: displayName,
+            userImageUrl: imageUrl,
         }, {merge: true});
     });
 };

@@ -1,5 +1,5 @@
 import {firestore} from 'firebase-admin';
-import firebase from 'firebase';
+import firebase from 'firebase/app';
 import * as functions from 'firebase-functions';
 import * as moment from 'moment';
 import {db} from './db';
@@ -39,10 +39,8 @@ const updateActivity = (
     transaction: firestore.Transaction,
     submission: SubmissionResult,
 ) => {
-    if (submission.status !== 'Solved') {
-        functions.logger.info(`Not updating user activity. Status: ${submission.status}`);
-        return;
-    }
+    if (submission.status !== 'Solved')
+        return functions.logger.info(`Not updating user activity. Status: ${submission.status}`);
 
     functions.logger.info('Updating the user activity...');
     const submissionDate = submission.createdAt.toDate();
@@ -62,18 +60,12 @@ const unlockContent = (
     exercise: Exercise,
     user?: User,
 ) => {
-    if (!user) {
-        functions.logger.info(`No user to unlock content. Submission: ${submission.id}`);
-        return;
-    }
-    if (submission.status !== 'Solved') {
-        functions.logger.info(`Not unlocking content. Status: ${submission.status}`);
-        return;
-    }
-    if (!exercise.unlockContent || exercise.unlockContent.length === 0) {
-        functions.logger.info(`Exercise ${exercise.id} does not have content to unlock`);
-        return;
-    }
+    if (!user)
+        return functions.logger.info(`No user to unlock content. Submission: ${submission.id}`);
+    if (submission.status !== 'Solved')
+        return functions.logger.info(`Not unlocking content. Status: ${submission.status}`);
+    if (!exercise.unlockContent || exercise.unlockContent.length === 0)
+        return functions.logger.info(`Exercise ${exercise.id} does not have content to unlock`);
 
     const isIn = (courseId: string, courses?: Course[]) => courses && courses
         .filter((c) => c.id === courseId).length > 0;
@@ -123,12 +115,11 @@ export const processResult = async (
     if (submissionResult.isTestRun) {
         // save the results to /runs/userId/private/<submissionId>
         functions.logger.info(`Updating the run: ${submissionResult.id} with ${JSON.stringify(submissionResult)}`);
-        await firestore().runTransaction(async (transaction) => {
+        return await firestore().runTransaction(async (transaction) => {
             transaction.set(db.run(userId, submissionResult.id), submissionResult);
             const [courseId, exerciseId] = [submissionResult.course.id, submissionResult.exercise.id];
             recordInsights(transaction, 'runs', courseId, exerciseId, submissionDate);
         });
-        return;
     }
     const [courseSnapshot, exerciseSnapshot, userSnapshot] = await Promise.all([
         db.course(submissionResult.course.id).get(),

@@ -1,46 +1,49 @@
-# Getting Started with Create React App
+# <img alt="Profound Academy logo" src="src/logo.svg" width="80"/> Profound Academy
+
+[Profound Academy](https://profound.academy) is an educational platform with a primary focus on hands-on learning 
+that enables teachers and course makers to easily create courses with rigorous practice exercises and tests. 
+The aim of the platform is to save tutors’ time on homework checking 
+and allow students to learn at their own pace while increasing their engagement throughout the learning process.
+
+
+| Join the community                                                                                                                       | Visit Profound Academy   | Contact us                                                |
+|------------------------------------------------------------------------------------------------------------------------------------------|--------------------------|-----------------------------------------------------------|
+| <a href="https://discord.gg/DfZMjQhK"><img src="https://www.vhv.rs/dpng/d/101-1013839_discord-join-hd-png-download.png" width="180"></a> | https://profound.academy | [support@pofound.academy](mailto:support@pofound.academy) |
+
+
+
+
+# Development
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+Available scripts include:
+* `yarn start` Runs the app in the development mode
+* `yarn test` Launches the test runner in the [interactive watch mode](https://facebook.github.io/create-react-app/docs/running-tests)
+* `yarn build` Builds the app for production to the `build` folder
+* `firebase deploy` Deploys the whole project to production (backend, frontend, Firestore, and rules)
+* `firebase deploy --only hosting` Deploys the Rect app in the `build` folder to production
+* `yarn update:models` Updates the models in the React app from `functions/src/models`
 
-## Available Scripts
+### Project structure
+The project is organized as a mono-repo that includes both the front-end (React app) and the backend-end (Firebase serverless functions)
+in one repository. Therefore, some things like models (schemas) are shared between those two major components to avoid replication.
 
-In the project directory, you can run:
-
-### `yarn start`
-
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
-
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
-
-### `yarn test`
-
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
-
-### `yarn build`
-
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
-
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
-
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
-
-### `yarn eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
-
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
-
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
+```markdown
+profound.academy
+|
+|-> firebase (includes firebase-specific files like Storage and Firestore rules and Firestore indexes)
+|-> functions (firebase serverless functions)
+        |-> test (includes tests for the serverless functions)
+        |-> src (the main source code for functions)
+             |-> models (all the models for both the front-end and the backend)
+             |-> services (the main functionality of each endpoint)
+             |-> index.ts (all the firebase functions endpoints)
+|
+|-> public (manifest, favicon, logo, etc)
+|-> src (the main Rect app source code)
+     |-> common (components and utilities)
+     |-> course (components present in the course view including drawers, editor, exercise, forum, ranking, etc)
+     |-> home (components present in the home page including footer, landing page, etc)
+     |-> user (components for user view)
+     |-> services (includes logic for reading and writing to firestore, connecting to firebase functions, uploading to S3, etc)
+```

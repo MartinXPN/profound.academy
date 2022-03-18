@@ -15,6 +15,19 @@ and allow students to learn at their own pace while increasing their engagement 
 
 # Development
 
+### Prerequisites
+To run the firebase functions `.runtimeconfig.json` needs to be present under `/functions/` directory.
+AWS S3 id and key need to be present for generating signed-url when uploading private `.zip` test cases to S3.
+```json
+{
+  "aws_s3": {
+    "id": "XXXXXXXXXXXXXXXXXXXX",
+    "key": "KKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKK"
+  }
+}
+```
+
+### Running the project
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 Available scripts include:
 * `yarn start` Runs the app in the development mode

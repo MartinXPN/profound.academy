@@ -62,5 +62,5 @@ export const dateDayDiff = (d: Date, days: number): Date => {
 export const tomorrow = (d: Date): Date => dateDayDiff(d, 1);
 
 export const notionPageToId = (page: string): string => {
-    return page.split('-').at(-1) ?? '';
+    return page.split('/').at(-1)?.split('-').at(-1) ?? '';
 };

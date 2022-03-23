@@ -134,6 +134,10 @@ service cloud.firestore {
     // Users can read their runs
     match /runs/{userId}/private/{runId} {
       allow read: if isCurrentUser(request, userId);
+
+      match /testResults/{resultType} {
+        allow read: if isCurrentUser(request, userId);
+      }
     }
 
     // All authenticated users can see the submission results
@@ -158,6 +162,10 @@ service cloud.firestore {
       return request.auth != null && request.auth.uid in get(course).data.instructors;
     }
     match /submissions/{submissionId}/private/{userId} {
+      allow read: if isCurrentUser(request, userId) || isInstructor(request, submissionId) || isViewingAllowed(request, submissionId);
+    }
+    // TODO: Maybe not even allow the current user to view the test case that was failed
+    match /submissions/{submissionId}/testResults/{userId} {
       allow read: if isCurrentUser(request, userId) || isInstructor(request, submissionId) || isViewingAllowed(request, submissionId);
     }
 

@@ -190,7 +190,7 @@ function ExerciseEditor({cancelEditing, exerciseTypeChanged}: {
     const onReEvaluate = async () => {
         if( !course?.id || !exercise?.id )
             return;
-        setSnackbar({message: 'Resubmitting all the submissions. Please wait...', severity: 'success'});
+        setSnackbar({message: 'Resubmitting all the submissions. Please wait...', severity: 'info'});
         await reEvaluateSubmissions(course.id, exercise.id);
         setSnackbar({message: 'Done! Go to All submissions for more information', severity: 'success'});
     };

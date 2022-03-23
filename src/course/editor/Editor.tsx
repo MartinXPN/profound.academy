@@ -4,7 +4,7 @@ import Console from "./Console";
 import {getModeForPath} from 'ace-builds/src-noconflict/ext-modelist';
 import {useStickyState} from "../../util";
 import {TestCase} from "models/exercise";
-import {onRunResultChanged, onSubmissionResultChanged, submitSolution} from "../../services/submissions";
+import {onRunResultChanged, onRunTestResultsChanged, onSubmissionResultChanged, onSubmissionTestResultsChanged, submitSolution} from "../../services/submissions";
 import {AuthContext} from "../../App";
 import {SubmissionResult} from "models/submissions";
 import {onCodeChanged, saveCode} from "../../services/codeDrafts";
@@ -14,6 +14,7 @@ import {SplitPane} from "react-multi-split-pane";
 import {Language, LANGUAGES} from "models/language";
 import Box from "@mui/material/Box";
 import Settings from "./Settings";
+import {TestResult} from "../../../functions/src/models/submissions";
 
 
 function Editor({disableCodeSync, userId}: {disableCodeSync?: boolean, userId?: string}) {
@@ -31,6 +32,7 @@ function Editor({disableCodeSync, userId}: {disableCodeSync?: boolean, userId?: 
     const [splitPos, setSplitPos] = useStickyState<number[] | null>(null, `consoleSplitPos-${auth?.currentUserId}`);
 
     const [submissionResult, setSubmissionResult] = useStickyState<SubmissionResult | null>(null, `submissionRes-${currentUserId}-${exercise?.id}`);
+    const [submissionTestResults, setSubmissionTestResults] = useStickyState<TestResult[] | null>(null, `submissionTestsRes-${currentUserId}-${exercise?.id}`);
     const [submitted, setSubmitted] = useState(false);
     if( language === null && exercise && exercise.allowedLanguages && exercise?.allowedLanguages.length > 0 )
         setLanguage(LANGUAGES[exercise?.allowedLanguages[0]]);
@@ -83,6 +85,8 @@ function Editor({disableCodeSync, userId}: {disableCodeSync?: boolean, userId?: 
     }, [course, exercise, currentUserId, isMyCode, filename, setCode, setLanguage]);
 
     const onEvaluate = useCallback(async (mode: 'run' | 'submit', tests?: TestCase[]) => {
+        setSubmissionResult(null);
+        setSubmissionTestResults(null);
         if( !auth.currentUserId || !auth.currentUser || !course || !exercise )
             return;
 
@@ -90,10 +94,13 @@ function Editor({disableCodeSync, userId}: {disableCodeSync?: boolean, userId?: 
         console.log('code length:', JSON.stringify(code).length);
         if( JSON.stringify(code).length > 32000 ) {
             setSubmissionResult({
-                isBest: false, time: 0, score: 0, memory: 0,
-                status: 'Compilation error',
-                compileOutputs: 'Source code exceeds the allowed 64KB limit',
+                id: '', isBest: false, time: 0, score: 0, memory: 0, returnCode: 0, status: 'Compilation error',
+                compileResult: {
+                    status: 'Compilation error', time: 0, score: 0, memory: 0, returnCode: 0,
+                    message: 'Source code exceeds the allowed 64KB limit',
+                },
             });
+            setSubmissionTestResults(null);
             return;
         }
 
@@ -103,12 +110,20 @@ function Editor({disableCodeSync, userId}: {disableCodeSync?: boolean, userId?: 
             : await submitSolution(auth.currentUserId, course.id, exercise.id, code, language, true, tests);
 
         const onResultChanged = mode === 'submit' ? onSubmissionResultChanged: onRunResultChanged;
-        return onResultChanged(auth.currentUserId, submissionId, (result) => {
+        const onTestResultsChanged = mode === 'submit' ? onSubmissionTestResultsChanged : onRunTestResultsChanged;
+
+        const unsubscribeResult = onResultChanged(auth.currentUserId, submissionId, result => {
             setSubmissionResult(result);
             if(result)
                 setSubmitted(false);
         });
-    }, [auth.currentUserId, auth.currentUser, course, exercise, code, language, setSubmissionResult]);
+        // Do not get results per test case when submitting (only when running the program)
+        const unsubscribeTestResults = mode === 'submit' ? () => {} : onTestResultsChanged(auth.currentUserId, submissionId, setSubmissionTestResults);
+        return () => {
+            unsubscribeResult();
+            unsubscribeTestResults();
+        }
+    }, [auth.currentUserId, auth.currentUser, course, exercise, code, language, setSubmissionResult, setSubmissionTestResults]);
     const handleSubmit = useCallback(async () => onEvaluate('submit'), [onEvaluate]);
     const handleRun = useCallback(async (tests) => onEvaluate('run', tests), [onEvaluate]);
 
@@ -133,7 +148,8 @@ function Editor({disableCodeSync, userId}: {disableCodeSync?: boolean, userId?: 
                     onSubmitClicked={handleSubmit}
                     onRunClicked={handleRun}
                     isProcessing={submitted}
-                    submissionResult={submissionResult} />
+                    submissionResult={submissionResult}
+                    testResults={submissionTestResults} />
             </Box>
         </SplitPane>
     </>

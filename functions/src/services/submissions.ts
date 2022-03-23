@@ -2,21 +2,24 @@ import * as functions from 'firebase-functions';
 import * as https from 'https';
 import * as http from 'node:http';
 import * as moment from 'moment';
+import * as needle from 'needle';
+import * as admin from 'firebase-admin';
+import {firestore} from 'firebase-admin';
+import {updateUserMetric} from './metrics';
 import {db} from './db';
 import {Submission} from '../models/submissions';
 import {Exercise} from '../models/exercise';
 import {processResult} from './submissionResults';
 import {recordNewUserInsight} from './insights';
-import * as admin from 'firebase-admin';
-import {firestore} from 'firebase-admin';
-import {updateUserMetric} from './metrics';
 
 // const LAMBDA_JUDGE_URL='https://judge.profound.academy/check';
 const LAMBDA_JUDGE_URL='https://jdc8h3yyag.execute-api.us-east-1.amazonaws.com/Prod/check/';
 const PROCESS_SUBMISSION_CALLBACK_URL='https://us-central1-profound-academy.cloudfunctions.net/processSubmissionResult';
+const LOCALHOST = functions.config()?.host === 'local';
 
 
-const submitLambdaJudge = async (submission: Submission, exercise: Exercise): Promise<http.ClientRequest> => {
+const submitLambdaJudge = async (submission: Submission, exercise: Exercise): Promise<http.ClientRequest | void> => {
+    const callbackUrl = LOCALHOST ? null : `${PROCESS_SUBMISSION_CALLBACK_URL}/${submission.userId}/${submission.id}`;
     const data = {
         problem: submission.testCases ? undefined : submission.exercise.id,
         testCases: submission.testCases,
@@ -31,9 +34,17 @@ const submitLambdaJudge = async (submission: Submission, exercise: Exercise): Pr
         testGroups: submission.isTestRun ? undefined : exercise?.testGroups,
         comparisonMode: exercise?.comparisonMode ?? 'token',
         floatPrecision: exercise?.floatPrecision ?? 0.001,
-        callbackUrl: `${PROCESS_SUBMISSION_CALLBACK_URL}/${submission.userId}/${submission.id}`,
+        callbackUrl: callbackUrl,
     };
     functions.logger.info(`submitting data: ${JSON.stringify(data)}`);
+
+    // if running locally, do not process through callback URL as we won't get the response that way
+    if (LOCALHOST) {
+        functions.logger.info('Submitting from local to LambdaJudge');
+        const judgeResult = await needle('post', LAMBDA_JUDGE_URL, JSON.stringify(data), {open_timeout: 1000});
+        functions.logger.info(`res: ${JSON.stringify(judgeResult.body)}`);
+        return processResult(judgeResult.body, submission.userId, submission.id);
+    }
 
     return new Promise((resolve) => {
         const dataString = JSON.stringify(data);
@@ -54,24 +65,20 @@ const submitLambdaJudge = async (submission: Submission, exercise: Exercise): Pr
     });
 };
 
-const submitAnswerCheck = async (submission: Submission, exercise: Exercise) => {
-    const course = (await db.course(submission.course.id).get()).data();
+const submitAnswerCheck = async (submission: Submission) => {
     const target = (await db.exercisePrivateFields(submission.course.id, submission.exercise.id).get()).data()?.answer;
     const answer = Object.values(submission.code ?? {})[0];
     functions.logger.info(`The answer was: ${answer} with target: ${target}`);
 
-    if (!target) throw Error(`The exercise ${submission.exercise.id} does not have an answer`);
-    if (!course) throw Error(`The course ${submission.course.id} does not exist`);
+    if (!target)
+        throw Error(`The exercise ${submission.exercise.id} does not have an answer`);
 
     const isCorrect = answer.trim() === target.trim();
-    return processResult({
+    return processResult({overall: {
         ...submission,
-        isBest: false,
         status: isCorrect ? 'Solved' : 'Wrong answer',
-        memory: 0, time: 0, score: isCorrect ? 100 : 0,
-        courseTitle: course.title,
-        exerciseTitle: exercise.title,
-    }, submission.userId, submission.id);
+        memory: 0, time: 0, score: isCorrect ? 100 : 0, returnCode: 0,
+    }}, submission.userId, submission.id);
 };
 
 export const submit = async (submission: Submission): Promise<http.ClientRequest | void> => {
@@ -124,7 +131,7 @@ export const submit = async (submission: Submission): Promise<http.ClientRequest
 
     functions.logger.info('Submitting solution to the judge...');
     if (submission.language === 'txt')
-        return submitAnswerCheck(submission, exercise);
+        return submitAnswerCheck(submission);
     return submitLambdaJudge(submission, exercise);
 };
 

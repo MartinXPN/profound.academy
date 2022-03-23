@@ -11,6 +11,7 @@ import {Comment, Vote} from "models/forum";
 import {CodeDraft} from "models/codeDrafts";
 import {Insight} from "models/lib/courses";
 import {CoursePrivateFields} from "../../functions/src/models/courses";
+import {TestResults} from "../../functions/src/models/submissions";
 
 // Add ids when getting the data and removing when sending it
 const converter = <T>() => ({
@@ -56,14 +57,16 @@ const db = {
     forum: dataPoint<Comment>('forum'),
     forumComment: (commentId: string) => dataPoint<Comment>('forum').doc(commentId),
     forumCommentVotes: (commentId: string, userId: string) => dataPoint<Vote>(`forum/${commentId}/voters`).doc(userId),
-    submissionQueue: (userId: string) => dataPoint<Submission>(`submissionQueue/${userId}/private`),
 
+    submissionQueue: (userId: string) => dataPoint<Submission>(`submissionQueue/${userId}/private`),
     runs: (userId: string) => dataPoint<SubmissionResult>(`runs/${userId}/private`),
     run: (userId: string, submissionId: string) => dataPoint<SubmissionResult>(`runs/${userId}/private`).doc(submissionId),
+    runTestResults: (userId: string, submissionId: string) => dataPoint<TestResults>(`runs/${userId}/private/${submissionId}/testResults`).doc('results'),
 
     submissionResults: dataPoint<SubmissionResult>('submissions'),
     submissionResult: (submissionId: string) => dataPoint<SubmissionResult>('submissions').doc(submissionId),
     submissionSensitiveRecords: (userId: string, submissionId: string) => dataPoint<SubmissionSensitiveRecords>(`/submissions/${submissionId}/private`).doc(userId),
+    submissionTestResults: (userId: string, submissionId: string) => dataPoint<TestResults>(`/submissions/${submissionId}/testResults`).doc(userId),
 
     codeDrafts: (courseId: string, exerciseId: string) => dataPoint<CodeDraft>(`codeDrafts/${courseId}/${exerciseId}`),
     codeDraft: (courseId: string, exerciseId: string, userId: string) => dataPoint<CodeDraft>(`codeDrafts/${courseId}/${exerciseId}`).doc(userId),

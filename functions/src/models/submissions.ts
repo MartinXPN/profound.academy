@@ -25,16 +25,37 @@ export interface Submission {
     isTestRun: boolean;
 }
 
+export interface TestResult {
+    status: SubmissionStatus;
+    memory: number;
+    time: number;
+    returnCode: number;
+    score: number;
+    message?: string;
+    outputs?: string;
+    errors?: string;
+}
+
+export interface TestResults {
+    testResults: TestResult[];
+}
+
+export interface JudgeResult {
+    overall: TestResult;
+    compileResult?: TestResult;
+    testResults?: TestResult[];
+}
+
 export interface SubmissionResult extends Submission {
     isBest: boolean;
-    status: SubmissionStatus | SubmissionStatus[];
-    memory: number | number[];
-    time: number | number[];
+    status: SubmissionStatus;
+    memory: number;
+    time: number;
     score: number;
-    message?: string | string[];
-    outputs?: string | string[];
-    errors?: string | string[];
-    compileOutputs?: string;
+    message?: string;
+    outputs?: string;
+    errors?: string;
+    compileResult?: TestResult;
     // for displaying results
     userDisplayName?: string;
     userImageUrl?: string;

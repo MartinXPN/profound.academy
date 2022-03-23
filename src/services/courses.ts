@@ -166,6 +166,10 @@ export const updateCourse = async (
     visibility: 'public' | 'unlisted' | 'private', rankingVisibility: 'public' | 'private', allowViewingSolutions: boolean,
     title: string, author: string, instructors: string[], introduction: string) => {
     console.log('update course:', id, img, revealsAt, freezesAt, visibility, rankingVisibility, allowViewingSolutions);
+    if( !instructors.includes(userId) ) {
+        console.log('Adding the current user as an instructor as well');
+        instructors.push(userId);
+    }
     const exists = await doesExist(id);
     if( !exists )
         await registerForCourse(userId, id);

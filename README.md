@@ -16,14 +16,15 @@ and allow students to learn at their own pace while increasing their engagement 
 # Development
 
 ### Prerequisites
-To run the firebase functions `.runtimeconfig.json` needs to be present under `/functions/` directory.
+To run the firebase functions `.runtimeconfig.json` needs to be present in the project root and `functions/` directories.
 AWS S3 id and key need to be present for generating signed-url when uploading private `.zip` test cases to S3.
 ```json
 {
   "aws_s3": {
     "id": "XXXXXXXXXXXXXXXXXXXX",
     "key": "KKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKK"
-  }
+  },
+  "host": "local" // <--- optional to indicate local execution
 }
 ```
 
@@ -36,6 +37,7 @@ Available scripts include:
 * `firebase deploy` Deploys the whole project to production (backend, frontend, Firestore, and rules)
 * `firebase deploy --only hosting` Deploys the Rect app in the `build` folder to production
 * `yarn update:models` Updates the models in the React app from `functions/src/models`
+* ` lsof -t -i tcp:5000 | xargs kill &&  lsof -t -i tcp:5001 | xargs kill &&  lsof -t -i tcp:9099 | xargs kill &&  lsof -t -i tcp:8080 | xargs kill &&  lsof -t -i tcp:9199 | xargs kill &&  lsof -t -i tcp:8087 | xargs kill # firebase kill all emulators` Kills all firebase emulators and frees up ports
 
 ### Project structure
 The project is organized as a mono-repo that includes both the front-end (React app) and the backend-end (Firebase serverless functions)

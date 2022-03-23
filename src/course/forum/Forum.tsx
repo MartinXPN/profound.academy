@@ -4,13 +4,8 @@ import {onExerciseCommentsChanged, saveComment} from "../../services/forum";
 import {Comment} from 'models/forum';
 import CommentView from "./CommentView";
 import {AuthContext} from "../../App";
-import { styled } from '@mui/material/styles';
 import {CourseContext, CurrentExerciseContext} from "../Course";
-
-
-const RootContainer = styled('div')(({theme}) => ({
-    margin: theme.spacing(4),
-}));
+import Box from "@mui/material/Box";
 
 
 function Forum() {
@@ -46,7 +41,7 @@ function Forum() {
 
 
     return (
-        <RootContainer>
+        <Box margin={4} marginBottom={24}>
             <Typography variant='h5'>Ask & answer questions</Typography>
             <List>
                 {comments.map(c => <CommentView comment={c} key={c.id} allowReply={true}/>)}
@@ -65,7 +60,7 @@ function Forum() {
                     </Button>}
                 </>}
             </List>
-        </RootContainer>
+        </Box>
     );
 }
 

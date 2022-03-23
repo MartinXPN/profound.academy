@@ -5,7 +5,7 @@
     "lint": "eslint --ext .js,.ts .",
     "build": "tsc",
     "serve": "yarn build && firebase emulators:start --only functions",
-    "emulate": "yarn build -- --watch | firebase emulators:start --import=test_data --export-on-exit=test_data",
+    "emulate": "(yarn build -- --watch) | (firebase emulators:start --import=./test_data --export-on-exit)",
     "shell": "yarn build && firebase functions:shell",
     "start": "yarn shell",
     "deploy": "firebase deploy --only functions",

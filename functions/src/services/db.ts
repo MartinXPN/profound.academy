@@ -6,7 +6,7 @@ import {Notification} from '../models/notifications';
 import {Course, CoursePrivateFields, Insight} from '../models/courses';
 import {Exercise, ExercisePrivateFields} from '../models/exercise';
 import {Progress, ExerciseProgress} from '../models/progress';
-import {Submission, SubmissionResult, SubmissionSensitiveRecords} from '../models/submissions';
+import {Submission, SubmissionResult, SubmissionSensitiveRecords, TestResults} from '../models/submissions';
 import {Comment, Vote} from '../models/forum';
 
 admin.initializeApp({credential: admin.credential.applicationDefault()});
@@ -57,14 +57,16 @@ const db = {
     forum: dataPoint<Comment>('forum'),
     forumComment: (commentId: string) => dataPoint<Comment>('forum').doc(commentId),
     forumCommentVotes: (commentId: string, userId: string) => dataPoint<Vote>(`forum/${commentId}/voters`).doc(userId),
-    submissionQueue: (userId: string) => dataPoint<Submission>(`submissionQueue/${userId}/private`),
 
+    submissionQueue: (userId: string) => dataPoint<Submission>(`submissionQueue/${userId}/private`),
     runs: (userId: string) => dataPoint<SubmissionResult>(`runs/${userId}/private`),
     run: (userId: string, submissionId: string) => dataPoint<SubmissionResult>(`runs/${userId}/private`).doc(submissionId),
+    runTestResults: (userId: string, submissionId: string) => dataPoint<TestResults>(`runs/${userId}/private/${submissionId}/testResults`).doc('results'),
 
     submissionResults: dataPoint<SubmissionResult>('submissions'),
     submissionResult: (submissionId: string) => dataPoint<SubmissionResult>('submissions').doc(submissionId),
     submissionSensitiveRecords: (userId: string, submissionId: string) => dataPoint<SubmissionSensitiveRecords>(`/submissions/${submissionId}/private`).doc(userId),
+    submissionTestResults: (userId: string, submissionId: string) => dataPoint<TestResults>(`/submissions/${submissionId}/testResults`).doc(userId),
 
     codeDraft: (courseId: string, exerciseId: string, userId: string) => dataPoint<CodeDraft>(`codeDrafts/${courseId}/${exerciseId}`).doc(userId),
 

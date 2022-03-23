@@ -12,6 +12,7 @@ import {statusColors, statusToColor} from "../colors";
 import {CurrentExerciseContext} from "../Course";
 import Box from "@mui/material/Box";
 import {styled} from "@mui/material/styles";
+import {TestResult} from "models/lib/submissions";
 
 
 const StatusTypography = styled(Typography)({
@@ -21,20 +22,25 @@ const StatusTypography = styled(Typography)({
 });
 
 
-function Console({onSubmitClicked, onRunClicked, isProcessing, submissionResult}: {
+function Console({onSubmitClicked, onRunClicked, isProcessing, submissionResult, testResults}: {
     onSubmitClicked: () => void, onRunClicked: (tests: TestCase[]) => void,
-    isProcessing: boolean, submissionResult: SubmissionResult | null
+    isProcessing: boolean, submissionResult: SubmissionResult | null, testResults: TestResult[] | null,
 }) {
     const {exercise} = useContext(CurrentExerciseContext);
-
-    const message = submissionResult?.message ?? undefined;
-    const outputs = submissionResult?.outputs ?? undefined;
-    const errors = submissionResult?.errors ?? undefined;
-    const status = submissionResult?.status ?? undefined;
-    const memory = submissionResult?.memory ?? undefined;
-    const time = submissionResult?.time ?? undefined;
     const [selectedTest, setSelectedTest] = useState<number | null>(null);
     const [tests, setTests] = useState<TestCase[]>([]);
+
+    const getTestProp = (propName: 'message' | 'outputs' | 'errors' | 'status' | 'memory' | 'time' | 'score', index: number | null) => {
+        if( index === null )
+            return null;
+        if( Array.isArray(submissionResult?.[propName]) ) {
+            // @ts-ignore
+            return submissionResult?.[propName]?.[index];
+        }
+        if( !testResults )
+            return submissionResult?.[propName];
+        return testResults[index][propName];
+    }
 
     useEffect(() => {
         if( exercise )
@@ -85,7 +91,7 @@ function Console({onSubmitClicked, onRunClicked, isProcessing, submissionResult}
             <ToggleButtonGroup value={selectedTest} exclusive size='small' sx={{float: 'left'}}>
 
                 {tests.map((test, index) => {
-                    const currentStatus = Array.isArray(status) ? status[index] : status;
+                    const currentStatus = getTestProp('status', index);
                     console.log('index:', index, 'status:', currentStatus);
                     return (<div key={index.toString()}>
                         <Badge invisible={selectedTest !== index || index < exercise.testCases.length} badgeContent={
@@ -134,7 +140,9 @@ function Console({onSubmitClicked, onRunClicked, isProcessing, submissionResult}
             {submissionResult && submissionResult.status === 'Compilation error' &&
             <>
                 <StatusTypography style={{color: statusColors.failed}}>{submissionResult.status}</StatusTypography>
-                {submissionResult.compileOutputs?.trim() && <Typography whiteSpace='pre-wrap'>{submissionResult.compileOutputs}</Typography>}
+                {submissionResult.compileResult?.message?.trim() && <Typography whiteSpace='pre-wrap'>{submissionResult.compileResult?.message}</Typography>}
+                {submissionResult.compileResult?.outputs?.trim() && <Typography whiteSpace='pre-wrap'>{submissionResult.compileResult?.outputs}</Typography>}
+                {submissionResult.compileResult?.errors?.trim() && <Typography whiteSpace='pre-wrap'>{submissionResult.compileResult?.errors}</Typography>}
             </>}
 
             {!isProcessing && !submissionResult && selectedTest === null &&
@@ -143,13 +151,13 @@ function Console({onSubmitClicked, onRunClicked, isProcessing, submissionResult}
             {selectedTest !== null && selectedTest < tests.length &&
             <TestView
                 testCase={tests[selectedTest]}
-                message={Array.isArray(message) ? message[selectedTest] : message}
-                output={Array.isArray(outputs) ? outputs[selectedTest] : outputs}
-                error={Array.isArray(errors) ? errors[selectedTest] : errors}
+                message={getTestProp('message', selectedTest)}
+                output={getTestProp('outputs', selectedTest)}
+                error={getTestProp('errors', selectedTest)}
                 readOnly={selectedTest < exercise.testCases.length}
-                status={Array.isArray(status) ? status[selectedTest] : status}
-                memory={Array.isArray(memory) ? memory[selectedTest] : memory}
-                time={Array.isArray(time) ? time[selectedTest] : time}
+                status={getTestProp('status', selectedTest)}
+                memory={getTestProp('memory', selectedTest)}
+                time={getTestProp('time', selectedTest)}
                 onSaveTest={(input, target) => onSaveTest(selectedTest, input, target)} />}
         </Box>
     </>;

@@ -2,7 +2,7 @@ import {firestore} from 'firebase-admin';
 import * as functions from 'firebase-functions';
 import * as moment from 'moment';
 import {db} from './db';
-import {SubmissionResult} from '../models/submissions';
+import {JudgeResult, SubmissionResult} from '../models/submissions';
 import {Course} from '../models/courses';
 import {Exercise} from '../models/exercise';
 import {User} from '../models/users';
@@ -98,55 +98,49 @@ const unlockContent = (
 
 
 export const processResult = async (
-    judgeResult: SubmissionResult,
+    judgeResult: JudgeResult,
     userId: string,
     submissionId: string,
 ): Promise<void> => {
     functions.logger.info(`res for user ${userId}, submission ${submissionId}: ${JSON.stringify(judgeResult)}`);
     const submission = (await db.submissionQueue(userId).doc(submissionId).get()).data();
-    const {code, ...submissionResult} = {...submission, ...judgeResult, id: submissionId, isBest: false};
+    if (!submission) throw Error(`Submission ${submissionId} was not found`);
+    if (!judgeResult) throw Error('Submission result is null');
+
+    const [course, exercise, user] = await Promise.all([
+        (await db.course(submission.course.id).get()).data(),
+        (await db.exercise(submission.course.id, submission.exercise.id).get()).data(),
+        (await db.user(submission.userId).get()).data(),
+    ]);
+    if (!course) throw Error(`Course with id ${submission.course.id} does not exist`);
+    if (!exercise) throw Error(`Exercise with id ${submission.exercise.id} does not exist`);
+
+    const testResults = judgeResult.testResults ?? [];
+    const {code, ...submissionResult}: SubmissionResult = {
+        ...submission, ...judgeResult.overall,
+        id: submissionId, isBest: false,
+        compileResult: judgeResult.compileResult,
+        courseTitle: course.title, exerciseTitle: exercise.title,
+        userImageUrl: user?.imageUrl ?? '',
+        userDisplayName: user?.displayName ?? '',
+    };
     functions.logger.info(`submissionResult: ${JSON.stringify(submissionResult)}`);
     const submissionDate = submissionResult.createdAt.toDate();
-
-    if (!judgeResult)
-        throw Error('Submission result is null');
+    const level = Math.trunc(exercise.order).toString();
 
     if (submissionResult.isTestRun) {
         // save the results to /runs/userId/private/<submissionId>
         functions.logger.info(`Updating the run: ${submissionResult.id} with ${JSON.stringify(submissionResult)}`);
         return await firestore().runTransaction(async (transaction) => {
             transaction.set(db.run(userId, submissionResult.id), submissionResult);
-            const [courseId, exerciseId] = [submissionResult.course.id, submissionResult.exercise.id];
-            recordInsights(transaction, 'runs', courseId, exerciseId, submissionDate);
+            transaction.set(db.runTestResults(userId, submissionId), {testResults: testResults});
+            recordInsights(transaction, 'runs', course.id, exercise.id, submissionDate);
         });
     }
-    const [courseSnapshot, exerciseSnapshot, userSnapshot] = await Promise.all([
-        db.course(submissionResult.course.id).get(),
-        db.exercise(submissionResult.course.id, submissionResult.exercise.id).get(),
-        db.user(submissionResult.userId).get(),
-    ]);
-    const course = courseSnapshot.data();
-    const exercise = exerciseSnapshot.data();
-    const user = userSnapshot.data();
-    if (!course)
-        throw Error(`Course with id ${submissionResult.course.id} does not exist`);
-    if (!exercise)
-        throw Error(`Exercise with id ${submissionResult.exercise.id} does not exist`);
 
     functions.logger.info(`Setting the score to exerciseScore instead of judgeScore (${submissionResult.score})...`);
     submissionResult.score = submissionResult.score / 100.0 * (exercise.score ?? 100);
     functions.logger.info(`Exercise score is set to: ${submissionResult.score}`);
-
-    const status = typeof submissionResult.status === 'string' ? submissionResult.status :
-        submissionResult.status.reduce((prev, cur) => cur === 'Solved' ? prev : cur, 'Solved');
-    const level = Math.trunc(exercise.order).toString();
-    const displayName = submissionResult.userDisplayName ?? user?.displayName;
-    const imageUrl = user?.imageUrl ?? '';
-    submissionResult.userDisplayName = displayName;
-    submissionResult.userImageUrl = imageUrl;
-    submissionResult.courseTitle = course.title;
-    submissionResult.exerciseTitle = exercise.title;
-
 
     functions.logger.info(`Updating the submission: ${submissionResult.id} with ${JSON.stringify(submissionResult)}`);
     // Update the best submissions
@@ -158,7 +152,6 @@ export const processResult = async (
 
         const bestUserSubmissions = (await transaction.get(bestUserSubmissionsRef)).docs.map((s) => s.data());
         let alreadySolved = false;
-
         if (bestUserSubmissions.length > 1)
             throw Error(`Duplicate user best: ${submissionResult.userId} for ex: ${submissionResult.exercise.id}`);
 
@@ -171,7 +164,8 @@ export const processResult = async (
 
         // save the sensitive information to /submissions/${submissionId}/private/${userId}
         const sensitiveData = {code: code};
-        transaction.set(db.submissionSensitiveRecords(submissionResult.userId, submissionResult.id), sensitiveData);
+        transaction.set(db.submissionSensitiveRecords(userId, submissionResult.id), sensitiveData);
+        transaction.set(db.submissionTestResults(userId, submissionResult.id), {testResults: testResults});
         functions.logger.info(`Saved the submission: ${JSON.stringify(code)}`);
 
         // update insights and activity
@@ -212,10 +206,11 @@ export const processResult = async (
         }
 
         updateUserMetric(transaction, 'solved', submissionResult.userId, course.id, exercise.id, level,
-            prevSolved?.progress?.[exercise.id] === 'Solved' ? 1 : 0, status === 'Solved' ? 1 : 0, status);
+            prevSolved?.progress?.[exercise.id] === 'Solved' ? 1 : 0,
+            submissionResult.status === 'Solved' ? 1 : 0, submissionResult.status);
         transaction.set(db.userProgress(course.id, submissionResult.userId), {
-            userDisplayName: displayName,
-            userImageUrl: imageUrl,
+            userDisplayName: submissionResult.userDisplayName,
+            userImageUrl: submissionResult.userImageUrl,
         }, {merge: true});
     });
 };

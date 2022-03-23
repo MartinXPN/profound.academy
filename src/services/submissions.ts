@@ -3,6 +3,7 @@ import firebase from "firebase/app";
 import {Language} from "models/language";
 import {TestCase} from "models/exercise";
 import {Submission, SubmissionResult} from "models/submissions";
+import {TestResult} from "models/lib/submissions";
 
 
 export const submitSolution = async (userId: string,
@@ -34,23 +35,39 @@ export const submitSolution = async (userId: string,
 
 export const onRunResultChanged = (userId: string, submissionId: string,
                                    onChanged: (submissionResult: SubmissionResult | null) => void) => {
-    const resultSnapshot = db.run(userId, submissionId);
-    return resultSnapshot.onSnapshot(doc => {
+    return db.run(userId, submissionId).onSnapshot(doc => {
         const res = doc.data();
         console.log('Run result changed:', submissionId, res);
         onChanged(res ?? null);
-    })
+    });
 }
 
 
 export const onSubmissionResultChanged = (userId: string, submissionId: string,
                                           onChanged: (submissionResult: SubmissionResult | null) => void) => {
-    const resultSnapshot = db.submissionResult(submissionId);
-    return resultSnapshot.onSnapshot(doc => {
+    return db.submissionResult(submissionId).onSnapshot(doc => {
         const res = doc.data();
         console.log('Submission result changed:', submissionId, res);
         onChanged(res ?? null);
-    })
+    });
+}
+
+export const onRunTestResultsChanged = (userId: string, submissionId: string,
+                                        onChanged: (testResults: TestResult[] | null) => void) => {
+    return db.runTestResults(userId, submissionId).onSnapshot(snapshot => {
+        const res = snapshot.data();
+        console.log('Run test results changed:', submissionId, res);
+        onChanged(res?.testResults ?? null);
+    });
+}
+
+export const onSubmissionTestResultsChanged = (userId: string, submissionId: string,
+                                               onChanged: (testResults: TestResult[] | null) => void) => {
+    return db.submissionTestResults(userId, submissionId).onSnapshot(snapshot => {
+        const res = snapshot.data();
+        console.log('Run test results changed:', submissionId, res);
+        onChanged(res?.testResults ?? null);
+    });
 }
 
 

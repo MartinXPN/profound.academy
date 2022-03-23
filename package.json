@@ -46,6 +46,7 @@
   },
   "scripts": {
     "analyze": "source-map-explorer 'build/static/js/*.js'",
+    "emulate": "(yarn --cwd functions build -- --watch) | (firebase emulators:start --import=./test_data --export-on-exit)",
     "start": "GENERATE_SOURCEMAP=false react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",

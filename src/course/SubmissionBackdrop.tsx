@@ -10,6 +10,7 @@ import {LANGUAGES} from "models/language";
 import {getModeForPath} from "ace-builds/src-noconflict/ext-modelist";
 import {Close} from "@mui/icons-material";
 import SmallAvatar from "../common/SmallAvatar";
+import SubmissionTestsStatus from "./SubmissionTestsStatus";
 
 
 const CodeBackdrop = styled(Backdrop)(({theme}) => ({
@@ -65,7 +66,7 @@ function SubmissionBackdrop({submission, onClose}: {submission: SubmissionResult
                         : <Code readOnly theme="tomorrow" fontSize={14}
                               language={editorLanguage} code={submissionCode} />
                     }
-                    <Typography variant="body2" color="text.secondary" noWrap textAlign="center">Instructors will see results per test case here</Typography>
+                    <SubmissionTestsStatus submission={submission} />
                 </Paper>
             </ClickAwayListener>
         </CodeBackdrop>

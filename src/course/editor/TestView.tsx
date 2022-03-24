@@ -5,13 +5,14 @@ import {statusToColor} from "../colors";
 import {StatusTypography} from "../../common/StatusTypography";
 
 
-function TestView({testCase, message, output, error, readOnly, status, memory, time, onSaveTest}: {
+function TestView({testCase, message, output, error, readOnly, status, score, memory, time, onSaveTest}: {
     testCase: TestCase,
     message?: string,
     output?: string,
     error?: string,
     readOnly: boolean,
     status?: string,
+    score?: number,
     memory?: number,
     time?: number,
     onSaveTest: (input: string, target: string) => void
@@ -38,7 +39,7 @@ function TestView({testCase, message, output, error, readOnly, status, memory, t
     return <>
         {!!status && !!time &&
         <StatusTypography style={{color: statusToColor(status)}}>
-            {status} in {time.toFixed(2)} seconds, used {memory?.toFixed(1)}MB
+            {status} with score {score} in {time.toFixed(2)} seconds, used {memory?.toFixed(1)}MB
         </StatusTypography>
         }
 

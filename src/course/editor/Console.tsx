@@ -37,7 +37,7 @@ function Console({onSubmitClicked, onRunClicked, isProcessing, submissionResult,
             // @ts-ignore
             return submissionResult?.[propName]?.[index];
         }
-        if( !testResults )
+        if( !testResults || testResults.length <= index )
             return submissionResult?.[propName];
         return testResults[index][propName];
     }
@@ -156,6 +156,7 @@ function Console({onSubmitClicked, onRunClicked, isProcessing, submissionResult,
                 error={getTestProp('errors', selectedTest)}
                 readOnly={selectedTest < exercise.testCases.length}
                 status={getTestProp('status', selectedTest)}
+                score={getTestProp('score', selectedTest)}
                 memory={getTestProp('memory', selectedTest)}
                 time={getTestProp('time', selectedTest)}
                 onSaveTest={(input, target) => onSaveTest(selectedTest, input, target)} />}

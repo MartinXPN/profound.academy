@@ -37,9 +37,9 @@ function TestView({testCase, message, output, error, readOnly, status, score, me
     }, [testCase, input, target, onSaveTest]);
 
     return <>
-        {!!status && !!time &&
+        {!!status && !!time && !!score &&
         <StatusTypography style={{color: statusToColor(status)}}>
-            {status} with score {score} in {time.toFixed(2)} seconds, used {memory?.toFixed(1)}MB
+            {status} with score {parseFloat(score.toFixed(2))} in {time.toFixed(2)} seconds, used {memory?.toFixed(1)}MB
         </StatusTypography>
         }
 

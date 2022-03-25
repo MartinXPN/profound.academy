@@ -34,7 +34,7 @@ function SubmissionTestsStatus({submission}: {submission: SubmissionResult}) {
                         return <>
                             <TableRow key={`${submission.id}-test-${index}`} sx={{'&:last-child td, &:last-child th': { border: 0 }}}>
                                 <TableCell align="left">{index + 1}</TableCell>
-                                <TableCell align="center">{test.score}</TableCell>
+                                <TableCell align="center">{parseFloat(test.score.toFixed(2))}</TableCell>
                                 <TableCell align="center" style={{color: color}}>{test.status}</TableCell>
                                 <TableCell align="center">{test.time.toFixed(2)}</TableCell>
                                 <TableCell align="center">{test.memory.toFixed(1)}</TableCell>

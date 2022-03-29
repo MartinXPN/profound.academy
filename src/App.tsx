@@ -1,8 +1,8 @@
 import React, {Suspense, createContext, lazy, useEffect} from 'react';
 import {BrowserRouter as Router, Route, Routes} from 'react-router-dom';
 
-import firebase from 'firebase/app';
-import 'firebase/auth';
+import firebase from 'firebase/compat/app';
+import 'firebase/compat/auth';
 import './firebase';
 
 import { ThemeProvider, StyledEngineProvider, createTheme } from '@mui/material/styles';
@@ -18,7 +18,6 @@ const Course = lazy(() => import('./course/Course'));
 const CourseEditor = lazy(() => import('./course/CourseEditor'));
 
 
-firebase.analytics();
 const theme = createTheme({
     palette: {
         background: {

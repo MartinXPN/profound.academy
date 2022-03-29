@@ -1,7 +1,7 @@
-import firebase from 'firebase/app';
-import 'firebase/firestore';
-import 'firebase/analytics';
-import 'firebase/performance';
+import firebase from 'firebase/compat/app';
+import 'firebase/compat/firestore';
+import { getAnalytics } from 'firebase/analytics';
+import { getPerformance } from 'firebase/performance';
 // import 'firebase/functions';
 // import 'firebase/storage';
 
@@ -15,16 +15,16 @@ export const firebaseConfig = {
     measurementId: "G-5EM92EE4GL"
 };
 
-firebase.initializeApp(firebaseConfig);
+const app = firebase.initializeApp(firebaseConfig);
 
 // configure the database to ignore undefined values
 const db = firebase.firestore();
 db.settings({ignoreUndefinedProperties: true});
 
-const perf = firebase.performance();
+const perf = getPerformance(app);
 console.log('perf enabled:', perf.dataCollectionEnabled);
 
-const analytics = firebase.analytics();
+const analytics = getAnalytics(app);
 console.log('analytics:', analytics);
 
 // if (window.location.hostname === 'localhost') {

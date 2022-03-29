@@ -1,6 +1,6 @@
 import {db} from "./db";
 import {LANGUAGES} from "models/language";
-import firebase from "firebase";
+import firebase from "firebase/compat/app";
 import {CodeDraft, TextSelection} from "models/codeDrafts";
 
 export const saveCode = async (

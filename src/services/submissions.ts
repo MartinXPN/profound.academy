@@ -1,5 +1,5 @@
 import {db} from "./db";
-import firebase from "firebase/app";
+import firebase from "firebase/compat/app";
 import {Language} from "models/language";
 import {TestCase} from "models/exercise";
 import {Submission, SubmissionResult} from "models/submissions";

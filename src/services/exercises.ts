@@ -1,6 +1,6 @@
 import {db} from "./db";
 import {Exercise, EXERCISE_TYPES, TestCase} from "models/exercise";
-import firebase from "firebase";
+import firebase from "firebase/compat/app";
 import axios from "axios";
 import {LANGUAGES} from "models/language";
 import {Insight} from "models/lib/courses";

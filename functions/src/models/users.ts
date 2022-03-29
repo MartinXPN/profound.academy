@@ -1,5 +1,5 @@
 import {Course} from './courses';
-import firebase from 'firebase';
+import firebase from 'firebase/compat/app';
 
 export interface Activity {
     // @ts-ignore

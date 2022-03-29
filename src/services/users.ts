@@ -1,6 +1,6 @@
 import {db} from "./db";
 import {Activity, User} from "models/users";
-import firebase from "firebase";
+import firebase from "firebase/compat/app";
 
 export const getUserActivity = async (userId: string) => {
     const snapshot = await db.activity(userId).get();

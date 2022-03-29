@@ -1,6 +1,6 @@
 import {db} from "./db";
 import {Course} from "models/courses";
-import firebase from "firebase/app";
+import firebase from "firebase/compat/app";
 import {CoursePrivateFields, Insight} from "models/lib/courses";
 import moment from "moment/moment";
 import {dateDayDiff} from "../util";

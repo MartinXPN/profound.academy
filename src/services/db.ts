@@ -1,5 +1,5 @@
-import firebase from 'firebase/app';
-import 'firebase/firestore';
+import firebase from 'firebase/compat/app';
+import 'firebase/compat/firestore';
 
 import {Activity, User, UserInfoUpdate, UserRole} from "models/users";
 import {Notification} from "models/notifications";

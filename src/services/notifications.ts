@@ -1,6 +1,6 @@
 import {db} from "./db";
 import {Notification} from "models/notifications";
-import firebase from "firebase/app";
+import firebase from "firebase/compat/app";
 
 export const onNotificationsChanged = (userId: string,
                                        onChanged: (notifications: Notification[]) => void) => {

@@ -36,32 +36,32 @@ const submitLambdaJudge = async (submission: Submission, exercise: Exercise): Pr
         floatPrecision: exercise?.floatPrecision ?? 0.001,
         callbackUrl: callbackUrl,
     };
-    functions.logger.info(`submitting data: ${JSON.stringify(data)}`);
+    const dataString = JSON.stringify(data);
+    functions.logger.info(`submitting data: ${dataString}`);
 
     // if running locally, do not process through callback URL as we won't get the response that way
     if (LOCALHOST) {
         functions.logger.info('Submitting from local to LambdaJudge');
-        const judgeResult = await needle('post', LAMBDA_JUDGE_URL, JSON.stringify(data), {open_timeout: 1000});
+        const judgeResult = await needle('post', LAMBDA_JUDGE_URL, dataString, {open_timeout: 1000});
         functions.logger.info(`res: ${JSON.stringify(judgeResult.body)}`);
         return processResult(judgeResult.body, submission.userId, submission.id);
     }
 
     return new Promise((resolve) => {
-        const dataString = JSON.stringify(data);
         const options = {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json',
-                'Content-Length': dataString.length,
+                'Content-Type': 'application/json; charset=utf-8',
+                'Content-Length': Buffer.byteLength(dataString, 'utf-8'),
             },
             timeout: 1000, // in ms
         };
 
         const req = https.request(LAMBDA_JUDGE_URL, options);
-        req.write(dataString);
+        req.write(dataString, 'utf-8');
         functions.logger.info(`req: ${JSON.stringify(req)}`);
         req.end(() => resolve(req));
-        functions.logger.info('done:');
+        functions.logger.info('Done!');
     });
 };
 

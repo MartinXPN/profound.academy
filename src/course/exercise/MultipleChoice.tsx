@@ -2,7 +2,7 @@ import React, {memo, useContext, useState} from "react";
 import {Button, CircularProgress, Grid, RadioGroup, Radio, FormControlLabel, FormControl, FormLabel} from "@mui/material";
 import {AuthContext} from "../../App";
 import {CourseContext, CurrentExerciseContext} from "../Course";
-import {useStickyState} from "../../util";
+import {useStickyState} from "../../common/stickystate";
 import {SubmissionResult} from "models/submissions";
 import {onSubmissionResultChanged, submitSolution} from "../../services/submissions";
 import {LANGUAGES} from "models/language";

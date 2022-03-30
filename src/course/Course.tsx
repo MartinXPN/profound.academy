@@ -11,7 +11,7 @@ import {Exercise as ExerciseModel} from "models/exercise";
 import {AuthContext} from "../App";
 import CourseDrawer from "./drawer/Drawer";
 import Exercise from "./exercise/Exercise";
-import {safeParse} from "../util";
+import {safeParse} from "../common/stickystate";
 import StatusPage from "./StatusPage";
 import LandingPage from "../home/LandingPage";
 

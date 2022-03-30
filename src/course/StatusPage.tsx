@@ -4,7 +4,7 @@ import Box from "@mui/material/Box";
 import OutlinedButton from "../common/OutlinedButton";
 import {AuthContext} from "../App";
 import {CourseContext} from "./Course";
-import {useStickyState} from "../util";
+import {useStickyState} from "../common/stickystate";
 import {CourseSubmissionsTable} from "./submission/SubmissionsTable";
 import RankingTable from "./ranking/RankingTable";
 import moment from "moment";

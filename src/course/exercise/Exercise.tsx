@@ -1,7 +1,8 @@
 import {useParams} from "react-router-dom";
 import React, {lazy, useCallback, useContext, useState, memo, Suspense, useEffect} from "react";
 import {AuthContext} from "../../App";
-import {useLocalize, useStickyState} from "../../util";
+import {useLocalize} from "../../common/localization";
+import {useStickyState} from "../../common/stickystate";
 import CourseLandingPage from "../CourseLandingPage";
 import {SignIn} from "../../user/Auth";
 import Editor from "../editor/Editor";

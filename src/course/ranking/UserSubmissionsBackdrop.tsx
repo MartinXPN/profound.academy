@@ -1,7 +1,7 @@
 import React, {memo} from "react";
 import {Backdrop, ClickAwayListener, IconButton, Paper, Stack, Typography} from "@mui/material";
 import SmallAvatar from "../../common/SmallAvatar";
-import {useLocalize} from "../../util";
+import {useLocalize} from "../../common/localization";
 import {Close} from "@mui/icons-material";
 import {UserExerciseSubmissionsTable} from "../submission/SubmissionsTable";
 import {styled} from "@mui/material/styles";

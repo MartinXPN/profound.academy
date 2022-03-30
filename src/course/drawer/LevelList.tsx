@@ -16,7 +16,7 @@ import {onCourseExerciseProgressChanged} from "../../services/progress";
 import {AuthContext} from "../../App";
 import {SubmissionStatus} from "models/submissions";
 import {CourseContext, CurrentExerciseContext} from "../Course";
-import {useLocalize} from '../../util';
+import {useLocalize} from '../../common/localization';
 import {useParams} from "react-router-dom";
 
 

@@ -20,7 +20,7 @@ import {Stack, Typography} from "@mui/material";
 import SmallAvatar from "../../common/SmallAvatar";
 import ClickableTableCell from "../../common/ClickableTableCell";
 import {LANGUAGES} from "models/language";
-import {localize} from "../../util";
+import {localize} from "../../common/localization";
 import Box from "@mui/material/Box";
 import {useNavigate} from "react-router-dom";
 import {NavigateFunction} from "react-router";

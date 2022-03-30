@@ -5,10 +5,11 @@ import {Collapse, Tooltip, Typography} from "@mui/material";
 import moment from "moment/moment";
 import useAsyncEffect from "use-async-effect";
 import {getUserActivity} from "../services/users";
-import {tomorrow, useStickyState} from "../util";
+import {tomorrow} from "../util";
 import Box from "@mui/material/Box";
 import {TransitionGroup} from "react-transition-group";
 import {UserDateSubmissionsTable} from "../course/submission/SubmissionsTable";
+import {useStickyState} from "../common/stickystate";
 
 
 function ActivityHeatmap({userId}: {userId: string}) {

@@ -1,4 +1,4 @@
-import React, {MutableRefObject, useEffect, useRef, useState} from "react";
+import React, {memo, MutableRefObject, useEffect, useRef, useState} from "react";
 import Box from "@mui/material/Box";
 import CircularProgress from "@mui/material/CircularProgress";
 
@@ -20,7 +20,7 @@ export function useOnScreen(ref: MutableRefObject<any>) {
 }
 
 
-export function BottomLoading({hasMore, loadMore}: {hasMore: boolean, loadMore: () => void}) {
+function InfiniteScrollLoading({hasMore, loadMore}: {hasMore: boolean, loadMore: () => void}) {
     const ref = useRef();
     const isVisible = useOnScreen(ref);
 
@@ -35,3 +35,5 @@ export function BottomLoading({hasMore, loadMore}: {hasMore: boolean, loadMore: 
     }
     </div>
 }
+
+export default memo(InfiniteScrollLoading);

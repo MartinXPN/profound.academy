@@ -5,7 +5,7 @@ import OutlinedButton from "../common/OutlinedButton";
 import {AuthContext} from "../App";
 import {CourseContext} from "./Course";
 import {useStickyState} from "../util";
-import {CourseSubmissionsTable} from "./SubmissionsTable";
+import {CourseSubmissionsTable} from "./submission/SubmissionsTable";
 import RankingTable from "./ranking/RankingTable";
 import moment from "moment";
 import Dashboard from "./Dashboard";

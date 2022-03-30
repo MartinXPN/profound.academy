@@ -8,7 +8,7 @@ import {getUserActivity} from "../services/users";
 import {tomorrow, useStickyState} from "../util";
 import Box from "@mui/material/Box";
 import {TransitionGroup} from "react-transition-group";
-import {UserDateSubmissionsTable} from "../course/SubmissionsTable";
+import {UserDateSubmissionsTable} from "../course/submission/SubmissionsTable";
 
 
 function ActivityHeatmap({userId}: {userId: string}) {

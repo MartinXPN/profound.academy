@@ -14,7 +14,7 @@ import {Typography} from "@mui/material";
 import useAsyncEffect from "use-async-effect";
 import {useNavigate} from "react-router-dom";
 import ClickableTableCell from "../../common/ClickableTableCell";
-import {BottomLoading} from "../../common/loading";
+import InfiniteScrollLoading from "../../common/InfiniteScrollLoading";
 import RankingPage from "./RankingPage";
 
 
@@ -134,7 +134,7 @@ function RankingTable({metric, showProgress}: {metric: string, showProgress?: bo
                     })}
                 </TableBody>
             </Table>
-            <BottomLoading hasMore={hasMore} loadMore={loadNextPage} />
+            <InfiniteScrollLoading hasMore={hasMore} loadMore={loadNextPage} />
         </TableContainer>
     );
 }

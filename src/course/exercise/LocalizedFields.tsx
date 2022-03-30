@@ -1,13 +1,13 @@
 import React, {memo} from "react";
 import {Autocomplete, Button, IconButton, List, ListItem, Stack, TextField} from "@mui/material";
 import Box from "@mui/material/Box";
-import { notionPageToId } from "../../util";
 
 import {Controller, useFieldArray, useFormContext} from "react-hook-form";
 import {infer as Infer, object, string} from "zod";
 import CloseIcon from "@mui/icons-material/Close";
 import AddIcon from "@mui/icons-material/Add";
 import * as locales from "@mui/material/locale";
+import {notionPageToId} from "../../services/notion";
 
 
 export const fieldSchema = object({
@@ -111,15 +111,13 @@ function LocalizedFields() {
 
     return <>
         <List>
-        {/*    <TransitionGroup> https://github.com/react-hook-form/react-hook-form/issues/7733 */}
-                {controlledFields.map((item, index) => (
-                    // <Collapse key={item.id}>
-                        <ListItem key={item.id} secondaryAction={<IconButton edge="end" title="Delete" onClick={() => remove(index)}><CloseIcon /></IconButton>}>
-                            <LocalizedField allowedLocales={getAllowedLocales(index)} namePrefix={`localizedFields.${index}.`} />
-                        </ListItem>
-                    // </Collapse>
-                ))}
-        {/*    </TransitionGroup>*/}
+            {controlledFields.map((item, index) => (
+                <ListItem key={item.id} secondaryAction={
+                    <IconButton edge="end" title="Delete" onClick={() => remove(index)}><CloseIcon /></IconButton>
+                }>
+                    <LocalizedField allowedLocales={getAllowedLocales(index)} namePrefix={`localizedFields.${index}.`}/>
+                </ListItem>
+            ))}
             <Button key="add" sx={{textTransform: 'none', marginLeft: 2}} startIcon={<AddIcon/>} onClick={() => addLanguage()}>Add</Button>
         </List>
     </>

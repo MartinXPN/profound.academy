@@ -37,21 +37,30 @@ export function useStickyState<T>(defaultValue: T, key: string) {
 }
 
 /**
- * Get localized exercise params
+ * Get localized params
  * @param param string or object mapping from locale to text value
+ * @param locale (enUS, hyAM, etc)
  */
-export const getLocalizedParam = (param: string | {[key: string]: string}): string => {
+export const localize = (param: string | {[key: string]: string}, locale?: string): string => {
     if( !param )
         return '';
     if( typeof param === 'string' )
         return param;
 
     const localeToParamText: {[key: string]: {value: string}} = {};
-    Object.entries(param).forEach(([locale, titleText]) => {
-        localeToParamText[locale] = {value: titleText};
+    Object.entries(param).forEach(([locale, text]) => {
+        localeToParamText[locale] = {value: text};
     });
 
-    return new LocalizedStrings(localeToParamText).value;
+    const localizedStrings = new LocalizedStrings(localeToParamText);
+    locale && localizedStrings.setLanguage(locale);
+    return localizedStrings.value;
+};
+
+export const useLocalize = () => {
+    const [locale, setLocale] = useStickyState<string>('enUS', 'locale');
+    const localizeText = (text: string | {[key: string]: string}) => localize(text, locale);
+    return [localizeText, setLocale];
 };
 
 export const dateDayDiff = (d: Date, days: number): Date => {
@@ -60,7 +69,3 @@ export const dateDayDiff = (d: Date, days: number): Date => {
     return res;
 };
 export const tomorrow = (d: Date): Date => dateDayDiff(d, 1);
-
-export const notionPageToId = (page: string): string => {
-    return page.split('/').at(-1)?.split('-').at(-1) ?? '';
-};

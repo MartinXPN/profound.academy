@@ -5,7 +5,7 @@ import CourseList from "../course/CourseList";
 import ProfileAppBar from "./ProfileAppBar";
 import UserInfo from "./UserInfo";
 import {Box} from "@mui/material";
-import {UserSubmissionsTable} from "../course/SubmissionsTable";
+import {UserSubmissionsTable} from "../course/submission/SubmissionsTable";
 import OutlinedButton from "../common/OutlinedButton";
 
 

@@ -19,11 +19,11 @@ import AutocompleteSearch from "../common/AutocompleteSearch";
 import {Controller, useForm, FormProvider} from "react-hook-form";
 import {zodResolver} from "@hookform/resolvers/zod";
 import {boolean, infer as Infer, date, object, string, array, enum as zodEnum} from "zod";
-import {notionPageToId} from "../util";
 import {Moment} from "moment";
 import CourseInvitations from "./CourseInvitations";
 import {CoursePrivateFields} from "models/lib/courses";
 import {ExpandLess, ExpandMore} from "@mui/icons-material";
+import { notionPageToId } from "../services/notion";
 
 
 const schema = object({

@@ -1,7 +1,7 @@
 import {useParams} from "react-router-dom";
 import React, {lazy, useCallback, useContext, useState, memo, Suspense, useEffect} from "react";
 import {AuthContext} from "../../App";
-import {getLocalizedParam, useStickyState} from "../../util";
+import {useLocalize, useStickyState} from "../../util";
 import CourseLandingPage from "../CourseLandingPage";
 import {SignIn} from "../../user/Auth";
 import Editor from "../editor/Editor";
@@ -9,7 +9,7 @@ import {CourseContext, CurrentExerciseContext} from "../Course";
 import {Grid, Stack, Typography} from "@mui/material";
 import Content from "../Content";
 import Forum from "../forum/Forum";
-import {ExerciseSubmissionsTable} from "../SubmissionsTable";
+import {ExerciseSubmissionsTable} from "../submission/SubmissionsTable";
 import {SplitPane} from "react-multi-split-pane";
 import "../SplitPane.css";
 import OutlinedButton from "../../common/OutlinedButton";
@@ -31,6 +31,7 @@ function Exercise({launchCourse, registerCourse}: {launchCourse: () => void, reg
     const {exercise} = useContext(CurrentExerciseContext);
     console.log('exercise:', exercise);
 
+    const [localize] = useLocalize();
     const {exerciseId} = useParams<{ exerciseId: string }>();
     const [exerciseType, setExerciseType] = useState<keyof typeof EXERCISE_TYPES>(exercise?.exerciseType ?? 'code');
     const [splitPos, setSplitPos] = useStickyState<number[] | null>(null, `splitPos-${auth?.currentUserId}`);
@@ -82,7 +83,7 @@ function Exercise({launchCourse, registerCourse}: {launchCourse: () => void, reg
                         {isCourseInstructor && <OutlinedButton selected={currentTab === 'edit'} endIcon={<Edit />} onClick={() => setCurrentTab('edit')}>Edit</OutlinedButton>}
                     </Grid>
 
-                    {currentTab === 'description' && <>{isCourseInstructor && <Dashboard/>}<Content notionPage={getLocalizedParam(exercise.pageId)}/>{auth.isSignedIn && <Forum/>}</>}
+                    {currentTab === 'description' && <>{isCourseInstructor && <Dashboard/>}<Content notionPage={localize(exercise.pageId)}/>{auth.isSignedIn && <Forum/>}</>}
                     {currentTab === 'bestSubmissions' && <ExerciseSubmissionsTable rowsPerPage={5} course={course} exercise={exercise} mode="best" />}
                     {currentTab === 'allSubmissions' && <ExerciseSubmissionsTable rowsPerPage={5} course={course} exercise={exercise} mode="all" />}
                     {currentTab === 'codeDrafts' && <CodeDrafts onCodeDraftSelected={setCodeDraftId} />}

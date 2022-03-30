@@ -9,18 +9,18 @@ import TableRow from '@mui/material/TableRow';
 
 import {Course} from "models/courses";
 import {Exercise} from "models/exercise";
-import {onCourseSubmissionsChanged, onSubmissionsChanged, onUserExerciseSubmissionsChanged, onUserSubmissionsChanged} from "../services/submissions";
+import {onCourseSubmissionsChanged, onSubmissionsChanged, onUserExerciseSubmissionsChanged, onUserSubmissionsChanged} from "../../services/submissions";
 import {SubmissionResult} from "models/submissions";
 import moment from "moment/moment";
 import SubmissionBackdrop from "./SubmissionBackdrop";
-import {statusToColor} from "./colors";
-import {lastExerciseId} from "./Course";
-import {BottomLoading} from "../common/loading";
+import {statusToColor} from "../colors";
+import {lastExerciseId} from "../Course";
+import InfiniteScrollLoading from "../../common/InfiniteScrollLoading";
 import {Stack, Typography} from "@mui/material";
-import SmallAvatar from "../common/SmallAvatar";
-import ClickableTableCell from "../common/ClickableTableCell";
+import SmallAvatar from "../../common/SmallAvatar";
+import ClickableTableCell from "../../common/ClickableTableCell";
 import {LANGUAGES} from "models/language";
-import {getLocalizedParam} from "../util";
+import {localize} from "../../util";
 import Box from "@mui/material/Box";
 import {useNavigate} from "react-router-dom";
 import {NavigateFunction} from "react-router";
@@ -163,11 +163,10 @@ class SubmissionsTable extends Component<Props, State> {
                                                 </Stack>
                                             </ClickableTableCell>
                                         if( column.id === 'courseTitle' )
-                                            return <ClickableTableCell key={column.id} align={column.align} onClick={() => this.onCourseClicked(row.course.id)}>{value}</ClickableTableCell>
+                                            return <ClickableTableCell key={column.id} align={column.align} onClick={() => this.onCourseClicked(row.course.id)}>{row.courseTitle}</ClickableTableCell>
                                         if( column.id === 'exerciseTitle' )
                                             return <ClickableTableCell key={column.id} align={column.align} onClick={() => this.onExerciseClicked(row.course.id, row.exercise.id)}>
-                                                { /* @ts-ignore */}
-                                                {getLocalizedParam(value)}
+                                                {localize(row.exerciseTitle)}
                                             </ClickableTableCell>
 
                                         if( column.id === 'language' && typeof value === 'string' )
@@ -185,7 +184,7 @@ class SubmissionsTable extends Component<Props, State> {
                         </TableBody>
                     </Table>
                 </TableContainer>
-                <BottomLoading hasMore={hasMore} loadMore={this.loadNextPage} />
+                <InfiniteScrollLoading hasMore={hasMore} loadMore={this.loadNextPage} />
             </Paper>
         );
     }

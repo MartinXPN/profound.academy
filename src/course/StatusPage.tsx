@@ -34,7 +34,7 @@ function StatusPage() {
             </Grid>
 
             {currentTab === 'dashboard' && <Dashboard />}
-            {currentTab === 'submissions' && <CourseSubmissionsTable rowsPerPage={5} course={course} />}
+            {currentTab === 'submissions' && <CourseSubmissionsTable rowsPerPage={20} course={course} />}
             {currentTab === 'ranking' && <RankingTable metric="score"/>}
             {currentTab === 'lastWeeksProgress' && <RankingTable metric={`score_${moment().format('YYYY_MM_WW')}`} showProgress/>}
             {currentTab === 'upsolving' && <RankingTable metric="upsolveScore"/>}

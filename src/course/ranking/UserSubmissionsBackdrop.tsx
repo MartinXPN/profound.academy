@@ -42,7 +42,7 @@ function UserSubmissionsBackdrop({submissionsInfo, handleClose}: {
                     </Stack>
 
                     <UserExerciseSubmissionsTable
-                        rowsPerPage={10}
+                        rowsPerPage={20}
                         userId={submissionsInfo.userId}
                         courseId={submissionsInfo.courseId}
                         exerciseId={submissionsInfo.exercise.id} />

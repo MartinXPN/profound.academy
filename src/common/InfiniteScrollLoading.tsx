@@ -27,13 +27,14 @@ function InfiniteScrollLoading({hasMore, loadMore}: {hasMore: boolean, loadMore:
     if( hasMore && isVisible )
         loadMore();
 
-    // @ts-ignore
-    return <div ref={ref} style={{ paddingBottom: '5em' }}>{isVisible && hasMore &&
-        <Box sx={{ textAlign: 'center', width: '100%', margin: '1em' }}>
-            <CircularProgress />
+    return <>
+        <Box ref={ref} paddingBottom="5em">
+            {isVisible && hasMore &&
+            <Box sx={{ textAlign: 'center', width: '100%', margin: '1em' }}>
+                <CircularProgress />
+            </Box>}
         </Box>
-    }
-    </div>
+    </>
 }
 
 export default memo(InfiniteScrollLoading);

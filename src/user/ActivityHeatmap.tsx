@@ -87,7 +87,7 @@ function ActivityHeatmap({userId}: {userId: string}) {
                 {selectedDate &&
                 <Collapse key={selectedDate.formattedDate}>
                     <UserDateSubmissionsTable
-                        userId={userId} rowsPerPage={10}
+                        userId={userId} rowsPerPage={20}
                         startDate={new Date(selectedDate.date)}
                         endDate={tomorrow(new Date(selectedDate.date))} />
                 </Collapse>}

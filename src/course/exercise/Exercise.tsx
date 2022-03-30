@@ -84,8 +84,8 @@ function Exercise({launchCourse, registerCourse}: {launchCourse: () => void, reg
                     </Grid>
 
                     {currentTab === 'description' && <>{isCourseInstructor && <Dashboard/>}<Content notionPage={localize(exercise.pageId)}/>{auth.isSignedIn && <Forum/>}</>}
-                    {currentTab === 'bestSubmissions' && <ExerciseSubmissionsTable rowsPerPage={5} course={course} exercise={exercise} mode="best" />}
-                    {currentTab === 'allSubmissions' && <ExerciseSubmissionsTable rowsPerPage={5} course={course} exercise={exercise} mode="all" />}
+                    {currentTab === 'bestSubmissions' && <ExerciseSubmissionsTable rowsPerPage={20} course={course} exercise={exercise} mode="best" />}
+                    {currentTab === 'allSubmissions' && <ExerciseSubmissionsTable rowsPerPage={20} course={course} exercise={exercise} mode="all" />}
                     {currentTab === 'codeDrafts' && <CodeDrafts onCodeDraftSelected={setCodeDraftId} />}
                     {currentTab === 'edit' && <Suspense fallback={<></>}><ExerciseEditor cancelEditing={() => setCurrentTab('description')} exerciseTypeChanged={setExerciseType} /></Suspense>}
                 </Box>

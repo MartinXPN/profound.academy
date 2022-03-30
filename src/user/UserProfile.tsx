@@ -31,7 +31,7 @@ function UserProfile() {
             <ActivityHeatmap userId={userId} />
             <br/><br/><br/><br/>
         </>}
-        {currentTab === 'status' && <UserSubmissionsTable rowsPerPage={5} userId={userId}/>}
+        {currentTab === 'status' && <UserSubmissionsTable rowsPerPage={20} userId={userId}/>}
     </>
 }
 

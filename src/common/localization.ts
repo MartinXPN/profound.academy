@@ -1,6 +1,6 @@
 import LocalizedStrings from "react-localization";
 import {useStickyState} from "./stickystate";
-import {useContext} from "react";
+import {useCallback, useContext} from "react";
 import {AuthContext} from "../App";
 
 /**
@@ -24,9 +24,11 @@ export const localize = (param: string | {[key: string]: string}, locale?: strin
     return localizedStrings.value;
 };
 
-export const useLocalize = () => {
+export const useLocalize = (): [
+    (text: string | {[key: string]: string}) => string, string, (locale: string) => void
+] => {
     const auth = useContext(AuthContext);
     const [locale, setLocale] = useStickyState<string>('enUS', `locale-${auth.currentUserId}`);
-    const localizeText = (text: string | {[key: string]: string}) => localize(text, locale);
-    return [localizeText, setLocale];
+    const localizeText = useCallback((text: string | {[key: string]: string}) => localize(text, locale), [locale]);
+    return [localizeText, locale, setLocale];
 };

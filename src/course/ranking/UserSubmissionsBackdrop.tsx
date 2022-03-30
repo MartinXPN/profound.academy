@@ -1,9 +1,9 @@
 import React, {memo} from "react";
 import {Backdrop, ClickAwayListener, IconButton, Paper, Stack, Typography} from "@mui/material";
 import SmallAvatar from "../../common/SmallAvatar";
-import {getLocalizedParam} from "../../util";
+import {useLocalize} from "../../common/localization";
 import {Close} from "@mui/icons-material";
-import {UserExerciseSubmissionsTable} from "../SubmissionsTable";
+import {UserExerciseSubmissionsTable} from "../submission/SubmissionsTable";
 import {styled} from "@mui/material/styles";
 import {Exercise} from "models/exercise";
 
@@ -26,6 +26,7 @@ export interface SubmissionsInfo {
 function UserSubmissionsBackdrop({submissionsInfo, handleClose}: {
     submissionsInfo: SubmissionsInfo, handleClose: () => void,
 }) {
+    const [localize] = useLocalize();
     return <>
         <SubmissionsBackdrop open={!!submissionsInfo}>
             <ClickAwayListener onClickAway={handleClose}>
@@ -34,12 +35,14 @@ function UserSubmissionsBackdrop({submissionsInfo, handleClose}: {
                         <SmallAvatar src={submissionsInfo.userImageUrl} />
                         {submissionsInfo.userDisplayName}
                         <Typography variant="body2" color="text.secondary" noWrap>&nbsp; • &nbsp;</Typography>
-                        <Typography variant="body2" color="text.secondary" noWrap sx={{flex: 1}}>{getLocalizedParam(submissionsInfo.exercise.title)}</Typography>
+                        <Typography variant="body2" color="text.secondary" noWrap sx={{flex: 1}}>
+                            {localize(submissionsInfo.exercise.title)}
+                        </Typography>
                         <IconButton onClick={handleClose} size="large"><Close /></IconButton>
                     </Stack>
 
                     <UserExerciseSubmissionsTable
-                        rowsPerPage={10}
+                        rowsPerPage={20}
                         userId={submissionsInfo.userId}
                         courseId={submissionsInfo.courseId}
                         exerciseId={submissionsInfo.exercise.id} />

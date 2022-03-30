@@ -1,13 +1,13 @@
 import React, {memo} from "react";
 import {Autocomplete, Button, IconButton, List, ListItem, Stack, TextField} from "@mui/material";
-import Box from "@mui/material/Box";
-import { notionPageToId } from "../../util";
 
 import {Controller, useFieldArray, useFormContext} from "react-hook-form";
 import {infer as Infer, object, string} from "zod";
 import CloseIcon from "@mui/icons-material/Close";
 import AddIcon from "@mui/icons-material/Add";
 import * as locales from "@mui/material/locale";
+import {notionPageToId} from "../../services/notion";
+import Locale from "../../common/Locale";
 
 
 export const fieldSchema = object({
@@ -45,22 +45,8 @@ export function LocalizedFieldView({allowedLocales, namePrefix}: { allowedLocale
                     autoSelect
                     disableClearable
                     value={[value]}
-                    renderOption={({ ...props}, option: string) => (
-                        <Box component="li" sx={{ '& > img': { mr: 2, flexShrink: 0 } }} {...props}>
-                            <img loading="lazy" width={20} alt=""
-                                 src={`https://flagcdn.com/w20/${option.substring(2, 4).toLowerCase()}.png`}
-                                 srcSet={`https://flagcdn.com/w40/${option.substring(2, 4).toLowerCase()}.png 2x`}/>
-                            {option.substring(0, 2)}-{option.substring(2, 4)}
-                        </Box>
-                    )}
-                    renderTags={(options: string[], getTagProps) => options.map((option, index) => (
-                        <Box component="li" sx={{ '& > img': { mr: 2, flexShrink: 0 } }} {...getTagProps({ index })}>
-                            <img loading="lazy" width={20} alt=""
-                                 src={`https://flagcdn.com/w20/${option.substring(2, 4).toLowerCase()}.png`}
-                                 srcSet={`https://flagcdn.com/w40/${option.substring(2, 4).toLowerCase()}.png 2x`}/>
-                            {option.substring(0, 2)}-{option.substring(2, 4)}
-                        </Box>
-                    ))}
+                    renderOption={({ ...props}, option: string) => <Locale locale={option} {...props} />}
+                    renderTags={(options: string[], getTagProps) => options.map((option, index) => <Locale locale={option} {...getTagProps({ index })} />)}
                     renderInput={(params) => (
                         <TextField label="Language" {...params}
                                    error={Boolean(getError(`${namePrefix}locale`))}
@@ -111,15 +97,13 @@ function LocalizedFields() {
 
     return <>
         <List>
-        {/*    <TransitionGroup> https://github.com/react-hook-form/react-hook-form/issues/7733 */}
-                {controlledFields.map((item, index) => (
-                    // <Collapse key={item.id}>
-                        <ListItem key={item.id} secondaryAction={<IconButton edge="end" title="Delete" onClick={() => remove(index)}><CloseIcon /></IconButton>}>
-                            <LocalizedField allowedLocales={getAllowedLocales(index)} namePrefix={`localizedFields.${index}.`} />
-                        </ListItem>
-                    // </Collapse>
-                ))}
-        {/*    </TransitionGroup>*/}
+            {controlledFields.map((item, index) => (
+                <ListItem key={item.id} secondaryAction={
+                    <IconButton edge="end" title="Delete" onClick={() => remove(index)}><CloseIcon /></IconButton>
+                }>
+                    <LocalizedField allowedLocales={getAllowedLocales(index)} namePrefix={`localizedFields.${index}.`}/>
+                </ListItem>
+            ))}
             <Button key="add" sx={{textTransform: 'none', marginLeft: 2}} startIcon={<AddIcon/>} onClick={() => addLanguage()}>Add</Button>
         </List>
     </>

@@ -4,8 +4,8 @@ import Box from "@mui/material/Box";
 import OutlinedButton from "../common/OutlinedButton";
 import {AuthContext} from "../App";
 import {CourseContext} from "./Course";
-import {useStickyState} from "../util";
-import {CourseSubmissionsTable} from "./SubmissionsTable";
+import {useStickyState} from "../common/stickystate";
+import {CourseSubmissionsTable} from "./submission/SubmissionsTable";
 import RankingTable from "./ranking/RankingTable";
 import moment from "moment";
 import Dashboard from "./Dashboard";
@@ -34,7 +34,7 @@ function StatusPage() {
             </Grid>
 
             {currentTab === 'dashboard' && <Dashboard />}
-            {currentTab === 'submissions' && <CourseSubmissionsTable rowsPerPage={5} course={course} />}
+            {currentTab === 'submissions' && <CourseSubmissionsTable rowsPerPage={20} course={course} />}
             {currentTab === 'ranking' && <RankingTable metric="score"/>}
             {currentTab === 'lastWeeksProgress' && <RankingTable metric={`score_${moment().format('YYYY_MM_WW')}`} showProgress/>}
             {currentTab === 'upsolving' && <RankingTable metric="upsolveScore"/>}

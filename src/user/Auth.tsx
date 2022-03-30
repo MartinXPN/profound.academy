@@ -8,6 +8,7 @@ import firebase from 'firebase/compat/app';
 import 'firebase/compat/auth';
 import {AuthContext} from "../App";
 import {useNavigate} from "react-router-dom";
+import PreferredLanguage from "./PreferredLanguage";
 
 // Configure FirebaseUI.
 const uiConfig = {
@@ -56,18 +57,25 @@ export function AppBarProfile() {
     const navigate = useNavigate();
 
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+    const [showLanguageOptions, setShowLanguageOptions] = useState(false);
     const open = Boolean(anchorEl);
 
     const handleMenu = (event: React.MouseEvent<HTMLElement>) => setAnchorEl(event.currentTarget);
-    const handleClose = () => setAnchorEl(null);
+    const handleClose = () => {
+        setShowLanguageOptions(false);
+        setAnchorEl(null);
+    }
 
     const onSignOutClicked = async () => {
         handleClose();
         await firebase.auth().signOut();
     }
     const onUserProfileClicked = useCallback(() => {
+        handleClose();
         navigate(`/users/${auth.currentUserId}`);
     }, [auth.currentUserId, navigate]);
+    const onShowOptions = () => setShowLanguageOptions(true);
+
 
     return <>
         <IconButton
@@ -92,7 +100,6 @@ export function AppBarProfile() {
             anchorEl={anchorEl}
             open={open}
             onClose={handleClose}
-            onClick={handleClose}
             PaperProps={{
                 elevation: 0,
                 sx: {
@@ -104,15 +111,17 @@ export function AppBarProfile() {
             transformOrigin={{ horizontal: 'right', vertical: 'top' }}
             anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}>
 
-            <MenuItem onClick={onUserProfileClicked} key='user-profile'>
+            {!showLanguageOptions && <MenuItem onClick={onUserProfileClicked} key="user-profile">
                 <ListItemIcon><AccountCircleIcon fontSize="medium" /></ListItemIcon>
                 <ListItemText>Profile</ListItemText>
-            </MenuItem>
+            </MenuItem>}
 
-            <MenuItem onClick={onSignOutClicked} key='sign-out'>
+            <PreferredLanguage onShowOptions={onShowOptions} onOptionSelected={handleClose} anchorEl={anchorEl} />
+
+            {!showLanguageOptions && <MenuItem onClick={onSignOutClicked} key="sign-out">
                 <ListItemIcon><ExitToAppIcon fontSize="medium" /></ListItemIcon>
                 <ListItemText>Logout</ListItemText>
-            </MenuItem>
+            </MenuItem>}
         </Menu>}
     </>;
 }

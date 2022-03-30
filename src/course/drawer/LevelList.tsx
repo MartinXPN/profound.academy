@@ -16,7 +16,7 @@ import {onCourseExerciseProgressChanged} from "../../services/progress";
 import {AuthContext} from "../../App";
 import {SubmissionStatus} from "models/submissions";
 import {CourseContext, CurrentExerciseContext} from "../Course";
-import {getLocalizedParam} from '../../util';
+import {useLocalize} from '../../common/localization';
 import {useParams} from "react-router-dom";
 
 
@@ -32,6 +32,7 @@ function LevelList({levelName, levelStatus, onItemSelected, isDrawerOpen, isSing
     const {exerciseId} = useParams<{ exerciseId: string }>();
     const {course} = useContext(CourseContext);
     const {exercise} = useContext(CurrentExerciseContext);
+    const [localize] = useLocalize();
     const [levelExercises, setLevelExercises] = useState<Exercise[]>([]);
     const [open, setOpen] = useState(isSingleLevel);
     const [progress, setProgress] = useState<ExerciseProgress<SubmissionStatus> | null>(null);
@@ -106,7 +107,7 @@ function LevelList({levelName, levelStatus, onItemSelected, isDrawerOpen, isSing
             {open && levelExercises.map((ex, index) =>
                 <ListItem button key={ex.id} onClick={() => onItemSelected(ex)} style={getStatusStyle(ex.id)}>
                     <ListItemIcon>{exerciseId === ex.id ? <ArrowRightIcon /> : <ListItemText primary={index + 1}/>}</ListItemIcon>
-                    <ListItemText primary={getLocalizedParam(ex.title)}/>
+                    <ListItemText primary={localize(ex.title)}/>
                 </ListItem>
             )}
         </List>

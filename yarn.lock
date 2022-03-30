@@ -8541,7 +8541,7 @@ react-lifecycles-compat@^3.0.0, react-lifecycles-compat@^3.0.4:
   resolved "https://registry.yarnpkg.com/react-lifecycles-compat/-/react-lifecycles-compat-3.0.4.tgz#4f1a273afdfc8f3488a8c516bfda78f872352362"
   integrity sha512-fBASbA6LnOU9dOU2eW7aQ8xmYBSXUIWr+UmF9b1efZBazGNO+rcXT/icdKnYm2pTwcRylVUYwW7H1PHfLekVzA==
 
-react-localization@^1.0.17:
+react-localization@^1.0.18:
   version "1.0.18"
   resolved "https://registry.yarnpkg.com/react-localization/-/react-localization-1.0.18.tgz#9be8d49138126712991d5b7c6a7ff1f18549322c"
   integrity sha512-LL6+aKR7E72Ek23LnKrVd3cd2fojJfQtPzveic98YPHdgcYhz+zMaWlQJgKAeZzi0jH9Euls+S+/YZFvY0Wz2Q==

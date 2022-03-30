@@ -7,7 +7,7 @@ import {Course} from 'models/courses';
 import {getAllCourses, getCompletedCourses, getUserCourses} from "../services/courses";
 import useAsyncEffect from "use-async-effect";
 import {useNavigate} from "react-router-dom";
-import {useStickyState} from "../util";
+import {useStickyState} from "../common/stickystate";
 import {lastExerciseId} from "./Course";
 import {AuthContext} from "../App";
 import {hasInstructorRole} from "../services/users";

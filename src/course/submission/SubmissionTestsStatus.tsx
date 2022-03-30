@@ -1,9 +1,9 @@
 import {memo, useEffect, useState} from "react";
 import {TestResult} from "models/lib/submissions";
 import {SubmissionResult} from "models/submissions";
-import {onSubmissionTestResultsChanged} from "../services/submissions";
+import {onSubmissionTestResultsChanged} from "../../services/submissions";
 import {TableCell, Typography, Table, TableContainer, TableRow, TableBody, Paper, TableHead} from "@mui/material";
-import {statusToColor} from "./colors";
+import {statusToColor} from "../colors";
 
 
 function SubmissionTestsStatus({submission}: {submission: SubmissionResult}) {

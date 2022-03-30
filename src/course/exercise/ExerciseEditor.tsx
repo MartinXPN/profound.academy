@@ -30,7 +30,7 @@ const baseSchema = {
     levelOrder: number().nonnegative().int(),
     score: number().min(0).max(1000).int(),
     allowedAttempts: number().min(1).max(100).int(),
-    unlockContent: array(string().min(20).max(35)),
+    unlockContent: array(string().min(5).max(35)),
 } as const;
 const codeSchema = object({
     ...baseSchema,
@@ -221,36 +221,43 @@ function ExerciseEditor({cancelEditing, exerciseTypeChanged}: {
 
                 {isPublic && <>
                     <Controller name="level" control={control} render={({ field: { ref, onChange, ...field } }) => (
-                        <TextField required variant="outlined" placeholder="4" type="number" fullWidth
-                                   label="Level"
-                                   onChange={e => e.target.value ? onChange(Number(e.target.value)) : onChange(e.target.value)}
-                                   error={Boolean(errors.level)} helperText={errors.level?.message}
-                                   inputProps={{ inputMode: 'numeric', pattern: '[0-9]*' }} inputRef={ref} {...field} sx={{flex: 1}}/>
+                        <TextField
+                            required label="Level" variant="outlined" placeholder="4" type="number" fullWidth
+                            onChange={e => e.target.value ? onChange(Number(e.target.value)) : onChange(e.target.value)}
+                            error={Boolean(errors.level)} helperText={errors.level?.message}
+                            inputProps={{inputMode: 'numeric', pattern: '[0-9]*'}} inputRef={ref}
+                            {...field} sx={{flex: 1}} />
                     )}/>
 
                     <Controller name="levelOrder" control={control} render={({ field: { ref, onChange, ...field } }) => (
-                        <TextField required variant="outlined" placeholder="2" type="number" fullWidth
-                                   label="Order within level"
-                                   onChange={e => e.target.value ? onChange(Number(e.target.value)) : onChange(e.target.value)}
-                                   error={Boolean(errors.levelOrder)} helperText={errors.levelOrder?.message}
-                                   inputProps={{ inputMode: 'numeric', pattern: '[0-9]*' }} inputRef={ref} {...field} sx={{flex: 1}}/>
+                        <TextField
+                            required variant="outlined" placeholder="2" type="number" fullWidth
+                            label="Order within level"
+                            onChange={e => e.target.value ? onChange(Number(e.target.value)) : onChange(e.target.value)}
+                            error={Boolean(errors.levelOrder)} helperText={errors.levelOrder?.message}
+                            inputProps={{inputMode: 'numeric', pattern: '[0-9]*'}} inputRef={ref}
+                            {...field} sx={{flex: 1}}/>
                     )}/>
                 </>}
             </Stack>
 
             <Stack direction="row" spacing={1} marginTop={2}>
                 <Controller name="score" control={control} render={({ field: { ref, onChange, ...field } }) => (
-                    <TextField required variant="outlined" placeholder="100" type="number" label="Score"
-                               onChange={e => e.target.value ? onChange(Number(e.target.value)) : onChange(e.target.value)}
-                               error={Boolean(errors.score)} helperText={errors.score?.message}
-                               inputProps={{ inputMode: 'numeric', pattern: '[0-9.]*' }} inputRef={ref} {...field} sx={{flex: 1}}/>
+                    <TextField
+                        required variant="outlined" placeholder="100" type="number" label="Score"
+                        onChange={e => e.target.value ? onChange(Number(e.target.value)) : onChange(e.target.value)}
+                        error={Boolean(errors.score)} helperText={errors.score?.message}
+                        inputProps={{inputMode: 'numeric', pattern: '[0-9.]*'}} inputRef={ref}
+                        {...field} sx={{flex: 1}}/>
                 )}/>
 
                 <Controller name="allowedAttempts" control={control} render={({ field: { ref, onChange, ...field } }) => (
-                    <TextField required variant="outlined" placeholder="100" type="number" label="Allowed attempts"
-                               onChange={e => e.target.value ? onChange(Number(e.target.value)) : onChange(e.target.value)}
-                               error={Boolean(errors.allowedAttempts)} helperText={errors.allowedAttempts?.message}
-                               inputProps={{ inputMode: 'numeric', pattern: '[0-9.]*' }} inputRef={ref} {...field} sx={{flex: 1}}/>
+                    <TextField
+                        required variant="outlined" placeholder="100" type="number" label="Allowed attempts"
+                        onChange={e => e.target.value ? onChange(Number(e.target.value)) : onChange(e.target.value)}
+                        error={Boolean(errors.allowedAttempts)} helperText={errors.allowedAttempts?.message}
+                        inputProps={{inputMode: 'numeric', pattern: '[0-9.]*'}} inputRef={ref}
+                        {...field} sx={{flex: 1}} />
                 )}/>
 
                 <Controller name="unlockContent" control={control} render={({field}) => <>
@@ -269,15 +276,16 @@ function ExerciseEditor({cancelEditing, exerciseTypeChanged}: {
 
             <br/><br/><br/>
             <Controller name="exerciseType" control={control} render={({field}) => (
-                <Autocomplete sx={{ width: 200 }} autoHighlight autoSelect disableClearable ref={field.ref}
-                              value={EXERCISE_TYPES[field.value].displayName}
-                              options={Object.keys(EXERCISE_TYPES).map(key => EXERCISE_TYPES[key].displayName)}
-                              onChange={(event, value: string | null) => value && onExerciseTypeChanged(nameToExerciseType(value)!)}
-                              renderInput={(params) => (
-                                  <TextField
-                                      {...params} label="Exercise type"
-                                      error={Boolean(errors.exerciseType)} helperText={errors.exerciseType?.message} />
-                              )}/>
+                <Autocomplete
+                    sx={{width: 200}} autoHighlight autoSelect disableClearable ref={field.ref}
+                    value={EXERCISE_TYPES[field.value].displayName}
+                    options={Object.keys(EXERCISE_TYPES).map(key => EXERCISE_TYPES[key].displayName)}
+                    onChange={(event, value: string | null) => value && onExerciseTypeChanged(nameToExerciseType(value)!)}
+                    renderInput={(params) => (
+                        <TextField
+                            {...params} label="Exercise type"
+                            error={Boolean(errors.exerciseType)} helperText={errors.exerciseType?.message}/>
+                    )}/>
             )} />
             <br/>
 

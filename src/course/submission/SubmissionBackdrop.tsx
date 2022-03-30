@@ -3,13 +3,13 @@ import useAsyncEffect from "use-async-effect";
 import {Backdrop, CircularProgress, ClickAwayListener, IconButton, Paper, Stack, Typography} from "@mui/material";
 import {styled} from "@mui/material/styles";
 import {SubmissionResult} from "models/submissions";
-import {getSubmissionCode} from "../services/submissions";
-import {AuthContext} from "../App";
-import Code from "./editor/Code";
+import {getSubmissionCode} from "../../services/submissions";
+import {AuthContext} from "../../App";
+import Code from "../editor/Code";
 import {LANGUAGES} from "models/language";
 import {getModeForPath} from "ace-builds/src-noconflict/ext-modelist";
 import {Close} from "@mui/icons-material";
-import SmallAvatar from "../common/SmallAvatar";
+import SmallAvatar from "../../common/SmallAvatar";
 import SubmissionTestsStatus from "./SubmissionTestsStatus";
 
 

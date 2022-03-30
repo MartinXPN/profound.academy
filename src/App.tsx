@@ -8,7 +8,7 @@ import './firebase';
 import { ThemeProvider, StyledEngineProvider, createTheme } from '@mui/material/styles';
 
 import {updateUserInfo} from "./services/users";
-import {useStickyState} from "./util";
+import {useStickyState} from "./common/stickystate";
 import ErrorBoundary from './common/ErrorBoundary';
 import Home from './home/Home';
 import UserProfile from './user/UserProfile';

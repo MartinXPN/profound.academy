@@ -16,8 +16,8 @@ import {onCourseExerciseProgressChanged} from "../../services/progress";
 import {AuthContext} from "../../App";
 import {SubmissionStatus} from "models/submissions";
 import {CourseContext, CurrentExerciseContext} from "../Course";
-import {useLocalize} from '../../common/localization';
 import {useParams} from "react-router-dom";
+import {LocalizeContext} from "../../common/Localization";
 
 
 function LevelList({levelName, levelStatus, onItemSelected, isDrawerOpen, isSingleLevel, drafts}: {
@@ -32,7 +32,7 @@ function LevelList({levelName, levelStatus, onItemSelected, isDrawerOpen, isSing
     const {exerciseId} = useParams<{ exerciseId: string }>();
     const {course} = useContext(CourseContext);
     const {exercise} = useContext(CurrentExerciseContext);
-    const [localize] = useLocalize();
+    const {localize} = useContext(LocalizeContext);
     const [levelExercises, setLevelExercises] = useState<Exercise[]>([]);
     const [open, setOpen] = useState(isSingleLevel);
     const [progress, setProgress] = useState<ExerciseProgress<SubmissionStatus> | null>(null);

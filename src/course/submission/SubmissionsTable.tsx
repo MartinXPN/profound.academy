@@ -1,4 +1,4 @@
-import React, {Component, useEffect, useState} from "react";
+import React, {Component, useContext, useEffect, useState} from "react";
 import Paper from '@mui/material/Paper';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -20,10 +20,10 @@ import {Stack, Typography} from "@mui/material";
 import SmallAvatar from "../../common/SmallAvatar";
 import ClickableTableCell from "../../common/ClickableTableCell";
 import {LANGUAGES} from "models/language";
-import {localize} from "../../common/localization";
 import Box from "@mui/material/Box";
 import {useNavigate} from "react-router-dom";
 import {NavigateFunction} from "react-router";
+import {LocalizeContext} from "../../common/Localization";
 
 
 interface Column {
@@ -52,6 +52,7 @@ interface Props {
     reset: number;
     onLoadNext: (startAfterId: string | null, onChange: (submissions: SubmissionResult[], more: boolean) => void) => Promise<() => void>;
     columns: Column[];
+    localize: (text: string | {[key: string]: string}) => string,
 }
 
 interface State {
@@ -166,7 +167,7 @@ class SubmissionsTable extends Component<Props, State> {
                                             return <ClickableTableCell key={column.id} align={column.align} onClick={() => this.onCourseClicked(row.course.id)}>{row.courseTitle}</ClickableTableCell>
                                         if( column.id === 'exerciseTitle' )
                                             return <ClickableTableCell key={column.id} align={column.align} onClick={() => this.onExerciseClicked(row.course.id, row.exercise.id)}>
-                                                {localize(row.exerciseTitle)}
+                                                {this.props.localize(row.exerciseTitle)}
                                             </ClickableTableCell>
 
                                         if( column.id === 'language' && typeof value === 'string' )
@@ -197,8 +198,9 @@ export function UserSubmissionsTable({rowsPerPage, userId}: {rowsPerPage: number
 
     const [reset, setReset] = useState(0);
     const navigate = useNavigate();
+    const {localize} = useContext(LocalizeContext);
     useEffect(() => setReset(r => r + 1), [userId]);
-    return <SubmissionsTable reset={reset} navigate={navigate} onLoadNext={onLoadNext} columns={columns.filter(c => c.id !== 'userDisplayName')}/>
+    return <SubmissionsTable reset={reset} navigate={navigate} onLoadNext={onLoadNext} columns={columns.filter(c => c.id !== 'userDisplayName')} localize={localize}/>
 }
 
 export function UserExerciseSubmissionsTable({rowsPerPage, userId, courseId, exerciseId}: {
@@ -209,8 +211,9 @@ export function UserExerciseSubmissionsTable({rowsPerPage, userId, courseId, exe
 
     const [reset, setReset] = useState(0);
     const navigate = useNavigate();
+    const {localize} = useContext(LocalizeContext);
     useEffect(() => setReset(r => r + 1), [userId]);
-    return <SubmissionsTable reset={reset} navigate={navigate} onLoadNext={onLoadNext} columns={columns.filter(c => c.id !== 'userDisplayName' && c.id !== 'courseTitle' && c.id !== 'exerciseTitle')}/>
+    return <SubmissionsTable reset={reset} navigate={navigate} onLoadNext={onLoadNext} columns={columns.filter(c => c.id !== 'userDisplayName' && c.id !== 'courseTitle' && c.id !== 'exerciseTitle')} localize={localize}/>
 }
 
 export function UserDateSubmissionsTable({rowsPerPage, userId, startDate, endDate}: {rowsPerPage: number, userId: string, startDate: Date, endDate: Date}) {
@@ -219,8 +222,9 @@ export function UserDateSubmissionsTable({rowsPerPage, userId, startDate, endDat
 
     const [reset, setReset] = useState(0);
     const navigate = useNavigate();
+    const {localize} = useContext(LocalizeContext);
     useEffect(() => setReset(r => r + 1), [userId]);
-    return <SubmissionsTable reset={reset} navigate={navigate} onLoadNext={onLoadNext} columns={columns.filter(c => c.id !== 'userDisplayName')}/>
+    return <SubmissionsTable reset={reset} navigate={navigate} onLoadNext={onLoadNext} columns={columns.filter(c => c.id !== 'userDisplayName')} localize={localize}/>
 }
 
 
@@ -230,8 +234,9 @@ export function CourseSubmissionsTable({rowsPerPage, course}: {rowsPerPage: numb
 
     const [reset, setReset] = useState(0);
     const navigate = useNavigate();
+    const {localize} = useContext(LocalizeContext);
     useEffect(() => setReset(r => r + 1), [course.id]);
-    return <SubmissionsTable reset={reset} navigate={navigate} onLoadNext={onLoadNext} columns={columns.filter(c => c.id !== 'courseTitle')}/>
+    return <SubmissionsTable reset={reset} navigate={navigate} onLoadNext={onLoadNext} columns={columns.filter(c => c.id !== 'courseTitle')} localize={localize}/>
 }
 
 export function ExerciseSubmissionsTable({rowsPerPage, course, exercise, mode}: {rowsPerPage: number, course: Course, exercise: Exercise, mode: 'all' | 'best'}) {
@@ -240,6 +245,7 @@ export function ExerciseSubmissionsTable({rowsPerPage, course, exercise, mode}: 
 
     const [reset, setReset] = useState(0);
     const navigate = useNavigate();
+    const {localize} = useContext(LocalizeContext);
     useEffect(() => setReset(r => r + 1), [course.id, exercise.id, mode]);
-    return <SubmissionsTable reset={reset} navigate={navigate} onLoadNext={onLoadNext} columns={columns.filter(c => c.id !== 'courseTitle' && c.id !== 'exerciseTitle')}/>
+    return <SubmissionsTable reset={reset} navigate={navigate} onLoadNext={onLoadNext} columns={columns.filter(c => c.id !== 'courseTitle' && c.id !== 'exerciseTitle')} localize={localize}/>
 }

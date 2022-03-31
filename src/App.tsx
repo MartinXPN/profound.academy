@@ -13,6 +13,7 @@ import ErrorBoundary from './common/ErrorBoundary';
 import Home from './home/Home';
 import UserProfile from './user/UserProfile';
 import StaticContent from "./home/StaticContent";
+import Localization from "./common/Localization";
 // Do not include the Course and the editor in the main bundle as they're pretty heavy
 const Course = lazy(() => import('./course/Course'));
 const CourseEditor = lazy(() => import('./course/CourseEditor'));
@@ -44,7 +45,9 @@ interface AuthContextProps {
     setCurrentUser: (user: firebase.User | null) => void;
 }
 
-export const AuthContext = createContext<AuthContextProps>({isSignedIn: false, currentUser: null, setCurrentUser: () => {}});
+export const AuthContext = createContext<AuthContextProps>({
+    isSignedIn: false, currentUser: null, setCurrentUser: () => {}
+});
 
 
 function App() {
@@ -72,6 +75,7 @@ function App() {
                 setCurrentUser: setCurrentUser,
             }}>
             <ErrorBoundary>
+            <Localization>
             <Router>
             <Suspense fallback={<div>Loading...</div>}>
                 <Routes>
@@ -86,6 +90,7 @@ function App() {
                 </Routes>
             </Suspense>
             </Router>
+            </Localization>
             </ErrorBoundary>
             </AuthContext.Provider>
             </ThemeProvider>

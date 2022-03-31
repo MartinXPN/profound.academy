@@ -1,14 +1,25 @@
 import LocalizedStrings from "react-localization";
 import {useStickyState} from "./stickystate";
-import {useCallback, useContext} from "react";
+import {createContext, memo, ReactNode, useCallback, useContext} from "react";
 import {AuthContext} from "../App";
+
+interface LocalizeContextProps {
+    localize: (text: string | {[key: string]: string}) => string;
+    locale: string;
+    setLocale: (locale: string) => void;
+}
+export const LocalizeContext = createContext<LocalizeContextProps>({
+    localize: text => '',
+    locale: 'enUS',
+    setLocale: locale => {},
+});
 
 /**
  * Get localized params
  * @param param string or object mapping from locale to text value
  * @param locale (enUS, hyAM, etc)
  */
-export const localize = (param: string | {[key: string]: string}, locale?: string): string => {
+const localize = (param: string | {[key: string]: string}, locale?: string): string => {
     if( !param )
         return '';
     if( typeof param === 'string' )
@@ -24,7 +35,7 @@ export const localize = (param: string | {[key: string]: string}, locale?: strin
     return localizedStrings.value;
 };
 
-export const useLocalize = (): [
+const useLocalize = (): [
     (text: string | {[key: string]: string}) => string, string, (locale: string) => void
 ] => {
     const auth = useContext(AuthContext);
@@ -32,3 +43,18 @@ export const useLocalize = (): [
     const localizeText = useCallback((text: string | {[key: string]: string}) => localize(text, locale), [locale]);
     return [localizeText, locale, setLocale];
 };
+
+function Localization({children}: { children: ReactNode }) {
+    const [localizeText, locale, setLocale] = useLocalize();
+    return <>
+        <LocalizeContext.Provider value={{
+            localize: localizeText,
+            locale: locale,
+            setLocale: setLocale,
+        }}>
+            {children}
+        </LocalizeContext.Provider>
+    </>
+}
+
+export default memo(Localization);

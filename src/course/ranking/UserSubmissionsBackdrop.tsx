@@ -1,11 +1,11 @@
-import React, {memo} from "react";
+import React, {memo, useContext} from "react";
 import {Backdrop, ClickAwayListener, IconButton, Paper, Stack, Typography} from "@mui/material";
 import SmallAvatar from "../../common/SmallAvatar";
-import {useLocalize} from "../../common/localization";
 import {Close} from "@mui/icons-material";
 import {UserExerciseSubmissionsTable} from "../submission/SubmissionsTable";
 import {styled} from "@mui/material/styles";
 import {Exercise} from "models/exercise";
+import {LocalizeContext} from "../../common/Localization";
 
 
 const SubmissionsBackdrop = styled(Backdrop)(({theme}) => ({
@@ -26,7 +26,7 @@ export interface SubmissionsInfo {
 function UserSubmissionsBackdrop({submissionsInfo, handleClose}: {
     submissionsInfo: SubmissionsInfo, handleClose: () => void,
 }) {
-    const [localize] = useLocalize();
+    const {localize} = useContext(LocalizeContext);
     return <>
         <SubmissionsBackdrop open={!!submissionsInfo}>
             <ClickAwayListener onClickAway={handleClose}>

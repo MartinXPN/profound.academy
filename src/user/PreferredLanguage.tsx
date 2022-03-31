@@ -1,9 +1,9 @@
-import React, {memo, useState} from "react";
-import {useLocalize} from "../common/localization";
+import React, {memo, useContext, useState} from "react";
 import * as locales from "@mui/material/locale";
 import Locale from "../common/Locale";
 import {ListItemIcon, ListItemText, Menu, MenuItem} from "@mui/material";
 import ArrowRightIcon from "@mui/icons-material/ArrowRight";
+import {LocalizeContext} from "../common/Localization";
 
 
 const allLocales = Object.keys(locales);
@@ -15,7 +15,7 @@ function PreferredLanguage({onShowOptions, onOptionSelected, anchorEl}: {
     onOptionSelected: (locale: string) => void,
     anchorEl: null | HTMLElement,
 }) {
-    const [, locale, setLocale] = useLocalize();
+    const {locale, setLocale} = useContext(LocalizeContext);
     const [showOptions, setShowOptions] = useState(false);
 
     const onShowOptionsClicked = () => {

@@ -1,7 +1,6 @@
 import {useParams} from "react-router-dom";
 import React, {lazy, useCallback, useContext, useState, memo, Suspense, useEffect} from "react";
 import {AuthContext} from "../../App";
-import {useLocalize} from "../../common/localization";
 import {useStickyState} from "../../common/stickystate";
 import CourseLandingPage from "../CourseLandingPage";
 import {SignIn} from "../../user/Auth";
@@ -22,6 +21,7 @@ import TextAnswer from "./TextAnswer";
 import Checkboxes from "./Checkboxes";
 import MultipleChoice from "./MultipleChoice";
 import Dashboard from "./Dashboard";
+import {LocalizeContext} from "../../common/Localization";
 
 const ExerciseEditor = lazy(() => import('./ExerciseEditor'));
 
@@ -32,7 +32,7 @@ function Exercise({launchCourse, registerCourse}: {launchCourse: () => void, reg
     const {exercise} = useContext(CurrentExerciseContext);
     console.log('exercise:', exercise);
 
-    const [localize] = useLocalize();
+    const {localize} = useContext(LocalizeContext);
     const {exerciseId} = useParams<{ exerciseId: string }>();
     const [exerciseType, setExerciseType] = useState<keyof typeof EXERCISE_TYPES>(exercise?.exerciseType ?? 'code');
     const [splitPos, setSplitPos] = useStickyState<number[] | null>(null, `splitPos-${auth?.currentUserId}`);

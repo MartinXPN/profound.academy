@@ -1,6 +1,7 @@
 import {db} from "./db";
 import {Activity, User} from "models/users";
 import firebase from "firebase/compat/app";
+import { getStorage, ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 
 export const getUserActivity = async (userId: string) => {
     const snapshot = await db.activity(userId).get();
@@ -37,16 +38,18 @@ export const updateUserInfo = async (userId: string, displayName?: string, image
 }
 
 export const uploadProfilePicture = async (userId: string, file: File) => {
-    const ref = firebase.storage().ref(`profilePictures/${userId}/${file.name}`);
-    await ref.put(file);
-    const imageUrl = await ref.getDownloadURL();
+    const storage = getStorage();
+    const storageRef = ref(storage, `profilePictures/${userId}/${file.name}`);
+    await uploadBytesResumable(storageRef, file);
+    const imageUrl = await getDownloadURL(storageRef);
     return updateUserInfo(userId, undefined, imageUrl);
 }
 
 export const uploadPicture = async (userId: string, file: File) => {
-    const ref = firebase.storage().ref(`pictures/${userId}/${file.name}`);
-    await ref.put(file);
-    return await ref.getDownloadURL();
+    const storage = getStorage();
+    const storageRef = ref(storage, `pictures/${userId}/${file.name}`);
+    await uploadBytesResumable(storageRef, file);
+    return await getDownloadURL(storageRef);
 }
 
 export const searchUser = async (name: string, limit: number = 20) => {

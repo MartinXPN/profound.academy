@@ -2,6 +2,7 @@ import firebase from 'firebase/compat/app';
 import 'firebase/compat/firestore';
 import { getAnalytics } from 'firebase/analytics';
 import { getPerformance } from 'firebase/performance';
+import { initializeAppCheck, ReCaptchaV3Provider } from 'firebase/app-check';
 // import 'firebase/functions';
 // import 'firebase/storage';
 
@@ -16,6 +17,13 @@ export const firebaseConfig = {
 };
 
 const app = firebase.initializeApp(firebaseConfig);
+const appCheck = initializeAppCheck(app, {
+    provider: new ReCaptchaV3Provider('6LcpsDAfAAAAAO04Nn88Eu88h7DldZGFu-OUrEN1'),
+    // Optional argument. If true, the SDK automatically refreshes App Check tokens as needed.
+    isTokenAutoRefreshEnabled: true
+});
+console.log('app check:', appCheck);
+
 
 // configure the database to ignore undefined values
 const db = firebase.firestore();

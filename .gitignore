@@ -3,6 +3,9 @@
 ## Project specific files ##
 .runtimeconfig.json
 test_data/
+lib
+firebase-export-*
+firebase/tests*
 
 # IntelliJ
 .idea/

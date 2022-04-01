@@ -6,9 +6,9 @@ The aim of the platform is to save tutors’ time on homework checking
 and allow students to learn at their own pace while increasing their engagement throughout the learning process.
 
 
-| Join the community                                                                                                                       | Visit Profound Academy   | Contact us                                                |
-|------------------------------------------------------------------------------------------------------------------------------------------|--------------------------|-----------------------------------------------------------|
-| <a href="https://discord.gg/DfZMjQhK"><img src="https://www.vhv.rs/dpng/d/101-1013839_discord-join-hd-png-download.png" width="180"></a> | https://profound.academy | [support@pofound.academy](mailto:support@pofound.academy) |
+| Join the community                                                                                  | Visit Profound Academy   | Contact us                                                |
+|-----------------------------------------------------------------------------------------------------|--------------------------|-----------------------------------------------------------|
+| <a href="https://discord.gg/TTTEcu2Jju"><img src="https://i.imgur.com/YSRtCwE.png" width="180"></a> | https://profound.academy | [support@pofound.academy](mailto:support@pofound.academy) |
 
 
 

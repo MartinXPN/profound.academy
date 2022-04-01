@@ -1,8 +1,12 @@
 import React, {memo, useRef, useState} from 'react';
 import useAsyncEffect from "use-async-effect";
 
-import {ExtendedRecordMap} from "notion-types/src/maps";
-import {Code, Collection, CollectionRow, Equation, Modal, NotionRenderer} from 'react-notion-x'
+import {Decoration, ExtendedRecordMap} from "notion-types";
+import {NotionRenderer} from "react-notion-x";
+import { Code } from 'react-notion-x/build/third-party/code';
+import { Collection } from 'react-notion-x/build/third-party/collection';
+import { Equation } from 'react-notion-x/build/third-party/equation';
+import { Modal } from 'react-notion-x/build/third-party/modal';
 import { highlightAll } from "prismjs";
 import 'prismjs/themes/prism.min.css';      // used for code syntax highlighting (optional)
 import 'react-notion-x/src/styles.css';     // core styles shared by all of react-notion-x (required)
@@ -14,7 +18,6 @@ import Box from "@mui/material/Box";
 
 import {getNotionPageMap} from "../services/notion";
 import {DependencyLoader, getAllDependencies} from "./prismutil";
-import {Decoration} from "notion-types/src/core";
 
 
 function Content({notionPage}: {notionPage: string}) {
@@ -82,13 +85,7 @@ function Content({notionPage}: {notionPage: string}) {
             recordMap={recordMap}
             fullPage={false}
             darkMode={false}
-            components={{
-                code: Code,
-                collection: Collection,
-                collectionRow: CollectionRow,
-                modal: Modal,
-                equation: Equation,
-            }}/>
+            components={{Code, Collection, Modal, Equation}} />
             : errors
                 ? <Typography textAlign="center" color="error" marginBottom={4}>{errors}</Typography>
                 : <Box width="80%" margin="10%" textAlign="center"><CircularProgress/></Box>

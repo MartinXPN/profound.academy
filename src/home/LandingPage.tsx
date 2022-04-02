@@ -4,7 +4,7 @@ import {SignIn} from "../user/Auth";
 import Box from "@mui/material/Box";
 import {styled} from "@mui/material/styles";
 import {Grid, Typography} from "@mui/material";
-import Content from "../course/Content";
+import Content from "../common/notion/Content";
 
 
 const TopOval = styled('div')(({ theme }) => ({

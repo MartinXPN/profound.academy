@@ -9,7 +9,7 @@ import AdapterMoment from '@mui/lab/AdapterMoment';
 import LocalizationProvider from '@mui/lab/LocalizationProvider';
 import DateTimePicker from '@mui/lab/DateTimePicker';
 import {styled} from "@mui/material/styles";
-import Content from "./Content";
+import Content from "../common/notion/Content";
 import {useNavigate} from "react-router-dom";
 import {getUsers, searchUser, uploadPicture} from "../services/users";
 import {genCourseId, onCoursePrivateFieldsChanged, sendCourseInviteEmails, updateCourse, updateCoursePrivateFields} from "../services/courses";

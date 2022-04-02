@@ -1,5 +1,5 @@
 import React, {memo} from "react";
-import Content from "../course/Content";
+import Content from "../common/notion/Content";
 import ProfileAppBar from "../user/ProfileAppBar";
 import Footer from "./Footer";
 import {Divider} from "@mui/material";

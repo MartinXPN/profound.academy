@@ -7,7 +7,7 @@ import {SignIn} from "../../user/Auth";
 import Editor from "../editor/Editor";
 import {CourseContext, CurrentExerciseContext} from "../Course";
 import {Grid, Stack, Typography} from "@mui/material";
-import Content from "../Content";
+import Content from "../../common/notion/Content";
 import Forum from "../forum/Forum";
 import {ExerciseSubmissionsTable} from "../submission/SubmissionsTable";
 import {SplitPane} from "react-multi-split-pane";

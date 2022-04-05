@@ -13,7 +13,7 @@ import {processResult} from './submissionResults';
 import {recordNewUserInsight} from './insights';
 
 // const LAMBDA_JUDGE_URL='https://judge.profound.academy/check';
-const LAMBDA_JUDGE_URL='https://jdc8h3yyag.execute-api.us-east-1.amazonaws.com/Prod/check/';
+const LAMBDA_JUDGE_URL='https://239loy8zo4.execute-api.us-east-1.amazonaws.com/Prod/check/';
 const PROCESS_SUBMISSION_CALLBACK_URL='https://us-central1-profound-academy.cloudfunctions.net/processSubmissionResult';
 const LOCALHOST = functions.config()?.host === 'local';
 

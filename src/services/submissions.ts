@@ -1,5 +1,6 @@
 import {db} from "./db";
 import firebase from "firebase/compat/app";
+import { getFunctions, httpsCallable } from "firebase/functions";
 import {Language} from "models/language";
 import {TestCase} from "models/exercise";
 import {Submission, SubmissionResult} from "models/submissions";
@@ -189,7 +190,9 @@ export const getSubmissionCode = async (userId: string, submissionId: string) =>
 
 export const reEvaluateSubmissions = async (courseId: string, exerciseId: string) => {
     console.log('re-evaluating all the submissions...:', courseId, exerciseId);
-    return await firebase.functions().httpsCallable('reEvaluateSubmissions')({
+    const functions = getFunctions();
+    const reEvaluate = httpsCallable(functions, 'reEvaluateSubmissions');
+    return reEvaluate({
         courseId: courseId,
         exerciseId: exerciseId,
     });

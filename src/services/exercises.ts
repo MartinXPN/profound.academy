@@ -1,6 +1,7 @@
 import {db} from "./db";
 import {Exercise, EXERCISE_TYPES, TestCase} from "models/exercise";
 import firebase from "firebase/compat/app";
+import { getFunctions, httpsCallable } from "firebase/functions";
 import axios from "axios";
 import {LANGUAGES} from "models/language";
 import {Insight} from "models/lib/courses";
@@ -137,16 +138,21 @@ export const updateTestCases = async (
     onProgressChanged: (progress: number) => void,
 ) => {
     onProgressChanged(5);
-    const uploadUrl = await firebase.functions().httpsCallable('getS3UploadUrl')({
+    const functions = getFunctions();
+    const upload = httpsCallable(functions, 'getS3UploadUrl');
+
+    const uploadUrl = await upload({
         courseId: courseId,
         exerciseId: exerciseId,
         contentType: file.type,
     });
     console.log('uploadURL:', uploadUrl.data);
+    if( !uploadUrl || !uploadUrl.data )
+        return onProgressChanged(0);
 
     const res = await axios.request({
         method: 'put',
-        url: uploadUrl.data,
+        url: uploadUrl.data as string,
         data: file,
         headers: {
             'Content-Type': file.type,

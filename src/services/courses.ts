@@ -1,6 +1,7 @@
 import {db} from "./db";
 import {Course} from "models/courses";
 import firebase from "firebase/compat/app";
+import { getFunctions, httpsCallable } from "firebase/functions";
 import {CoursePrivateFields, Insight} from "models/lib/courses";
 import moment from "moment/moment";
 import {dateDayDiff} from "../util";
@@ -201,7 +202,9 @@ export const updateCoursePrivateFields = (
 }
 
 export const sendCourseInviteEmails = async (courseId: string) => {
-    await firebase.functions().httpsCallable('sendCourseInviteEmails')({
+    const functions = getFunctions();
+    const send = httpsCallable(functions, 'sendCourseInviteEmails');
+    return send({
         courseId: courseId,
     });
 }

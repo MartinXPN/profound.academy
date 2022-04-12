@@ -28,7 +28,7 @@ describe('Record Insights', function () {
     after(async () => {
         firestoreStub.restore();
         adminInitStub.restore();
-        await db.course(courseId).delete();
+        await admin.firestore().recursiveDelete(db.course(courseId));
     });
 
     describe('Insight for a single course', () => {

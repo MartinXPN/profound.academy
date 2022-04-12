@@ -12,25 +12,16 @@ export const recordInsights = (
     value = 1,
 ) => {
     const insightDay = format(date);
+    const record = (location: firestore.DocumentReference) => {
+        transaction.set(location, {
+            date: insightDay,
+            [metric]: firestore.FieldValue.increment(value),
+        }, {merge: true});
+    };
 
-    // COURSE ///
-    // set course insight for a specific day
-    transaction.set(db.courseInsights(courseId).doc(insightDay), {
-        date: insightDay,
-        [metric]: firestore.FieldValue.increment(value) as unknown as number,
-    }, {merge: true});
-
-    // set in course overall insights
-    transaction.set(db.courseOverallInsights(courseId), {
-        date: insightDay,
-        [metric]: firestore.FieldValue.increment(value) as unknown as number,
-    }, {merge: true});
-
-    // EXERCISE ///
-    transaction.set(db.exerciseInsights(courseId, exerciseId), {
-        date: insightDay,
-        [metric]: firestore.FieldValue.increment(value) as unknown as number,
-    }, {merge: true});
+    record(db.courseInsights(courseId).doc(insightDay));    // Course - day insight
+    record(db.courseOverallInsights(courseId));             // Course - overall insight
+    record(db.exerciseInsights(courseId, exerciseId));      // Exercise - overall insight
 };
 
 
@@ -41,7 +32,6 @@ export const recordNewUserInsight = async (
     const user = (await transaction.get(db.user(userId))).data();
     const course = db.course(courseId);
 
-    // @ts-ignore
     if (user && user.courses && user.courses.some((c) => c.id === course.id)) {
         functions.logger.info('Not updating new user insight as the user has already signed up for the course');
         return;

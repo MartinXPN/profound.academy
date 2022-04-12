@@ -1,5 +1,6 @@
 {
   "projects": {
-    "default": "profound-academy"
+    "default": "profound-academy",
+    "test": "profound-academy-test"
   }
 }

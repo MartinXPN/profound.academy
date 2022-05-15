@@ -5,7 +5,7 @@ import {db} from './db';
 import {UserInfoUpdate} from '../models/users';
 
 
-export const updateUserInfo = async (userInfo: UserInfoUpdate): Promise<void> => {
+const updateUserInfo = async (userInfo: UserInfoUpdate): Promise<void> => {
     functions.logger.info(`updating user info: ${JSON.stringify(userInfo)}`);
 
     // update progress
@@ -56,7 +56,13 @@ export const addCourses = async (
     courseIds: string[],
 ) => {
     const user = (await transaction.get(db.user(userId))).data();
-    const courses = courseIds.map((courseId) => db.course(courseId));
+    const completedCourses = user?.completed?.map((c) => c.id) ?? [];
+    const courses = courseIds
+        .filter((courseId) => !completedCourses.includes(courseId))
+        .map((courseId) => db.course(courseId));
+
+    if (courses.length === 0)
+        return functions.logger.info('No new courses to add');
 
     if (!user || !user.courses || user.courses.length === 0) {
         functions.logger.info('This is the first course of this user!');

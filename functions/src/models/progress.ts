@@ -11,6 +11,7 @@ export interface ExerciseProgress<T> {
 
 export interface Progress {
     id: string;                                             // userId
+    userId: string;                                         // userId for collction group queries
     userDisplayName: string;                                // how to show the user
     userImageUrl?: string;                                  // Image of the user
     score?: number;                                         // total score for the course

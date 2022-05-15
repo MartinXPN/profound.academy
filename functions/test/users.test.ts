@@ -31,7 +31,49 @@ describe('Update User Info', function () {
     });
 
     describe('Update Info Queue', () => {
-        it('Update the display name', async () => {
+        it('Process Info update for a single user', async () => {
+            // Populate the DB with dummy data
+            await db.user(userId).set({id: userId, displayName: 'Alice', imageUrl: ''});
+            await db.userProgress('c1', userId).set({id: userId, userId: userId, userDisplayName: 'Alice', userImageUrl: '', score: 0});
+            const commentId = await db.forum.add({
+                id: '', userId: userId, displayName: 'Alice',
+                // @ts-ignore
+                createdAt: admin.firestore.FieldValue.serverTimestamp(), replies: [], score: 1, text: 'Hey!'
+            });
+            // @ts-ignore
+            const submissionId = await db.submissionResults.add({
+                id: '', isBest: true, status: 'Solved', memory: 10, time: 0.1, score: 100,
+                userDisplayName: 'Alice', userImageUrl: '', userId: userId,
+            });
+
+
+            // Launch the update
+            await db.userInfoUpdate(userId).set({id: userId, displayName: 'Bob', imageUrl: 'https://i.imgur.com/Mcvgbvm.jpeg'});
+            await users.updateInfoQueue();
+
+            // info updates
+            const updates = (await db.infoUpdates.get()).docs.map((d) => d.data());
+            assert.isEmpty(updates, 'Info updates should be empty after processing');
+
+            // progress
+            const progress = (await db.userProgress('c1', userId).get()).data();
+            assert.equal(progress?.userDisplayName, 'Bob', 'Progress user name update');
+            assert.notEqual(progress?.userImageUrl, '', 'Progress image URL should be updated');
+
+            // forum comments
+            const comment = (await db.forumComment(commentId.id).get()).data();
+            assert.equal(comment?.displayName, 'Bob', 'Comment user name update');
+            assert.notEqual(comment?.avatarUrl, '', 'Comment image URL should be updated');
+
+            // submissions
+            const submission = (await db.submissionResult(submissionId.id).get()).data();
+            assert.equal(submission?.userDisplayName, 'Bob', 'Comment user name update');
+            assert.notEqual(submission?.userImageUrl, '', 'Comment image URL should be updated');
+
+            // user
+            const user = (await db.user(userId).get()).data();
+            assert.equal(user?.displayName, 'Bob', 'User info should be updated');
+            assert.notEqual(user?.imageUrl, '', 'User image URL should be updated');
         });
     });
 });

@@ -199,6 +199,7 @@ describe('Update User Progress', function () {
             progress = (await db.userProgress(courseId, userId).get()).data();
             exerciseProgress = (await db.userProgress(courseId, userId).collection('exerciseScore').doc('level1').get()).data();
             assert.equal(progress?.score, 50, 'User score should be the sum of all the exercise scores');
+            assert.equal(progress?.userId, userId, 'User ID should be added for collection group queries');
             assert.equal(exerciseProgress?.['progress']?.[exercise1Id], 20, 'exercise 1 score should accumulate');
             assert.equal(exerciseProgress?.['progress']?.[exercise2Id], 30, 'exercise 2 score be set');
         });

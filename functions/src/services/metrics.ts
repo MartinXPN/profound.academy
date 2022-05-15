@@ -29,6 +29,7 @@ export const updateUserProgress = (
     const uppercaseMetric = metric.charAt(0).toUpperCase() + metric.slice(1);
     functions.logger.info(`Updating metric: ${metric} with prev ${prev} to cur ${cur}`);
     transaction.set(db.userProgress(courseId, userId), {
+        userId: userId,
         [metric]: firestore.FieldValue.increment(cur - prev),
         [`level${uppercaseMetric}`]: {[level]: firestore.FieldValue.increment(cur - prev)},
     }, {merge: true});

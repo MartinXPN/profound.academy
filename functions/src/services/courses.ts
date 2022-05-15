@@ -1,6 +1,7 @@
-import {firestore} from 'firebase-admin';
 import * as AWS from 'aws-sdk';
 import * as functions from 'firebase-functions';
+import {firestore} from 'firebase-admin';
+
 import {db} from './db';
 
 

@@ -5,12 +5,12 @@ import * as moment from 'moment';
 import * as needle from 'needle';
 import * as admin from 'firebase-admin';
 import {firestore} from 'firebase-admin';
-import {updateUserMetric} from './metrics';
+
 import {db} from './db';
 import {Submission} from '../models/submissions';
 import {Exercise} from '../models/exercise';
 import {processResult} from './submissionResults';
-import {recordNewUserInsight} from './insights';
+import {updateUserProgress, recordNewUserInsight} from './metrics';
 
 // const LAMBDA_JUDGE_URL='https://judge.profound.academy/check';
 const LAMBDA_JUDGE_URL='https://239loy8zo4.execute-api.us-east-1.amazonaws.com/Prod/check/';
@@ -120,7 +120,7 @@ export const submit = async (submission: Submission): Promise<http.ClientRequest
             });
             return false;
         }
-        updateUserMetric(transaction, 'attempts', submission.userId, course.id, exercise.id, levelName,
+        updateUserProgress(transaction, 'attempts', submission.userId, course.id, exercise.id, levelName,
             numAttempts, numAttempts + 1, numAttempts + 1);
         functions.logger.info(`Updated attempts to ${numAttempts + 1}`);
         return true;
@@ -186,7 +186,7 @@ export const reEvaluate = async (courseId: string, exerciseId: string): Promise<
             ]);
         }));
 
-        // reset user metrics
+        // reset user progress metrics
         await Promise.all(prevData.map(async (data) => {
             if (!data)
                 return;
@@ -195,19 +195,19 @@ export const reEvaluate = async (courseId: string, exerciseId: string): Promise<
             functions.logger.info(`weekly score path: ${weekly}`);
             console.log('user:', user);  // , 'prevSolved:', prevSolved, 'upsolve:', upsolveScore
 
-            updateUserMetric(transaction, 'solved', user, courseId, exerciseId, level,
+            updateUserProgress(transaction, 'solved', user, courseId, exerciseId, level,
                 prevSolved?.progress?.[exerciseId] === 'Solved' ? 1 : 0, 0, 0, true);
 
-            updateUserMetric(transaction, 'score', user, courseId, exerciseId, level,
+            updateUserProgress(transaction, 'score', user, courseId, exerciseId, level,
                 prevScore?.progress?.[exerciseId] ?? 0, 0, 0, true);
 
-            updateUserMetric(transaction, `score_${weekly}`, user, courseId, exerciseId, level,
+            updateUserProgress(transaction, `score_${weekly}`, user, courseId, exerciseId, level,
                 prevScore?.progress?.[exerciseId] ?? 0, 0, 0, true);
 
-            updateUserMetric(transaction, 'upsolveScore', user, courseId, exerciseId, level,
+            updateUserProgress(transaction, 'upsolveScore', user, courseId, exerciseId, level,
                 upsolveScore?.progress?.[exerciseId] ?? 0, 0, 0, true);
 
-            updateUserMetric(transaction, 'attempts', user, courseId, exerciseId, level,
+            updateUserProgress(transaction, 'attempts', user, courseId, exerciseId, level,
                 prevAttempts?.progress?.[exerciseId] ?? 0, 0, 0, true);
         }));
 

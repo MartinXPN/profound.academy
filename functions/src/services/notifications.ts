@@ -1,8 +1,10 @@
 import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
+import {firestore} from 'firebase-admin';
+
 import {Comment} from '../models/forum';
 import {Notification} from '../models/notifications';
-import {db, firestore} from './db';
+import {db} from './db';
 
 
 export const getTopLocalizedParam = (param: string | { [key: string]: string }): string => {

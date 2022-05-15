@@ -1,27 +1,25 @@
-import * as firebaseFunctionsTest from 'firebase-functions-test';
-import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
 import * as sinon from 'sinon';
 import * as chai from 'chai';
+import {config} from "./testConfig";
 
 const assert = chai.assert;
-const test = firebaseFunctionsTest();
 
 
 describe('Test Hello world', () => {
     let allFunctions: typeof import('../src/index');
     let adminInitStub: sinon.SinonStub;
 
-    before(async () => {
-        admin.initializeApp(functions.config().firebase);
+    beforeEach(async () => {
+        if (admin.apps.length === 0)
+            admin.initializeApp(config);
         adminInitStub = sinon.stub(admin, 'initializeApp');
         allFunctions = await import('../src/index');
         console.log('Done initializing!');
     });
 
-    after(() => {
+    afterEach(() => {
         adminInitStub.restore();
-        test.cleanup();
     });
 
     describe('print', () => {

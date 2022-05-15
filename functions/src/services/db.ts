@@ -1,4 +1,5 @@
 import * as admin from 'firebase-admin';
+import {firestore} from 'firebase-admin';
 
 import {CodeDraft} from '../models/codeDrafts';
 import {Activity, User, UserInfoUpdate, UserRole} from '../models/users';
@@ -10,7 +11,6 @@ import {Submission, SubmissionResult, SubmissionSensitiveRecords, TestResults} f
 import {Comment, Vote} from '../models/forum';
 
 admin.initializeApp({credential: admin.credential.applicationDefault()});
-export const firestore = admin.firestore;
 
 // Add ids when getting the data and removing when sending it
 const converter = <T>() => ({

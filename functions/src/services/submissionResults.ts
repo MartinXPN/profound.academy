@@ -1,13 +1,13 @@
-import {firestore} from 'firebase-admin';
 import * as functions from 'firebase-functions';
 import * as moment from 'moment';
+import {firestore} from 'firebase-admin';
+
 import {db} from './db';
 import {JudgeResult, SubmissionResult} from '../models/submissions';
 import {Course} from '../models/courses';
 import {Exercise} from '../models/exercise';
 import {User} from '../models/users';
-import {recordInsights} from './insights';
-import {updateUserMetric} from './metrics';
+import {updateUserProgress, recordInsights} from './metrics';
 
 
 const updateBest = (
@@ -189,23 +189,23 @@ export const processResult = async (
             const prevScore = (await transaction.get(db.userProgress(course.id, userId)
                 .collection('exerciseScore').doc(level))).data();
             functions.logger.info(`prevScore: ${JSON.stringify(prevScore)}`);
-            updateUserMetric(transaction, 'score', submissionResult.userId, course.id, exercise.id, level,
+            updateUserProgress(transaction, 'score', submissionResult.userId, course.id, exercise.id, level,
                 prevScore?.progress?.[exercise.id] ?? 0, submissionResult.score, submissionResult.score);
             // update weekly score metrics
             const weekly = moment(submissionDate).format('YYYY_MM_WW');
             functions.logger.info(`weekly score path: ${weekly}`);
-            updateUserMetric(transaction, `score_${weekly}`,
+            updateUserProgress(transaction, `score_${weekly}`,
                 submissionResult.userId, course.id, exercise.id, level,
                 prevScore?.progress?.[exercise.id] ?? 0, submissionResult.score, submissionResult.score);
         } else {
             const prevScore = (await transaction.get(db.userProgress(course.id, userId)
                 .collection('exerciseUpsolveScore').doc(level))).data();
             functions.logger.info(`prevScore: ${JSON.stringify(prevScore)}`);
-            updateUserMetric(transaction, 'upsolveScore', submissionResult.userId, course.id, exercise.id, level,
+            updateUserProgress(transaction, 'upsolveScore', submissionResult.userId, course.id, exercise.id, level,
                 prevScore?.progress?.[exercise.id] ?? 0, submissionResult.score, submissionResult.score);
         }
 
-        updateUserMetric(transaction, 'solved', submissionResult.userId, course.id, exercise.id, level,
+        updateUserProgress(transaction, 'solved', submissionResult.userId, course.id, exercise.id, level,
             prevSolved?.progress?.[exercise.id] === 'Solved' ? 1 : 0,
             submissionResult.status === 'Solved' ? 1 : 0, submissionResult.status);
         transaction.set(db.userProgress(course.id, submissionResult.userId), {

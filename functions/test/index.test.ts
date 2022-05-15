@@ -10,7 +10,7 @@ describe('Test Hello world', () => {
     let allFunctions: typeof import('../src/index');
     let adminInitStub: sinon.SinonStub;
 
-    before(async () => {
+    beforeEach(async () => {
         if (admin.apps.length === 0)
             admin.initializeApp(config);
         adminInitStub = sinon.stub(admin, 'initializeApp');
@@ -18,7 +18,7 @@ describe('Test Hello world', () => {
         console.log('Done initializing!');
     });
 
-    after(() => {
+    afterEach(() => {
         adminInitStub.restore();
     });
 

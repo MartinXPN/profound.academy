@@ -17,7 +17,7 @@ describe('Record Insights', function () {
     let firestoreStub: sinon.SinonStub;
     let courseId: string;
 
-    before(async () => {
+    beforeEach(async () => {
         const app = admin.apps.length === 0 ? admin.initializeApp(config) : admin.apps[0] ?? undefined;
         adminInitStub = sinon.stub(admin, 'initializeApp');
         firestoreStub = sinon.stub(admin, 'firestore').callsFake(() => admin.firestore(app));
@@ -26,7 +26,7 @@ describe('Record Insights', function () {
         courseId = db.courses.doc().id;
     });
 
-    after(async () => {
+    afterEach(async () => {
         firestoreStub.restore();
         adminInitStub.restore();
         await admin.firestore().recursiveDelete(db.course(courseId));
@@ -63,9 +63,10 @@ describe('Record New User Insights', function () {
     let firestoreStub: sinon.SinonStub;
     let course1Id: string;
     let course2Id: string;
-    let userId: string;
+    let user1Id: string;
+    let user2Id: string;
 
-    before(async () => {
+    beforeEach(async () => {
         const app = admin.apps.length === 0 ? admin.initializeApp(config) : admin.apps[0] ?? undefined;
         adminInitStub = sinon.stub(admin, 'initializeApp');
         firestoreStub = sinon.stub(admin, 'firestore').callsFake(() => admin.firestore(app));
@@ -73,26 +74,29 @@ describe('Record New User Insights', function () {
         db = (await import('../src/services/db')).db;
         course1Id = db.courses.doc().id;
         course2Id = db.courses.doc().id;
-        userId = db.users.doc().id;
+        user1Id = db.users.doc().id;
+        user2Id = db.users.doc().id;
     });
 
-    after(async () => {
-        firestoreStub.restore();
-        adminInitStub.restore();
+    afterEach(async () => {
         await admin.firestore().recursiveDelete(db.course(course1Id));
         await admin.firestore().recursiveDelete(db.course(course2Id));
+        await admin.firestore().recursiveDelete(db.user(user1Id));
+        await admin.firestore().recursiveDelete(db.user(user2Id));
+        firestoreStub.restore();
+        adminInitStub.restore();
     });
 
     describe('New user new course', () => {
         it('Single user single course', async () => {
             const date = new Date();
-            await db.user(userId).set({'id': userId, 'displayName': 'Bob'});
+            await db.user(user1Id).set({'id': user1Id, 'displayName': 'Bob'});
 
             await admin.firestore().runTransaction(async (transaction) => {
-                await metrics.recordNewUserInsight(transaction, userId, course1Id, date);
+                await metrics.recordNewUserInsight(transaction, user1Id, course1Id, date);
             });
 
-            const userData = (await db.user(userId).get()).data();
+            const userData = (await db.user(user1Id).get()).data();
             assert.equal(userData?.displayName, 'Bob', 'Initial data should be preserved');
             assert.equal(userData?.courses?.length, 1, 'Should add the course to the list');
 
@@ -102,6 +106,42 @@ describe('Record New User Insights', function () {
 
             assert.equal(courseInsights?.users, 1, 'Keep track of overall users');
             assert.equal(courseOverall?.users, 1, 'Keep track of overall users');
+        });
+    });
+
+    describe('New users for multiple courses',  () => {
+        it('Multiple courses', async () => {
+            const date = new Date();
+            await db.user(user1Id).set({'id': user1Id, 'displayName': 'Bob'});
+            await db.user(user2Id).set({'id': user1Id, 'displayName': 'Alice'});
+
+            await admin.firestore().runTransaction(async (transaction) => {
+                await metrics.recordNewUserInsight(transaction, user1Id, course1Id, date);
+            });
+            await admin.firestore().runTransaction(async (transaction) => {
+                await metrics.recordNewUserInsight(transaction, user2Id, course1Id, date);
+            });
+
+            const user1Data = (await db.user(user1Id).get()).data();
+            let user2Data = (await db.user(user2Id).get()).data();
+            assert.equal(user1Data?.courses?.length, 1, 'Should add the course to the user1 list');
+            assert.equal(user2Data?.courses?.length, 1, 'Should add the course to the user2 list');
+
+            const insightDay = format(date);
+            const course1Insights = (await db.courseInsights(course1Id).doc(insightDay).get()).data();
+            const course1Overall = (await db.courseOverallInsights(course1Id).get()).data();
+            assert.equal(course1Insights?.users, 2, `Keep track of overall users ${JSON.stringify(course1Insights)}`);
+            assert.equal(course1Overall?.users, 2, `Keep track of overall users ${JSON.stringify(course1Overall)}`);
+
+            // sign user2 up for the course2
+            await admin.firestore().runTransaction(async (transaction) => {
+                await metrics.recordNewUserInsight(transaction, user2Id, course2Id, date);
+            });
+            const course2Overall = (await db.courseOverallInsights(course2Id).get()).data();
+            assert.equal(course2Overall?.users, 1, `Keep track of overall users ${JSON.stringify(course2Overall)}`);
+
+            user2Data = (await db.user(user2Id).get()).data();
+            assert.equal(user2Data?.courses?.length, 2, 'Should add the course to the user2 list');
         });
     });
 });

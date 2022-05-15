@@ -145,3 +145,76 @@ describe('Record New User Insights', function () {
         });
     });
 });
+
+
+describe('Update User Progress', function () {
+    // Firebase connection can take long to be established
+    this.timeout(5000);
+
+    let metrics: typeof import('../src/services/metrics');
+    let db: typeof import('../src/services/db').db;
+    let adminInitStub: sinon.SinonStub;
+    let firestoreStub: sinon.SinonStub;
+    let userId: string;
+    let courseId: string;
+    let exercise1Id: string;
+    let exercise2Id: string;
+
+    beforeEach(async () => {
+        const app = admin.apps.length === 0 ? admin.initializeApp(config) : admin.apps[0] ?? undefined;
+        adminInitStub = sinon.stub(admin, 'initializeApp');
+        firestoreStub = sinon.stub(admin, 'firestore').callsFake(() => admin.firestore(app));
+        metrics = await import('../src/services/metrics');
+        db = (await import('../src/services/db')).db;
+        userId = db.users.doc().id;
+        courseId = db.courses.doc().id;
+        exercise1Id = db.exercises(courseId).doc().id;
+        exercise2Id = db.exercises(courseId).doc().id;
+    });
+
+    afterEach(async () => {
+        await admin.firestore().recursiveDelete(db.course(courseId));
+        await admin.firestore().recursiveDelete(db.user(userId));
+        firestoreStub.restore();
+        adminInitStub.restore();
+    });
+
+    describe('User progress for a single exercise', () => {
+        it('Correctly update the metric', async () => {
+            await admin.firestore().runTransaction(async (transaction) => {
+                metrics.updateUserProgress(transaction, 'score', userId, courseId, exercise1Id, 'level1', 0, 10, 10);
+            });
+            let progress = (await db.userProgress(courseId, userId).get()).data();
+            let exerciseProgress = (await db.userProgress(courseId, userId).collection('exerciseScore').doc('level1').get()).data();
+            assert.equal(progress?.score, 10, 'Initial score should be tracked');
+            assert.equal(exerciseProgress?.['progress']?.[exercise1Id], 10, 'Initial score should be tracked');
+
+            await admin.firestore().runTransaction(async (transaction) => {
+                metrics.updateUserProgress(transaction, 'score', userId, courseId, exercise1Id, 'level1', 10, 20, 20);
+                metrics.updateUserProgress(transaction, 'score', userId, courseId, exercise2Id, 'level1', 0, 30, 30);
+            });
+            await admin.firestore().runTransaction(async (transaction) => {
+                metrics.updateUserProgress(transaction, 'score', userId, courseId, exercise1Id, 'level1', 20, 10, 20);
+            });
+            progress = (await db.userProgress(courseId, userId).get()).data();
+            exerciseProgress = (await db.userProgress(courseId, userId).collection('exerciseScore').doc('level1').get()).data();
+            assert.equal(progress?.score, 50, 'User score should be the sum of all the exercise scores');
+            assert.equal(exerciseProgress?.['progress']?.[exercise1Id], 20, 'exercise 1 score should accumulate');
+            assert.equal(exerciseProgress?.['progress']?.[exercise2Id], 30, 'exercise 2 score be set');
+        });
+
+        it('Force update a metric', async () => {
+            await admin.firestore().runTransaction(async (transaction) => {
+                metrics.updateUserProgress(transaction, 'score', userId, courseId, exercise1Id, 'level1', 0, 10, 10);
+            });
+            await admin.firestore().runTransaction(async (transaction) => {
+                metrics.updateUserProgress(transaction, 'score', userId, courseId, exercise1Id, 'level1', 10, 5, 5, true);
+            });
+
+            let progress = (await db.userProgress(courseId, userId).get()).data();
+            let exerciseProgress = (await db.userProgress(courseId, userId).collection('exerciseScore').doc('level1').get()).data();
+            assert.equal(progress?.score, 5, 'User score should be down as well');
+            assert.equal(exerciseProgress?.['progress']?.[exercise1Id], 5, 'Exercise score should be changed');
+        });
+    });
+});

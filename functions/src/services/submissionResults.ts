@@ -77,6 +77,7 @@ const unlockContent = (
     if (unlockedCourses.length === 0)
         return;
 
+    // TODO: user addCourses() instead
     if (user.courses && user.courses.length > 0) {
         functions.logger.info('Adding course to pre-existing list of courses');
         transaction.update(db.user(user.id), {

@@ -3,6 +3,7 @@ import * as moment from 'moment';
 import {firestore} from 'firebase-admin';
 
 import {db} from './db';
+import {addCourses} from './users';
 
 
 export const format = (date: Date) => moment(date).locale('en').format('YYYY-MM-DD');
@@ -67,21 +68,10 @@ export const recordNewUserInsight = async (
     const user = (await transaction.get(db.user(userId))).data();
     const course = db.course(courseId);
 
-    if (user && user.courses && user.courses.some((c) => c.id === course.id)) {
-        functions.logger.info('Not updating new user insight as the user has already signed up for the course');
-        return;
-    }
+    if (user && user.courses && user.courses.some((c) => c.id === course.id))
+        return functions.logger.info('Not updating new user insight as the user has already signed up for the course');
 
-    if (!user || !user.courses || user.courses.length === 0) {
-        functions.logger.info('This is the first course of this user!');
-        // @ts-ignore
-        transaction.set(db.user(userId), {courses: [course]}, {merge: true});
-    } else {
-        functions.logger.info(`The user already has ${user.courses.length} courses. Adding to the list`);
-        // @ts-ignore
-        transaction.set(db.user(userId), {courses: firestore.FieldValue.arrayUnion(course)}, {merge: true});
-    }
-
+    await addCourses(transaction, userId, [courseId]);
     transaction.set(db.courseInsights(courseId).doc(insightDay), {
         users: firestore.FieldValue.increment(1) as unknown as number,
     }, {merge: true});

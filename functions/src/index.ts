@@ -47,12 +47,12 @@ export const sendCourseInviteEmails = functions.https.onCall(async (data, contex
 
 export const reEvaluateSubmissions = functions.https.onCall(async (data, context) => {
     const {isCourseInstructor} = await import('./services/courses');
-    const {reEvaluate} = await import('./services/submissions');
+    const {resubmitSolutions} = await import('./services/resubmit');
     if (!await isCourseInstructor(data.courseId, context.auth?.uid))
         throw Error(`User ${context.auth?.uid} tried to reEvaluate submissions: ${data.courseId} ${data.exerciseId}`);
 
     functions.logger.info(`reEvaluateSubmissions: ${JSON.stringify(data)}`);
-    return await reEvaluate(data.courseId, data.exerciseId);
+    return await resubmitSolutions(data.courseId, data.exerciseId);
 });
 
 export const getS3UploadUrl = functions.https.onCall(async (data, context) => {

@@ -44,17 +44,15 @@ export const resubmitSolutions = async (courseId: string, exerciseId: string): P
         const prevData = await Promise.all(Array.from(users).map(async (user) => {
             if (!user)
                 return;
+            /* eslint-disable max-len */
             return Promise.all([
                 user,
-                (await transaction.get(db.userProgress(courseId, user)
-                    .collection('exerciseSolved').doc(level))).data(),
-                (await transaction.get(db.userProgress(courseId, user)
-                    .collection('exerciseScore').doc(level))).data(),
-                (await transaction.get(db.userProgress(courseId, user)
-                    .collection('exerciseUpsolveScore').doc(level))).data(),
-                (await transaction.get(db.userProgress(courseId, user)
-                    .collection('exerciseAttempts').doc(level))).data(),
+                (await transaction.get(db.userProgress(courseId, user).collection('exerciseSolved').doc(level))).data(),
+                (await transaction.get(db.userProgress(courseId, user).collection('exerciseScore').doc(level))).data(),
+                (await transaction.get(db.userProgress(courseId, user).collection('exerciseUpsolveScore').doc(level))).data(),
+                (await transaction.get(db.userProgress(courseId, user).collection('exerciseAttempts').doc(level))).data(),
             ]);
+            /* eslint-enable max-len */
         }));
 
         // reset user progress metrics
@@ -66,20 +64,16 @@ export const resubmitSolutions = async (courseId: string, exerciseId: string): P
             functions.logger.info(`weekly score path: ${weekly}`);
             console.log('user:', user);  // , 'prevSolved:', prevSolved, 'upsolve:', upsolveScore
 
-            updateUserProgress(transaction, 'solved', user, courseId, exerciseId, level,
-                prevSolved?.progress?.[exerciseId] === 'Solved' ? 1 : 0, 0, 0, true);
-
-            updateUserProgress(transaction, 'score', user, courseId, exerciseId, level,
-                prevScore?.progress?.[exerciseId] ?? 0, 0, 0, true);
-
-            updateUserProgress(transaction, `score_${weekly}`, user, courseId, exerciseId, level,
-                prevScore?.progress?.[exerciseId] ?? 0, 0, 0, true);
-
-            updateUserProgress(transaction, 'upsolveScore', user, courseId, exerciseId, level,
-                upsolveScore?.progress?.[exerciseId] ?? 0, 0, 0, true);
-
-            updateUserProgress(transaction, 'attempts', user, courseId, exerciseId, level,
-                prevAttempts?.progress?.[exerciseId] ?? 0, 0, 0, true);
+            const reset = (metric: string, prevValue: number) => updateUserProgress(
+                transaction, metric,
+                user, courseId, exerciseId, level,
+                prevValue, 0, 0, true
+            );
+            reset('solved', prevSolved?.progress?.[exerciseId] === 'Solved' ? 1 : 0);
+            reset('score', prevScore?.progress?.[exerciseId] ?? 0);
+            reset(`score_${weekly}`, prevScore?.progress?.[exerciseId] ?? 0);
+            reset('upsolveScore', upsolveScore?.progress?.[exerciseId] ?? 0);
+            reset('attempts', prevAttempts?.progress?.[exerciseId] ?? 0);
         }));
 
         // submit again

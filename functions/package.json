@@ -11,7 +11,7 @@
     "deploy": "firebase deploy --only functions",
     "logs": "firebase functions:log",
     "pretest": "tsc -p tsconfig.dev.json",
-    "test": "mocha './test/**/*.ts' --reporter spec --require ts-node/register --recursive"
+    "test": "nyc mocha './test/**/*.ts' --reporter spec --require ts-node/register --recursive"
   },
   "engines": {
     "node": "16"
@@ -47,6 +47,7 @@
     "eslint-plugin-import": "^2.25.4",
     "firebase-functions-test": "^0.3.3",
     "mocha": "^9.2.0",
+    "nyc": "^15.1.0",
     "sinon": "^13.0.1",
     "ts-node": "^10.5.0",
     "typescript": "^4.5.5"

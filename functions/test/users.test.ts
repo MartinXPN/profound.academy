@@ -14,6 +14,8 @@ describe('Update User Info', function () {
     let adminInitStub: sinon.SinonStub;
     let firestoreStub: sinon.SinonStub;
     let userId: string;
+    let commentId: string;
+    let submissionId: string;
 
     beforeEach(async () => {
         const app = admin.apps.length === 0 ? admin.initializeApp(config) : admin.apps[0] ?? undefined;
@@ -28,6 +30,9 @@ describe('Update User Info', function () {
         firestoreStub.restore();
         adminInitStub.restore();
         await admin.firestore().recursiveDelete(db.user(userId));
+        await admin.firestore().recursiveDelete(db.course('c1'));
+        await admin.firestore().recursiveDelete(db.forumComment(commentId));
+        await admin.firestore().recursiveDelete(db.submissionResult(submissionId));
     });
 
     describe('Update Info Queue', () => {
@@ -35,16 +40,16 @@ describe('Update User Info', function () {
             // Populate the DB with dummy data
             await db.user(userId).set({id: userId, displayName: 'Alice', imageUrl: ''});
             await db.userProgress('c1', userId).set({id: userId, userId: userId, userDisplayName: 'Alice', userImageUrl: '', score: 0});
-            const commentId = await db.forum.add({
+            commentId = (await db.forum.add({
                 id: '', userId: userId, displayName: 'Alice',
                 // @ts-ignore
                 createdAt: admin.firestore.FieldValue.serverTimestamp(), replies: [], score: 1, text: 'Hey!'
-            });
+            })).id;
             // @ts-ignore
-            const submissionId = await db.submissionResults.add({
+            submissionId = (await db.submissionResults.add({
                 id: '', isBest: true, status: 'Solved', memory: 10, time: 0.1, score: 100,
                 userDisplayName: 'Alice', userImageUrl: '', userId: userId,
-            });
+            })).id;
 
 
             // Launch the update
@@ -61,12 +66,12 @@ describe('Update User Info', function () {
             assert.notEqual(progress?.userImageUrl, '', 'Progress image URL should be updated');
 
             // forum comments
-            const comment = (await db.forumComment(commentId.id).get()).data();
+            const comment = (await db.forumComment(commentId).get()).data();
             assert.equal(comment?.displayName, 'Bob', 'Comment user name update');
             assert.notEqual(comment?.avatarUrl, '', 'Comment image URL should be updated');
 
             // submissions
-            const submission = (await db.submissionResult(submissionId.id).get()).data();
+            const submission = (await db.submissionResult(submissionId).get()).data();
             assert.equal(submission?.userDisplayName, 'Bob', 'Comment user name update');
             assert.notEqual(submission?.userImageUrl, '', 'Comment image URL should be updated');
 

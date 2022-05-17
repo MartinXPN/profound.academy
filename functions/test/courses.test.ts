@@ -116,6 +116,9 @@ describe('Send Course Invite Emails', function () {
 
             const privateFields = (await db.coursePrivateFields(courseId).get()).data();
             chai.expect(privateFields?.sentEmails ?? []).to.include.all.members([...emails, 'another@gmail.com']);
+
+            const sent = await courses.sendInviteEmails(courseId);
+            assert.isFalse(sent, 'Should have no invitations to sent');
         });
     });
 });

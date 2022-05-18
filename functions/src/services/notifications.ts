@@ -32,7 +32,6 @@ export const notifyOnComment = async (comment: Comment): Promise<void> => {
         const data = parentComment.data();
         if (!data)
             throw Error(`comment with id: ${parentComment.id} exists but does not have data`);
-
         functions.logger.info(`parent comment: ${JSON.stringify(data)}`);
 
         threadUsers.push(data.userId);
@@ -41,13 +40,6 @@ export const notifyOnComment = async (comment: Comment): Promise<void> => {
     }
 
     // get the corresponding exercise and the course
-    const exercise = await firestore().doc(repliedTo.path).get();
-    const exerciseData = exercise.data();
-    if (!exerciseData)
-        throw Error(`exercise with id: ${exercise.id} exists but does not have data`);
-
-    functions.logger.info(`exercise: ${JSON.stringify(exerciseData)}`);
-
     const coursePath = repliedTo.parent.parent?.path;
     if (!coursePath)
         throw Error(`Course with ${coursePath} does not exist`);
@@ -56,9 +48,13 @@ export const notifyOnComment = async (comment: Comment): Promise<void> => {
     const courseData = course.data();
     if (!courseData)
         throw Error(`Course with id: ${course.id} exists but does not have data`);
-
     functions.logger.info(`course: ${JSON.stringify(courseData)}`);
 
+    const exercise = await firestore().doc(repliedTo.path).get();
+    const exerciseData = exercise.data();
+    if (!exerciseData)
+        throw Error(`exercise with id: ${exercise.id} exists but does not have data`);
+    functions.logger.info(`exercise: ${JSON.stringify(exerciseData)}`);
 
     // Posted under the exercise:
     //  1. if the person is the instructor => notify all the students

@@ -70,7 +70,7 @@ export const sendInviteEmails = async (
         await db.coursePrivateFields(courseId).set({sentEmails: diffEmails}, {merge: true});
     else
         await db.coursePrivateFields(courseId).set({   // @ts-ignore
-            sentEmails: firestore.FieldValue.arrayUnion(diffEmails),
+            sentEmails: firestore.FieldValue.arrayUnion(...diffEmails),
         }, {merge: true});
 
     functions.logger.info('Done');

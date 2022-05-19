@@ -2,7 +2,7 @@ import * as admin from 'firebase-admin';
 import * as sinon from 'sinon';
 import * as chai from 'chai';
 import {config} from './testConfig';
-import {JudgeResult, Submission} from "../src/models/submissions";
+import {JudgeResult, Submission} from '../src/models/submissions';
 
 const assert = chai.assert;
 
@@ -38,7 +38,7 @@ describe('Process submission result', function () {
         });
 
         const tomorrow = new Date();
-        tomorrow.setDate(tomorrow.getDate()+1);
+        tomorrow.setDate(tomorrow.getDate() + 1);
         await db.course(courseId).set({
             id: courseId,
             img: 'https://i.imgur.com/Mcvgbvm.jpeg',
@@ -139,6 +139,41 @@ describe('Process submission result', function () {
             assert.isTrue(correctResult?.isBest, 'Should not change the best');
             assert.isFalse(sameResult?.isBest, 'Should not change the best');
             assert.isFalse(wrongResult?.isBest, 'Should not change the best');
+        });
+    });
+
+    describe('Late submission', () => {
+        it('Should update the upsolving metrics', async () => {
+            const creationDate = new Date();
+            creationDate.setDate(creationDate.getDate() + 3);
+            const submission = {
+                id: '',
+                userId: userId,
+                course: db.course(courseId), exercise: db.exercise(courseId, exerciseId),
+                createdAt: admin.firestore.Timestamp.fromDate(creationDate),
+                code: {'main.py': 'print("hello hello")'},
+                language: 'python',
+                isTestRun: false,
+            };
+            const submissionDoc = await db.submissionQueue(userId).add(submission as unknown as Submission);
+            const judgeResult = {
+                overall: {status: 'Wrong answer', score: 80, memory: 52, time: 0.1, returnCode: 0},
+                compileResult: {status: 'Solved', score: 0, memory: 100, time: 1, returnCode: 0},
+                testResults: [
+                    {status: 'Solved', score: 20, memory: 40, time: 0.1, returnCode: 0},
+                    {status: 'Solved', score: 20, memory: 52, time: 0.1, returnCode: 0},
+                    {status: 'Solved', score: 20, memory: 20, time: 0.01, returnCode: 0},
+                    {status: 'Solved', score: 20, memory: 40, time: 0.1, returnCode: 0},
+                    {status: 'Wrong answer', score: 0, memory: 40, time: 0.1, returnCode: 0},
+                ]
+            } as JudgeResult;
+
+            await submissionResults.processResult(judgeResult, userId, submissionDoc.id);
+            const userExerciseProgress = (await db.userProgress(courseId, userId).collection('exerciseUpsolveScore').doc('1').get()).data();
+            assert.equal(userExerciseProgress?.['progress']?.[exerciseId], 80, `Upsolve score should be updated: ${JSON.stringify(userExerciseProgress)}`);
+            const userProgress = (await db.userProgress(courseId, userId).get()).data();
+            assert.equal(userProgress?.upsolveScore, 80, `Upsolve score should be updated for course: ${JSON.stringify(userProgress)}`);
+            assert.equal(userProgress?.levelUpsolveScore?.['1'], 80, `Upsolve score should be updated for level: ${JSON.stringify(userProgress)}`);
         });
     });
 });

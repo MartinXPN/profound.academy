@@ -7,7 +7,7 @@ import {JudgeResult, Submission} from "../src/models/submissions";
 const assert = chai.assert;
 
 
-describe('Submit Regular Exercise', function () {
+describe('Submit a solution', function () {
     // Firebase connection can take long to be established
     this.timeout(5000);
 
@@ -30,7 +30,11 @@ describe('Submit Regular Exercise', function () {
         submissionResultStub = sinon.stub(submissionResults, 'processResult');
         courseId = db.courses.doc().id;
         exerciseId = db.exercises(courseId).doc().id;
-        userId = (await admin.auth().createUser({email: 'student@gmail.com', password: 'student132'})).uid;
+        userId = (await admin.auth().createUser({
+            displayName: 'Student Student',
+            email: 'student@gmail.com',
+            password: 'student132',
+        })).uid;
 
         await db.course(courseId).set({
             id: courseId,
@@ -74,7 +78,7 @@ describe('Submit Regular Exercise', function () {
         submissionResultStub.restore();
     });
 
-    describe('Submit to a course', () => {
+    describe('Submit a regular exercise (multiple choice, text answer, etc)', () => {
         it('Should submit properly', async () => {
             const submission = {
                 id: '',
@@ -90,6 +94,89 @@ describe('Submit Regular Exercise', function () {
             const processResultCall = submissionResultStub.getCall(0).args[0] as JudgeResult;
             assert.equal(processResultCall.overall.status, 'Solved');
             assert.equal(processResultCall.overall.score, 100);
+        });
+    });
+
+    describe('Submit code', () => {
+        it('Should submit to LambdaJudge', async () => {
+            const submission = {
+                id: '',
+                userId: userId,
+                course: db.course(courseId), exercise: db.exercise(courseId, exerciseId),
+                createdAt: admin.firestore.FieldValue.serverTimestamp(),
+                code: {'main.py': 'print("hello hello")'},
+                testCases: [{'input': '', 'target': 'hello hello'}],
+                language: 'python',
+                isTestRun: true,
+            };
+            await db.exercise(courseId, exerciseId).set({
+                testCases: [{'input': '', 'target': 'hello hello'}],
+                exerciseType: 'code',
+            }, {merge: true});
+
+            const submissionDoc = await db.submissionQueue(userId).add(submission as unknown as Submission);
+            await submissions.submit((await submissionDoc.get()).data() as unknown as Submission);
+            const processResultCall = submissionResultStub.getCall(0).args[0] as JudgeResult;
+            assert.equal(processResultCall.overall.status, 'Solved');
+            assert.equal(processResultCall.overall.score, 100);
+        });
+
+        it('Should result in Wrong Answer', async () => {
+            const submission = {
+                id: '',
+                userId: userId,
+                course: db.course(courseId), exercise: db.exercise(courseId, exerciseId),
+                createdAt: admin.firestore.FieldValue.serverTimestamp(),
+                code: {'main.py': 'print("hello yo")'},
+                testCases: [{'input': '', 'target': 'hello hello'}],
+                language: 'python',
+                isTestRun: true,
+            };
+            await db.exercise(courseId, exerciseId).set({
+                testCases: [{'input': '', 'target': 'hello hello'}],
+                exerciseType: 'code',
+            }, {merge: true});
+
+            const submissionDoc = await db.submissionQueue(userId).add(submission as unknown as Submission);
+            await submissions.submit((await submissionDoc.get()).data() as unknown as Submission);
+            const processResultCall = submissionResultStub.getCall(0).args[0] as JudgeResult;
+            assert.equal(processResultCall.overall.status, 'Wrong answer');
+            assert.equal(processResultCall.overall.score, 0);
+        });
+    });
+
+    describe('Test allowed attempts', () => {
+        it('Should restrict when reaching the number of allowed attempts', async () => {
+            const submission = {
+                id: '',
+                userId: userId,
+                course: db.course(courseId), exercise: db.exercise(courseId, exerciseId),
+                createdAt: admin.firestore.FieldValue.serverTimestamp(),
+                code: {'main.txt': 'hello'},
+                language: 'txt',
+                isTestRun: false,
+            };
+            await db.exercise(courseId, exerciseId).set({
+                allowedAttempts: 2,
+            }, {merge: true});
+
+            const submissionDoc = await db.submissionQueue(userId).add(submission as unknown as Submission);
+            await submissions.submit((await submissionDoc.get()).data() as unknown as Submission);
+            const processResultCall = submissionResultStub.getCall(0).args[0] as JudgeResult;
+            assert.equal(processResultCall.overall.status, 'Wrong answer');
+            assert.equal(processResultCall.overall.score, 0);
+
+            const secondDoc = await db.submissionQueue(userId).add(submission as unknown as Submission);
+            await submissions.submit((await secondDoc.get()).data() as unknown as Submission);
+            const secondProcessResultCall = submissionResultStub.getCall(0).args[0] as JudgeResult;
+            assert.equal(secondProcessResultCall.overall.status, 'Wrong answer');
+            assert.equal(secondProcessResultCall.overall.score, 0);
+
+            const thirdDoc = await db.submissionQueue(userId).add(submission as unknown as Submission);
+            await submissions.submit((await thirdDoc.get()).data() as unknown as Submission);
+            const thirdResult = (await db.submissionResult(thirdDoc.id).get()).data();
+            assert.equal(thirdResult?.status, 'Unavailable');
+            chai.expect(thirdResult?.message ?? '').to.contain('Exceeded the number of allowed attempts');
         });
     });
 });

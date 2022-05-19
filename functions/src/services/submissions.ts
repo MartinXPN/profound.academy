@@ -109,8 +109,8 @@ const attemptSubmit = async (submission: Submission, course: Course, exercise: E
             const user = await admin.auth().getUser(submission.userId);
             transaction.set(db.submissionResult(submission.id), {
                 ...submission,
-                userDisplayName: user.displayName,
-                userImageUrl: user.photoURL,
+                userDisplayName: user.displayName ?? '',
+                userImageUrl: user.photoURL ?? '',
                 status: 'Unavailable',
                 isBest: false, memory: 0, time: 0, score: 0,
                 message: `Exceeded the number of allowed attempts (${allowedAttempts})`,

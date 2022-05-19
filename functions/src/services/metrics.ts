@@ -66,11 +66,7 @@ export const recordNewUserInsight = async (
     transaction: firestore.Transaction, userId: string, courseId: string, date: Date
 ) => {
     const insightDay = format(date);
-    let user = (await transaction.get(db.user(userId))).data();
-    if (!user) {
-        transaction.set(db.user(userId), {}, {merge: true});
-        user = {id: userId};
-    }
+    const user = (await transaction.get(db.user(userId))).data() ?? {id: userId};
     const course = db.course(courseId);
     if (user.courses && user.courses.some((c) => c.id === course.id))
         return functions.logger.info('Not updating new user insight as the user has already signed up for the course');

@@ -37,11 +37,13 @@ describe('Process submission result', function () {
             displayName: 'Student Student',
         });
 
+        const tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate()+1);
         await db.course(courseId).set({
             id: courseId,
             img: 'https://i.imgur.com/Mcvgbvm.jpeg',
             revealsAt: admin.firestore.FieldValue.serverTimestamp() as admin.firestore.Timestamp,
-            freezeAt: admin.firestore.FieldValue.serverTimestamp() as admin.firestore.Timestamp,
+            freezeAt: admin.firestore.Timestamp.fromDate(tomorrow),
             visibility: 'private',
             rankingVisibility: 'private',
             allowViewingSolutions: false,
@@ -118,12 +120,25 @@ describe('Process submission result', function () {
             } as JudgeResult;
             const correctDoc = await db.submissionQueue(userId).add(submission as unknown as Submission);
             await submissionResults.processResult(correct, userId, correctDoc.id);
-            const correctResult = (await db.submissionResult(correctDoc.id).get()).data();
+            let correctResult = (await db.submissionResult(correctDoc.id).get()).data();
             wrongResult = (await db.submissionResult(submissionDoc.id).get()).data();
             assert.equal(correctResult?.status, 'Solved');
             assert.isUndefined(correctResult?.code, 'Make sure we do not expose the source code');
             assert.isTrue(correctResult?.isBest, 'Should make the latest submission the current best');
             assert.isFalse(wrongResult?.isBest, 'Should update the previous best');
+
+            const same = {...correct};
+            const sameDoc = await db.submissionQueue(userId).add(submission as unknown as Submission);
+            await submissionResults.processResult(same, userId, sameDoc.id);
+            wrongResult = (await db.submissionResult(submissionDoc.id).get()).data();
+            correctResult = (await db.submissionResult(correctDoc.id).get()).data();
+            let sameResult = (await db.submissionResult(sameDoc.id).get()).data();
+            assert.equal(correctResult?.status, 'Solved');
+            assert.equal(sameResult?.status, 'Solved');
+            assert.isUndefined(sameResult?.code, 'Make sure we do not expose the source code');
+            assert.isTrue(correctResult?.isBest, 'Should not change the best');
+            assert.isFalse(sameResult?.isBest, 'Should not change the best');
+            assert.isFalse(wrongResult?.isBest, 'Should not change the best');
         });
     });
 });

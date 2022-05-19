@@ -72,6 +72,7 @@ describe('Submit a solution', function () {
         await admin.firestore().recursiveDelete(db.course(courseId));
         await admin.firestore().recursiveDelete(db.user(userId));
         await admin.firestore().recursiveDelete(admin.firestore().collection('submissionQueue'));
+        await admin.firestore().recursiveDelete(admin.firestore().collection('submissions'));
         await admin.auth().deleteUser(userId);
         firestoreStub.restore();
         adminInitStub.restore();

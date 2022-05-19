@@ -53,7 +53,7 @@ const updateActivity = (
     functions.logger.info('Updated the user activity!');
 };
 
-const unlockContent = (
+const unlockContent = async (
     transaction: firestore.Transaction,
     submission: SubmissionResult,
     exercise: Exercise,
@@ -77,7 +77,7 @@ const unlockContent = (
     if (unlockedCourses.length === 0)
         return;
 
-    // TODO: user addCourses() instead
+    // TODO: use addCourses() instead
     if (user.courses && user.courses.length > 0) {
         functions.logger.info('Adding course to pre-existing list of courses');
         transaction.update(db.user(user.id), {
@@ -86,7 +86,7 @@ const unlockContent = (
     } else {
         functions.logger.info('Adding courses from scratch');
         transaction.update(db.user(user.id), {
-            courses: [unlockedCourses],
+            courses: unlockedCourses,
         });
     }
 
@@ -95,6 +95,16 @@ const unlockContent = (
     transaction.update(db.submissionResult(submission.id), {
         message: 'Congratulations! You have unlocked new content!\nGo to homepage to view it',
     });
+
+    // Add the user to the list of invited users for each unlocked course
+    await Promise.all(unlockedCourses.map(async (c) => {
+        const currentUsers = (await db.coursePrivateFields(c.id).get()).data()?.invitedUsers;
+        functions.logger.info(`Adding the user ${user.id} to the invited list for course ${c.id}`);
+        transaction.set(db.coursePrivateFields(c.id), {
+            // @ts-ignore
+            invitedUsers: Array.isArray(currentUsers) ? firestore.FieldValue.arrayUnion(user.id) : [user.id],
+        }, {merge: true});
+    }));
 };
 
 
@@ -164,6 +174,7 @@ export const processResult = async (
         updateBest(transaction, submissionResult, currentBest);
 
         // save the sensitive information to /submissions/${submissionId}/private/${userId}
+        // TODO: Move this out of this transaction
         const sensitiveData = {code: code};
         transaction.set(db.submissionSensitiveRecords(userId, submissionResult.id), sensitiveData);
         transaction.set(db.submissionTestResults(userId, submissionResult.id), {testResults: testResults});
@@ -176,7 +187,7 @@ export const processResult = async (
             recordInsights(transaction, 'solved', course.id, exercise.id, submissionDate);
         if (!alreadySolved) {
             updateActivity(transaction, submissionResult);
-            unlockContent(transaction, submissionResult, exercise, user);
+            await unlockContent(transaction, submissionResult, exercise, user);
         }
     });
 

@@ -2,7 +2,7 @@ import * as admin from 'firebase-admin';
 import * as sinon from 'sinon';
 import * as chai from 'chai';
 import {config} from './testConfig';
-import {Submission} from "../src/models/submissions";
+import {JudgeResult, Submission} from "../src/models/submissions";
 
 const assert = chai.assert;
 
@@ -65,6 +65,7 @@ describe('Process submission result', function () {
     });
 
     afterEach(async () => {
+        await admin.firestore().recursiveDelete(db.exercise(courseId, exerciseId));
         await admin.firestore().recursiveDelete(db.course(courseId));
         await admin.firestore().recursiveDelete(db.user(userId));
         await admin.firestore().recursiveDelete(admin.firestore().collection('submissionQueue'));
@@ -81,20 +82,32 @@ describe('Process submission result', function () {
                 userId: userId,
                 course: db.course(courseId), exercise: db.exercise(courseId, exerciseId),
                 createdAt: admin.firestore.FieldValue.serverTimestamp(),
-                code: {'main.txt': 'hello hello'},
-                language: 'txt',
+                code: {'main.py': 'print("hello hello")'},
+                language: 'python',
                 isTestRun: false,
             };
             const submissionDoc = await db.submissionQueue(userId).add(submission as unknown as Submission);
-            await submissionResults.processResult({
-                overall: {
-                    status: 'Solved', score: 100,
-                    memory: 52, time: 0.1, returnCode: 0,
-                },
-                compileResult: {
-                    status: 'Solved', score: 0,
-                    memory: 100, time: 1, returnCode: 0,
-                },
+            const judgeResult = {
+                overall: {status: 'Wrong answer', score: 80, memory: 52, time: 0.1, returnCode: 0},
+                compileResult: {status: 'Solved', score: 0, memory: 100, time: 1, returnCode: 0},
+                testResults: [
+                    {status: 'Solved', score: 20, memory: 40, time: 0.1, returnCode: 0},
+                    {status: 'Solved', score: 20, memory: 52, time: 0.1, returnCode: 0},
+                    {status: 'Solved', score: 20, memory: 20, time: 0.01, returnCode: 0},
+                    {status: 'Solved', score: 20, memory: 40, time: 0.1, returnCode: 0},
+                    {status: 'Wrong answer', score: 0, memory: 40, time: 0.1, returnCode: 0},
+                ]
+            } as JudgeResult;
+
+            await submissionResults.processResult(judgeResult, userId, submissionDoc.id);
+            let wrongResult = (await db.submissionResult(submissionDoc.id).get()).data();
+            assert.equal(wrongResult?.status, 'Wrong answer');
+            assert.isUndefined(wrongResult?.code, 'Make sure we do not expose the source code');
+            assert.isTrue(wrongResult?.isBest, 'The only submission is the best submission');
+
+            const correct = {
+                ...judgeResult,
+                overall: {status: 'Solved', score: 100, memory: 52, time: 0.1, returnCode: 0},
                 testResults: [
                     {status: 'Solved', score: 20, memory: 40, time: 0.1, returnCode: 0},
                     {status: 'Solved', score: 20, memory: 52, time: 0.1, returnCode: 0},
@@ -102,11 +115,15 @@ describe('Process submission result', function () {
                     {status: 'Solved', score: 20, memory: 40, time: 0.1, returnCode: 0},
                     {status: 'Solved', score: 20, memory: 40, time: 0.1, returnCode: 0},
                 ]
-            }, userId, submissionDoc.id);
-
-            const submissionResultData = (await db.submissionResult(submissionDoc.id).get()).data();
-            assert.equal(submissionResultData?.status, 'Solved');
-            assert.isUndefined(submissionResultData?.code);
+            } as JudgeResult;
+            const correctDoc = await db.submissionQueue(userId).add(submission as unknown as Submission);
+            await submissionResults.processResult(correct, userId, correctDoc.id);
+            const correctResult = (await db.submissionResult(correctDoc.id).get()).data();
+            wrongResult = (await db.submissionResult(submissionDoc.id).get()).data();
+            assert.equal(correctResult?.status, 'Solved');
+            assert.isUndefined(correctResult?.code, 'Make sure we do not expose the source code');
+            assert.isTrue(correctResult?.isBest, 'Should make the latest submission the current best');
+            assert.isFalse(wrongResult?.isBest, 'Should update the previous best');
         });
     });
 });

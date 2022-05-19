@@ -2,7 +2,8 @@ import * as functions from 'firebase-functions';
 import {firestore} from 'firebase-admin';
 
 import {db} from './db';
-import {UserInfoUpdate} from '../models/users';
+import {User, UserInfoUpdate} from '../models/users';
+import {Course} from '../models/courses';
 
 
 const updateUserInfo = async (userInfo: UserInfoUpdate): Promise<void> => {
@@ -52,11 +53,10 @@ export const updateInfoQueue = async (): Promise<void> => {
 
 export const addCourses = async (
     transaction: firestore.Transaction,
-    userId: string,
     courseIds: string[],
+    user: User,
 ) => {
-    const user = (await transaction.get(db.user(userId))).data();
-    const completedCourses = user?.completed?.map((c) => c.id) ?? [];
+    const completedCourses = user.completed?.map((c) => c.id) ?? [];
     const courses = courseIds
         .filter((courseId) => !completedCourses.includes(courseId))
         .map((courseId) => db.course(courseId));
@@ -64,12 +64,7 @@ export const addCourses = async (
     if (courses.length === 0)
         return functions.logger.info('No new courses to add');
 
-    if (!user || !user.courses || user.courses.length === 0) {
-        functions.logger.info('This is the first course of this user!');
-        // @ts-ignore
-        transaction.set(db.user(userId), {courses: courses}, {merge: true});
-    } else {
-        functions.logger.info(`The user already has ${user.courses.length} courses. Adding to the list`);
-        transaction.update(db.user(userId), {courses: firestore.FieldValue.arrayUnion(...courses)});
-    }
+    transaction.set(db.user(user.id), {
+        courses: firestore.FieldValue.arrayUnion(...courses) as unknown as Course[],
+    }, {merge: true});
 };

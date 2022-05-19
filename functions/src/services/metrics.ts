@@ -66,13 +66,17 @@ export const recordNewUserInsight = async (
     transaction: firestore.Transaction, userId: string, courseId: string, date: Date
 ) => {
     const insightDay = format(date);
-    const user = (await transaction.get(db.user(userId))).data();
+    let user = (await transaction.get(db.user(userId))).data();
+    if (!user) {
+        transaction.set(db.user(userId), {}, {merge: true});
+        user = {id: userId};
+    }
     const course = db.course(courseId);
-
-    if (user && user.courses && user.courses.some((c) => c.id === course.id))
+    if (user.courses && user.courses.some((c) => c.id === course.id))
         return functions.logger.info('Not updating new user insight as the user has already signed up for the course');
 
-    await addCourses(transaction, userId, [courseId]);
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    await addCourses(transaction, [courseId], user);
     transaction.set(db.courseInsights(courseId).doc(insightDay), {
         users: firestore.FieldValue.increment(1) as unknown as number,
     }, {merge: true});

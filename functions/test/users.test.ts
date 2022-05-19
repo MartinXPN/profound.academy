@@ -112,11 +112,12 @@ describe('Add Courses', function () {
 
     describe('Add courses to the users curriculum', () => {
         it('Add a new course', async () => {
+            await db.user(userId).set({id: userId}, {merge: true});
             await admin.firestore().runTransaction(async (transaction) => {
-                await users.addCourses(transaction, userId, ['c1', 'c2']);
+                await users.addCourses(transaction, ['c1', 'c2'], (await db.user(userId).get()).data()!);
             });
             await admin.firestore().runTransaction(async (transaction) => {
-                await users.addCourses(transaction, userId, ['c3', 'c4']);
+                await users.addCourses(transaction, ['c3', 'c4'], (await db.user(userId).get()).data()!);
             });
 
             let user = (await db.user(userId).get()).data();
@@ -127,7 +128,7 @@ describe('Add Courses', function () {
                 'completed': [db.course('c5')]
             }, {merge: true});
             await admin.firestore().runTransaction(async (transaction) => {
-                await users.addCourses(transaction, userId, ['c5']);
+                await users.addCourses(transaction, ['c5'], (await db.user(userId).get()).data()!);
             });
             user = (await db.user(userId).get()).data();
             assert.equal(user?.courses?.length, 4, 'Should not add back a completed course');

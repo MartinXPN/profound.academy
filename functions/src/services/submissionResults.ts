@@ -8,6 +8,7 @@ import {Course} from '../models/courses';
 import {Exercise} from '../models/exercise';
 import {User} from '../models/users';
 import {updateUserProgress, recordInsights} from './metrics';
+import {addCourses} from './users';
 
 
 const updateBest = (
@@ -69,26 +70,13 @@ const unlockContent = async (
     const isIn = (courseId: string, courses?: Course[]) => courses && courses
         .filter((c) => c.id === courseId).length > 0;
 
-    const unlockedCourses = exercise.unlockContent
-        .filter((courseId) => !isIn(courseId, user.courses) && !isIn(courseId, user.completed))
-        .map((courseId) => db.course(courseId));
-    functions.logger.info(`There are ${unlockedCourses.length} courses to unlock!`);
+    const unlockedCourseIds = exercise.unlockContent
+        .filter((courseId) => !isIn(courseId, user.courses) && !isIn(courseId, user.completed));
+    functions.logger.info(`There are ${unlockedCourseIds.length} courses to unlock!`);
 
-    if (unlockedCourses.length === 0)
+    if (unlockedCourseIds.length === 0)
         return;
-
-    // TODO: use addCourses() instead
-    if (user.courses && user.courses.length > 0) {
-        functions.logger.info('Adding course to pre-existing list of courses');
-        transaction.update(db.user(user.id), {
-            courses: firestore.FieldValue.arrayUnion(...unlockedCourses),
-        });
-    } else {
-        functions.logger.info('Adding courses from scratch');
-        transaction.update(db.user(user.id), {
-            courses: unlockedCourses,
-        });
-    }
+    await addCourses(transaction, unlockedCourseIds, user);
 
     // Update submissionResult message
     functions.logger.info('Updating submissionResult message...');
@@ -97,12 +85,11 @@ const unlockContent = async (
     });
 
     // Add the user to the list of invited users for each unlocked course
-    await Promise.all(unlockedCourses.map(async (c) => {
-        const currentUsers = (await db.coursePrivateFields(c.id).get()).data()?.invitedUsers;
-        functions.logger.info(`Adding the user ${user.id} to the invited list for course ${c.id}`);
-        transaction.set(db.coursePrivateFields(c.id), {
+    await Promise.all(unlockedCourseIds.map(async (courseId) => {
+        functions.logger.info(`Adding the user ${user.id} to the invited list for course ${courseId}`);
+        transaction.set(db.coursePrivateFields(courseId), {
             // @ts-ignore
-            invitedUsers: Array.isArray(currentUsers) ? firestore.FieldValue.arrayUnion(user.id) : [user.id],
+            invitedUsers: firestore.FieldValue.arrayUnion(user.id),
         }, {merge: true});
     }));
 };

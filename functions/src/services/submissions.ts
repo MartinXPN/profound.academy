@@ -6,10 +6,11 @@ import * as admin from 'firebase-admin';
 import {firestore} from 'firebase-admin';
 
 import {db} from './db';
-import {Submission} from '../models/submissions';
+import {Course} from '../models/courses';
 import {Exercise} from '../models/exercise';
+import {Submission} from '../models/submissions';
 import {processResult} from './submissionResults';
-import {updateUserProgress, recordNewUserInsight} from './metrics';
+import {recordNewUserInsight, updateUserProgress} from './metrics';
 
 // const LAMBDA_JUDGE_URL='https://judge.profound.academy/check';
 const LAMBDA_JUDGE_URL='https://239loy8zo4.execute-api.us-east-1.amazonaws.com/Prod/check/';
@@ -27,7 +28,6 @@ const submitLambdaJudge = async (submission: Submission, exercise: Exercise): Pr
         memoryLimit: exercise?.memoryLimit ?? 512,
         timeLimit: exercise?.timeLimit ?? 2,
         outputLimit: exercise?.outputLimit ?? 1,
-        aggregateResults: !submission.isTestRun,
         returnOutputs: submission.isTestRun,
         stopOnFirstFail: submission.isTestRun ? false : !exercise?.testGroups,
         testGroups: submission.isTestRun ? undefined : exercise?.testGroups,
@@ -80,18 +80,18 @@ const submitAnswerCheck = async (submission: Submission) => {
     }}, submission.userId, submission.id);
 };
 
-export const submit = async (submission: Submission): Promise<http.ClientRequest | void> => {
-    if (!submission.isTestRun && submission.testCases)
-        throw Error('Final submissions cannot have test cases');
-
-    const course = (await db.course(submission.course.id).get()).data();
-    const exercise = (await db.exercise(submission.course.id, submission.exercise.id).get()).data();
-    functions.logger.info(`submission exercise: ${JSON.stringify(exercise)}`);
-    if (!exercise || !course)
-        throw Error(`Exercise or course do not exist: ${submission.exercise.id} ${submission.course.id}`);
+// eslint-disable-next-line valid-jsdoc
+/**
+ * Checks if it's allowed to make a submission.
+ * If the allowed number of submissions is exceeded, the function returns false
+ * Otherwise, the number of attempts is increased in the firestore
+ */
+const attemptSubmit = async (submission: Submission, course: Course, exercise: Exercise): Promise<boolean> => {
+    if (submission.isTestRun)
+        return true;
 
     const levelName = Math.trunc(exercise.order).toString();
-    const canSubmit = submission.isTestRun || await firestore().runTransaction(async (transaction) => {
+    return await firestore().runTransaction(async (transaction) => {
         // new attempt
         const attempts = (await transaction.get(db.userProgress(course.id, submission.userId)
             .collection('exerciseAttempts').doc(levelName))).data();
@@ -109,8 +109,8 @@ export const submit = async (submission: Submission): Promise<http.ClientRequest
             const user = await admin.auth().getUser(submission.userId);
             transaction.set(db.submissionResult(submission.id), {
                 ...submission,
-                userDisplayName: user.displayName,
-                userImageUrl: user.photoURL,
+                userDisplayName: user.displayName ?? '',
+                userImageUrl: user.photoURL ?? '',
                 status: 'Unavailable',
                 isBest: false, memory: 0, time: 0, score: 0,
                 message: `Exceeded the number of allowed attempts (${allowedAttempts})`,
@@ -124,7 +124,19 @@ export const submit = async (submission: Submission): Promise<http.ClientRequest
         functions.logger.info(`Updated attempts to ${numAttempts + 1}`);
         return true;
     });
+};
 
+export const submit = async (submission: Submission): Promise<http.ClientRequest | void> => {
+    if (!submission.isTestRun && submission.testCases)
+        throw Error('Final submissions cannot have test cases');
+
+    const course = (await db.course(submission.course.id).get()).data();
+    const exercise = (await db.exercise(submission.course.id, submission.exercise.id).get()).data();
+    functions.logger.info(`submission exercise: ${JSON.stringify(exercise)}`);
+    if (!exercise || !course)
+        throw Error(`Exercise or course do not exist: ${submission.exercise.id} ${submission.course.id}`);
+
+    const canSubmit = await attemptSubmit(submission, course, exercise);
     if (!canSubmit)
         return;
 

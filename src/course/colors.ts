@@ -29,6 +29,9 @@ export const statusToColor = (status: SubmissionStatus | string | null | undefin
 const getStyle = (color: string) => {
     const hoverColor = adjust(color, -10);
     const focusColor = adjust(color, -20);
+
+    const selectedColor = adjust(color, -30);
+    const selectedHoverColor = adjust(color, -40);
     return {
         background: color,
         '&:hover': {
@@ -36,6 +39,12 @@ const getStyle = (color: string) => {
         },
         '&:focus': {
             background: focusColor,
+        },
+        '&.Mui-selected': {
+            backgroundColor: selectedColor,
+            "&:hover": {
+                backgroundColor: selectedHoverColor,
+            },
         },
     }
 };

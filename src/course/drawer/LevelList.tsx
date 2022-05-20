@@ -1,7 +1,6 @@
 import React, {useContext, useEffect, useState, memo} from "react";
 
 import List from '@mui/material/List';
-import ListItem from '@mui/material/ListItem';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
 import {ArrowDropUp, ArrowDropDown, Equalizer, Edit} from "@mui/icons-material";
@@ -10,7 +9,7 @@ import ArrowRightIcon from '@mui/icons-material/ArrowRight';
 import {Exercise} from "models/exercise";
 import {ExerciseProgress} from "models/progress";
 import {statusToStyledBackground} from "../colors";
-import {Typography} from "@mui/material";
+import {ListItemButton, Stack, Typography} from "@mui/material";
 import {onCourseLevelExercisesChanged} from "../../services/exercises";
 import {onCourseExerciseProgressChanged} from "../../services/progress";
 import {AuthContext} from "../../App";
@@ -89,7 +88,7 @@ function LevelList({levelName, levelStatus, onItemSelected, isDrawerOpen, isSing
     return <>
         <List disablePadding>
             {!isSingleLevel &&
-                <ListItem button key={`level-${levelName}`} onClick={onLevelClicked} style={levelStyle}>
+                <ListItemButton key={`level-${levelName}`} onClick={onLevelClicked} style={levelStyle}>
                     {drafts
                     ? <ListItemIcon>
                             <Edit/>
@@ -102,14 +101,24 @@ function LevelList({levelName, levelStatus, onItemSelected, isDrawerOpen, isSing
                         {isDrawerOpen && <Typography variant="subtitle1">Level {levelName}</Typography>}
                         {open ? <ArrowDropUp/> : <ArrowDropDown/>}
                     </ListItemIcon>}
-                </ListItem>
+                </ListItemButton>
             }
-            {open && levelExercises.map((ex, index) =>
-                <ListItem button key={ex.id} onClick={() => onItemSelected(ex)} style={getStatusStyle(ex.id)}>
-                    <ListItemIcon>{exerciseId === ex.id ? <ArrowRightIcon /> : <ListItemText primary={index + 1}/>}</ListItemIcon>
-                    <ListItemText primary={localize(ex.title)}/>
-                </ListItem>
-            )}
+            {open && levelExercises.map((ex, index) => {
+                const isCurrent = exerciseId === ex.id;
+                return <>
+                    <ListItemButton key={ex.id} onClick={() => onItemSelected(ex)} sx={getStatusStyle(ex.id)} selected={isCurrent}>
+                        <ListItemIcon>
+                            {isCurrent
+                                ? <Stack direction="row" alignItems="center" alignContent="center">
+                                    <ListItemText primary={index + 1}/>
+                                    <ArrowRightIcon sx={{color: 'rgba(0,0,0,0.36)'}} />
+                                </Stack>
+                                : <ListItemText primary={index + 1}/>}
+                        </ListItemIcon>
+                        <ListItemText primary={localize(ex.title)}/>
+                    </ListItemButton>
+                </>
+            })}
         </List>
     </>
 }

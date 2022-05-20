@@ -12,21 +12,17 @@ import {Exercise} from "models/exercise";
 import {onCourseSubmissionsChanged, onSubmissionsChanged, onUserExerciseSubmissionsChanged, onUserSubmissionsChanged} from "../../services/submissions";
 import {SubmissionResult} from "models/submissions";
 import moment from "moment/moment";
-import SubmissionCode from "./SubmissionCode";
-import {statusToColor} from "../colors";
 import {lastExerciseId} from "../Course";
 import InfiniteScrollLoading from "../../common/InfiniteScrollLoading";
-import {Stack, Typography} from "@mui/material";
-import SmallAvatar from "../../common/SmallAvatar";
-import ClickableTableCell from "../../common/ClickableTableCell";
-import {LANGUAGES} from "models/language";
+import {Typography} from "@mui/material";
 import Box from "@mui/material/Box";
 import {useNavigate} from "react-router-dom";
 import {NavigateFunction} from "react-router";
 import {LocalizeContext} from "../../common/Localization";
+import SubmissionView from "./SubmissionView";
 
 
-interface Column {
+export interface Column {
     id: '#' | 'userDisplayName' | 'createdAt' | 'courseTitle' | 'exerciseTitle' | 'status' | 'time' | 'memory' | 'language';
     label: string;
     minWidth?: number;
@@ -58,7 +54,6 @@ interface Props {
 interface State {
     page: number;
     hasMore: boolean;
-    displayedSubmission?: SubmissionResult;
     pageSubmissions: SubmissionResult[][];
     updateSubscriptions: (() => void)[],
 }
@@ -79,8 +74,6 @@ class SubmissionsTable extends Component<Props, State> {
         this.unsubscribeAll();
     }
 
-    onSubmissionClicked = (submission: SubmissionResult) => this.setState({displayedSubmission: submission});
-    onCloseSubmission = () => this.setState({displayedSubmission: undefined});
     onUserClicked = (userId: string) => this.props.navigate(`/users/${userId}`);
     onExerciseClicked = (courseId: string, exerciseId: string) => this.props.navigate(`/${courseId}/${exerciseId}`);
     onCourseClicked = (courseId: string) => {
@@ -126,7 +119,7 @@ class SubmissionsTable extends Component<Props, State> {
 
 
     render() {
-        const {hasMore, displayedSubmission, pageSubmissions} = this.state;
+        const {hasMore, pageSubmissions} = this.state;
         let orderNumber = 1;
         console.log('page submissions:', pageSubmissions.length, 'hasMore:', hasMore);
         if( (pageSubmissions.length === 0 || (pageSubmissions.length === 1 && pageSubmissions[0].length === 0)) && !hasMore )
@@ -136,7 +129,6 @@ class SubmissionsTable extends Component<Props, State> {
 
         return (
             <Paper sx={{width: '100%'}}>
-                {displayedSubmission && <SubmissionCode submission={displayedSubmission} onClose={this.onCloseSubmission} />}
                 <TableContainer>
                     <Table>
                         <TableHead>
@@ -150,37 +142,13 @@ class SubmissionsTable extends Component<Props, State> {
                         </TableHead>
                         <TableBody>
                             {pageSubmissions.map((submissions, _page) => submissions.map((row, _index) =>
-                                <TableRow hover role="checkbox" tabIndex={-1} key={row.id} onClick={() => this.onSubmissionClicked(row)}>
-                                    {this.props.columns.map((column) => {
-                                        if( column.id === '#' )
-                                            return <TableCell key={column.id} align={column.align}>{orderNumber++}</TableCell>;
-
-                                        const value = row[column.id];
-                                        if( column.id === 'userDisplayName' )
-                                            return <ClickableTableCell key={column.id} align={column.align} onClick={() => this.onUserClicked(row.userId)}>
-                                                <Stack direction="row" alignItems="center" alignContent="center">
-                                                    <SmallAvatar src={row.userImageUrl} />
-                                                    {value}
-                                                </Stack>
-                                            </ClickableTableCell>
-                                        if( column.id === 'courseTitle' )
-                                            return <ClickableTableCell key={column.id} align={column.align} onClick={() => this.onCourseClicked(row.course.id)}>{row.courseTitle}</ClickableTableCell>
-                                        if( column.id === 'exerciseTitle' )
-                                            return <ClickableTableCell key={column.id} align={column.align} onClick={() => this.onExerciseClicked(row.course.id, row.exercise.id)}>
-                                                {this.props.localize(row.exerciseTitle)}
-                                            </ClickableTableCell>
-
-                                        if( column.id === 'language' && typeof value === 'string' )
-                                            return <TableCell key={column.id} align={column.align}>{LANGUAGES[value].displayName}</TableCell>
-                                        // @ts-ignore
-                                        const style = column.id === 'status' ? {color: statusToColor(value)} : {};
-                                        return (
-                                            <TableCell key={column.id} align={column.align} style={style}>
-                                                {column.format ? column.format(value) : value}
-                                            </TableCell>
-                                        );
-                                    })}
-                                </TableRow>
+                                <SubmissionView
+                                    submission={row}
+                                    displayColumns={this.props.columns}
+                                    onCourseClicked={this.onCourseClicked}
+                                    onExerciseClicked={this.onExerciseClicked}
+                                    onUserClicked={this.onUserClicked}
+                                    orderNumber={orderNumber++} />
                             ))}
                         </TableBody>
                     </Table>

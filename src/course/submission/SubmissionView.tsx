@@ -2,7 +2,7 @@ import React, {memo, useContext, useState} from "react";
 import TableRow from "@mui/material/TableRow";
 import TableCell from "@mui/material/TableCell";
 import ClickableTableCell from "../../common/ClickableTableCell";
-import {Stack} from "@mui/material";
+import {Collapse, Stack} from "@mui/material";
 import SmallAvatar from "../../common/SmallAvatar";
 import {LANGUAGES} from "models/language";
 import {statusToColor} from "../colors";
@@ -10,6 +10,7 @@ import {SubmissionResult} from "models/submissions";
 import {LocalizeContext} from "../../common/Localization";
 import {Column} from "./SubmissionsTable";
 import SubmissionCode from "./SubmissionCode";
+import {TransitionGroup} from "react-transition-group";
 
 function SubmissionView({submission, orderNumber, displayColumns, onUserClicked, onCourseClicked, onExerciseClicked}: {
     submission: SubmissionResult,
@@ -57,9 +58,15 @@ function SubmissionView({submission, orderNumber, displayColumns, onUserClicked,
                 );
             })}
         </TableRow>
-        {showCode && <TableRow>
+
+
+        {showCode && <TableRow key={submission.id + 'code'}>
             <TableCell colSpan={displayColumns.length}>
-                <SubmissionCode submission={submission}/>
+                <TransitionGroup appear={showCode}>
+                    <Collapse>
+                        <SubmissionCode submission={submission}/>
+                    </Collapse>
+                </TransitionGroup>
             </TableCell>
         </TableRow>}
     </>

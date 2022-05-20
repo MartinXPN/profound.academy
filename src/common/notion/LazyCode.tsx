@@ -48,16 +48,13 @@ export const LazyCode = ({content, language, className}: {
         copyTimeout.current = setTimeout(() => setIsCopied(false), 1200) as unknown as number;
     }, [content, copyTimeout]);
 
-    const copyButton = (
-        <div className='notion-code-copy-button' onClick={onClickCopyToClipboard}>
-            <ContentCopyIcon/>
-        </div>
-    )
 
     return <>
         <pre className={cs('notion-code', className)}>
             <div className='notion-code-copy'>
-                {copyButton}
+                <div className='notion-code-copy-button' onClick={onClickCopyToClipboard}>
+                    <ContentCopyIcon/>
+                </div>
                 {isCopied && (
                     <div className='notion-code-copy-tooltip'>
                         <div>{isCopied ? 'Copied' : 'Copy'}</div>
@@ -93,7 +90,7 @@ const NotionLazyCode: FC<{
 
 
     return <>
-        <LazyCode content={content} language={language} />
+        <LazyCode content={content} language={language} className={className} />
 
         {caption && (
             <figcaption className='notion-asset-caption'>

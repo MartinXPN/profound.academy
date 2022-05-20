@@ -1,7 +1,6 @@
 import * as React from 'react';
 import {memo, useState, useEffect} from "react";
-import {TextField, Autocomplete, Chip, Avatar, Box} from "@mui/material";
-import {SxProps} from "@mui/system";
+import {TextField, Autocomplete, Chip, Avatar, Box, SxProps} from "@mui/material";
 import {Theme} from "@mui/material/styles/createTheme";
 import useAsyncEffect from "use-async-effect";
 
@@ -65,6 +64,7 @@ function AutocompleteSearch<T>({label, placeholder, search, idsToValues,
             onClose={() => setOpen(false)}
 
             options={options}
+            // @ts-ignore
             getOptionLabel={optionToLabel}
             isOptionEqualToValue={(option, value) => optionToId(option) === optionToId(value)}
             value={value}

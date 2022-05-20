@@ -6,7 +6,7 @@ function adjust(color: string, amount: number) {
 }
 
 export const statusColors = {
-    solved: '#1fb947',
+    solved: '#4caf50',
     failed: '#F44336',
     neutral: '#fafafa',
     neutralText: '#212121',

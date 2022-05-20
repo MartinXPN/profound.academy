@@ -72,6 +72,7 @@ function ActivityHeatmap({userId}: {userId: string}) {
                         <Tooltip
                             key={formattedDate}
                             describeChild
+                            disableInteractive
                             onClickCapture={() => onDateClicked(currentDate, formattedDate)}
                             title={value && value.count
                                 ? `${value.count} solutions on ${formattedDate}` + ( value.count >= 10 ? '!' : '')

@@ -1,6 +1,6 @@
 import React, {useContext, useState} from "react";
 import useAsyncEffect from "use-async-effect";
-import {CircularProgress, Paper, Stack, Typography} from "@mui/material";
+import {CircularProgress, Typography} from "@mui/material";
 import {SubmissionResult} from "models/submissions";
 import {getSubmissionCode} from "../../services/submissions";
 import {AuthContext} from "../../App";

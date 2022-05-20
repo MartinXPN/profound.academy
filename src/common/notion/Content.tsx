@@ -5,7 +5,7 @@ import {ExtendedRecordMap} from 'notion-types';
 import {NotionRenderer} from 'react-notion-x';
 import {Collection} from 'react-notion-x/build/third-party/collection';
 import {Equation} from 'react-notion-x/build/third-party/equation';
-import LazyCode from "./LazyCode";
+import NotionLazyCode from "./LazyCode";
 import 'react-notion-x/src/styles.css';     // core styles shared by all of react-notion-x (required)
 import 'prismjs/themes/prism.min.css';      // used for code syntax highlighting (optional)
 import 'katex/dist/katex.min.css';          // used for rendering equations
@@ -20,6 +20,7 @@ function Content({notionPage}: {notionPage: string}) {
     const isMounted = useRef(false)
     const [recordMap, setRecordMap] = useState<ExtendedRecordMap | null>(null);
     const [errors, setErrors] = useState<string | null>(null);
+    console.log('recordMap:', recordMap);
 
     useAsyncEffect(async () => {
         isMounted.current = true;
@@ -46,7 +47,7 @@ function Content({notionPage}: {notionPage: string}) {
             recordMap={recordMap}
             fullPage={false}
             darkMode={false}
-            components={{Code: LazyCode, Collection, Equation}} />
+            components={{Code: NotionLazyCode, Collection, Equation}} />
             : errors
                 ? <Typography textAlign="center" color="error" marginBottom={4}>{errors}</Typography>
                 : <Box width="80%" margin="10%" textAlign="center"><CircularProgress/></Box>

@@ -10,18 +10,13 @@ import {DependencyLoader, getAllDependencies, name} from "./prismutil";
 import useAsyncEffect from "use-async-effect";
 
 
-const LazyCode: FC<{
-    block: CodeBlock
-    defaultLanguage?: string
-    className?: string
-}> = ({block, defaultLanguage = 'typescript', className}) => {
+export const LazyCode = ({content, language, className}: {
+    content: string,
+    language: string,
+    className?: string,
+}) => {
     const [isCopied, setIsCopied] = useState(false);
     const copyTimeout = useRef<number | null>(null);
-    const {recordMap} = useNotionContext();
-    const [content, setContent] = useState<string>(getBlockTitle(block, recordMap));
-    const language = name(block.properties?.language?.[0]?.[0] || defaultLanguage);
-    const caption = block.properties.caption;
-
     const codeRef = useRef();
     useAsyncEffect(async () => {
         if( !codeRef.current ) {
@@ -29,20 +24,17 @@ const LazyCode: FC<{
             return;
         }
 
-        const deps = block.properties.language.map(l => getAllDependencies(l as string[]));
-        block.properties.language = deps as Decoration[];
-
-        const unique = [...new Set(deps.reduce((prev, cur) => [...prev, ...cur], []))];
+        const deps = getAllDependencies(language);
+        const unique = [...new Set(deps)];
         await new DependencyLoader(unique).load();
         console.log('loaded:', unique);
-        setContent(getBlockTitle(block, recordMap));
 
         try {
             highlightElement(codeRef.current);
         } catch (err) {
             console.warn('prismjs highlight error', err);
         }
-    }, [codeRef, block]);
+    }, [codeRef, language]);
 
     const onClickCopyToClipboard = useCallback(() => {
         copyToClipboard(content)
@@ -62,7 +54,6 @@ const LazyCode: FC<{
         </div>
     )
 
-
     return <>
         <pre className={cs('notion-code', className)}>
             <div className='notion-code-copy'>
@@ -77,6 +68,32 @@ const LazyCode: FC<{
             { /* @ts-ignore */ }
             <code className={`language-${language}`} ref={codeRef}>{content}</code>
         </pre>
+    </>
+}
+
+const NotionLazyCode: FC<{
+    block: CodeBlock
+    defaultLanguage?: string
+    className?: string
+}> = ({block, defaultLanguage = 'typescript', className}) => {
+    const {recordMap} = useNotionContext();
+    const [content, setContent] = useState<string>(getBlockTitle(block, recordMap));
+    const language = name(block.properties?.language?.[0]?.[0] || defaultLanguage);
+    const caption = block.properties.caption;
+
+    useAsyncEffect(async () => {
+        const deps = block.properties.language.map(l => getAllDependencies(l as string[]));
+        block.properties.language = deps as Decoration[];
+
+        const unique = [...new Set(deps.reduce((prev, cur) => [...prev, ...cur], []))];
+        await new DependencyLoader(unique).load();
+        console.log('loaded:', unique);
+        setContent(getBlockTitle(block, recordMap));
+    }, [block, recordMap]);
+
+
+    return <>
+        <LazyCode content={content} language={language} />
 
         {caption && (
             <figcaption className='notion-asset-caption'>
@@ -86,4 +103,6 @@ const LazyCode: FC<{
     </>
 };
 
-export default memo(LazyCode);
+export default memo(NotionLazyCode);
+
+

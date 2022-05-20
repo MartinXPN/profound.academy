@@ -222,6 +222,7 @@ export const langAliases = {
     "pbfasm": "purebasic",
     "purs": "purescript",
     "py": "python",
+    "python3": "python",
     "qs": "qsharp",
     "rkt": "racket",
     "razor": "cshtml",

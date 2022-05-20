@@ -12,7 +12,7 @@ import {Exercise} from "models/exercise";
 import {onCourseSubmissionsChanged, onSubmissionsChanged, onUserExerciseSubmissionsChanged, onUserSubmissionsChanged} from "../../services/submissions";
 import {SubmissionResult} from "models/submissions";
 import moment from "moment/moment";
-import SubmissionBackdrop from "./SubmissionBackdrop";
+import SubmissionCode from "./SubmissionCode";
 import {statusToColor} from "../colors";
 import {lastExerciseId} from "../Course";
 import InfiniteScrollLoading from "../../common/InfiniteScrollLoading";
@@ -136,7 +136,7 @@ class SubmissionsTable extends Component<Props, State> {
 
         return (
             <Paper sx={{width: '100%'}}>
-                {displayedSubmission && <SubmissionBackdrop submission={displayedSubmission} onClose={this.onCloseSubmission} />}
+                {displayedSubmission && <SubmissionCode submission={displayedSubmission} onClose={this.onCloseSubmission} />}
                 <TableContainer>
                     <Table>
                         <TableHead>

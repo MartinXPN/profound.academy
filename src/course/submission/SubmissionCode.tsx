@@ -5,12 +5,11 @@ import {styled} from "@mui/material/styles";
 import {SubmissionResult} from "models/submissions";
 import {getSubmissionCode} from "../../services/submissions";
 import {AuthContext} from "../../App";
-import Code from "../editor/Code";
 import {LANGUAGES} from "models/language";
-import {getModeForPath} from "ace-builds/src-noconflict/ext-modelist";
 import {Close} from "@mui/icons-material";
 import SmallAvatar from "../../common/SmallAvatar";
 import SubmissionTestsStatus from "./SubmissionTestsStatus";
+import {LazyCode} from "../../common/notion/LazyCode";
 
 
 const CodeBackdrop = styled(Backdrop)(({theme}) => ({
@@ -19,7 +18,7 @@ const CodeBackdrop = styled(Backdrop)(({theme}) => ({
     padding: theme.spacing(4),
 }));
 
-function SubmissionBackdrop({submission, onClose}: {submission: SubmissionResult, onClose: () => void}) {
+function SubmissionCode({submission, onClose}: {submission: SubmissionResult, onClose: () => void}) {
     const auth = useContext(AuthContext);
 
     const [open, setOpen] = useState(true);
@@ -47,8 +46,8 @@ function SubmissionBackdrop({submission, onClose}: {submission: SubmissionResult
 
     }, [submission]);
 
-    const language = LANGUAGES[submission.language];
-    const editorLanguage = getModeForPath(`main.${language.extension}`).name;
+    const language = LANGUAGES[submission.language].extension;
+    console.log('language:', language);
 
     return (<>
         <CodeBackdrop open={open}>
@@ -63,8 +62,7 @@ function SubmissionBackdrop({submission, onClose}: {submission: SubmissionResult
                     </Stack>
                     {!submissionCode
                         ? <CircularProgress color="inherit"/>
-                        : <Code readOnly theme="tomorrow" fontSize={14}
-                              language={editorLanguage} code={submissionCode} />
+                        : <LazyCode language={language} content={submissionCode} />
                     }
                     <SubmissionTestsStatus submission={submission} />
                 </Paper>
@@ -73,4 +71,4 @@ function SubmissionBackdrop({submission, onClose}: {submission: SubmissionResult
     </>);
 }
 
-export default SubmissionBackdrop;
+export default SubmissionCode;

@@ -1,5 +1,5 @@
 import React, {memo, useCallback, useContext, useEffect, useState} from "react";
-import {Autocomplete, Badge, IconButton, LinearProgress, Link, Stack, TextField, Typography} from "@mui/material";
+import {Autocomplete, Badge, IconButton, LinearProgress, Link, MenuItem, Stack, TextField, Typography} from "@mui/material";
 import {Controller, useFieldArray, useFormContext} from "react-hook-form";
 import {LANGUAGES} from "models/language";
 import {COMPARISON_MODES} from "models/exercise";
@@ -84,28 +84,26 @@ function CodeForm() {
                     )} />
             )} />
 
-            <Controller name="comparisonMode" control={control} render={({field: {onChange, ...field}}) => <>
-                <Autocomplete
-                    sx={{ width: 200 }} autoHighlight autoSelect disableClearable {...field}
-                    onChange={(event, value) => onChange(value)}
-                    options={COMPARISON_MODES}
-                    renderInput={(params) => (
-                        <TextField
-                            {...params} label="Checker" error={Boolean(errors.comparisonMode)}
-                            helperText={field.value === 'whole'
-                                ? 'Compare whole output with the target'
-                                : field.value === 'token'
-                                    ? 'Token-by-token comparison'
-                                    : 'Need to implement a custom checker'} />
-                    )}/>
-            </>} />
+            <Controller name="comparisonMode" control={control} render={({ field: { ref, ...field } }) => (
+                <TextField select label="Checker" variant="outlined" inputRef={ref} {...field} helperText={{
+                    'whole': 'Compare whole output with the target',
+                    'token': 'Split output and target into tokens before comparing',
+                    'custom': 'Need to implement a custom checker',
+                }[field.value as typeof COMPARISON_MODES[number]]}>
+
+                    <MenuItem value="whole">Exact match</MenuItem>
+                    <MenuItem value="token">Token-by-token match</MenuItem>
+                    <MenuItem value="custom">Custom</MenuItem>
+                </TextField>
+            )} />
 
             {comparisonMode === 'token' && <>
                 <Controller name="floatPrecision" control={control} render={({field: {ref, onChange, ...field}}) => (
                     <TextField required variant="outlined" placeholder="0.001" type="number" label="Float precision"
                                onChange={e => e.target.value ? onChange(Number(e.target.value)) : onChange(e.target.value)}
                                error={Boolean(errors.floatPrecision)} helperText={errors.floatPrecision?.message}
-                               inputProps={{inputMode: 'numeric', pattern: '[0-9]*'}} inputRef={ref} {...field} sx={{flex: 1}}/>
+                               inputProps={{inputMode: 'numeric', pattern: '[0-9]*'}} inputRef={ref}
+                               {...field} sx={{flex: 1, minWidth: 100}} />
                 )}/>
             </>}
         </Stack>

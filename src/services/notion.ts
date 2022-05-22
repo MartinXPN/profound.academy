@@ -1,3 +1,5 @@
+import {parsePageId} from 'notion-utils';
+
 const GET_NOTION_ENDPOINT = 'https://us-central1-profound-academy.cloudfunctions.net/getNotionPage';
 
 export const getNotionPageMap = async (pageId: string) => {
@@ -11,6 +13,4 @@ export const getNotionPageMap = async (pageId: string) => {
 };
 
 
-export const notionPageToId = (page: string): string => {
-    return page.split('/').at(-1)?.split('-').at(-1) ?? '';
-};
+export const notionPageToId = (page: string): string => parsePageId(page, {uuid: false});

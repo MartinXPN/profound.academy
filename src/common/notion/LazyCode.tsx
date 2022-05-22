@@ -10,14 +10,24 @@ import {DependencyLoader, getAllDependencies, name} from "./prismutil";
 import useAsyncEffect from "use-async-effect";
 
 
-export const LazyCode = ({content, language, className}: {
+export const LazyCode = ({content, language, className, showLineNumbers}: {
     content: string,
     language: string,
     className?: string,
+    showLineNumbers?: boolean,
 }) => {
     const [isCopied, setIsCopied] = useState(false);
     const copyTimeout = useRef<number | null>(null);
     const codeRef = useRef();
+    useAsyncEffect(async () => {
+        if (!showLineNumbers || !codeRef.current)
+            return;
+        console.log('Loading line numbers plugin');
+        await Promise.all([
+            await import((`prismjs/plugins/line-numbers/prism-line-numbers`)),
+            await import((`prismjs/plugins/line-numbers/prism-line-numbers.css`)),
+        ]);
+    }, [showLineNumbers, codeRef]);
     useAsyncEffect(async () => {
         if( !codeRef.current ) {
             console.error('Not current ref..');
@@ -50,7 +60,7 @@ export const LazyCode = ({content, language, className}: {
 
 
     return <>
-        <pre className={cs('notion-code', className)}>
+        <pre className={cs('notion-code', showLineNumbers ? 'line-numbers' : 'no-line-numbers', className)}>
             <div className='notion-code-copy'>
                 <div className='notion-code-copy-button' onClick={onClickCopyToClipboard}>
                     <ContentCopyIcon/>

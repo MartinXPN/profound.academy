@@ -102,12 +102,12 @@ function RankingTable({metric, showProgress}: {metric: string, showProgress?: bo
                             const levelName = (index + 1).toString();
                             return <>
                                 {maxLevel >= 2 &&
-                                <TableCell key={levelName} align="right" onClick={() => onLevelClicked(levelName)} sx={{"&:focus,&:hover": {cursor: 'pointer'}, width: 50}}>
+                                <ClickableTableCell key={levelName} align="right" onClick={() => onLevelClicked(levelName)} sx={{width: 50}}>
                                     <Typography variant="subtitle1" sx={{verticalAlign: 'middle', display: 'inline-flex'}}>
                                         <Equalizer /> {levelName}
                                     </Typography>
                                     <Typography variant="body2">{course?.levelScores?.[levelName] ?? '?'}</Typography>
-                                </TableCell>}
+                                </ClickableTableCell>}
 
                                 {levelOpen[levelName] && levelName in levelExercises && levelExercises[levelName].map((ex, index) =>
                                     <ClickableTableCell key={ex.id} align="right" sx={{width: 50}} onClick={() => onExerciseClicked(ex.id)}>

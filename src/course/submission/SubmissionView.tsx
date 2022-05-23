@@ -11,6 +11,7 @@ import {LocalizeContext} from "../../common/Localization";
 import {Column} from "./SubmissionsTable";
 import SubmissionCode from "./SubmissionCode";
 import {TransitionGroup} from "react-transition-group";
+import SubmissionTestsStatus from "./SubmissionTestsStatus";
 
 function SubmissionView({submission, orderNumber, displayColumns, onUserClicked, onCourseClicked, onExerciseClicked}: {
     submission: SubmissionResult,
@@ -27,7 +28,8 @@ function SubmissionView({submission, orderNumber, displayColumns, onUserClicked,
     };
 
     return <>
-        <TableRow hover role="checkbox" tabIndex={-1} key={submission.id} onClick={onSubmissionClicked}>
+        <TableRow hover role="checkbox" tabIndex={-1} key={submission.id} onClick={onSubmissionClicked}
+                  sx={{...(showCode && {'& td': {border: 0}})}}>
             {displayColumns.map((column) => {
                 if( column.id === '#' )
                     return <TableCell key={column.id} align={column.align}>{orderNumber}</TableCell>;
@@ -65,6 +67,7 @@ function SubmissionView({submission, orderNumber, displayColumns, onUserClicked,
                 <TransitionGroup appear={showCode}>
                     <Collapse>
                         <SubmissionCode submission={submission}/>
+                        <SubmissionTestsStatus submission={submission} />
                     </Collapse>
                 </TransitionGroup>
             </TableCell>

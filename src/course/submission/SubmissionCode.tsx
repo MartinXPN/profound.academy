@@ -5,7 +5,6 @@ import {SubmissionResult} from "models/submissions";
 import {getSubmissionCode} from "../../services/submissions";
 import {AuthContext} from "../../App";
 import {LANGUAGES} from "models/language";
-import SubmissionTestsStatus from "./SubmissionTestsStatus";
 import {LazyCode} from "../../common/notion/LazyCode";
 
 
@@ -35,12 +34,11 @@ function SubmissionCode({submission}: {submission: SubmissionResult}) {
     console.log('language:', language);
 
     return (<>
-        <Typography variant="body2" color="text.secondary" noWrap>Submission &nbsp; • &nbsp; {submission.id}</Typography>
+        <Typography variant="body2" color="text.secondary" noWrap align="center">Submission &nbsp; • &nbsp; {submission.id}</Typography>
         {submissionCode
             ? <LazyCode language={language} content={submissionCode} showLineNumbers />
             : <CircularProgress color="inherit"/>
         }
-        <SubmissionTestsStatus submission={submission} />
     </>);
 }
 

@@ -38,7 +38,7 @@ function CourseInvitations({onSendInvites}: {onSendInvites: () => Promise<void>}
                             helperText={Boolean(errors.invitedEmails) ? errors.invitedEmails?.message : 'Invites are only sent to new users. Removing an email from the list blocks the user'}
                             {...params}
                             onChange={(e) => {
-                                const val = e.target.value;
+                                const val = e.target.value.toLowerCase();
                                 const values = val.split(/[ ,]+/);
 
                                 if( values.length > 1 ) {

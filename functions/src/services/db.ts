@@ -11,6 +11,7 @@ import {Submission, SubmissionResult, SubmissionSensitiveRecords, TestResults} f
 import {Comment, Vote} from '../models/forum';
 
 admin.initializeApp({credential: admin.credential.applicationDefault()});
+firestore().settings({ignoreUndefinedProperties: true});
 
 // Add ids when getting the data and removing when sending it
 const converter = <T>() => ({

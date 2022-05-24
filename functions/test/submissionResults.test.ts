@@ -141,6 +141,42 @@ describe('Process submission result', function () {
         });
     });
 
+    describe('Multiple choice question', () => {
+        it('Should process fine', async () => {
+            const submission = {
+                id: '',
+                userId: userId,
+                course: db.course(courseId), exercise: db.exercise(courseId, exerciseId),
+                createdAt: admin.firestore.FieldValue.serverTimestamp(),
+                code: {'main.txt': 'hello hello'},
+                language: 'text',
+                isTestRun: false,
+            };
+            const submissionDoc = await db.submissionQueue(userId).add(submission as unknown as Submission);
+            const judgeResult = {
+                overall: {status: 'Wrong answer', score: 0, memory: 0, time: 0, returnCode: 0},
+            } as JudgeResult;
+            await db.exercise(courseId, exerciseId).set({exerciseType: 'multipleChoice'}, {merge: true});
+
+            await submissionResults.processResult(judgeResult, userId, submissionDoc.id);
+            let wrongResult = (await db.submissionResult(submissionDoc.id).get()).data();
+            assert.equal(wrongResult?.status, 'Wrong answer');
+            assert.isUndefined(wrongResult?.code, 'Make sure we do not expose the answer');
+
+            const correct = {
+                overall: {status: 'Solved', score: 100, memory: 0, time: 0, returnCode: 0},
+            } as JudgeResult;
+            const correctDoc = await db.submissionQueue(userId).add(submission as unknown as Submission);
+            await submissionResults.processResult(correct, userId, correctDoc.id);
+            let correctResult = (await db.submissionResult(correctDoc.id).get()).data();
+            wrongResult = (await db.submissionResult(submissionDoc.id).get()).data();
+            assert.equal(correctResult?.status, 'Solved');
+            assert.isUndefined(correctResult?.code, 'Make sure we do not expose the answer');
+            assert.isTrue(correctResult?.isBest, 'Should make the latest submission the current best');
+            assert.isFalse(wrongResult?.isBest, 'Should update the previous best');
+        });
+    });
+
     describe('Late submission', () => {
         it('Should update the upsolving metrics', async () => {
             const creationDate = new Date();

@@ -55,3 +55,9 @@ export interface ExercisePrivateFields {
     id: string;
     answer?: string;
 }
+
+export interface PrivateTestsSummary {
+    id: string,
+    count: number,
+    tests: TestCase[],
+}

@@ -24,6 +24,22 @@ describe('Update User Info', function () {
         users = await import('../src/services/users');
         db = (await import('../src/services/db')).db;
         userId = db.courses.doc().id;
+
+        // Populate the DB with dummy data
+        await db.user(userId).set({id: userId, displayName: 'Alice', imageUrl: ''});
+        await db.userProgress('c1', userId).set({
+            id: userId, userId: userId, userDisplayName: 'Alice', userImageUrl: '', score: 0
+        });
+        commentId = (await db.forum.add({
+            id: '', userId: userId, displayName: 'Alice',
+            // @ts-ignore
+            createdAt: admin.firestore.FieldValue.serverTimestamp(), replies: [], score: 1, text: 'Hey!'
+        })).id;
+        // @ts-ignore
+        submissionId = (await db.submissionResults.add({
+            id: '', isBest: true, status: 'Solved', memory: 10, time: 0.1, score: 100,
+            userDisplayName: 'Alice', userImageUrl: '', userId: userId,
+        })).id;
     });
 
     afterEach(async () => {
@@ -37,21 +53,6 @@ describe('Update User Info', function () {
 
     describe('Update Info Queue', () => {
         it('Process Info update for a single user', async () => {
-            // Populate the DB with dummy data
-            await db.user(userId).set({id: userId, displayName: 'Alice', imageUrl: ''});
-            await db.userProgress('c1', userId).set({id: userId, userId: userId, userDisplayName: 'Alice', userImageUrl: '', score: 0});
-            commentId = (await db.forum.add({
-                id: '', userId: userId, displayName: 'Alice',
-                // @ts-ignore
-                createdAt: admin.firestore.FieldValue.serverTimestamp(), replies: [], score: 1, text: 'Hey!'
-            })).id;
-            // @ts-ignore
-            submissionId = (await db.submissionResults.add({
-                id: '', isBest: true, status: 'Solved', memory: 10, time: 0.1, score: 100,
-                userDisplayName: 'Alice', userImageUrl: '', userId: userId,
-            })).id;
-
-
             // Launch the update
             await db.userInfoUpdate(userId).set({id: userId, displayName: 'Bob', imageUrl: 'https://i.imgur.com/Mcvgbvm.jpeg'});
             await users.updateInfoQueue();
@@ -78,6 +79,38 @@ describe('Update User Info', function () {
             // user
             const user = (await db.user(userId).get()).data();
             assert.equal(user?.displayName, 'Bob', 'User info should be updated');
+            assert.notEqual(user?.imageUrl, '', 'User image URL should be updated');
+        });
+    });
+
+    describe('Update Single Field', () => {
+        it('Process Info update for a single user', async () => {
+            // Launch the update
+            await db.userInfoUpdate(userId).set({id: userId, imageUrl: 'https://i.imgur.com/Mcvgbvm.jpeg'});
+            await users.updateInfoQueue();
+
+            // info updates
+            const updates = (await db.infoUpdates.get()).docs.map((d) => d.data());
+            assert.isEmpty(updates, 'Info updates should be empty after processing');
+
+            // progress
+            const progress = (await db.userProgress('c1', userId).get()).data();
+            assert.equal(progress?.userDisplayName, 'Alice', 'Progress user name should stay the same');
+            assert.notEqual(progress?.userImageUrl, '', 'Progress image URL should be updated');
+
+            // forum comments
+            const comment = (await db.forumComment(commentId).get()).data();
+            assert.equal(comment?.displayName, 'Alice', 'Comment user name should stay the same');
+            assert.notEqual(comment?.avatarUrl, '', 'Comment image URL should be updated');
+
+            // submissions
+            const submission = (await db.submissionResult(submissionId).get()).data();
+            assert.equal(submission?.userDisplayName, 'Alice', 'Comment user name should stay the same');
+            assert.notEqual(submission?.userImageUrl, '', 'Comment image URL should be updated');
+
+            // user
+            const user = (await db.user(userId).get()).data();
+            assert.equal(user?.displayName, 'Alice', 'User info should be the same');
             assert.notEqual(user?.imageUrl, '', 'User image URL should be updated');
         });
     });

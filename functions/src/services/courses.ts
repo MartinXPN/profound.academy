@@ -6,14 +6,14 @@ import {db} from './db';
 
 
 AWS.config.update({
-    accessKeyId: functions.config().aws_s3.id,
-    secretAccessKey: functions.config().aws_s3.key,
+    accessKeyId: functions.config().instructor.id,
+    secretAccessKey: functions.config().instructor.key,
     region: 'us-east-1',
 });
 
 export const getS3UploadSignedUrl = (exerciseId: string, contentType: string): string => {
     const s3 = new AWS.S3();
-    const s3Params = {
+    const params = {
         Bucket: 'lambda-judge-tests-bucket',
         Key: `${exerciseId}.zip`,
         Expires: 600, // Expires in 10 minutes
@@ -21,7 +21,7 @@ export const getS3UploadSignedUrl = (exerciseId: string, contentType: string): s
         ServerSideEncryption: 'AES256',
     };
 
-    return s3.getSignedUrl('putObject', s3Params);
+    return s3.getSignedUrl('putObject', params);
 };
 
 

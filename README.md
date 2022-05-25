@@ -17,12 +17,17 @@ and allow students to learn at their own pace while increasing their engagement 
 
 ### Prerequisites
 To run the firebase functions `.runtimeconfig.json` needs to be present in the project root and `functions/` directories.
-AWS S3 id and key need to be present for generating signed-url when uploading private `.zip` test cases to S3.
+It should contain AWS IAM role ID and private key with permissions to write to S3 and to read from a DynamoDB table.
+* S3 permissions need to be present to generate signed-url when uploading private `.zip` test cases to S3.
+* DynamoDB table name should be present to retrieve private test summary for exercises.
 ```json
 {
-  "aws_s3": {
+  "instructor": {
     "id": "XXXXXXXXXXXXXXXXXXXX",
     "key": "KKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKK"
+  },
+  "tests": {
+    "table": "LambdaJudge-PrivateTestsTable-XXXXXX"
   },
   "host": "local" // <--- optional to indicate local execution
 }

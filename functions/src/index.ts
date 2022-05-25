@@ -66,6 +66,18 @@ export const getS3UploadUrl = functions.https.onCall(async (data, context) => {
     return url;
 });
 
+export const getPrivateTestsSummary = functions.https.onCall(async (data, context) => {
+    const {isCourseInstructor} = await import('./services/courses');
+    const {getPrivateTestsSummary} = await import('./services/exercises');
+    if (!await isCourseInstructor(data.courseId, context.auth?.uid))
+        throw Error(`User ${context.auth?.uid} tried to access private tests of ${data.courseId}/${data.exerciseId}`);
+
+    functions.logger.info(`getPrivateTestsSummary: ${JSON.stringify(data)}`);
+    const tests = await getPrivateTestsSummary(data.exerciseId);
+    functions.logger.info(`got tests: ${JSON.stringify(tests)}`);
+    return tests;
+});
+
 export const submitSolution = functions.firestore
     .document('submissionQueue/{userId}/private/{submissionId}')
     .onWrite(async (snapshot, context) => {

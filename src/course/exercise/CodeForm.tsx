@@ -1,18 +1,18 @@
 import React, {memo, useCallback, useContext, useEffect, useState} from "react";
-import {Autocomplete, Badge, IconButton, LinearProgress, Link, MenuItem, Stack, TextField, Typography} from "@mui/material";
+import {Autocomplete, Badge, IconButton, LinearProgress, Link, MenuItem, Stack, TextField, Typography, Grid} from "@mui/material";
 import {Controller, useFieldArray, useFormContext} from "react-hook-form";
 import {LANGUAGES} from "models/language";
-import {COMPARISON_MODES} from "models/exercise";
+import {COMPARISON_MODES, TestCase} from "models/exercise";
 import {styled} from "@mui/material/styles";
 import Box from "@mui/material/Box";
 import {FileUploader} from "react-drag-drop-files";
-import {updateTestCases} from "../../services/exercises";
+import {getExercisePrivateTestSummaries, updateTestCases} from "../../services/exercises";
 import {CourseContext, CurrentExerciseContext} from "../Course";
-import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 import HighlightOffTwoToneIcon from "@mui/icons-material/HighlightOffTwoTone";
 import ToggleButton from "@mui/material/ToggleButton";
 import {Add} from "@mui/icons-material";
 import TestGroupsForm from "./TestGroupsForm";
+import useAsyncEffect from "use-async-effect";
 
 const UploadBackground = styled(Box)({
     width: '100%',
@@ -38,12 +38,31 @@ function CodeForm() {
     const [progress, setProgress] = useState(0);
     const [error, setError] = useState<string | null>(null);
     const [selectedTest, setSelectedTest] = useState<number | null>(null);
+    const [privateTestSummaries, setPrivateTestSummaries] = useState<TestCase[]>([]);
+    const [selectedPrivateTest, setSelectedPrivateTest] = useState<number | null>(null);
+
+    useAsyncEffect(async () => {
+        if( (progress !== 0 && progress !== 100) || !course?.id || !exercise?.id || privateTestSummaries.length > 0 )
+            return;
+        if( progress === 100 )
+            return setTimeout(async () => {
+                const summaries = await getExercisePrivateTestSummaries(course.id, exercise.id);
+                setPrivateTestSummaries(summaries.tests);
+            }, 1000);
+
+        const summaries = await getExercisePrivateTestSummaries(course.id, exercise.id);
+        setPrivateTestSummaries(summaries.tests);
+    }, [progress, privateTestSummaries, course?.id, exercise?.id]);
 
     useEffect(() => {
         setProgress(0);
         setError(null);
+        setSelectedTest(null);
+        setPrivateTestSummaries([]);
+        setSelectedPrivateTest(null);
     }, [exercise?.id]);
-    const onTestSelected = useCallback((newTest: number | null) => setSelectedTest(newTest === selectedTest ? null : newTest), [selectedTest]);
+    const onTestSelected = (newTest: number | null) => setSelectedTest(newTest === selectedTest ? null : newTest);
+    const onPrivateTestSelected = (newTest: number | null) => setSelectedPrivateTest(newTest === selectedPrivateTest ? null : newTest);
 
     const nameToLanguageId = (name: string) => Object.keys(LANGUAGES).find(key => LANGUAGES[key].displayName === name);
     const comparisonMode = watch('comparisonMode');
@@ -136,29 +155,28 @@ function CodeForm() {
         </Stack>
 
         <Typography variant="h6" marginBottom={2} marginTop={8}>Test cases (public and private)</Typography>
-        <Stack direction="row" alignItems="center" alignContent="center">
-            <Typography marginRight={1}>Public tests: </Typography>
-            <ToggleButtonGroup size="small">
-                {tests.map((test, index) => {
-                    return (<div key={index.toString()}>
-                        <Badge invisible={selectedTest !== index} badgeContent={
-                            <HighlightOffTwoToneIcon
-                                fontSize="small" sx={{ color: '#515151', "&:focus,&:hover": {cursor: 'pointer'}}}
-                                onClick={() => removeTest(index)}/>
-                        }>
-                            <ToggleButton value={index} id={`${index}`}
-                                          onClick={() => onTestSelected(index)}
-                                          color={(!Boolean(errors.testCases?.[index]?.input) && !Boolean(errors.testCases?.[index]?.target)) ? 'standard' : 'error'}
-                                          sx={{paddingLeft: 3, paddingRight: 3}}
-                                          selected={true}>
-                                <Typography>{index + 1}</Typography>
-                            </ToggleButton>
-                        </Badge>
-                    </div>)}
-                )}
-            </ToggleButtonGroup>
-            <IconButton sx={{padding: '12px'}} onClick={addTest} size="large"><Add /></IconButton>
-        </Stack>
+        <Grid container direction="row" alignItems="center">
+            <Grid item key="public-tests-title"><Typography marginRight={1}>Public tests: </Typography></Grid>
+
+            {tests.map((test, index) => <Grid item key={`public-test-${index}`}>
+                <Badge invisible={selectedTest !== index} badgeContent={
+                    <HighlightOffTwoToneIcon
+                        fontSize="small" sx={{ color: '#515151', "&:focus,&:hover": {cursor: 'pointer'}}}
+                        onClick={() => removeTest(index)}/>
+                }>
+                    <ToggleButton value={index} id={`${index}`}
+                                  onClick={() => onTestSelected(index)}
+                                  color={(!Boolean(errors.testCases?.[index]?.input) && !Boolean(errors.testCases?.[index]?.target)) ? 'standard' : 'error'}
+                                  sx={{paddingLeft: 3, paddingRight: 3}}
+                                  selected={true}>
+                        <Typography>{index + 1}</Typography>
+                    </ToggleButton>
+                </Badge>
+            </Grid>)}
+            <Grid item key="public-tests-add">
+                <IconButton sx={{padding: '12px'}} onClick={addTest} size="large"><Add /></IconButton>
+            </Grid>
+        </Grid>
         {selectedTest !== null && 0 <= selectedTest && selectedTest < tests.length && tests.map((test, index) => index === selectedTest && <>
             <Stack spacing={1} hidden={selectedTest !== index}>
                 <Controller name={`testCases.${index}.input`} control={control} render={({ field: { ref, ...field } }) => (
@@ -174,6 +192,30 @@ function CodeForm() {
                         error={Boolean(errors.testCases?.[index]?.target)} helperText={errors.testCases?.[index]?.target?.message}
                         inputRef={ref} {...field} />
                 )}/>
+            </Stack>
+        </>)}
+        <br/>
+
+        {Boolean(privateTestSummaries.length) && <>
+            <Grid container direction="row" alignItems="center">
+                <Grid item key="private-tests-title">
+                    <Typography marginRight={1}>Private tests: </Typography>
+                </Grid>
+                {privateTestSummaries.map((test, index) => <Grid item key={`private-${index}`}>
+                    <ToggleButton
+                        value={index}
+                        selected={index === selectedPrivateTest}
+                        onClick={() => onPrivateTestSelected(index)}
+                        sx={{width: 60}}>
+                        <Typography>{index + 1}</Typography>
+                    </ToggleButton>
+                </Grid>)}
+            </Grid>
+        </>}
+        {selectedPrivateTest !== null && 0 <= selectedPrivateTest && selectedPrivateTest < privateTestSummaries.length && privateTestSummaries.map((test, index) => index === selectedPrivateTest && <>
+            <Stack spacing={1} hidden={selectedPrivateTest !== index} sx={{marginTop: 2}}>
+                <TextField multiline fullWidth disabled variant="outlined" label="Input" value={privateTestSummaries[index].input}/>
+                <TextField multiline fullWidth disabled variant="outlined" label="Expected output" value={privateTestSummaries[index].target}/>
             </Stack>
         </>)}
         <br/>

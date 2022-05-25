@@ -1,5 +1,5 @@
 import {db} from "./db";
-import {Exercise, EXERCISE_TYPES, TestCase} from "models/exercise";
+import {Exercise, EXERCISE_TYPES, PrivateTestsSummary, TestCase} from "models/exercise";
 import firebase from "firebase/compat/app";
 import { getFunctions, httpsCallable } from "firebase/functions";
 import axios from "axios";
@@ -131,6 +131,15 @@ export const onExerciseInsightsChanged = (courseId: string, exerciseId: string, 
 export const getExercisePrivateFields = async (courseId: string, exerciseId: string) => {
     const snapshot = await db.exercisePrivateFields(courseId, exerciseId).get();
     return snapshot.data();
+}
+
+export const getExercisePrivateTestSummaries = async (courseId: string, exerciseId: string): Promise<PrivateTestsSummary> => {
+    const functions = getFunctions();
+    const getSummaries = httpsCallable(functions, 'getPrivateTestsSummary');
+
+    const summaries = await getSummaries({courseId: courseId, exerciseId: exerciseId});
+    console.log('Private summaries:', summaries);
+    return summaries.data as PrivateTestsSummary;
 }
 
 export const updateTestCases = async (

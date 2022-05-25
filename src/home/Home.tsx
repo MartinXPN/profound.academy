@@ -9,6 +9,7 @@ import Box from "@mui/material/Box";
 import LandingPage from "./LandingPage";
 import Footer from "./Footer";
 import {Divider} from "@mui/material";
+import {Helmet} from "react-helmet-async";
 
 
 function HeaderView() {
@@ -31,6 +32,13 @@ function Home() {
     const auth = useContext(AuthContext);
 
     return <>
+        <Helmet>
+            <html lang="en" />
+            <title>Profound Academy</title>
+            <meta property="og:title" content="Profound Academy"/>
+            <meta name="description" content="Get in-depth knowledge through hands-on learning" />
+        </Helmet>
+
         <Box minHeight="100vh">
             <Header/>
             {auth?.currentUserId && <ActivityHeatmap userId={auth.currentUserId} />}

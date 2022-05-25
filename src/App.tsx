@@ -6,6 +6,7 @@ import 'firebase/compat/auth';
 import './firebase';
 
 import { ThemeProvider, StyledEngineProvider, createTheme } from '@mui/material/styles';
+import { HelmetProvider } from 'react-helmet-async';
 
 import {updateUserInfo} from "./services/users";
 import {useStickyState} from "./common/stickystate";
@@ -77,6 +78,7 @@ function App() {
             <ErrorBoundary>
             <Localization>
             <Router>
+            <HelmetProvider>
             <Suspense fallback={<div>Loading...</div>}>
                 <Routes>
                     <Route path="/" element={<Home/>} />
@@ -89,6 +91,7 @@ function App() {
                     <Route path=":courseId/*" element={<Course/>} />
                 </Routes>
             </Suspense>
+            </HelmetProvider>
             </Router>
             </Localization>
             </ErrorBoundary>

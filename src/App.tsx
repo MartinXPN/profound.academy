@@ -78,9 +78,9 @@ function App() {
                 setCurrentUser: setCurrentUser,
             }}>
             <ErrorBoundary>
+            <Router>
             <Localization>
             <HelmetProvider>
-            <Router>
             <Suspense fallback={<div>Loading...</div>}>
                 <Routes>
                     <Route path="/" element={<Home/>} />
@@ -93,9 +93,9 @@ function App() {
                     <Route path=":courseId/*" element={<Course/>} />
                 </Routes>
             </Suspense>
-            </Router>
             </HelmetProvider>
             </Localization>
+            </Router>
             </ErrorBoundary>
             </AuthContext.Provider>
             </ThemeProvider>

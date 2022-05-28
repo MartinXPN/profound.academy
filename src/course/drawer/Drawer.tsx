@@ -11,7 +11,6 @@ import IconButton from '@mui/material/IconButton';
 import MenuIcon from '@mui/icons-material/Menu';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
-import ListItem from '@mui/material/ListItem';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
 import {Add, Home} from "@mui/icons-material";
@@ -26,7 +25,7 @@ import {AuthContext} from "../../App";
 import {onUserProgressChanged} from "../../services/progress";
 import {CourseContext} from "../Course";
 import Countdown from "react-countdown";
-import {Divider, Typography} from "@mui/material";
+import {Divider, ListItem, ListItemButton, Typography} from "@mui/material";
 
 
 const drawerWidth = 240;
@@ -166,42 +165,48 @@ function CourseDrawer({onItemSelected, onStatusClicked, onCreateExerciseClicked}
             </AppBar>
 
             <Drawer variant="permanent" open={open}>
-                <DrawerHeader>
+                <DrawerHeader key="header">
                     <Box component="span" fontWeight="fontWeightMedium">My Progress</Box>
                 </DrawerHeader>
 
-                <ListItem button onClick={onStatusClicked} key="status">
-                    <ListItemIcon><QueryStatsIcon/></ListItemIcon>
-                    <ListItemText primary="Status"/>
+                <ListItem disablePadding key="status">
+                    <ListItemButton onClick={onStatusClicked}>
+                        <ListItemIcon><QueryStatsIcon/></ListItemIcon>
+                        <ListItemText primary="Status"/>
+                    </ListItemButton>
                 </ListItem>
-                {isCourseInstructor && <>
-                <LevelList
-                    drafts
-                    levelName="0"
-                    levelStatus={'In Progress'}
-                    onItemSelected={onItemSelected}
-                    isDrawerOpen={open}
-                    isSingleLevel={false} />
-                <Divider />
-                </>}
+                {isCourseInstructor && <Box key="drafts">
+                    <LevelList
+                        drafts
+                        levelName="0"
+                        levelStatus={'In Progress'}
+                        onItemSelected={onItemSelected}
+                        isDrawerOpen={open}
+                        isSingleLevel={false} />
+                    <Divider />
+                </Box>}
 
                 {Object.entries(course.levelExercises).map(([levelName, numExercises]) => {
                     const numSolved = progress && progress.levelSolved && levelName in progress.levelSolved ? progress.levelSolved[levelName] : 0;
                     const isLevelSolved = numExercises <= numSolved;
 
-                    return <LevelList
-                            levelName={levelName}
-                            levelStatus={isLevelSolved ? 'Solved' : 'In Progress'}
-                            onItemSelected={onItemSelected}
-                            isDrawerOpen={open}
-                            isSingleLevel={Object.keys(course?.levelExercises ?? {}).length <= 1}/>
+                    return <Box key={`drawer-level-${levelName}`}>
+                            <LevelList
+                                levelName={levelName}
+                                levelStatus={isLevelSolved ? 'Solved' : 'In Progress'}
+                                onItemSelected={onItemSelected}
+                                isDrawerOpen={open}
+                                isSingleLevel={Object.keys(course?.levelExercises ?? {}).length <= 1}/>
+                        </Box>
                     }
                 )}
 
                 {isCourseInstructor &&
-                <ListItem button onClick={onCreateExerciseClicked} key="add-exercise">
-                    <ListItemIcon><Add/></ListItemIcon>
-                    <ListItemText primary="Create exercise"/>
+                <ListItem disablePadding key="add-exercise">
+                    <ListItemButton onClick={onCreateExerciseClicked}>
+                        <ListItemIcon><Add/></ListItemIcon>
+                        <ListItemText primary="Create exercise"/>
+                    </ListItemButton>
                 </ListItem>}
             </Drawer>
         </Box>

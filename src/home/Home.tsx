@@ -11,6 +11,7 @@ import Footer from "./Footer";
 import {Divider} from "@mui/material";
 import {Helmet} from "react-helmet-async";
 import {LocalizeContext} from "../common/Localization";
+import Logo from "../logo.svg";
 
 
 function HeaderView() {
@@ -38,6 +39,8 @@ function Home() {
             <html lang={locale.substring(0, 2)} />
             <title>Profound Academy</title>
             <meta property="og:title" content="Profound Academy"/>
+            <meta property="og:image" content="../" />
+            <meta property="og:image:alt" content={Logo} />
             <meta name="description" content="Get in-depth knowledge through hands-on learning" />
         </Helmet>
 

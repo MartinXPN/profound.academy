@@ -8,6 +8,7 @@ import {AuthContext} from "../App";
 import {FileUploader} from "react-drag-drop-files";
 import {User} from "models/users";
 import {onUserInfoChanged, updateUserInfo, uploadProfilePicture} from "../services/users";
+import {Helmet} from "react-helmet-async";
 
 
 const UserInfoRoot = styled('div')(({theme}) => ({
@@ -145,6 +146,13 @@ function UserInfo({userId}: {userId: string}) {
     useEffect(() => onUserInfoChanged(userId, user => setUser(user)), [userId]);
 
     return <>
+        <Helmet>
+            <title>{user?.displayName ?? 'Profound Academy'}</title>
+            <meta property="og:title" content={user?.displayName} />
+            <meta property="og:image" content={user?.imageUrl} />
+            <meta property="og:image:alt" content={user?.displayName} />
+        </Helmet>
+
         <UserInfoRoot>
             <UserInfoContents>
                 {user ? <>

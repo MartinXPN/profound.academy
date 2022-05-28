@@ -24,8 +24,7 @@ function StatusPage() {
     if( !course )
         return <></>
     return <>
-        {/* The maxWidth calculation is screen-width - drawer-width */}
-        <Box overflow="auto" width="100%" height="100%" sx={{maxWidth: (theme) => `calc(100vw - ${theme.spacing(9)} - 1px)`}}>
+        <Box overflow="auto" width="100%" height="100%">
             <Grid container justifyContent="center">
                 {showDashboard && <OutlinedButton selected={currentTab === 'dashboard'} onClick={() => setCurrentTab('dashboard')}>Dashboard</OutlinedButton>}
                 <OutlinedButton selected={currentTab === 'submissions'} onClick={() => setCurrentTab('submissions')}>Submissions</OutlinedButton>

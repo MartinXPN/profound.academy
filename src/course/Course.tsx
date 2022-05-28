@@ -28,10 +28,12 @@ const DrawerHeader = styled('div')(({ theme }) => ({
     ...theme.mixins.toolbar,
 }));
 
-const Content = styled('main')({
+const Content = styled('main')(({ theme }) => ({
+    // maxWidth = screenWidth - drawerWidth
+    maxWidth: `calc(100vw - ${theme.spacing(9)} - 1px)`,
     flexGrow: 1,
     padding: 0,
-});
+}));
 
 export const CourseContext = createContext<{ course: Course | null }>({course: null});
 export const CurrentExerciseContext = createContext<{ exercise: ExerciseModel | null }>({exercise: null});

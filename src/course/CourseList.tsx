@@ -67,7 +67,7 @@ function CourseList({variant, title, userId}: {
         <Box display="flex" flexWrap="wrap" justifyContent="space-around" overflow="hidden">
             <Grid container alignItems="center" justifyContent="center" width={1000} maxWidth="100%" spacing={0.5}>
                 {isCurrentUserCourses && hasInstructorPermissions &&
-                <Grid item height={180} width={300} display="flex" flexDirection="row">
+                <Grid item height={180} width={300} display="flex" flexDirection="row" key="create-course">
                 <ClickableImageListItem key="create-course" onClick={onCreateCourseClicked} sx={{border: 1, borderColor: '#e1e1e1', flexDirection: 'column', flexGrow: 1}}>
                     <Stack direction="column" alignItems="center" justifyContent="center" height="100%" width="100%" flexGrow={1}>
                         <Add fontSize="large" color="action" />
@@ -77,7 +77,7 @@ function CourseList({variant, title, userId}: {
                 </Grid>}
 
                 {courses.map((item: Course) => (
-                    <Grid item height={180} width={300} display="flex" flexDirection="row">
+                    <Grid item height={180} width={300} display="flex" flexDirection="row" key={item.id}>
                     <ClickableImageListItem key={item.id} onClick={() => onCourseSelected(item.id)} sx={{flexDirection: 'column', flexGrow: 1}}>
                         <img src={item.img} alt={item.title} loading="lazy" style={{flexGrow: 1, objectFit: 'cover'}} />
                         <ImageListItemBar title={item.title} subtitle={<span>by: {item.author}</span>} />

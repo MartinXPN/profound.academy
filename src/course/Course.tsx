@@ -14,6 +14,8 @@ import Exercise from "./exercise/Exercise";
 import {safeParse} from "../common/stickystate";
 import StatusPage from "./StatusPage";
 import LandingPage from "../home/LandingPage";
+import {Helmet} from "react-helmet-async";
+import {LocalizeContext} from "../common/Localization";
 
 const CourseEditor = lazy(() => import('./CourseEditor'));
 
@@ -117,6 +119,7 @@ const Root = styled('div')({
 
 
 function CourseView() {
+    const {locale} = useContext(LocalizeContext);
     const auth = useContext(AuthContext);
     const navigate = useNavigate();
     const {courseId} = useParams<{ courseId: string }>();
@@ -135,14 +138,21 @@ function CourseView() {
 
     if( error )     return <LandingPage error={error} />
     if( !course )   return <></>
-    return (
+    return <>
+        <Helmet>
+            <html lang={locale.substring(0, 2)} />
+            <title>{course.title}</title>
+            <meta property="og:title" content={course.title} />
+            <meta property="og:image" itemProp="image" content={course.img} />
+        </Helmet>
+
         <CourseContext.Provider value={{course: course}}>
         <Routes>
             <Route path=":exerciseId" element={<Root><CurrentCourseView openPage={openPage} /></Root>} />
             <Route path="" element={<Root><CurrentCourseView openPage={openPage} /></Root>} />
         </Routes>
         </CourseContext.Provider>
-    );
+    </>
 }
 
 export default memo(CourseView);

@@ -1,6 +1,9 @@
 import React, {memo, useContext, useState} from "react";
 import TableRow from "@mui/material/TableRow";
 import TableCell from "@mui/material/TableCell";
+import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
+import ArrowRightIcon from '@mui/icons-material/ArrowRight';
+import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import ClickableTableCell from "../../common/ClickableTableCell";
 import {Collapse, Stack} from "@mui/material";
 import SmallAvatar from "../../common/SmallAvatar";
@@ -12,6 +15,8 @@ import {Column} from "./SubmissionsTable";
 import SubmissionCode from "./SubmissionCode";
 import {TransitionGroup} from "react-transition-group";
 import SubmissionTestsStatus from "./SubmissionTestsStatus";
+import OutlinedButton from "../../common/OutlinedButton";
+import Grid from "@mui/material/Grid";
 
 function SubmissionView({submission, orderNumber, displayColumns, onUserClicked, onCourseClicked, onExerciseClicked}: {
     submission: SubmissionResult,
@@ -32,7 +37,12 @@ function SubmissionView({submission, orderNumber, displayColumns, onUserClicked,
                   sx={{...(showCode && {'& td': {border: 0}})}}>
             {displayColumns.map((column) => {
                 if( column.id === '#' )
-                    return <TableCell key={column.id} align={column.align}>{orderNumber}</TableCell>;
+                    return <ClickableTableCell key={column.id} align={column.align}>
+                        <Stack direction="row" alignItems="center" alignContent="center">
+                            {showCode ? <ArrowDropDownIcon/> : <ArrowRightIcon />}
+                            {orderNumber}
+                        </Stack>
+                    </ClickableTableCell>;
 
                 const value = submission[column.id];
                 if( column.id === 'userDisplayName' )
@@ -68,6 +78,9 @@ function SubmissionView({submission, orderNumber, displayColumns, onUserClicked,
                     <Collapse>
                         <SubmissionCode submission={submission}/>
                         <SubmissionTestsStatus submission={submission} />
+                        <Grid container direction="column" alignItems="center" justifyContent="center" sx={{marginBottom: 2}}>
+                            <OutlinedButton size="small" selected={false} onClick={() => setShowCode(false)} endIcon={<KeyboardArrowUpIcon />}>Collapse</OutlinedButton>
+                        </Grid>
                     </Collapse>
                 </TransitionGroup>
             </TableCell>

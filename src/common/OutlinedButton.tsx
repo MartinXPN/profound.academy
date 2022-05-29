@@ -15,11 +15,9 @@ interface OutlinedButtonProps extends ButtonProps {
     endIcon?: React.ReactNode,
 }
 
-function OutlinedButton(props: OutlinedButtonProps) {
-    return <StyledButton variant={props.selected ? 'contained' : 'outlined'}
-                         onClick={props.onClick}
-                         endIcon={props.endIcon}>
-        {props.children}
+function OutlinedButton({children, selected, ...props}: OutlinedButtonProps) {
+    return <StyledButton variant={selected ? 'contained' : 'outlined'} {...props}>
+        {children}
     </StyledButton>
 }
 

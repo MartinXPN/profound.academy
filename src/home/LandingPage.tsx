@@ -94,10 +94,7 @@ function LandingPage({error}: {error?: string}) {
             </Grid>
         </Root>
 
-        {/* Fix the issue of notion content overflowing the page by 32px */}
-        <Box paddingRight="32px">
-            <Content notionPage={localize(content)} />
-        </Box>
+        <Content notionPage={localize(content)} />
         <br/>
     </>
 }

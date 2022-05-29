@@ -36,7 +36,7 @@
     "react-hook-form": "^7.26.1",
     "react-localization": "^1.0.18",
     "react-multi-split-pane": "^0.3.3",
-    "react-notion-x": "^6.12.9",
+    "react-notion-x": "^6.12.10",
     "react-router-dom": "^6.2.1",
     "react-scripts": "^5.0.0",
     "recharts": "^2.1.9",

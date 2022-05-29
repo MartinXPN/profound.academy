@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xhtml="http://www.w3.org/1999/xhtml">
+    <url>
+        <loc>https://profound.academy</loc>
+        <xhtml:link rel="alternate" hreflang="en" href="https://profound.academy?lang=enUS"/>
+        <xhtml:link rel="alternate" hreflang="hy" href="https://profound.academy?lang=hyAM"/>
+    </url>
+    <url><loc>https://profound.academy/about</loc></url>
+    <url><loc>https://profound.academy/privacy</loc></url>
+    <url><loc>https://profound.academy/terms</loc></url>
+
+    <url>
+        <loc>https://profound.academy/python-introduction</loc>
+        <xhtml:link rel="alternate" hreflang="en" href="https://profound.academy/python-introduction?lang=enUS"/>
+    </url>
+    <url>
+        <loc>https://profound.academy/competitive-programming</loc>
+        <xhtml:link rel="alternate" hreflang="hy" href="https://profound.academy/competitive-programming?lang=hyAM"/>
+    </url>
+    <url>
+        <loc>https://profound.academy/armenian-spoj</loc>
+        <xhtml:link rel="alternate" hreflang="hy" href="https://profound.academy/armenian-spoj?lang=hyAM"/>
+    </url>
+</urlset>

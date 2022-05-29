@@ -1,7 +1,8 @@
 import LocalizedStrings from "react-localization";
 import {useStickyState} from "./stickystate";
-import {createContext, memo, ReactNode, useCallback, useContext} from "react";
+import {createContext, memo, ReactNode, useCallback, useContext, useEffect} from "react";
 import {AuthContext} from "../App";
+import { useSearchParams } from "react-router-dom";
 
 interface LocalizeContextProps {
     localize: (text: string | {[key: string]: string}) => string;
@@ -41,6 +42,13 @@ const useLocalize = (): [
     const auth = useContext(AuthContext);
     const [locale, setLocale] = useStickyState<string>('enUS', `locale-${auth.currentUserId}`);
     const localizeText = useCallback((text: string | {[key: string]: string}) => localize(text, locale), [locale]);
+    const [searchParams] = useSearchParams();
+    useEffect(() => {
+        const lang = searchParams.get('lang')
+        console.log('lang search param:', lang);
+        if( lang )
+            setLocale(lang);
+    }, [searchParams, setLocale]);
     return [localizeText, locale, setLocale];
 };
 

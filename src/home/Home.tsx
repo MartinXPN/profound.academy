@@ -9,6 +9,9 @@ import Box from "@mui/material/Box";
 import LandingPage from "./LandingPage";
 import Footer from "./Footer";
 import {Divider} from "@mui/material";
+import {Helmet} from "react-helmet-async";
+import {LocalizeContext} from "../common/Localization";
+import Logo from "../logo.svg";
 
 
 function HeaderView() {
@@ -29,11 +32,21 @@ const Header = memo(HeaderView);
 
 function Home() {
     const auth = useContext(AuthContext);
+    const {locale} = useContext(LocalizeContext);
 
     return <>
+        <Helmet>
+            <html lang={locale.substring(0, 2)} />
+            <title>Profound Academy</title>
+            <meta property="og:title" content="Profound Academy"/>
+            <meta property="og:image" content="../" />
+            <meta property="og:image:alt" content={Logo} />
+            <meta name="description" content="Get in-depth knowledge through hands-on learning" />
+        </Helmet>
+
         <Box minHeight="100vh">
             <Header/>
-            {auth?.currentUserId && <ActivityHeatmap userId={auth.currentUserId} />}
+            {auth.currentUserId && <ActivityHeatmap userId={auth.currentUserId} />}
             {auth.currentUserId && <CourseList variant="userCourses" title="My Curriculum" userId={auth.currentUserId}/>}
             <CourseList variant="allCourses" title="All Courses" />
         </Box>

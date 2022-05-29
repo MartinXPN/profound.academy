@@ -1,9 +1,10 @@
-import React, {memo, useState} from "react";
+import React, {memo, useContext, useState} from "react";
 import Button from "@mui/material/Button";
 import {SignIn} from "../user/Auth";
 import Box from "@mui/material/Box";
 import {styled} from "@mui/material/styles";
 import {Grid, Typography} from "@mui/material";
+import {LocalizeContext} from "../common/Localization";
 import Content from "../common/notion/Content";
 
 
@@ -57,8 +58,13 @@ const Root = styled(Box)(({ theme }) => ({
     },
 }));
 
+const content = {
+    enUS: '2f7d510201724893be5679ba69e5f543',
+} as const;
+
 
 function LandingPage({error}: {error?: string}) {
+    const {localize} = useContext(LocalizeContext);
     const [showSignInOptions, setShowSignInOptions] = useState(false);
     const landingPageImageURL = 'https://firebasestorage.googleapis.com/v0/b/profound-academy.appspot.com/o/images%2Fwebsite-landing-removebg.png?alt=media&token=ebd74cb6-4eab-4ac8-87af-6ef0442ab699';
 
@@ -88,7 +94,7 @@ function LandingPage({error}: {error?: string}) {
             </Grid>
         </Root>
 
-        <Content notionPage="2f7d510201724893be5679ba69e5f543" />
+        <Content notionPage={localize(content)} />
         <br/>
     </>
 }

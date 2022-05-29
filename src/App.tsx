@@ -6,14 +6,17 @@ import 'firebase/compat/auth';
 import './firebase';
 
 import { ThemeProvider, StyledEngineProvider, createTheme } from '@mui/material/styles';
+import { HelmetProvider } from 'react-helmet-async';
 
 import {updateUserInfo} from "./services/users";
 import {useStickyState} from "./common/stickystate";
 import ErrorBoundary from './common/ErrorBoundary';
 import Home from './home/Home';
+import About from "./home/About";
 import UserProfile from './user/UserProfile';
-import StaticContent from "./home/StaticContent";
 import Localization from "./common/Localization";
+import Privacy from "./home/Privacy";
+import TermsAndConditions from "./home/TermsAndConditions";
 // Do not include the Course and the editor in the main bundle as they're pretty heavy
 const Course = lazy(() => import('./course/Course'));
 const CourseEditor = lazy(() => import('./course/CourseEditor'));
@@ -75,22 +78,24 @@ function App() {
                 setCurrentUser: setCurrentUser,
             }}>
             <ErrorBoundary>
-            <Localization>
             <Router>
+            <Localization>
+            <HelmetProvider>
             <Suspense fallback={<div>Loading...</div>}>
                 <Routes>
                     <Route path="/" element={<Home/>} />
-                    <Route path="/about" element={<StaticContent notionPage="95e3c00cd1d744cd9bff906885af6a87"/>} />
-                    <Route path="/privacy" element={<StaticContent notionPage="a55965cadfd74c89bc9ceb869e9b1090"/>} />
-                    <Route path="/terms" element={<StaticContent notionPage="76764fc54cc144d9b788ddff3907d0d5"/>} />
+                    <Route path="/about" element={<About/>} />
+                    <Route path="/privacy" element={<Privacy/>} />
+                    <Route path="/terms" element={<TermsAndConditions/>} />
                     <Route path="/users/:userId" element={<UserProfile/>} />
                     <Route path="/new" element={<CourseEditor/>} />
                     <Route path=":courseId" element={<Course/>} />
                     <Route path=":courseId/*" element={<Course/>} />
                 </Routes>
             </Suspense>
-            </Router>
+            </HelmetProvider>
             </Localization>
+            </Router>
             </ErrorBoundary>
             </AuthContext.Provider>
             </ThemeProvider>

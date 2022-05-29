@@ -14,6 +14,7 @@ import Exercise from "./exercise/Exercise";
 import {safeParse} from "../common/stickystate";
 import StatusPage from "./StatusPage";
 import LandingPage from "../home/LandingPage";
+import {Helmet} from "react-helmet-async";
 
 const CourseEditor = lazy(() => import('./CourseEditor'));
 
@@ -27,10 +28,12 @@ const DrawerHeader = styled('div')(({ theme }) => ({
     ...theme.mixins.toolbar,
 }));
 
-const Content = styled('main')({
+const Content = styled('main')(({ theme }) => ({
+    // maxWidth = screenWidth - drawerWidth
+    maxWidth: `calc(100vw - ${theme.spacing(9)} - 1px)`,
     flexGrow: 1,
     padding: 0,
-});
+}));
 
 export const CourseContext = createContext<{ course: Course | null }>({course: null});
 export const CurrentExerciseContext = createContext<{ exercise: ExerciseModel | null }>({exercise: null});
@@ -135,14 +138,22 @@ function CourseView() {
 
     if( error )     return <LandingPage error={error} />
     if( !course )   return <></>
-    return (
+    return <>
+        <Helmet>
+            <title>{course.title}</title>
+            <meta property="og:title" content={course.title} />
+            <meta property="og:image" content={course.img} />
+            <meta property="og:image:alt" content={course.title} />
+            <meta property="og:type" content="article" />
+        </Helmet>
+
         <CourseContext.Provider value={{course: course}}>
         <Routes>
             <Route path=":exerciseId" element={<Root><CurrentCourseView openPage={openPage} /></Root>} />
             <Route path="" element={<Root><CurrentCourseView openPage={openPage} /></Root>} />
         </Routes>
         </CourseContext.Provider>
-    );
+    </>
 }
 
 export default memo(CourseView);

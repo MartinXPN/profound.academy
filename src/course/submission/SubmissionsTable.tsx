@@ -31,7 +31,7 @@ export interface Column {
 }
 
 const columns: Column[] = [
-    { id: '#', label: '#', minWidth: 30 },
+    { id: '#', label: '#', minWidth: 20 },
     { id: 'userDisplayName', label: 'User', minWidth: 100 },
     { id: 'courseTitle', label: 'Course', minWidth: 100 },
     { id: 'exerciseTitle', label: 'Exercise', minWidth: 100 },

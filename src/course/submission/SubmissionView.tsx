@@ -79,7 +79,7 @@ function SubmissionView({submission, orderNumber, displayColumns, onUserClicked,
                         <SubmissionCode submission={submission}/>
                         <SubmissionTestsStatus submission={submission} />
                         <Grid container direction="column" alignItems="center" justifyContent="center" sx={{marginBottom: 2}}>
-                            <OutlinedButton size="small" selected={false} onClick={() => setShowCode(false)} endIcon={<KeyboardArrowUpIcon />}>Collapse</OutlinedButton>
+                            <OutlinedButton size="small" selected={false} onClick={() => setShowCode(false)} startIcon={<KeyboardArrowUpIcon />} sx={{paddingRight: 2}}>Collapse</OutlinedButton>
                         </Grid>
                     </Collapse>
                 </TransitionGroup>

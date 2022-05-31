@@ -3,9 +3,9 @@ import { Button, Divider, List, TextField, Typography } from "@mui/material";
 import {onExerciseCommentsChanged, saveComment} from "../../services/forum";
 import {Comment} from 'models/forum';
 import CommentView from "./CommentView";
-import {AuthContext} from "../../App";
 import {CourseContext, CurrentExerciseContext} from "../Course";
 import Box from "@mui/material/Box";
+import AuthContext from "../../user/AuthContext";
 
 
 function Forum() {

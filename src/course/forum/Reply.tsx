@@ -1,7 +1,7 @@
 import React, {useContext, useState} from "react";
-import {AuthContext} from "../../App";
 import {saveReply} from "../../services/forum";
 import {TextField} from "@mui/material";
+import AuthContext from "../../user/AuthContext";
 
 
 function Reply({commentId, onReplySaved}: { commentId: string, onReplySaved: () => void }) {

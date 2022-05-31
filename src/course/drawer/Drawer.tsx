@@ -1,5 +1,4 @@
 import React, {useContext, useEffect, useState, memo} from "react";
-import {useNavigate} from "react-router-dom";
 
 import { styled, useTheme, Theme, CSSObject } from '@mui/material/styles';
 import Box from '@mui/material/Box';
@@ -21,11 +20,12 @@ import {AppBarProfile} from "../../user/Auth";
 import {Progress} from "models/progress";
 import AppBarNotifications from "../../user/Notifications";
 import LevelList from "./LevelList";
-import {AuthContext} from "../../App";
 import {onUserProgressChanged} from "../../services/progress";
 import {CourseContext} from "../Course";
 import Countdown from "react-countdown";
 import {Divider, ListItem, ListItemButton, Typography} from "@mui/material";
+import AuthContext from "../../user/AuthContext";
+import {useRouter} from "next/router";
 
 
 const drawerWidth = 240;
@@ -109,13 +109,13 @@ function CourseDrawer({onItemSelected, onStatusClicked, onCreateExerciseClicked}
     const auth = useContext(AuthContext);
     const {course} = useContext(CourseContext);
     const theme = useTheme();
-    const navigate = useNavigate();
+    const router = useRouter();
     const [open, setOpen] = useState(false);
     const [progress, setProgress] = useState<Progress | null>(null);
 
     const handleDrawerOpen = () => setOpen(true);
     const handleDrawerClose = () => setOpen(false);
-    const onHomeClicked = () => navigate('/');
+    const onHomeClicked = async () => await router.push('/');
     const isCourseInstructor = course && auth.currentUserId && course.instructors.includes(auth.currentUserId);
 
 

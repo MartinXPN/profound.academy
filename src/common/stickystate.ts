@@ -20,7 +20,7 @@ export function safeParse<T>(str: string | null, defaultValue: T) {
  */
 export function useStickyState<T>(defaultValue: T, key: string) {
     const [value, setValue] = useState(() => {
-        const storageValue = localStorage.getItem(key);
+        const storageValue = typeof window !== 'undefined' ? localStorage.getItem(key) : null;
         return safeParse(storageValue, defaultValue);
     });
     useEffect(() => {

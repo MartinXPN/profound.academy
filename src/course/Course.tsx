@@ -1,20 +1,17 @@
 import React, {createContext, memo, lazy, useCallback, useContext, useEffect, useState, Suspense} from "react";
-import {Route, Routes, useNavigate, useParams} from "react-router-dom";
-
 import {styled} from '@mui/material/styles';
-
-import {getCourse, registerForCourse} from "../services/courses";
-import {createCourseExercise, getExercise, getFirstExercise} from "../services/exercises";
 import useAsyncEffect from "use-async-effect";
+import {useRouter} from "next/router";
+
+import {registerForCourse} from "../services/courses";
+import {createCourseExercise, getExercise, getFirstExercise} from "../services/exercises";
 import {Course} from "models/courses";
 import {Exercise as ExerciseModel} from "models/exercise";
-import {AuthContext} from "../App";
 import CourseDrawer from "./drawer/Drawer";
 import Exercise from "./exercise/Exercise";
 import {safeParse} from "../common/stickystate";
 import StatusPage from "./StatusPage";
-import LandingPage from "../home/LandingPage";
-import {Helmet} from "react-helmet-async";
+import AuthContext from "../user/AuthContext";
 
 const CourseEditor = lazy(() => import('./CourseEditor'));
 
@@ -46,9 +43,10 @@ export const lastExerciseId = (userId?: string, courseId?: string) => {
 };
 
 function CurrentCourseView({openPage}: {openPage: (page: string) => void}) {
+    const router = useRouter();
     const auth = useContext(AuthContext);
     const {course} = useContext(CourseContext);
-    const {exerciseId} = useParams<{ exerciseId: string }>();
+    const { exerciseId } = router.query;
     const [currentExercise, setCurrentExercise] = useState<ExerciseModel | null>(null);
 
     useEffect(() => {
@@ -88,7 +86,7 @@ function CurrentCourseView({openPage}: {openPage: (page: string) => void}) {
             return;
         }
 
-        const ex = await getExercise(course.id, exerciseId);
+        const ex = await getExercise(course.id, exerciseId as string);
         if( ex )    openExercise(ex);
         else        setCurrentExercise(null);
     }, [exerciseId, currentExercise, course, openExercise, setCurrentExercise]);
@@ -112,48 +110,4 @@ function CurrentCourseView({openPage}: {openPage: (page: string) => void}) {
     </>
 }
 
-
-const Root = styled('div')({
-    display: 'flex',
-    height: 'calc(100vh - 64px)',
-});
-
-
-function CourseView() {
-    const auth = useContext(AuthContext);
-    const navigate = useNavigate();
-    const {courseId} = useParams<{ courseId: string }>();
-    const [course, setCourse] = useState<Course | null>(null);
-    const [error, setError] = useState<string | null>(null);
-
-    useAsyncEffect(async () => {
-        if( !courseId )
-            return;
-        const course = await getCourse(courseId);
-        setCourse(course);
-        setError(course ? null : 'You are not allowed to view the course. Please sign in or return to homepage');
-    }, [courseId, auth]);
-
-    const openPage = useCallback((pageId: string) => navigate(pageId), [navigate]);
-
-    if( error )     return <LandingPage error={error} />
-    if( !course )   return <></>
-    return <>
-        <Helmet>
-            <title>{course.title}</title>
-            <meta property="og:title" content={course.title} />
-            <meta property="og:image" content={course.img} />
-            <meta property="og:image:alt" content={course.title} />
-            <meta property="og:type" content="article" />
-        </Helmet>
-
-        <CourseContext.Provider value={{course: course}}>
-        <Routes>
-            <Route path=":exerciseId" element={<Root><CurrentCourseView openPage={openPage} /></Root>} />
-            <Route path="" element={<Root><CurrentCourseView openPage={openPage} /></Root>} />
-        </Routes>
-        </CourseContext.Provider>
-    </>
-}
-
-export default memo(CourseView);
+export default memo(CurrentCourseView);

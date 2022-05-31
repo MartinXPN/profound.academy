@@ -6,11 +6,11 @@ import {Add} from "@mui/icons-material";
 import {Course} from 'models/courses';
 import {getAllCourses, getCompletedCourses, getUserCourses} from "../services/courses";
 import useAsyncEffect from "use-async-effect";
-import {useNavigate} from "react-router-dom";
 import {useStickyState} from "../common/stickystate";
 import {lastExerciseId} from "./Course";
-import {AuthContext} from "../App";
 import {hasInstructorRole} from "../services/users";
+import {useRouter} from "next/router";
+import AuthContext from "../user/AuthContext";
 
 const ClickableImageListItem = styled(ImageListItem)({
     "&:focus,&:hover": {
@@ -25,7 +25,7 @@ function CourseList({variant, title, userId}: {
     userId?: string
 }) {
     const auth = useContext(AuthContext);
-    const navigate = useNavigate();
+    const router = useRouter();
     const [courses, setCourses] = useStickyState<Course[] | null>(null, `${variant}-${userId}`);
     const [hasInstructorPermissions, setHasInstructorPermissions] = useStickyState(false, `isInstructor-${userId}`);
     const isCurrentUserCourses = userId && auth.currentUserId === userId && variant === 'userCourses';
@@ -52,12 +52,12 @@ function CourseList({variant, title, userId}: {
         setHasInstructorPermissions(isInstructor);
     }, [isCurrentUserCourses, auth.currentUserId, setHasInstructorPermissions]);
 
-    const onCreateCourseClicked = useCallback(() => navigate('/new'), [navigate]);
-    const onCourseSelected = useCallback((courseId: string) => {
+    const onCreateCourseClicked = useCallback(async () => await router.push('/new'), [router]);
+    const onCourseSelected = useCallback(async (courseId: string) => {
         const lastEx = lastExerciseId(auth?.currentUserId, courseId);
-        if( lastEx )    navigate(`/${courseId}/${lastEx}`);
-        else            navigate(`/${courseId}`);
-    }, [auth?.currentUserId, navigate]);
+        if( lastEx )    await router.push(`/${courseId}/${lastEx}`);
+        else            await router.push(`/${courseId}`);
+    }, [auth?.currentUserId, router]);
 
 
     if( !courses || (courses.length === 0 && !hasInstructorPermissions) )

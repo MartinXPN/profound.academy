@@ -3,13 +3,13 @@ import Content from "../common/notion/Content";
 import Button from "@mui/material/Button";
 import Countdown from "react-countdown";
 import {Typography} from "@mui/material";
-import {AuthContext} from "../App";
 import {CourseContext} from "./Course";
 import {Edit} from "@mui/icons-material";
-import {useNavigate} from "react-router-dom";
 import Box from "@mui/material/Box";
 import {onUserInfoChanged} from "../services/users";
 import {useTheme} from "@mui/material/styles";
+import AuthContext from "../user/AuthContext";
+import {useRouter} from "next/router";
 
 
 function CourseLandingPage({onStartCourseClicked, onRegisterCourseClicked}: {
@@ -18,9 +18,9 @@ function CourseLandingPage({onStartCourseClicked, onRegisterCourseClicked}: {
 }) {
     const auth = useContext(AuthContext);
     const {course} = useContext(CourseContext);
-    const navigate = useNavigate();
+    const router = useRouter();
     const theme = useTheme();
-    const onEditClicked = () => navigate('edit');
+    const onEditClicked = () => router.push('edit', 'edit', {shallow: true});
     const [registered, setRegistered] = useState(false);
     useEffect(() => {
         if( !course?.id || !auth.currentUserId )

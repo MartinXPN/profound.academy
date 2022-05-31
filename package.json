@@ -3,7 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@emotion/cache": "^11.7.1",
     "@emotion/react": "^11.7.1",
+    "@emotion/server": "^11.4.0",
     "@emotion/styled": "^11.6.0",
     "@hookform/resolvers": "^2.8.8",
     "@matejmazur/react-katex": "^3.1.3",
@@ -23,6 +25,7 @@
     "katex": "^0.15.2",
     "models": "file:functions/src/models",
     "moment": "^2.29.1",
+    "next": "^12.1.6",
     "notion-types": "^6.12.6",
     "prismjs": "^1.27.0",
     "react": "^17.0.2",
@@ -32,13 +35,10 @@
     "react-dom": "^17.0.2",
     "react-drag-drop-files": "^2.3.2",
     "react-firebaseui": "^6.0.0",
-    "react-helmet-async": "^1.3.0",
     "react-hook-form": "^7.26.1",
     "react-localization": "^1.0.18",
     "react-multi-split-pane": "^0.3.3",
     "react-notion-x": "^6.12.10",
-    "react-router-dom": "^6.2.1",
-    "react-scripts": "^5.0.0",
     "recharts": "^2.1.9",
     "source-map-explorer": "^2.5.2",
     "typescript": "^4.5.5",
@@ -53,10 +53,10 @@
   "scripts": {
     "analyze": "source-map-explorer 'build/static/js/*.js'",
     "emulate": "(yarn --cwd functions build -- --watch) | (firebase emulators:start --import=./test_data --export-on-exit)",
-    "start": "GENERATE_SOURCEMAP=false react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject",
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "test": "next test",
     "update:models": "(yarn --cwd functions/src/models build) && (yarn upgrade models)"
   },
   "eslintConfig": {
@@ -81,6 +81,6 @@
     "@types/lodash": "^4.14.179",
     "@types/prismjs": "^1.26.0",
     "@types/react-calendar-heatmap": "^1.6.3",
-    "@types/react-router-dom": "^5.3.3"
+    "eslint": "^8.16.0"
   }
 }

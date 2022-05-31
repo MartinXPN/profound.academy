@@ -1,20 +1,20 @@
 import React, {useState} from "react";
-import {useParams} from "react-router-dom";
-import ActivityHeatmap from "./ActivityHeatmap";
-import CourseList from "../course/CourseList";
-import ProfileAppBar from "./ProfileAppBar";
-import UserInfo from "./UserInfo";
+import {useRouter} from "next/router";
+import ProfileAppBar from "../../user/ProfileAppBar";
+import UserInfo from "../../user/UserInfo";
 import {Box} from "@mui/material";
-import {UserSubmissionsTable} from "../course/submission/SubmissionsTable";
-import OutlinedButton from "../common/OutlinedButton";
-
+import OutlinedButton from "../../common/OutlinedButton";
+import CourseList from "../../course/CourseList";
+import ActivityHeatmap from "../../user/ActivityHeatmap";
+import {UserSubmissionsTable} from "../../course/submission/SubmissionsTable";
 
 function UserProfile() {
-    const {userId} = useParams<{ userId: string }>();
+    const router = useRouter();
+    const {userId} = router.query;
     const [currentTab, setCurrentTab] = useState('overview');
     console.log(userId);
 
-    if( !userId )
+    if( !userId || typeof userId !== 'string')
         return <></>
     return <>
         <ProfileAppBar />

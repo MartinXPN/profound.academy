@@ -1,4 +1,5 @@
-import React, {memo, useCallback, useContext, useMemo, useState} from "react";
+import {memo, useCallback, useContext, useMemo, useState} from "react";
+import {useRouter} from "next/router";
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
@@ -12,14 +13,13 @@ import {CourseContext} from "../Course";
 import {Equalizer} from "@mui/icons-material";
 import {Typography} from "@mui/material";
 import useAsyncEffect from "use-async-effect";
-import {useNavigate} from "react-router-dom";
 import ClickableTableCell from "../../common/ClickableTableCell";
 import InfiniteScrollLoading from "../../common/InfiniteScrollLoading";
 import RankingPage from "./RankingPage";
 
 
 function RankingTable({metric, showProgress}: {metric: string, showProgress?: boolean}) {
-    const navigate = useNavigate();
+    const router = useRouter();
     const {course} = useContext(CourseContext);
     const [hasMore, setHasMore] = useState(true);
     const [maxLevel, setMaxLevel] = useState(0);
@@ -62,7 +62,7 @@ function RankingTable({metric, showProgress}: {metric: string, showProgress?: bo
         console.log(`level ${levelName} clicked! => setting open: ${open}`);
         setLevelOpen({...levelOpen, [levelName]: open});
     }, [levelOpen]);
-    const onExerciseClicked = useCallback((exerciseId: string) => navigate(`/${course?.id}/${exerciseId}`), [course?.id, navigate]);
+    const onExerciseClicked = useCallback((exerciseId: string) => router.push(`/${course?.id}/${exerciseId}`), [course?.id, router]);
 
     const onPageUserIdsChanged = useCallback((index: number, userIds: string[]) => {
         setLastIds(lastIds => {

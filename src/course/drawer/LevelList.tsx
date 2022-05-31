@@ -12,11 +12,11 @@ import {statusToStyledBackground} from "../colors";
 import {ListItem, ListItemButton, Stack, Tooltip, Typography} from "@mui/material";
 import {onCourseLevelExercisesChanged} from "../../services/exercises";
 import {onCourseExerciseProgressChanged} from "../../services/progress";
-import {AuthContext} from "../../App";
 import {SubmissionStatus} from "models/submissions";
 import {CourseContext, CurrentExerciseContext} from "../Course";
-import {useParams} from "react-router-dom";
 import {LocalizeContext} from "../../common/Localization";
+import AuthContext from "../../user/AuthContext";
+import {useRouter} from "next/router";
 
 
 function LevelList({levelName, levelStatus, onItemSelected, isDrawerOpen, isSingleLevel, drafts}: {
@@ -28,7 +28,8 @@ function LevelList({levelName, levelStatus, onItemSelected, isDrawerOpen, isSing
     drafts?: boolean,
 }) {
     const auth = useContext(AuthContext);
-    const {exerciseId} = useParams<{ exerciseId: string }>();
+    const router = useRouter();
+    const {exerciseId} = router.query;
     const {course} = useContext(CourseContext);
     const {exercise} = useContext(CurrentExerciseContext);
     const {localize} = useContext(LocalizeContext);

@@ -16,10 +16,9 @@ import {lastExerciseId} from "../Course";
 import InfiniteScrollLoading from "../../common/InfiniteScrollLoading";
 import {Typography} from "@mui/material";
 import Box from "@mui/material/Box";
-import {useNavigate} from "react-router-dom";
-import {NavigateFunction} from "react-router";
 import {LocalizeContext} from "../../common/Localization";
 import SubmissionView from "./SubmissionView";
+import {NextRouter, useRouter} from "next/router";
 
 
 export interface Column {
@@ -44,7 +43,7 @@ const columns: Column[] = [
 
 
 interface Props {
-    navigate: NavigateFunction,
+    router: NextRouter,
     reset: number;
     onLoadNext: (startAfterId: string | null, onChange: (submissions: SubmissionResult[], more: boolean) => void) => Promise<() => void>;
     columns: Column[];
@@ -74,12 +73,12 @@ class SubmissionsTable extends Component<Props, State> {
         this.unsubscribeAll();
     }
 
-    onUserClicked = (userId: string) => this.props.navigate(`/users/${userId}`);
-    onExerciseClicked = (courseId: string, exerciseId: string) => this.props.navigate(`/${courseId}/${exerciseId}`);
-    onCourseClicked = (courseId: string) => {
+    onUserClicked = (userId: string) => this.props.router.push(`/users/${userId}`);
+    onExerciseClicked = async (courseId: string, exerciseId: string) => this.props.router.push(`/${courseId}/${exerciseId}`);
+    onCourseClicked = async (courseId: string) => {
         const lastEx = lastExerciseId(this.context.auth?.currentUserId, courseId);
-        if( lastEx )    this.props.navigate(`/${courseId}/${lastEx}`);
-        else            this.props.navigate(`/${courseId}`);
+        if( lastEx )    await this.props.router.push(`/${courseId}/${lastEx}`);
+        else            await this.props.router.push(`/${courseId}`);
     };
     unsubscribeAll = () => {
         console.log('unsubscribing from all the submission listeners');
@@ -165,10 +164,10 @@ export function UserSubmissionsTable({rowsPerPage, userId}: {rowsPerPage: number
         await onUserSubmissionsChanged(userId, startAfterId ?? null, rowsPerPage, onChange);
 
     const [reset, setReset] = useState(0);
-    const navigate = useNavigate();
+    const router = useRouter();
     const {localize} = useContext(LocalizeContext);
     useEffect(() => setReset(r => r + 1), [userId]);
-    return <SubmissionsTable reset={reset} navigate={navigate} onLoadNext={onLoadNext} columns={columns.filter(c => c.id !== 'userDisplayName')} localize={localize}/>
+    return <SubmissionsTable reset={reset} router={router} onLoadNext={onLoadNext} columns={columns.filter(c => c.id !== 'userDisplayName')} localize={localize}/>
 }
 
 export function UserExerciseSubmissionsTable({rowsPerPage, userId, courseId, exerciseId}: {
@@ -178,10 +177,10 @@ export function UserExerciseSubmissionsTable({rowsPerPage, userId, courseId, exe
         await onUserExerciseSubmissionsChanged(userId, courseId, exerciseId, 'desc', startAfterId ?? null, rowsPerPage, onChange);
 
     const [reset, setReset] = useState(0);
-    const navigate = useNavigate();
+    const router = useRouter();
     const {localize} = useContext(LocalizeContext);
     useEffect(() => setReset(r => r + 1), [userId]);
-    return <SubmissionsTable reset={reset} navigate={navigate} onLoadNext={onLoadNext} columns={columns.filter(c => c.id !== 'userDisplayName' && c.id !== 'courseTitle' && c.id !== 'exerciseTitle')} localize={localize}/>
+    return <SubmissionsTable reset={reset} router={router} onLoadNext={onLoadNext} columns={columns.filter(c => c.id !== 'userDisplayName' && c.id !== 'courseTitle' && c.id !== 'exerciseTitle')} localize={localize}/>
 }
 
 export function UserDateSubmissionsTable({rowsPerPage, userId, startDate, endDate}: {rowsPerPage: number, userId: string, startDate: Date, endDate: Date}) {
@@ -189,10 +188,10 @@ export function UserDateSubmissionsTable({rowsPerPage, userId, startDate, endDat
         await onUserSubmissionsChanged(userId, startAfterId ?? null, rowsPerPage, onChange, startDate, endDate, 'asc');
 
     const [reset, setReset] = useState(0);
-    const navigate = useNavigate();
+    const router = useRouter();
     const {localize} = useContext(LocalizeContext);
     useEffect(() => setReset(r => r + 1), [userId]);
-    return <SubmissionsTable reset={reset} navigate={navigate} onLoadNext={onLoadNext} columns={columns.filter(c => c.id !== 'userDisplayName')} localize={localize}/>
+    return <SubmissionsTable reset={reset} router={router} onLoadNext={onLoadNext} columns={columns.filter(c => c.id !== 'userDisplayName')} localize={localize}/>
 }
 
 
@@ -201,10 +200,10 @@ export function CourseSubmissionsTable({rowsPerPage, course}: {rowsPerPage: numb
         await onCourseSubmissionsChanged(course.id, startAfterId ?? null, rowsPerPage, onChange);
 
     const [reset, setReset] = useState(0);
-    const navigate = useNavigate();
+    const router = useRouter();
     const {localize} = useContext(LocalizeContext);
     useEffect(() => setReset(r => r + 1), [course.id]);
-    return <SubmissionsTable reset={reset} navigate={navigate} onLoadNext={onLoadNext} columns={columns.filter(c => c.id !== 'courseTitle')} localize={localize}/>
+    return <SubmissionsTable reset={reset} router={router} onLoadNext={onLoadNext} columns={columns.filter(c => c.id !== 'courseTitle')} localize={localize}/>
 }
 
 export function ExerciseSubmissionsTable({rowsPerPage, course, exercise, mode}: {rowsPerPage: number, course: Course, exercise: Exercise, mode: 'all' | 'best'}) {
@@ -212,8 +211,8 @@ export function ExerciseSubmissionsTable({rowsPerPage, course, exercise, mode}: 
         await onSubmissionsChanged(course.id, exercise.id, mode, startAfterId ?? null, rowsPerPage, onChange);
 
     const [reset, setReset] = useState(0);
-    const navigate = useNavigate();
+    const router = useRouter();
     const {localize} = useContext(LocalizeContext);
     useEffect(() => setReset(r => r + 1), [course.id, exercise.id, mode]);
-    return <SubmissionsTable reset={reset} navigate={navigate} onLoadNext={onLoadNext} columns={columns.filter(c => c.id !== 'courseTitle' && c.id !== 'exerciseTitle')} localize={localize}/>
+    return <SubmissionsTable reset={reset} router={router} onLoadNext={onLoadNext} columns={columns.filter(c => c.id !== 'courseTitle' && c.id !== 'exerciseTitle')} localize={localize}/>
 }

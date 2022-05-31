@@ -1,6 +1,5 @@
 import React, {memo, useState} from 'react';
 import CalendarHeatmap from 'react-calendar-heatmap';
-import 'react-calendar-heatmap/dist/styles.css';
 import {Collapse, Tooltip, Typography} from "@mui/material";
 import moment from "moment/moment";
 import useAsyncEffect from "use-async-effect";

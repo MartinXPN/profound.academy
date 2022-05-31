@@ -6,9 +6,9 @@ import Menu from '@mui/material/Menu';
 import StyledFirebaseAuth from 'react-firebaseui/StyledFirebaseAuth';
 import firebase from 'firebase/compat/app';
 import 'firebase/compat/auth';
-import {AuthContext} from "../App";
-import {useNavigate} from "react-router-dom";
 import PreferredLanguage from "./PreferredLanguage";
+import AuthContext from "./AuthContext";
+import {useRouter} from "next/router";
 
 // Configure FirebaseUI.
 const uiConfig = {
@@ -54,7 +54,7 @@ export const SignIn = memo(function SignIn() {
 
 export function AppBarProfile() {
     const auth = useContext(AuthContext);
-    const navigate = useNavigate();
+    const router = useRouter();
 
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
     const [showLanguageOptions, setShowLanguageOptions] = useState(false);
@@ -70,10 +70,10 @@ export function AppBarProfile() {
         handleClose();
         await firebase.auth().signOut();
     }
-    const onUserProfileClicked = useCallback(() => {
+    const onUserProfileClicked = useCallback(async () => {
         handleClose();
-        navigate(`/users/${auth.currentUserId}`);
-    }, [auth.currentUserId, navigate]);
+        await router.push(`/users/${auth.currentUserId}`);
+    }, [auth.currentUserId, router]);
     const onShowOptions = () => setShowLanguageOptions(true);
 
 

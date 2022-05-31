@@ -1,17 +1,17 @@
+import React, {useCallback, useContext, useEffect, useState} from "react";
+import moment from "moment";
+import {useRouter} from "next/router";
 import {Avatar, ListItem, ListItemIcon, ListItemText, IconButton, Button, List, MenuItem, Stack} from "@mui/material";
 import {Typography, TextField} from "@mui/material";
 import {ArrowDropDown, ArrowDropUp, Edit, Save, Reply as ReplyIcon, Delete} from '@mui/icons-material';
-import React, {useCallback, useContext, useEffect, useState} from "react";
-import {AuthContext} from "../../App";
 import {Comment} from "models/forum";
 import {deleteComment, onCommentRepliesChanged, updateComment, vote} from "../../services/forum";
 import Reply from "./Reply";
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import Menu from "@mui/material/Menu";
-import {useNavigate} from "react-router-dom";
-import moment from "moment";
 import Box from "@mui/material/Box";
 import {styled} from "@mui/material/styles";
+import AuthContext from "../../user/AuthContext";
 
 const UserName = styled(Typography)({
     '&:focus,&:hover': {cursor: 'pointer'},
@@ -80,7 +80,7 @@ function CommentView({comment, allowReply}: {
     comment: Comment,
     allowReply: boolean
 }) {
-    const navigate = useNavigate();
+    const router = useRouter();
     const auth = useContext(AuthContext);
 
     const [replies, setReplies] = useState<Comment[]>([]);
@@ -114,7 +114,7 @@ function CommentView({comment, allowReply}: {
         setIsEditing(false);
     }, [comment.id, text]);
     const onDelete = useCallback(async () => await deleteComment(comment.id), [comment.id]);
-    const onUserClicked = useCallback((userId: string) => navigate(`/users/${userId}`), [navigate]);
+    const onUserClicked = useCallback((userId: string) => router.push(`/users/${userId}`), [router]);
 
     return <>
         <ListItem key={comment.id} alignItems="flex-start">

@@ -5,7 +5,6 @@ import {getModeForPath} from 'ace-builds/src-noconflict/ext-modelist';
 import {useStickyState} from "../../common/stickystate";
 import {TestCase} from "models/exercise";
 import {onRunResultChanged, onRunTestResultsChanged, onSubmissionResultChanged, onSubmissionTestResultsChanged, submitSolution} from "../../services/submissions";
-import {AuthContext} from "../../App";
 import {SubmissionResult} from "models/submissions";
 import {onCodeChanged, saveCode} from "../../services/codeDrafts";
 import {TextSelection} from "models/codeDrafts";
@@ -15,6 +14,7 @@ import {Language, LANGUAGES} from "models/language";
 import Box from "@mui/material/Box";
 import Settings from "./Settings";
 import {TestResult} from "../../../functions/src/models/submissions";
+import AuthContext from "../../user/AuthContext";
 
 
 function Editor({disableCodeSync, userId}: {disableCodeSync?: boolean, userId?: string}) {

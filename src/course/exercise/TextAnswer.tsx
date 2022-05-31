@@ -2,7 +2,6 @@ import React, {memo, useContext, useState} from "react";
 import {Button, CircularProgress, Grid, TextField, Typography} from "@mui/material";
 import {CourseContext, CurrentExerciseContext} from "../Course";
 import {useStickyState} from "../../common/stickystate";
-import {AuthContext} from "../../App";
 import {onSubmissionResultChanged, submitSolution} from "../../services/submissions";
 import {SubmissionResult} from "models/submissions";
 import {LANGUAGES} from "models/language";
@@ -10,6 +9,7 @@ import {statusToColor} from "../colors";
 import {StatusTypography} from "../../common/StatusTypography";
 import {Done} from "@mui/icons-material";
 import Box from "@mui/material/Box";
+import AuthContext from "../../user/AuthContext";
 
 
 function TextAnswer() {

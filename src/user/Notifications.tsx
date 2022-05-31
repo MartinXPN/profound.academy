@@ -2,16 +2,16 @@ import React, {useCallback, useContext, useEffect, useState} from 'react';
 import {IconButton, MenuItem, ListItemIcon, ListItemText, Badge, Avatar, Typography} from "@mui/material";
 import Menu from '@mui/material/Menu';
 import NotificationsIcon from '@mui/icons-material/Notifications';
-import {AuthContext} from "../App";
 import {Notification} from "models/notifications";
 import {onNotificationsChanged, readNotification} from "../services/notifications";
-import {useNavigate} from "react-router-dom";
 import {Done} from "@mui/icons-material";
+import AuthContext from "./AuthContext";
+import {useRouter} from "next/router";
 
 
 export default function AppBarNotifications() {
     const auth = useContext(AuthContext);
-    const navigate = useNavigate();
+    const router = useRouter();
 
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
     const open = Boolean(anchorEl);
@@ -25,8 +25,8 @@ export default function AppBarNotifications() {
         if( !auth.currentUserId )
             return;
         await readNotification(auth.currentUserId, notification.id);
-        navigate(notification.url);
-    }, [auth.currentUserId, navigate]);
+        await router.push(notification.url);
+    }, [auth.currentUserId, router]);
 
     useEffect(() => {
         if( !auth.currentUserId ) {

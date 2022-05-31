@@ -1,17 +1,14 @@
-import {useParams} from "react-router-dom";
 import React, {lazy, useCallback, useContext, useState, memo, Suspense, useEffect, ReactChild} from "react";
-import {AuthContext} from "../../App";
 import {useStickyState} from "../../common/stickystate";
 import CourseLandingPage from "../CourseLandingPage";
 import {SignIn} from "../../user/Auth";
-import Editor from "../editor/Editor";
 import {CourseContext, CurrentExerciseContext} from "../Course";
 import {Grid, Stack, Typography} from "@mui/material";
 import Content from "../../common/notion/Content";
 import Forum from "../forum/Forum";
 import {ExerciseSubmissionsTable} from "../submission/SubmissionsTable";
 import {SplitPane} from "react-multi-split-pane";
-import "../SplitPane.css";
+import "./SplitPane.module.css";
 import OutlinedButton from "../../common/OutlinedButton";
 import Box from "@mui/material/Box";
 import CodeDrafts from "../CodeDrafts";
@@ -23,8 +20,13 @@ import MultipleChoice from "./MultipleChoice";
 import Dashboard from "./Dashboard";
 import {LocalizeContext} from "../../common/Localization";
 import useWindowDimensions from "../../common/windowDimensions";
+import AuthContext from "../../user/AuthContext";
+import {useRouter} from "next/router";
+import dynamic from "next/dynamic";
 
+const Editor = dynamic(import('../editor/Editor'), {ssr: false});
 const ExerciseEditor = lazy(() => import('./ExerciseEditor'));
+
 
 function ConditionalSplitPane({split, children, defaultSizes, onDragFinished}: {
     split: boolean,
@@ -44,13 +46,14 @@ function ConditionalSplitPane({split, children, defaultSizes, onDragFinished}: {
 
 function Exercise({launchCourse, registerCourse}: {launchCourse: () => void, registerCourse: () => void}) {
     const auth = useContext(AuthContext);
+    const router = useRouter();
     const {course} = useContext(CourseContext);
     const {exercise} = useContext(CurrentExerciseContext);
     const {width} = useWindowDimensions();
     console.log('exercise:', exercise);
 
     const {localize} = useContext(LocalizeContext);
-    const {exerciseId} = useParams<{ exerciseId: string }>();
+    const {exerciseId} = router.query;
     const [exerciseType, setExerciseType] = useState<keyof typeof EXERCISE_TYPES>(exercise?.exerciseType ?? 'code');
     const [splitPos, setSplitPos] = useStickyState<number[] | null>(null, `splitPos-${auth?.currentUserId}`);
     const [currentTab, setCurrentTab] = useState<'description' | 'solve' | 'allSubmissions' | 'bestSubmissions' | 'codeDrafts' | 'edit'>('description');

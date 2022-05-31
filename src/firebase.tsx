@@ -19,23 +19,24 @@ const prodConfig = {
 
 
 const app = firebase.initializeApp(prodConfig);
-const appCheck = initializeAppCheck(app, {
-    provider: new ReCaptchaV3Provider('6LcpsDAfAAAAAO04Nn88Eu88h7DldZGFu-OUrEN1'),
-    // Optional argument. If true, the SDK automatically refreshes App Check tokens as needed.
-    isTokenAutoRefreshEnabled: true
-});
-console.log('app check:', appCheck);
-
-
-// configure the database to ignore undefined values
 const db = firebase.firestore();
 db.settings({ignoreUndefinedProperties: true});
 
-const perf = getPerformance(app);
-console.log('perf enabled:', perf.dataCollectionEnabled);
+// If we're on the client-side
+if (app.name && typeof window !== 'undefined') {
+    const appCheck = initializeAppCheck(app, {
+        provider: new ReCaptchaV3Provider('6LcpsDAfAAAAAO04Nn88Eu88h7DldZGFu-OUrEN1'),
+        // Optional argument. If true, the SDK automatically refreshes App Check tokens as needed.
+        isTokenAutoRefreshEnabled: true
+    });
+    console.log('app check:', appCheck);
 
-const analytics = getAnalytics(app);
-console.log('analytics:', analytics);
+    const perf = getPerformance(app);
+    console.log('perf enabled:', perf.dataCollectionEnabled);
+
+    const analytics = getAnalytics(app);
+    console.log('analytics:', analytics);
+}
 
 // if (window.location.hostname === 'localhost') {
 //     console.log('Using localhost => configuring the app to use emulators...');

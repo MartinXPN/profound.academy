@@ -1,6 +1,5 @@
 import React, {memo, useCallback, useContext, useEffect, useState} from "react";
 import {Course} from "models/courses";
-import {AuthContext} from "../App";
 import {Button, FormControlLabel, Stack, TextField, Typography, Switch, Grid, Alert, Snackbar, MenuItem, Collapse, ListItemIcon, ListItemText, ListItemButton} from "@mui/material";
 import {GroupAdd} from "@mui/icons-material";
 import Box from "@mui/material/Box";
@@ -10,7 +9,6 @@ import LocalizationProvider from '@mui/lab/LocalizationProvider';
 import DateTimePicker from '@mui/lab/DateTimePicker';
 import {styled} from "@mui/material/styles";
 import Content from "../common/notion/Content";
-import {useNavigate} from "react-router-dom";
 import {getUsers, searchUser, uploadPicture} from "../services/users";
 import {genCourseId, onCoursePrivateFieldsChanged, sendCourseInviteEmails, updateCourse, updateCoursePrivateFields} from "../services/courses";
 import {User} from "models/users";
@@ -24,6 +22,8 @@ import CourseInvitations from "./CourseInvitations";
 import {CoursePrivateFields} from "models/lib/courses";
 import {ExpandLess, ExpandMore} from "@mui/icons-material";
 import { notionPageToId } from "../services/notion";
+import AuthContext from "../user/AuthContext";
+import {useRouter} from "next/router";
 
 
 const schema = object({
@@ -63,7 +63,7 @@ const fileTypes = ['jpeg', 'jpg', 'png', 'webp'];
 
 
 function CourseEditor({course}: {course?: Course | null}) {
-    const navigate = useNavigate();
+    const router = useRouter();
     const auth = useContext(AuthContext);
     const [openSnackbar, setOpenSnackbar] = useState(false);
     const [invitesOpen, setInvitesOpen] = useState(false);
@@ -125,11 +125,11 @@ function CourseEditor({course}: {course?: Course | null}) {
         await updateCoursePrivateFields(id, data.invitedEmails, undefined, data.mailSubject, data.mailText);
 
         if( navigateToCourse )
-            navigate(`/${id}`);
+            await router.push(`/${id}`);
         setOpenSnackbar(true);
         return id;
     }
-    const onCancel = () => navigate(-1);
+    const onCancel = () => router.back();
     const onSendInvites = async () => {
         console.log('onSendInvites');
         await handleSubmit(async data => {
@@ -138,7 +138,7 @@ function CourseEditor({course}: {course?: Course | null}) {
                 return;
             await sendCourseInviteEmails(courseId);
             if( course?.id !== courseId )
-                navigate(`/${courseId}/edit`);
+                await router.push(`/${courseId}/edit`);
         })();
     }
 

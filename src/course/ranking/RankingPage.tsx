@@ -8,11 +8,11 @@ import {onLevelExerciseProgressChanged, onProgressChanged} from "../../services/
 import {CourseContext} from "../Course";
 import {Stack} from "@mui/material";
 import useAsyncEffect from "use-async-effect";
-import {useNavigate} from "react-router-dom";
 import ClickableTableCell from "../../common/ClickableTableCell";
 import SmallAvatar from "../../common/SmallAvatar";
 import {statusColors} from "../colors";
 import UserSubmissionsBackdrop, {SubmissionsInfo} from "./UserSubmissionsBackdrop";
+import {useRouter} from "next/router";
 
 
 function RankingPage({metric, numRows, startAfterId, startIndex, showProgress, levelOpen, maxLevel, levelExercises, setCurrentUserIds}: {
@@ -22,7 +22,7 @@ function RankingPage({metric, numRows, startAfterId, startIndex, showProgress, l
     levelExercises: {[key: string]: Exercise[]},
     setCurrentUserIds: (userIds: string[]) => void,
 }) {
-    const navigate = useNavigate();
+    const router = useRouter();
     const {course} = useContext(CourseContext);
     const [progress, setProgress] = useState<Progress[]>([]);
     const [userIds, setUserIds] = useState<string[]>([]);
@@ -33,7 +33,7 @@ function RankingPage({metric, numRows, startAfterId, startIndex, showProgress, l
     const levelMetric = 'level' + uppercaseMetric;
     const exerciseMetric = 'exercise' + uppercaseMetric;
 
-    const onUserClicked = useCallback((userId: string) => navigate(`/users/${userId}`), [navigate]);
+    const onUserClicked = useCallback((userId: string) => router.push(`/users/${userId}`), [router]);
     const onUserExerciseClicked = useCallback((userId: string, userImageUrl: string | undefined, userDisplayName: string, exercise: Exercise) => {
         if( !course?.id )
             return;

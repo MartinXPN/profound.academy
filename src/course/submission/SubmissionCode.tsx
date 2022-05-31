@@ -3,9 +3,9 @@ import useAsyncEffect from "use-async-effect";
 import {CircularProgress, Typography} from "@mui/material";
 import {SubmissionResult} from "models/submissions";
 import {getSubmissionCode} from "../../services/submissions";
-import {AuthContext} from "../../App";
 import {LANGUAGES} from "models/language";
 import {LazyCode} from "../../common/notion/LazyCode";
+import AuthContext from "../../user/AuthContext";
 
 
 function SubmissionCode({submission}: {submission: SubmissionResult}) {

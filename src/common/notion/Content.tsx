@@ -29,16 +29,10 @@ function Content({notionPage}: {notionPage: string}) {
             }
         `}</style>
 
-        {data ?
-        <NotionRenderer
-            recordMap={data}
-            fullPage={false}
-            darkMode={false}
-            components={{Code: NotionLazyCode, Collection, Equation}} />
-            : error
-                ? <Typography textAlign="center" color="error" margin={4}>{error.message}</Typography>
-                : <Box width="80%" margin="10%" textAlign="center"><CircularProgress/></Box>
-        }
+        {!data && !error && <Box width="80%" margin="10%" textAlign="center"><CircularProgress/></Box>}
+        {error && <Typography textAlign="center" color="error" margin={4}>{error.message}</Typography>}
+        {data && <NotionRenderer recordMap={data} fullPage={false} darkMode={false}
+                                 components={{Code: NotionLazyCode, Collection, Equation}} />}
     </>
 }
 

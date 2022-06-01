@@ -1,7 +1,6 @@
-import React, {memo, useRef, useState} from 'react';
-import useAsyncEffect from 'use-async-effect';
+import React, {memo} from 'react';
+import useSWR from 'swr';
 
-import {ExtendedRecordMap} from 'notion-types';
 import {NotionRenderer} from 'react-notion-x';
 import {Collection} from 'react-notion-x/build/third-party/collection';
 import {Equation} from 'react-notion-x/build/third-party/equation';
@@ -17,22 +16,10 @@ import {getNotionPageMap} from "../../services/notion";
 
 
 function Content({notionPage}: {notionPage: string}) {
-    const isMounted = useRef(false)
-    const [recordMap, setRecordMap] = useState<ExtendedRecordMap | null>(null);
-    const [errors, setErrors] = useState<string | null>(null);
-    console.log('recordMap:', recordMap);
-
-    useAsyncEffect(async () => {
-        isMounted.current = true;
-        setRecordMap(null);
-        setErrors(null);
-        const map = await getNotionPageMap(notionPage);
-        if( !isMounted.current )
-            return;
-
-        setRecordMap(map);
-        setErrors(map ? null : `Could not get Notion page with id: ${notionPage}`);
-    }, () => isMounted.current = false, [notionPage]);
+    const {data, error} = useSWR(notionPage, getNotionPageMap, {
+        errorRetryCount: 2,
+        revalidateOnFocus: false, revalidateOnReconnect: false, refreshInterval: 1000 * 60 * 5
+    });
 
     return <>
         {/*Fix issue where the user is prevented from selecting text: https://github.com/NotionX/react-notion-x/issues/81*/}
@@ -42,14 +29,14 @@ function Content({notionPage}: {notionPage: string}) {
             }
         `}</style>
 
-        {recordMap ?
+        {data ?
         <NotionRenderer
-            recordMap={recordMap}
+            recordMap={data}
             fullPage={false}
             darkMode={false}
             components={{Code: NotionLazyCode, Collection, Equation}} />
-            : errors
-                ? <Typography textAlign="center" color="error" marginBottom={4}>{errors}</Typography>
+            : error
+                ? <Typography textAlign="center" color="error" margin={4}>{error.message}</Typography>
                 : <Box width="80%" margin="10%" textAlign="center"><CircularProgress/></Box>
         }
     </>

@@ -9,7 +9,9 @@ export const getUserActivity = async (userId: string) => {
     console.log('Got activity:', activity);
     const daily: {[key: string]: number} = activity.reduce((res, item) =>  ({...res, ...item}), {});
     console.log('=> daily:', daily);
-    return daily;
+    const dailyActivity = Object.keys(daily).filter(key => key !== 'id').map(date => ({date: date, count: daily[date]}));
+    console.log('=> daily activity:', daily);
+    return dailyActivity;
 }
 
 export const onUserInfoChanged = (userId: string, onChanged: (user: User | null) => void) => {

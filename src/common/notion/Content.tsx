@@ -1,5 +1,5 @@
 import React, {memo} from 'react';
-import useSWR from 'swr';
+import useSWRImmutable from "swr/immutable";
 
 import {NotionRenderer} from 'react-notion-x';
 import {Collection} from 'react-notion-x/build/third-party/collection';
@@ -16,10 +16,7 @@ import {getNotionPageMap} from "../../services/notion";
 
 
 function Content({notionPage}: {notionPage: string}) {
-    const {data, error} = useSWR(notionPage, getNotionPageMap, {
-        errorRetryCount: 2,
-        revalidateOnFocus: false, revalidateOnReconnect: false, refreshInterval: 1000 * 60 * 5
-    });
+    const {data, error} = useSWRImmutable(notionPage, getNotionPageMap, {refreshInterval: 1000 * 60 * 5});
 
     return <>
         {/*Fix issue where the user is prevented from selecting text: https://github.com/NotionX/react-notion-x/issues/81*/}

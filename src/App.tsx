@@ -5,6 +5,7 @@ import firebase from 'firebase/compat/app';
 import 'firebase/compat/auth';
 import './firebase';
 
+import { SWRConfig } from 'swr';
 import { ThemeProvider, StyledEngineProvider, createTheme } from '@mui/material/styles';
 import { HelmetProvider } from 'react-helmet-async';
 
@@ -17,6 +18,7 @@ import UserProfile from './user/UserProfile';
 import Localization from "./common/Localization";
 import Privacy from "./home/Privacy";
 import TermsAndConditions from "./home/TermsAndConditions";
+import localStorageProvider from "./common/localStorageProvider";
 // Do not include the Course and the editor in the main bundle as they're pretty heavy
 const Course = lazy(() => import('./course/Course'));
 const CourseEditor = lazy(() => import('./course/CourseEditor'));
@@ -70,6 +72,7 @@ function App() {
 
     return (
         <StyledEngineProvider injectFirst>
+            <SWRConfig value={{ provider: localStorageProvider }}>
             <ThemeProvider theme={theme}>
             <AuthContext.Provider value={{
                 isSignedIn: !!currentUser,
@@ -99,6 +102,7 @@ function App() {
             </ErrorBoundary>
             </AuthContext.Provider>
             </ThemeProvider>
+            </SWRConfig>
         </StyledEngineProvider>
     );
 }

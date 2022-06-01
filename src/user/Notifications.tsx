@@ -1,5 +1,6 @@
 import React, {useCallback, useContext, useEffect, useState} from 'react';
-import {IconButton, MenuItem, ListItemIcon, ListItemText, Badge, Avatar, Typography} from "@mui/material";
+import {IconButton, MenuItem, ListItemIcon, ListItemText, Avatar, Typography} from "@mui/material";
+import Badge from '@mui/material/Badge';
 import Menu from '@mui/material/Menu';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import {AuthContext} from "../App";
@@ -29,16 +30,13 @@ export default function AppBarNotifications() {
     }, [auth.currentUserId, navigate]);
 
     useEffect(() => {
-        if( !auth.currentUserId ) {
-            setNotifications([]);
-            return;
-        }
-        const unsubscribe = onNotificationsChanged(auth.currentUserId, (notifs) => {
+        if( !auth.currentUserId )
+            return setNotifications([]);
+
+        return onNotificationsChanged(auth.currentUserId, (notifs) => {
             setUnreadNotifications(notifs.filter(n => !n.readAt).length);
             setNotifications(notifs);
         });
-
-        return () => unsubscribe();
     }, [auth.currentUserId]);
 
     if( !auth?.currentUser )

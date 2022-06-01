@@ -1,9 +1,9 @@
-import React, {memo, useState} from 'react';
+import React, {memo, useState, useEffect} from 'react';
 import CalendarHeatmap from 'react-calendar-heatmap';
 import 'react-calendar-heatmap/dist/styles.css';
 import {Collapse, Tooltip, Typography} from "@mui/material";
 import moment from "moment/moment";
-import useAsyncEffect from "use-async-effect";
+import useSWRImmutable from "swr/immutable";
 import {getUserActivity} from "../services/users";
 import {tomorrow} from "../util";
 import Box from "@mui/material/Box";
@@ -13,16 +13,14 @@ import {useStickyState} from "../common/stickystate";
 
 
 function ActivityHeatmap({userId}: {userId: string}) {
-    const [activity, setActivity] = useStickyState<{date: string, count: number}[] | null>(null, `daily-activity-${userId}`);
+    const {data: activity = null} = useSWRImmutable(userId, getUserActivity, {refreshInterval: 1000 * 60 * 10});
     const [totalActivity, setTotalActivity] = useStickyState<number>(0, `totalActivity-${userId}`);
     const [selectedDate, setSelectedDate] = useState<{ date: Date, formattedDate: string } | null>(null);
 
-    useAsyncEffect(async () => {
-        const activity = await getUserActivity(userId);
-        const dailyActivity = Object.keys(activity).filter(key => key !== 'id').map(date => ({date: date, count: activity[date]}));
-        setActivity(dailyActivity);
-        setTotalActivity(dailyActivity.reduce((sum, a) => sum + a.count, 0));
-    }, [userId]);
+    useEffect(() => {
+        if( !activity ) return;
+        setTotalActivity(activity.reduce((sum, a) => sum + a.count, 0));
+    }, [activity]);
 
     const onDateClicked = (date: Date, formattedDate: string) => {
         console.log('date clicked:', date, formattedDate);
@@ -34,11 +32,11 @@ function ActivityHeatmap({userId}: {userId: string}) {
 
     const endDate = new Date();
     const startDate = new Date();
-    startDate.setFullYear(startDate.getFullYear() - 1);
     startDate.setHours(0);
     startDate.setMinutes(0);
     startDate.setSeconds(0);
     startDate.setMilliseconds(0);
+    startDate.setFullYear(startDate.getFullYear() - 1);
     endDate.setHours(0);
     endDate.setMinutes(0);
     endDate.setSeconds(0);

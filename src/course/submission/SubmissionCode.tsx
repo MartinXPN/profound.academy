@@ -1,6 +1,6 @@
 import React, {useContext, useState} from "react";
 import useAsyncEffect from "use-async-effect";
-import {CircularProgress, Typography} from "@mui/material";
+import {CircularProgress} from "@mui/material";
 import {SubmissionResult} from "models/submissions";
 import {getSubmissionCode} from "../../services/submissions";
 import {AuthContext} from "../../App";
@@ -34,7 +34,6 @@ function SubmissionCode({submission}: {submission: SubmissionResult}) {
     console.log('language:', language);
 
     return (<>
-        <Typography variant="body2" color="text.secondary" noWrap align="center">Submission &nbsp; • &nbsp; {submission.id}</Typography>
         {submissionCode
             ? <LazyCode language={language} content={submissionCode} showLineNumbers />
             : <CircularProgress color="inherit"/>

@@ -5,7 +5,7 @@ import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import ArrowRightIcon from '@mui/icons-material/ArrowRight';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import ClickableTableCell from "../../common/ClickableTableCell";
-import {Collapse, Stack} from "@mui/material";
+import {Collapse, Stack, Typography} from "@mui/material";
 import SmallAvatar from "../../common/SmallAvatar";
 import {LANGUAGES} from "models/language";
 import {statusToColor} from "../colors";
@@ -76,6 +76,7 @@ function SubmissionView({submission, orderNumber, displayColumns, onUserClicked,
             <TableCell colSpan={displayColumns.length}>
                 <TransitionGroup appear={showCode}>
                     <Collapse>
+                        <Typography variant="body2" color="text.secondary" noWrap align="left">Submission &nbsp; • &nbsp; {submission.id}</Typography>
                         <SubmissionCode submission={submission}/>
                         <SubmissionTestsStatus submission={submission} />
                         <Grid container direction="column" alignItems="center" justifyContent="center" sx={{marginBottom: 2}}>

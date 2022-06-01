@@ -1,13 +1,18 @@
 import React, {memo, useState, useRef, useCallback, FC} from 'react'
+import useAsyncEffect from "use-async-effect";
 import {highlightElement} from 'prismjs'
+import ContentCopyIcon from '@mui/icons-material/ContentCopy';
+import DoneIcon from '@mui/icons-material/Done';
+import {IconButton, Tooltip} from "@mui/material";
+import Paper from "@mui/material/Paper";
+import {cs, useNotionContext, Text} from "react-notion-x";
 import {CodeBlock, Decoration} from 'notion-types'
 import {getBlockTitle} from 'notion-utils'
 import copyToClipboard from 'clipboard-copy'
+import useSWRImmutable from "swr/immutable";
 
-import {cs, useNotionContext, Text} from "react-notion-x";
-import ContentCopyIcon from '@mui/icons-material/ContentCopy';
-import {DependencyLoader, getAllDependencies, name} from "./prismutil";
-import useAsyncEffect from "use-async-effect";
+import {getAllDependencies, loadDependencies, loadLineNumbers, name} from "./prismutil";
+import {Key} from "swr/dist/types";
 
 
 export const LazyCode = ({content, language, className, showLineNumbers}: {
@@ -17,34 +22,21 @@ export const LazyCode = ({content, language, className, showLineNumbers}: {
     showLineNumbers?: boolean,
 }) => {
     const [isCopied, setIsCopied] = useState(false);
+    const [showCopy, setShowCopy] = useState(false);
     const copyTimeout = useRef<number | null>(null);
     const codeRef = useRef();
-    useAsyncEffect(async () => {
-        if (!showLineNumbers || !codeRef.current)
-            return;
-        console.log('Loading line numbers plugin');
-        await Promise.all([
-            await import((`prismjs/plugins/line-numbers/prism-line-numbers`)),
-            await import((`prismjs/plugins/line-numbers/prism-line-numbers.css`)),
-        ]);
-    }, [showLineNumbers, codeRef]);
-    useAsyncEffect(async () => {
-        if( !codeRef.current ) {
-            console.error('Not current ref..');
-            return;
-        }
+    const {data: loaded} = useSWRImmutable(language, loadDependencies);
+    const {data: lineNumbers} = useSWRImmutable(showLineNumbers as Key, loadLineNumbers);
 
-        const deps = getAllDependencies(language);
-        const unique = [...new Set(deps)];
-        await new DependencyLoader(unique).load();
-        console.log('loaded:', unique);
-
+    useAsyncEffect(async () => {
+        if( !codeRef.current || !loaded )
+            return console.error('Not highlighting...');
         try {
             highlightElement(codeRef.current);
         } catch (err) {
             console.warn('prismjs highlight error', err);
         }
-    }, [codeRef, language]);
+    }, [codeRef.current, loaded, lineNumbers]);
 
     const onClickCopyToClipboard = useCallback(() => {
         copyToClipboard(content)
@@ -60,17 +52,18 @@ export const LazyCode = ({content, language, className, showLineNumbers}: {
 
 
     return <>
-        <pre className={cs('notion-code', showLineNumbers ? 'line-numbers' : 'no-line-numbers', className)}>
-            <div className='notion-code-copy'>
-                <div className='notion-code-copy-button' onClick={onClickCopyToClipboard}>
-                    <ContentCopyIcon/>
-                </div>
-                {isCopied && (
-                    <div className='notion-code-copy-tooltip'>
-                        <div>{isCopied ? 'Copied' : 'Copy'}</div>
-                    </div>
-                )}
-            </div>
+        <pre className={cs('notion-code', showLineNumbers ? 'line-numbers' : 'no-line-numbers', className)}
+             onMouseOver={() => setShowCopy(true)}
+             onMouseLeave={() => setShowCopy(false)}>
+
+            {showCopy &&
+            <Tooltip arrow title={isCopied ? 'Copied!' : 'Copy'} placement="left">
+                <Paper sx={{position: 'absolute', top: 6, right: 6}}>
+                    <IconButton disableRipple onClick={onClickCopyToClipboard}>
+                        {isCopied ? <DoneIcon/> : <ContentCopyIcon/>}
+                    </IconButton>
+                </Paper>
+            </Tooltip>}
 
             { /* @ts-ignore */ }
             <code className={`language-${language}`} ref={codeRef}>{content}</code>
@@ -91,10 +84,6 @@ const NotionLazyCode: FC<{
     useAsyncEffect(async () => {
         const deps = block.properties.language.map(l => getAllDependencies(l as string[]));
         block.properties.language = deps as Decoration[];
-
-        const unique = [...new Set(deps.reduce((prev, cur) => [...prev, ...cur], []))];
-        await new DependencyLoader(unique).load();
-        console.log('loaded:', unique);
         setContent(getBlockTitle(block, recordMap));
     }, [block, recordMap]);
 

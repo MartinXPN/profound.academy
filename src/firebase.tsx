@@ -30,6 +30,12 @@ console.log('app check:', appCheck);
 // configure the database to ignore undefined values
 const db = firebase.firestore();
 db.settings({ignoreUndefinedProperties: true});
+db.enablePersistence().then(() => {
+    console.log('Persistence is enabled!');
+}).catch(e => {
+    if( e.code === 'failed-precondition' )  console.error('Multiple open tabs');
+    else if( e.code === 'unimplemented' )   console.error('Current browser does not support it');
+});
 
 const perf = getPerformance(app);
 console.log('perf enabled:', perf.dataCollectionEnabled);

@@ -7,13 +7,6 @@ import moment from "moment/moment";
 import {dateDayDiff} from "../util";
 
 
-export const getAllCourses = async () => {
-    const snapshot = await db.courses.where('visibility', '==', 'public').get();
-    const courses: Course[] = snapshot.docs.map(x => x.data());
-    console.log('Got courses:', courses);
-    return courses;
-}
-
 export const registerForCourse = async (userId: string, courseId: string) => {
     const course = db.course(courseId);
     const user = (await db.user(userId).get()).data();
@@ -70,6 +63,14 @@ export const genCourseId = async (title: string) => {
     }
 }
 
+
+export const getAllCourses = async () => {
+    const snapshot = await db.courses.where('visibility', '==', 'public').get();
+    const courses: Course[] = snapshot.docs.map(x => x.data());
+    console.log('Got courses:', courses);
+    return courses;
+}
+
 export const getCourse = async (id: string): Promise<Course | null> => {
     try {
         const snapshot = await db.course(id).get();
@@ -85,6 +86,29 @@ export const getCourses = async (courseIds: string[]) => {
     console.log('Got courses:', courses);
     return courses;
 }
+
+export const getUserCourses = async (userId: string) => {
+    const snap = await db.user(userId).get();
+    const us = snap.data();
+    if (!us || !us.courses)
+        return [];
+
+    const courses: Course[] = await getCourses(us.courses.map(c => c.id));
+    console.log('User courses:', courses);
+    return courses;
+}
+
+export const getCompletedCourses = async (userId: string) => {
+    const snap = await db.user(userId).get();
+    const us = snap.data();
+    if (!us || !us.completed)
+        return [];
+
+    const courses: Course[] = await getCourses(us.completed.map(c => c.id));
+    console.log('Completed courses:', courses);
+    return courses;
+}
+
 
 export const onCoursePrivateFieldsChanged = (id: string, onChanged: (privateFields: CoursePrivateFields | null) => void) => {
     return db.coursePrivateFields(id).onSnapshot(snapshot => {
@@ -135,28 +159,6 @@ export const searchCourses = async (title: string, limit: number = 20) => {
         .get();
     const courses = snapshot.docs.map(d => d.data());
     console.log('Found courses:', courses);
-    return courses;
-}
-
-export const getUserCourses = async (userId: string) => {
-    const snap = await db.user(userId).get();
-    const us = snap.data();
-    if (!us || !us.courses)
-        return [];
-
-    const courses: Course[] = await getCourses(us.courses.map(c => c.id));
-    console.log('User courses:', courses);
-    return courses;
-}
-
-export const getCompletedCourses = async (userId: string) => {
-    const snap = await db.user(userId).get();
-    const us = snap.data();
-    if (!us || !us.completed)
-        return [];
-
-    const courses: Course[] = await getCourses(us.completed.map(c => c.id));
-    console.log('Completed courses:', courses);
     return courses;
 }
 

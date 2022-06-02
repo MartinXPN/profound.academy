@@ -1,5 +1,4 @@
-import React, {memo, useState, useRef, useCallback, FC} from 'react'
-import useAsyncEffect from "use-async-effect";
+import React, {memo, useState, useRef, useCallback, FC, useEffect} from 'react'
 import {highlightElement} from 'prismjs'
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import DoneIcon from '@mui/icons-material/Done';
@@ -25,12 +24,12 @@ export const LazyCode = ({content, language, className, showLineNumbers}: {
     const [showCopy, setShowCopy] = useState(false);
     const copyTimeout = useRef<number | null>(null);
     const codeRef = useRef();
-    const {data: loaded} = useSWRImmutable(language, loadDependencies);
-    const {data: lineNumbers} = useSWRImmutable(showLineNumbers as Key, loadLineNumbers);
+    const {data: loaded} = useSWRImmutable(language, loadDependencies, {refreshInterval: 1000 * 60 * 15});  // 15 min
+    const {data: lineNumbers} = useSWRImmutable(showLineNumbers as Key, loadLineNumbers, {refreshInterval: 1000 * 60 * 15});  // 15 min
 
-    useAsyncEffect(async () => {
+    useEffect(() => {
         if( !codeRef.current || !loaded )
-            return console.error('Not highlighting...');
+            return console.log('Not highlighting...');
         try {
             highlightElement(codeRef.current);
         } catch (err) {
@@ -38,8 +37,8 @@ export const LazyCode = ({content, language, className, showLineNumbers}: {
         }
     }, [codeRef.current, loaded, lineNumbers]);
 
-    const onClickCopyToClipboard = useCallback(() => {
-        copyToClipboard(content)
+    const onClickCopyToClipboard = useCallback(async () => {
+        await copyToClipboard(content)
         setIsCopied(true)
 
         if (copyTimeout.current) {
@@ -81,7 +80,7 @@ const NotionLazyCode: FC<{
     const language = name(block.properties?.language?.[0]?.[0] || defaultLanguage);
     const caption = block.properties.caption;
 
-    useAsyncEffect(async () => {
+    useEffect(() => {
         const deps = block.properties.language.map(l => getAllDependencies(l as string[]));
         block.properties.language = deps as Decoration[];
         setContent(getBlockTitle(block, recordMap));

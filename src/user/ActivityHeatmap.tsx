@@ -13,14 +13,11 @@ import {useStickyState} from "../common/stickystate";
 
 
 function ActivityHeatmap({userId}: {userId: string}) {
-    const {data: activity = null} = useSWRImmutable(userId, getUserActivity, {refreshInterval: 1000 * 60 * 10});
+    const {data: activity = []} = useSWRImmutable(userId, getUserActivity, {refreshInterval: 1000 * 60 * 10});
     const [totalActivity, setTotalActivity] = useStickyState<number>(0, `totalActivity-${userId}`);
     const [selectedDate, setSelectedDate] = useState<{ date: Date, formattedDate: string } | null>(null);
 
-    useEffect(() => {
-        if( !activity ) return;
-        setTotalActivity(activity.reduce((sum, a) => sum + a.count, 0));
-    }, [activity]);
+    useEffect(() => setTotalActivity(activity.reduce((sum, a) => sum + a.count, 0)), [activity]);
 
     const onDateClicked = (date: Date, formattedDate: string) => {
         console.log('date clicked:', date, formattedDate);
@@ -54,7 +51,7 @@ function ActivityHeatmap({userId}: {userId: string}) {
                 showMonthLabels
                 startDate={startDate}
                 endDate={endDate}
-                values={activity ?? []}
+                values={activity}
                 classForValue={(value) => {
                     if (!value || !value.count) return 'color-empty';
                     if( value.count < 3 )       return 'color-scale-1';

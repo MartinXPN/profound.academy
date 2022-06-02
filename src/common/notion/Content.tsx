@@ -16,7 +16,7 @@ import {getNotionPageMap} from "../../services/notion";
 
 
 function Content({notionPage}: {notionPage: string}) {
-    const {data, error} = useSWRImmutable(notionPage, getNotionPageMap, {refreshInterval: 1000 * 60 * 5});
+    const {data, error} = useSWRImmutable(notionPage, getNotionPageMap, {refreshInterval: 1000 * 60 * 5});  // 5 min
 
     return <>
         {/*Fix issue where the user is prevented from selecting text: https://github.com/NotionX/react-notion-x/issues/81*/}

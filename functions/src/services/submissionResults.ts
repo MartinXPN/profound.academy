@@ -11,28 +11,43 @@ import {updateUserProgress, recordInsights} from './metrics';
 import {addCourses} from './users';
 
 
-const updateBest = (
-    transaction: firestore.Transaction,
-    submission: SubmissionResult,
-    bestSubmission?: SubmissionResult,
-) => {
+const updateBest = async (submission: SubmissionResult): Promise<boolean> => {
     functions.logger.info('Updating the best submissions...');
-    if (!bestSubmission) {
-        submission.isBest = true;
-        functions.logger.info('No best submissions before this => setting to best');
-    } else if (bestSubmission.score < submission.score ||
-        bestSubmission.score === submission.score && bestSubmission.time > submission.time) {
-        functions.logger.info(`Updating the previous best: ${JSON.stringify(bestSubmission)}`);
+    return await firestore().runTransaction(async (transaction) => {
+        const bestUserSubmissionsRef = db.submissionResults
+            .where('isBest', '==', true)
+            .where('userId', '==', submission.userId)
+            .where('exercise', '==', submission.exercise);
 
-        transaction.set(db.submissionResult(bestSubmission.id), {isBest: false}, {merge: true});
-        submission.isBest = true;
-        functions.logger.info(`Updated the previous best: ${bestSubmission.id}`);
-    } else {
-        functions.logger.info('Did not update the bestSubmissions list');
-    }
+        const bestUserSubmissions = (await transaction.get(bestUserSubmissionsRef)).docs.map((s) => s.data());
+        let alreadySolved = false;
+        if (bestUserSubmissions.length > 1)
+            throw Error(`Duplicate user best: ${submission.userId} for ex: ${submission.exercise.id}`);
 
-    // save the results to /submissions
-    transaction.set(db.submissionResult(submission.id), submission);
+        const currentBest = bestUserSubmissions.length === 1 ? bestUserSubmissions[0] : undefined;
+        if (currentBest?.status === 'Solved')
+            alreadySolved = true;
+
+        functions.logger.info(`Already solved (${submission.id}): ${alreadySolved}`);
+
+        if (!currentBest) {
+            submission.isBest = true;
+            functions.logger.info('No best submissions before this => setting to best');
+        } else if (currentBest.score < submission.score ||
+            currentBest.score === submission.score && currentBest.time > submission.time) {
+            functions.logger.info(`Updating the previous best: ${JSON.stringify(currentBest)}`);
+
+            transaction.set(db.submissionResult(currentBest.id), {isBest: false}, {merge: true});
+            submission.isBest = true;
+            functions.logger.info(`Updated the previous best: ${currentBest.id}`);
+        } else {
+            functions.logger.info('Did not update the bestSubmissions list');
+        }
+
+        // save the results to /submissions
+        transaction.set(db.submissionResult(submission.id), submission);
+        return alreadySolved;
+    });
 };
 
 const updateActivity = (
@@ -140,28 +155,9 @@ export const processResult = async (
     submissionResult.score = submissionResult.score / 100.0 * (exercise.score ?? 100);
     functions.logger.info(`Exercise score is set to: ${submissionResult.score}`);
 
-    functions.logger.info(`Updating the submission: ${submissionResult.id} with ${JSON.stringify(submissionResult)}`);
-    // Update the best submissions
+    const alreadySolved = await updateBest(submissionResult);
     await firestore().runTransaction(async (transaction) => {
-        const bestUserSubmissionsRef = db.submissionResults
-            .where('isBest', '==', true)
-            .where('userId', '==', submissionResult.userId)
-            .where('exercise', '==', submissionResult.exercise);
-
-        const bestUserSubmissions = (await transaction.get(bestUserSubmissionsRef)).docs.map((s) => s.data());
-        let alreadySolved = false;
-        if (bestUserSubmissions.length > 1)
-            throw Error(`Duplicate user best: ${submissionResult.userId} for ex: ${submissionResult.exercise.id}`);
-
-        const currentBest = bestUserSubmissions.length === 1 ? bestUserSubmissions[0] : undefined;
-        if (currentBest?.status === 'Solved')
-            alreadySolved = true;
-
-        functions.logger.info(`Already solved (${submissionResult.id}): ${alreadySolved}`);
-        updateBest(transaction, submissionResult, currentBest);
-
         // save the sensitive information to /submissions/${submissionId}/private/${userId}
-        // TODO: Move this out of this transaction
         const sensitiveData = {code: code};
         transaction.set(db.submissionSensitiveRecords(userId, submissionResult.id), sensitiveData);
         transaction.set(db.submissionTestResults(userId, submissionResult.id), {testResults: testResults});
@@ -190,7 +186,7 @@ export const processResult = async (
             functions.logger.info(`prevScore: ${JSON.stringify(prevScore)}`);
             updateUserProgress(transaction, 'score', submissionResult.userId, course.id, exercise.id, level,
                 prevScore?.progress?.[exercise.id] ?? 0, submissionResult.score, submissionResult.score);
-            // update weekly score metrics
+            // TODO: update weekly score metrics
             const weekly = moment(submissionDate).format('YYYY_MM_WW');
             functions.logger.info(`weekly score path: ${weekly}`);
             updateUserProgress(transaction, `score_${weekly}`,

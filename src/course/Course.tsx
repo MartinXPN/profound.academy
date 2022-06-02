@@ -3,7 +3,7 @@ import {Route, Routes, useNavigate, useParams} from "react-router-dom";
 
 import {styled} from '@mui/material/styles';
 
-import {getCourse, registerForCourse} from "../services/courses";
+import {onCourseChanged, registerForCourse} from "../services/courses";
 import {createCourseExercise, getExercise, getFirstExercise} from "../services/exercises";
 import useAsyncEffect from "use-async-effect";
 import {Course} from "models/courses";
@@ -126,12 +126,13 @@ function CourseView() {
     const [course, setCourse] = useState<Course | null>(null);
     const [error, setError] = useState<string | null>(null);
 
-    useAsyncEffect(async () => {
+    useEffect(() => {
         if( !courseId )
             return;
-        const course = await getCourse(courseId);
-        setCourse(course);
-        setError(course ? null : 'You are not allowed to view the course. Please sign in or return to homepage');
+        return onCourseChanged(courseId, (course) => {
+            setCourse(course);
+            setError(course ? null : 'You are not allowed to view the course. Please sign in or return to homepage');
+        });
     }, [courseId, auth]);
 
     const openPage = useCallback((pageId: string) => navigate(pageId), [navigate]);

@@ -51,7 +51,7 @@ function ActivityHeatmap({userId}: {userId: string}) {
             .react-calendar-heatmap .color-scale-3 { fill: #44a340; }
             .react-calendar-heatmap .color-scale-4 { fill: #1e6823; }
         `}</style>
-        <Box maxWidth="98%" width="50em" marginTop="4em" marginLeft="auto" marginRight="auto">
+        <Box maxWidth="98%" width="55em" marginTop="4em" marginLeft="auto" marginRight="auto">
             <CalendarHeatmap
                 showMonthLabels
                 startDate={startDate}

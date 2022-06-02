@@ -7,10 +7,46 @@ import moment from "moment/moment";
 import {dateDayDiff} from "../util";
 
 
+export const onCourseChanged = (courseId: string, onChanged: (course: Course | null) => void) => {
+    return db.course(courseId).onSnapshot(snapshot => onChanged(snapshot.data() ?? null));
+}
+
 export const getAllCourses = async () => {
     const snapshot = await db.courses.where('visibility', '==', 'public').get();
     const courses: Course[] = snapshot.docs.map(x => x.data());
     console.log('Got courses:', courses);
+    return courses;
+}
+
+export const getCourses = async (courseIds: string[]) => {
+    const courses: Course[] = (await Promise.all(courseIds
+        .map(async id => (await db.course(id).get()).data() ?? null)
+        .filter(c => !!c)
+    )) as Course[];
+    console.log('Got courses:', courses);
+    return courses;
+}
+
+
+export const getUserCourses = async (userId: string) => {
+    const snap = await db.user(userId).get();
+    const us = snap.data();
+    if (!us || !us.courses)
+        return [];
+
+    const courses: Course[] = await getCourses(us.courses.map(c => c.id));
+    console.log('User courses:', courses);
+    return courses;
+}
+
+export const getCompletedCourses = async (userId: string) => {
+    const snap = await db.user(userId).get();
+    const us = snap.data();
+    if (!us || !us.completed)
+        return [];
+
+    const courses: Course[] = await getCourses(us.completed.map(c => c.id));
+    console.log('Completed courses:', courses);
     return courses;
 }
 
@@ -70,21 +106,6 @@ export const genCourseId = async (title: string) => {
     }
 }
 
-export const getCourse = async (id: string): Promise<Course | null> => {
-    try {
-        const snapshot = await db.course(id).get();
-        return snapshot.data() ?? null;
-    }
-    catch {
-        return null;
-    }
-}
-
-export const getCourses = async (courseIds: string[]) => {
-    const courses: Course[] = (await Promise.all(courseIds.map(id => getCourse(id)))).filter(c => !!c) as Course[];
-    console.log('Got courses:', courses);
-    return courses;
-}
 
 export const onCoursePrivateFieldsChanged = (id: string, onChanged: (privateFields: CoursePrivateFields | null) => void) => {
     return db.coursePrivateFields(id).onSnapshot(snapshot => {
@@ -138,27 +159,6 @@ export const searchCourses = async (title: string, limit: number = 20) => {
     return courses;
 }
 
-export const getUserCourses = async (userId: string) => {
-    const snap = await db.user(userId).get();
-    const us = snap.data();
-    if (!us || !us.courses)
-        return [];
-
-    const courses: Course[] = await getCourses(us.courses.map(c => c.id));
-    console.log('User courses:', courses);
-    return courses;
-}
-
-export const getCompletedCourses = async (userId: string) => {
-    const snap = await db.user(userId).get();
-    const us = snap.data();
-    if (!us || !us.completed)
-        return [];
-
-    const courses: Course[] = await getCourses(us.completed.map(c => c.id));
-    console.log('Completed courses:', courses);
-    return courses;
-}
 
 export const updateCourse = async (
     userId: string,

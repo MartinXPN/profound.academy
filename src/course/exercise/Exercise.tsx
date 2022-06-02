@@ -47,7 +47,6 @@ function Exercise({launchCourse, registerCourse}: {launchCourse: () => void, reg
     const {course} = useContext(CourseContext);
     const {exercise} = useContext(CurrentExerciseContext);
     const {width} = useWindowDimensions();
-    console.log('exercise:', exercise);
 
     const {localize} = useContext(LocalizeContext);
     const {exerciseId} = useParams<{ exerciseId: string }>();
@@ -64,7 +63,6 @@ function Exercise({launchCourse, registerCourse}: {launchCourse: () => void, reg
             setCurrentTab('edit');
     }, [exercise, isCourseInstructor]);
 
-    console.log(splitPos);
     const onSplitChanged = useCallback((newSplit) => {
         console.log('split:', newSplit);
         setSplitPos(newSplit);

@@ -38,11 +38,10 @@ function LevelList({levelName, levelStatus, onItemSelected, isDrawerOpen, isSing
     const isCourseOpen = course && course.revealsAt.toDate() < new Date();
     const levelNumber = parseInt(levelName);
 
+    // Open the level in the drawer
     useEffect(() => {
-        if( isSingleLevel ) {
-            setOpen(true);
-            return;
-        }
+        if( isSingleLevel )
+            return setOpen(true);
         if( !exercise )
             return;
         const exerciseLevel = Math.trunc(exercise.order).toString();
@@ -54,24 +53,24 @@ function LevelList({levelName, levelStatus, onItemSelected, isDrawerOpen, isSing
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [exercise, levelName, isSingleLevel]);
 
+    // Level exercise listener
     useEffect(() => {
-        if( !course || !open )
-            return;
+        if( course && open )
+            return onCourseLevelExercisesChanged(course.id, levelNumber, setLevelExercises);
+    }, [course, open, levelNumber, isCourseOpen]);
 
-        return onCourseLevelExercisesChanged(course.id, levelNumber, (exercises => {
-            setLevelExercises(exercises);
-            const cur = exercises.filter(e => e.id === exerciseId);
-            if( cur.length === 1 && exerciseId === cur[0].id )
-                onItemSelected(cur[0]);
-        }));
-    }, [course, exerciseId, onItemSelected, open, levelNumber, isCourseOpen]);
-
+    // Level exercises progress listener
     useEffect(() => {
-        if( !open || !auth.currentUserId || !course )
-            return;
+        if( open && auth.currentUserId && course?.id )
+            return onCourseExerciseProgressChanged(course.id, auth.currentUserId, levelName, setProgress);
+    }, [open, levelName, auth.currentUserId, course?.id, isCourseOpen]);
 
-        return onCourseExerciseProgressChanged(course.id, auth.currentUserId, levelName, setProgress);
-    }, [open, levelName, auth, course, isCourseOpen]);
+    // Current exercise data update
+    useEffect(() => levelExercises.forEach(exercise => {
+        if (exercise.id === exerciseId)
+            onItemSelected(exercise);
+    }), [levelExercises, exerciseId]);
+
 
     const onLevelClicked = () => setOpen(!open);
     const getStatusStyle = (id: string) => {

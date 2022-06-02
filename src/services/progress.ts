@@ -63,7 +63,7 @@ export const onCourseExerciseProgressChanged = (
 ) => {
     return db.courseExerciseProgress(courseId, userId, level).onSnapshot(snapshot => {
         const res = snapshot.data();
-        console.log('Exercise Progress for level', level, ':', res);
+        console.log(`Got level-${level} progress`, res);
         onChanged(res ?? null);
     });
 }

@@ -57,22 +57,26 @@ function CurrentCourseView({openPage}: {openPage: (page: string) => void}) {
     }, [exerciseId, auth?.currentUserId, course?.id]);
 
     const openExercise = useCallback((exercise: ExerciseModel) => {
-        openPage(exercise.id);
+        console.log('openExercise:', exercise.id);
+        if( exerciseId !== exercise.id )
+            openPage(exercise.id);
         setCurrentExercise(exercise);
-    }, [openPage]);
+    }, [openPage, exerciseId]);
     const openStatus = useCallback(() => openPage('status'), [openPage]);
+
     const launchCourse = useCallback(async () => {
         if( !course )   return;
-
-        console.log('Launching the course!');
+        console.log('Launching the course');
         const firstExercise = await getFirstExercise(course.id);
         openExercise(firstExercise);
     }, [course, openExercise]);
+
     const registerCourse = useCallback(async () => {
         if( !course || !auth.currentUserId )   return;
         console.log('Registering for the course!');
         await registerForCourse(auth.currentUserId, course.id);
     }, [auth.currentUserId, course]);
+
     const createExercise = useCallback(async () => {
         if( !course )   return;
         const ex = await createCourseExercise(course.id);

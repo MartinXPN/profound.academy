@@ -20,7 +20,6 @@ function Content({notionPage}: {notionPage: string}) {
     const isMounted = useRef(false)
     const [recordMap, setRecordMap] = useState<ExtendedRecordMap | null>(null);
     const [errors, setErrors] = useState<string | null>(null);
-    console.log('recordMap:', recordMap);
 
     useAsyncEffect(async () => {
         isMounted.current = true;

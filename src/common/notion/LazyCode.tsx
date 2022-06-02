@@ -1,13 +1,14 @@
-import React, {memo, useState, useRef, useCallback, FC} from 'react'
+import React, {memo, useState, useRef, useCallback, FC, useEffect} from 'react'
 import {highlightElement} from 'prismjs'
 import {CodeBlock, Decoration} from 'notion-types'
 import {getBlockTitle} from 'notion-utils'
 import copyToClipboard from 'clipboard-copy'
 
 import {cs, useNotionContext, Text} from "react-notion-x";
-import ContentCopyIcon from '@mui/icons-material/ContentCopy';
-import {DependencyLoader, getAllDependencies, name} from "./prismutil";
+import {getAllDependencies, loadDependencies, loadLineNumbers, name} from "./prismutil";
 import useAsyncEffect from "use-async-effect";
+import {IconButton, Paper, Tooltip} from "@mui/material";
+import {Done, ContentCopy} from "@mui/icons-material";
 
 
 export const LazyCode = ({content, language, className, showLineNumbers}: {
@@ -17,28 +18,20 @@ export const LazyCode = ({content, language, className, showLineNumbers}: {
     showLineNumbers?: boolean,
 }) => {
     const [isCopied, setIsCopied] = useState(false);
+    const [showCopy, setShowCopy] = useState(false);
     const copyTimeout = useRef<number | null>(null);
     const codeRef = useRef();
     useAsyncEffect(async () => {
         if (!showLineNumbers || !codeRef.current)
             return;
-        console.log('Loading line numbers plugin');
-        await Promise.all([
-            await import((`prismjs/plugins/line-numbers/prism-line-numbers`)),
-            await import((`prismjs/plugins/line-numbers/prism-line-numbers.css`)),
-        ]);
+        await loadLineNumbers();
     }, [showLineNumbers, codeRef]);
     useAsyncEffect(async () => {
         if( !codeRef.current ) {
             console.error('Not current ref..');
             return;
         }
-
-        const deps = getAllDependencies(language);
-        const unique = [...new Set(deps)];
-        await new DependencyLoader(unique).load();
-        console.log('loaded:', unique);
-
+        await loadDependencies(language);
         try {
             highlightElement(codeRef.current);
         } catch (err) {
@@ -46,8 +39,8 @@ export const LazyCode = ({content, language, className, showLineNumbers}: {
         }
     }, [codeRef, language]);
 
-    const onClickCopyToClipboard = useCallback(() => {
-        copyToClipboard(content)
+    const onClickCopyToClipboard = useCallback(async () => {
+        await copyToClipboard(content)
         setIsCopied(true)
 
         if (copyTimeout.current) {
@@ -60,17 +53,18 @@ export const LazyCode = ({content, language, className, showLineNumbers}: {
 
 
     return <>
-        <pre className={cs('notion-code', showLineNumbers ? 'line-numbers' : 'no-line-numbers', className)}>
-            <div className='notion-code-copy'>
-                <div className='notion-code-copy-button' onClick={onClickCopyToClipboard}>
-                    <ContentCopyIcon/>
-                </div>
-                {isCopied && (
-                    <div className='notion-code-copy-tooltip'>
-                        <div>{isCopied ? 'Copied' : 'Copy'}</div>
-                    </div>
-                )}
-            </div>
+        <pre className={cs('notion-code', showLineNumbers ? 'line-numbers' : 'no-line-numbers', className)}
+             onMouseOver={() => setShowCopy(true)}
+             onMouseLeave={() => setShowCopy(false)}>
+
+            {showCopy &&
+                <Tooltip arrow title={isCopied ? 'Copied!' : 'Copy'} placement="left">
+                    <Paper sx={{position: 'absolute', top: 6, right: 6}}>
+                        <IconButton disableRipple onClick={onClickCopyToClipboard}>
+                            {isCopied ? <Done color="success"/> : <ContentCopy/>}
+                        </IconButton>
+                    </Paper>
+                </Tooltip>}
 
             { /* @ts-ignore */ }
             <code className={`language-${language}`} ref={codeRef}>{content}</code>
@@ -88,13 +82,9 @@ const NotionLazyCode: FC<{
     const language = name(block.properties?.language?.[0]?.[0] || defaultLanguage);
     const caption = block.properties.caption;
 
-    useAsyncEffect(async () => {
+    useEffect(() => {
         const deps = block.properties.language.map(l => getAllDependencies(l as string[]));
         block.properties.language = deps as Decoration[];
-
-        const unique = [...new Set(deps.reduce((prev, cur) => [...prev, ...cur], []))];
-        await new DependencyLoader(unique).load();
-        console.log('loaded:', unique);
         setContent(getBlockTitle(block, recordMap));
     }, [block, recordMap]);
 

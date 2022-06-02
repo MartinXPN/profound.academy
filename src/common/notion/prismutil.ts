@@ -260,11 +260,6 @@ export const name = (lang: string): string => {
         return langAliases[res];
     return res;
 };
-export const names = (languages: string | string[]): string[] => {
-    if( typeof languages === 'string' )
-        return [name(languages)];
-    return languages.map(l => names(l)).reduce((prev, cur) => [...prev, ...cur], []);
-};
 
 
 export const getAllDependencies = (lang: string | string[]): string[] => {
@@ -280,7 +275,7 @@ export const getAllDependencies = (lang: string | string[]): string[] => {
     return [...new Set(res)];
 };
 
-export class DependencyLoader {
+class DependencyLoader {
     private readonly languages: string | string[];
     private startedLoading: Set<string>;
     constructor(languages: string | string[]) {
@@ -303,4 +298,20 @@ export class DependencyLoader {
             return this.loadLanguage(this.languages);
         return Promise.all(this.languages.map(async l => this.loadLanguage(l)));
     }
+}
+
+export const loadDependencies = async (language: string) => {
+    const deps = getAllDependencies(language);
+    const unique = [...new Set(deps)];
+    await new DependencyLoader(unique).load();
+    console.log('loaded:', unique);
+    return unique;
+}
+
+export const loadLineNumbers = async () => {
+    await Promise.all([
+        await import((`prismjs/plugins/line-numbers/prism-line-numbers`)),
+        await import((`prismjs/plugins/line-numbers/prism-line-numbers.css`)),
+    ]);
+    console.log('loaded line numbers');
 }

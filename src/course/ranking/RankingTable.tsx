@@ -72,7 +72,7 @@ function RankingTable({metric, showProgress}: {metric: string, showProgress?: bo
                 // console.log('setting has more:', 'index:', index, 'lastIds.length:', lastIds.length, hasMore);
             }
             console.log('onPageUserIdsChanged:', index, userIds);
-            const newVal = hasMore ? userIds.at(-1)! : null;
+            const newVal = hasMore && userIds.length > 0 ? userIds[userIds.length - 1] : null;
             if( lastIds[index] === newVal )
                 return lastIds;
             const newUserIds = [...lastIds];
@@ -84,7 +84,7 @@ function RankingTable({metric, showProgress}: {metric: string, showProgress?: bo
 
     const loadNextPage = () => {
         console.log('load next page...', lastIds);
-        if( lastIds.length > 0 && lastIds.at(-1) === null )
+        if( lastIds.length > 0 && lastIds[lastIds.length - 1] === null )
             return;
         setLastIds(lastIds => [...lastIds, null]);
     }

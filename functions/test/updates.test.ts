@@ -21,7 +21,7 @@ describe('Update Progress', function () {
     beforeEach(async () => {
         const app = admin.apps.length === 0 ? admin.initializeApp(config) : admin.apps[0] ?? undefined;
         adminInitStub = sinon.stub(admin, 'initializeApp');
-        firestoreStub = sinon.stub(admin, 'firestore').callsFake(() => admin.firestore(app));
+        firestoreStub = sinon.stub(admin, 'firestore').callsFake(() => firestore(app));
         updates = await import('../src/services/updates');
         db = (await import('../src/services/db')).db;
         
@@ -56,18 +56,25 @@ describe('Update Progress', function () {
     afterEach(async () => {
         firestoreStub.restore();
         adminInitStub.restore();
-        await admin.firestore().recursiveDelete(db.updateQueue);
-        await admin.firestore().recursiveDelete(doc);
+        await firestore().recursiveDelete(db.updateQueue);
+        await firestore().recursiveDelete(doc);
     });
 
     describe('Update for a single document', () => {
         it('Should update only when the proper time comes', async () => {
             await updates.updateProgress();
-            const data = (await doc.get()).data();
+            let data = (await doc.get()).data();
             
             assert.equal(data?.one, 10, 'Should update one: 1 to 10');
             assert.equal(data?.two?.three?.four, 15, 'Should update nested properties properly');
             assert.equal(data?.later?.something, 8, 'Should not update docs scheduled for later');
+
+            await updates.updateProgress();
+            data = (await doc.get()).data();
+
+            assert.equal(data?.one, 10, 'Should not update twice');
+            assert.equal(data?.two?.three?.four, 15, 'Should not update twice');
+            assert.equal(data?.later?.something, 8, 'Should keep as is');
         });
     });
 });

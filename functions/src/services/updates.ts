@@ -9,6 +9,7 @@ export const updateProgress = async () => {
     return Promise.all(updates.docs.map(async (d) => {
         const update = d.data();
         functions.logger.info(`Updating: ${update.doc.path} - ${update.key} with diff ${update.diff}`);
-        return update.doc.set(pathToObject(update.key, firestore.FieldValue.increment(update.diff)), {merge: true});
+        await update.doc.set(pathToObject(update.key, firestore.FieldValue.increment(update.diff)), {merge: true});
+        return d.ref.delete();
     }));
 };

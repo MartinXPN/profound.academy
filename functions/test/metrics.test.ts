@@ -3,6 +3,7 @@ import * as sinon from 'sinon';
 import * as chai from 'chai';
 import {config} from "./testConfig";
 import {format} from "../src/services/metrics";
+import {dateDayDiff} from "../src/services/util";
 
 const assert = chai.assert;
 
@@ -175,6 +176,7 @@ describe('Update User Progress', function () {
     afterEach(async () => {
         await admin.firestore().recursiveDelete(db.course(courseId));
         await admin.firestore().recursiveDelete(db.user(userId));
+        await admin.firestore().recursiveDelete(db.updateQueue);
         firestoreStub.restore();
         adminInitStub.restore();
     });
@@ -216,6 +218,21 @@ describe('Update User Progress', function () {
             let exerciseProgress = (await db.userProgress(courseId, userId).collection('exerciseScore').doc('level1').get()).data();
             assert.equal(progress?.score, 5, 'User score should be down as well');
             assert.equal(exerciseProgress?.['progress']?.[exercise1Id], 5, 'Exercise score should be changed');
+        });
+
+        it('Rollback progress after a certain time', async () => {
+            await admin.firestore().runTransaction(async (transaction) => {
+                metrics.updateUserProgress(transaction, 'score', userId, courseId, exercise1Id, 'level1', 0, 10, 10, false, dateDayDiff(new Date(), 7));
+            });
+
+            let progress = (await db.userProgress(courseId, userId).get()).data();
+            let exerciseProgress = (await db.userProgress(courseId, userId).collection('exerciseScore').doc('level1').get()).data();
+            assert.equal(progress?.score, 10, 'Should record user progress score');
+            assert.equal(exerciseProgress?.['progress']?.[exercise1Id], 10, 'Should record exercise score');
+
+            const rollbackData = (await db.updateQueue.get()).docs.map(d => d.data());
+            const updateScores = rollbackData.map(d => d.value?.score ?? d.value.progress[exercise1Id]);
+            assert.deepEqual(updateScores, [-10, -10], 'Should update both exercise and user scores in the future');
         });
     });
 });

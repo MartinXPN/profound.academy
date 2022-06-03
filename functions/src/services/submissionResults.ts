@@ -9,6 +9,7 @@ import {Exercise} from '../models/exercise';
 import {User} from '../models/users';
 import {updateUserProgress, recordInsights} from './metrics';
 import {addCourses} from './users';
+import {dateDayDiff} from "./util";
 
 
 const updateBest = async (submission: SubmissionResult): Promise<boolean> => {
@@ -176,33 +177,30 @@ export const processResult = async (
 
     // another transaction to update user metrics
     await firestore().runTransaction(async (transaction) => {
-        const prevSolved = (await transaction.get(db.userProgress(course.id, userId)
-            .collection('exerciseSolved').doc(level))).data();
-        functions.logger.info(`prevSolved: ${JSON.stringify(prevSolved)}`);
-
-        if (course.freezeAt > submissionResult.createdAt ) {
-            const prevScore = (await transaction.get(db.userProgress(course.id, userId)
-                .collection('exerciseScore').doc(level))).data();
-            functions.logger.info(`prevScore: ${JSON.stringify(prevScore)}`);
-            updateUserProgress(transaction, 'score', submissionResult.userId, course.id, exercise.id, level,
-                prevScore?.progress?.[exercise.id] ?? 0, submissionResult.score, submissionResult.score);
-            // TODO: update weekly score metrics
-            const weekly = moment(submissionDate).format('YYYY_MM_WW');
-            functions.logger.info(`weekly score path: ${weekly}`);
-            updateUserProgress(transaction, `score_${weekly}`,
-                submissionResult.userId, course.id, exercise.id, level,
-                prevScore?.progress?.[exercise.id] ?? 0, submissionResult.score, submissionResult.score);
-        } else {
-            const prevScore = (await transaction.get(db.userProgress(course.id, userId)
-                .collection('exerciseUpsolveScore').doc(level))).data();
-            functions.logger.info(`prevScore: ${JSON.stringify(prevScore)}`);
-            updateUserProgress(transaction, 'upsolveScore', submissionResult.userId, course.id, exercise.id, level,
-                prevScore?.progress?.[exercise.id] ?? 0, submissionResult.score, submissionResult.score);
+        const getProgress = async (metric: string) => {
+            return (await transaction.get(db.userProgress(course.id, userId).collection(metric).doc(level))).data();
         }
+        const setProgress = (metric: string, prev: number, cur: number, res: number | string, rollbackDate?: Date) =>
+            updateUserProgress(
+                transaction, metric, submissionResult.userId, course.id, exercise.id, level,
+                prev, cur, res, false, rollbackDate
+            );
 
-        updateUserProgress(transaction, 'solved', submissionResult.userId, course.id, exercise.id, level,
-            prevSolved?.progress?.[exercise.id] === 'Solved' ? 1 : 0,
-            submissionResult.status === 'Solved' ? 1 : 0, submissionResult.status);
+        const rankingActive = course.freezeAt > submissionResult.createdAt;
+        const submissionDate = submissionResult.createdAt.toDate();
+        const prevSolved = await getProgress('exerciseSolved');
+        const prevScore = await getProgress(rankingActive ? 'exerciseScore': 'exerciseUpsolveScore');
+        functions.logger.info(`prevSolved: ${JSON.stringify(prevSolved)}`);
+        functions.logger.info(`prevScore: ${JSON.stringify(prevScore)}`);
+
+        /* eslint-disable max-len, @typescript-eslint/explicit-module-boundary-types */
+        setProgress(rankingActive ? 'score' : 'upsolveScore', prevScore?.progress?.[exercise.id] ?? 0, submissionResult.score, submissionResult.score);
+        setProgress('dailyScore', prevScore?.progress?.[exercise.id] ?? 0, submissionResult.score, submissionResult.score, dateDayDiff(submissionDate, 1));
+        setProgress('weeklyScore', prevScore?.progress?.[exercise.id] ?? 0, submissionResult.score, submissionResult.score, dateDayDiff(submissionDate, 7));
+        setProgress('monthlyScore', prevScore?.progress?.[exercise.id] ?? 0, submissionResult.score, submissionResult.score, dateDayDiff(submissionDate, 30));
+        setProgress('solved', prevSolved?.progress?.[exercise.id] === 'Solved' ? 1 : 0, submissionResult.status === 'Solved' ? 1 : 0, submissionResult.status);
+        /* eslint-enable max-len, @typescript-eslint/explicit-module-boundary-types */
+
         transaction.set(db.userProgress(course.id, submissionResult.userId), {
             userDisplayName: submissionResult.userDisplayName,
             userImageUrl: submissionResult.userImageUrl,

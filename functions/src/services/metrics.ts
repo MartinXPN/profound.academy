@@ -19,12 +19,11 @@ export const updateUserProgress = (
     prev: number,
     cur: number,
     res: number | string,
-    force?: boolean
+    force?: boolean,
+    rollbackDate?: Date,
 ) => {
-    if (cur < prev && !force) {
-        functions.logger.info(`Not updating: ${metric} prev: ${prev}, cur: ${cur}`);
-        return;
-    }
+    if (cur < prev && !force)
+        return functions.logger.info(`Not updating: ${metric} prev: ${prev}, cur: ${cur}`);
 
     const uppercaseMetric = metric.charAt(0).toUpperCase() + metric.slice(1);
     functions.logger.info(`Updating metric: ${metric} with prev ${prev} to cur ${cur}`);
@@ -39,6 +38,26 @@ export const updateUserProgress = (
         'courseId': courseId,
         'level': level,
         'progress': {[exerciseId]: res},
+    }, {merge: true});
+
+    if (!rollbackDate)
+        return functions.logger.info('No rollback');
+
+    transaction.set(db.updateQueue.doc(), { // @ts-ignore
+        doc: db.userProgress(courseId, userId),
+        updateAt: firestore.Timestamp.fromDate(rollbackDate),
+        value: {
+            [metric]: firestore.FieldValue.increment(prev - cur),
+            [`level${uppercaseMetric}`]: {[level]: firestore.FieldValue.increment(prev - cur)},
+        }
+    }, {merge: true});
+
+    transaction.set(db.updateQueue.doc(), { // @ts-ignore
+        doc: db.userProgress(courseId, userId).collection(`exercise${uppercaseMetric}`).doc(level),
+        updateAt: firestore.Timestamp.fromDate(rollbackDate),
+        value: {
+            'progress': {[exerciseId]: firestore.FieldValue.increment(prev - cur)},
+        }
     }, {merge: true});
 };
 

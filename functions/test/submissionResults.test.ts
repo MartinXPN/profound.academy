@@ -68,9 +68,10 @@ describe('Process submission result', function () {
 
     afterEach(async () => {
         await admin.firestore().recursiveDelete(db.user(userId));
-        await admin.firestore().recursiveDelete(admin.firestore().collection('courses'));
+        await admin.firestore().recursiveDelete(db.courses);
         await admin.firestore().recursiveDelete(admin.firestore().collection('submissionQueue'));
-        await admin.firestore().recursiveDelete(admin.firestore().collection('submissions'));
+        await admin.firestore().recursiveDelete(db.submissionResults);
+        await admin.firestore().recursiveDelete(db.updateQueue);
         await admin.auth().deleteUser(userId);
         firestoreStub.restore();
         adminInitStub.restore();

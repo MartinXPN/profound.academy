@@ -125,3 +125,11 @@ export const scheduledUserInfoUpdate = functions.pubsub
         const {updateInfoQueue} = await import('./services/users');
         return updateInfoQueue();
     });
+
+
+export const scheduledProgressUpdate = functions.pubsub
+    .schedule('every hour')
+    .onRun(async () => {
+        const {updateProgress} = await import('./services/updates');
+        return updateProgress();
+    });

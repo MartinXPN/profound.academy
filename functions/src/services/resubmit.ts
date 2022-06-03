@@ -1,4 +1,3 @@
-import * as moment from 'moment';
 import * as functions from 'firebase-functions';
 import {firestore} from 'firebase-admin';
 
@@ -60,8 +59,6 @@ export const resubmitSolutions = async (courseId: string, exerciseId: string): P
             if (!data)
                 return;
             const [user, prevSolved, prevScore, upsolveScore, prevAttempts] = data;
-            const weekly = moment().format('YYYY_MM_WW');
-            functions.logger.info(`weekly score path: ${weekly}`);
             console.log('user:', user);  // , 'prevSolved:', prevSolved, 'upsolve:', upsolveScore
 
             const reset = (metric: string, prevValue: number) => updateUserProgress(
@@ -71,8 +68,13 @@ export const resubmitSolutions = async (courseId: string, exerciseId: string): P
             );
             reset('solved', prevSolved?.progress?.[exerciseId] === 'Solved' ? 1 : 0);
             reset('score', prevScore?.progress?.[exerciseId] ?? 0);
-            reset(`score_${weekly}`, prevScore?.progress?.[exerciseId] ?? 0);
+            reset('dailyScore', prevScore?.progress?.[exerciseId] ?? 0);
+            reset('weeklyScore', prevScore?.progress?.[exerciseId] ?? 0);
+            reset('monthlyScore', prevScore?.progress?.[exerciseId] ?? 0);
             reset('upsolveScore', upsolveScore?.progress?.[exerciseId] ?? 0);
+            reset('upsolveDailyScore', upsolveScore?.progress?.[exerciseId] ?? 0);
+            reset('upsolveWeeklyScore', upsolveScore?.progress?.[exerciseId] ?? 0);
+            reset('upsolveMonthlyScore', upsolveScore?.progress?.[exerciseId] ?? 0);
             reset('attempts', prevAttempts?.progress?.[exerciseId] ?? 0);
         }));
 

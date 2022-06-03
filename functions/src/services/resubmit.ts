@@ -48,7 +48,13 @@ export const resubmitSolutions = async (courseId: string, exerciseId: string): P
                 user,
                 (await transaction.get(db.userProgress(courseId, user).collection('exerciseSolved').doc(level))).data(),
                 (await transaction.get(db.userProgress(courseId, user).collection('exerciseScore').doc(level))).data(),
+                (await transaction.get(db.userProgress(courseId, user).collection('exerciseDailyScore').doc(level))).data(),
+                (await transaction.get(db.userProgress(courseId, user).collection('exerciseWeeklyScore').doc(level))).data(),
+                (await transaction.get(db.userProgress(courseId, user).collection('exerciseMonthlyScore').doc(level))).data(),
                 (await transaction.get(db.userProgress(courseId, user).collection('exerciseUpsolveScore').doc(level))).data(),
+                (await transaction.get(db.userProgress(courseId, user).collection('exerciseDailyUpsolveScore').doc(level))).data(),
+                (await transaction.get(db.userProgress(courseId, user).collection('exerciseWeeklyUpsolveScore').doc(level))).data(),
+                (await transaction.get(db.userProgress(courseId, user).collection('exerciseMonthlyUpsolveScore').doc(level))).data(),
                 (await transaction.get(db.userProgress(courseId, user).collection('exerciseAttempts').doc(level))).data(),
             ]);
             /* eslint-enable max-len */
@@ -58,7 +64,10 @@ export const resubmitSolutions = async (courseId: string, exerciseId: string): P
         await Promise.all(prevData.map(async (data) => {
             if (!data)
                 return;
-            const [user, prevSolved, prevScore, upsolveScore, prevAttempts] = data;
+            const [user, prevSolved,
+                prevScore, prevDaily, prevWeekly, prevMonthly,
+                upsolveScore, upsolveDaily, upsolveWeekly, upsolveMonthly,
+                prevAttempts] = data;
             console.log('user:', user);  // , 'prevSolved:', prevSolved, 'upsolve:', upsolveScore
 
             const reset = (metric: string, prevValue: number) => updateUserProgress(
@@ -68,13 +77,13 @@ export const resubmitSolutions = async (courseId: string, exerciseId: string): P
             );
             reset('solved', prevSolved?.progress?.[exerciseId] === 'Solved' ? 1 : 0);
             reset('score', prevScore?.progress?.[exerciseId] ?? 0);
-            reset('dailyScore', prevScore?.progress?.[exerciseId] ?? 0);
-            reset('weeklyScore', prevScore?.progress?.[exerciseId] ?? 0);
-            reset('monthlyScore', prevScore?.progress?.[exerciseId] ?? 0);
+            reset('dailyScore', prevDaily?.progress?.[exerciseId] ?? 0);
+            reset('weeklyScore', prevWeekly?.progress?.[exerciseId] ?? 0);
+            reset('monthlyScore', prevMonthly?.progress?.[exerciseId] ?? 0);
             reset('upsolveScore', upsolveScore?.progress?.[exerciseId] ?? 0);
-            reset('upsolveDailyScore', upsolveScore?.progress?.[exerciseId] ?? 0);
-            reset('upsolveWeeklyScore', upsolveScore?.progress?.[exerciseId] ?? 0);
-            reset('upsolveMonthlyScore', upsolveScore?.progress?.[exerciseId] ?? 0);
+            reset('upsolveDailyScore', upsolveDaily?.progress?.[exerciseId] ?? 0);
+            reset('upsolveWeeklyScore', upsolveWeekly?.progress?.[exerciseId] ?? 0);
+            reset('upsolveMonthlyScore', upsolveMonthly?.progress?.[exerciseId] ?? 0);
             reset('attempts', prevAttempts?.progress?.[exerciseId] ?? 0);
         }));
 

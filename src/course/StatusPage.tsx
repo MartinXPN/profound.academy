@@ -7,7 +7,6 @@ import {CourseContext} from "./Course";
 import {useStickyState} from "../common/stickystate";
 import {CourseSubmissionsTable} from "./submission/SubmissionsTable";
 import RankingTable from "./ranking/RankingTable";
-import moment from "moment";
 import Dashboard from "./Dashboard";
 
 
@@ -36,7 +35,7 @@ function StatusPage() {
             {currentTab === 'dashboard' && <Dashboard />}
             {currentTab === 'submissions' && <CourseSubmissionsTable rowsPerPage={20} course={course} />}
             {currentTab === 'ranking' && <RankingTable metric="score"/>}
-            {currentTab === 'lastWeeksProgress' && <RankingTable metric={`score_${moment().format('YYYY_MM_WW')}`} showProgress/>}
+            {currentTab === 'lastWeeksProgress' && <RankingTable metric="weeklyScore" showProgress/>}
             {currentTab === 'upsolving' && <RankingTable metric="upsolveScore"/>}
         </Box>
     </>

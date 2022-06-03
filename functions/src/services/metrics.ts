@@ -19,12 +19,11 @@ export const updateUserProgress = (
     prev: number,
     cur: number,
     res: number | string,
-    force?: boolean
+    force?: boolean,
+    rollbackDate?: Date,
 ) => {
-    if (cur < prev && !force) {
-        functions.logger.info(`Not updating: ${metric} prev: ${prev}, cur: ${cur}`);
-        return;
-    }
+    if (cur < prev && !force)
+        return functions.logger.info(`Not updating: ${metric} prev: ${prev}, cur: ${cur}`);
 
     const uppercaseMetric = metric.charAt(0).toUpperCase() + metric.slice(1);
     functions.logger.info(`Updating metric: ${metric} with prev ${prev} to cur ${cur}`);
@@ -40,6 +39,22 @@ export const updateUserProgress = (
         'level': level,
         'progress': {[exerciseId]: res},
     }, {merge: true});
+
+    if (!rollbackDate)
+        return functions.logger.info('No rollback');
+
+    const rollback = (key: string, doc: firestore.DocumentReference) => {
+        transaction.set(db.updateQueue.doc(), { // @ts-ignore
+            doc: doc,
+            updateAt: firestore.Timestamp.fromDate(rollbackDate),
+            key: key,
+            diff: prev - cur,
+        }, {merge: true});
+    };
+    rollback(metric, db.userProgress(courseId, userId));
+    rollback(`level${uppercaseMetric}.${level}`, db.userProgress(courseId, userId));
+    rollback(`progress.${exerciseId}`, db.userProgress(courseId, userId)
+        .collection(`exercise${uppercaseMetric}`).doc(level));
 };
 
 

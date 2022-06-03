@@ -9,6 +9,7 @@ import {Exercise, ExercisePrivateFields} from '../models/exercise';
 import {Progress, ExerciseProgress} from '../models/progress';
 import {Submission, SubmissionResult, SubmissionSensitiveRecords, TestResults} from '../models/submissions';
 import {Comment, Vote} from '../models/forum';
+import {ScheduledUpdate} from '../models/updates';
 
 admin.initializeApp({credential: admin.credential.applicationDefault()});
 firestore().settings({ignoreUndefinedProperties: true});
@@ -72,6 +73,7 @@ const db = {
     codeDraft: (courseId: string, exerciseId: string, userId: string) => dataPoint<CodeDraft>(`codeDrafts/${courseId}/${exerciseId}`).doc(userId),
 
     mails: dataPoint('mail'),
+    updateQueue: dataPoint<ScheduledUpdate>('updateQueue'),
 };
 /* eslint-enable max-len, @typescript-eslint/explicit-module-boundary-types */
 export {db};

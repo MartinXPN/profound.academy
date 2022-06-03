@@ -43,22 +43,18 @@ export const updateUserProgress = (
     if (!rollbackDate)
         return functions.logger.info('No rollback');
 
-    transaction.set(db.updateQueue.doc(), { // @ts-ignore
-        doc: db.userProgress(courseId, userId),
-        updateAt: firestore.Timestamp.fromDate(rollbackDate),
-        value: {
-            [metric]: firestore.FieldValue.increment(prev - cur),
-            [`level${uppercaseMetric}`]: {[level]: firestore.FieldValue.increment(prev - cur)},
-        }
-    }, {merge: true});
-
-    transaction.set(db.updateQueue.doc(), { // @ts-ignore
-        doc: db.userProgress(courseId, userId).collection(`exercise${uppercaseMetric}`).doc(level),
-        updateAt: firestore.Timestamp.fromDate(rollbackDate),
-        value: {
-            'progress': {[exerciseId]: firestore.FieldValue.increment(prev - cur)},
-        }
-    }, {merge: true});
+    const rollback = (key: string, doc: firestore.DocumentReference) => {
+        transaction.set(db.updateQueue.doc(), { // @ts-ignore
+            doc: doc,
+            updateAt: firestore.Timestamp.fromDate(rollbackDate),
+            key: key,
+            diff: prev - cur,
+        }, {merge: true});
+    };
+    rollback(metric, db.userProgress(courseId, userId));
+    rollback(`level${uppercaseMetric}.${level}`, db.userProgress(courseId, userId));
+    rollback(`progress.${exerciseId}`, db.userProgress(courseId, userId)
+        .collection(`exercise${uppercaseMetric}`).doc(level));
 };
 
 

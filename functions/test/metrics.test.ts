@@ -231,8 +231,8 @@ describe('Update User Progress', function () {
             assert.equal(exerciseProgress?.['progress']?.[exercise1Id], 10, 'Should record exercise score');
 
             const rollbackData = (await db.updateQueue.get()).docs.map(d => d.data());
-            const updateScores = rollbackData.map(d => d.value?.score ?? d.value.progress[exercise1Id]);
-            assert.deepEqual(updateScores, [-10, -10], 'Should update both exercise and user scores in the future');
+            const updateScores = rollbackData.map(d => d.diff);
+            assert.deepEqual(updateScores, [-10, -10, -10], 'Should update exercise, level, and course scores in the future');
         });
     });
 });

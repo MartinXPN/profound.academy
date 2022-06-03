@@ -9,7 +9,7 @@ import {Exercise, ExercisePrivateFields} from '../models/exercise';
 import {Progress, ExerciseProgress} from '../models/progress';
 import {Submission, SubmissionResult, SubmissionSensitiveRecords, TestResults} from '../models/submissions';
 import {Comment, Vote} from '../models/forum';
-import {ScheduledUpdate} from "../models/updates";
+import {ScheduledUpdate} from '../models/updates';
 
 admin.initializeApp({credential: admin.credential.applicationDefault()});
 firestore().settings({ignoreUndefinedProperties: true});

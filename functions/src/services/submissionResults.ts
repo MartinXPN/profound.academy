@@ -9,7 +9,7 @@ import {Exercise} from '../models/exercise';
 import {User} from '../models/users';
 import {updateUserProgress, recordInsights} from './metrics';
 import {addCourses} from './users';
-import {dateDayDiff} from "./util";
+import {dateDayDiff} from './util';
 
 
 const updateBest = async (submission: SubmissionResult): Promise<boolean> => {
@@ -179,7 +179,7 @@ export const processResult = async (
     await firestore().runTransaction(async (transaction) => {
         const getProgress = async (metric: string) => {
             return (await transaction.get(db.userProgress(course.id, userId).collection(metric).doc(level))).data();
-        }
+        };
         const setProgress = (metric: string, prev: number, cur: number, res: number | string, rollbackDate?: Date) =>
             updateUserProgress(
                 transaction, metric, submissionResult.userId, course.id, exercise.id, level,
@@ -189,7 +189,7 @@ export const processResult = async (
         const rankingActive = course.freezeAt > submissionResult.createdAt;
         const submissionDate = submissionResult.createdAt.toDate();
         const prevSolved = await getProgress('exerciseSolved');
-        const prevScore = await getProgress(rankingActive ? 'exerciseScore': 'exerciseUpsolveScore');
+        const prevScore = await getProgress(rankingActive ? 'exerciseScore' : 'exerciseUpsolveScore');
         functions.logger.info(`prevSolved: ${JSON.stringify(prevSolved)}`);
         functions.logger.info(`prevScore: ${JSON.stringify(prevScore)}`);
 

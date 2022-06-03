@@ -12,15 +12,15 @@ const updateUserInfo = async (userInfo: UserInfoUpdate): Promise<void> => {
     // update progress
     const progress = await db.allUserProgress(userInfo.id).get();
     functions.logger.info(`Updating ${progress.docs.length} progress records...`);
-    await Promise.all(progress.docs.map((d) => d.ref.update({
-        displayName: userInfo.displayName,
+    await Promise.all(progress.docs.map(async (d) => d.ref.set({
+        userDisplayName: userInfo.displayName,
         userImageUrl: userInfo.imageUrl,
-    })));
+    }, {merge: true})));
 
     // update forum comments
     const userComments = await db.forum.where('userId', '==', userInfo.id).get();
     functions.logger.info(`Updating ${userComments.docs.length} comments...`);
-    await Promise.all(userComments.docs.map((d) => d.ref.set({
+    await Promise.all(userComments.docs.map(async (d) => d.ref.set({
         displayName: userInfo.displayName,
         avatarUrl: userInfo.imageUrl,
     }, {merge: true})));
@@ -28,7 +28,7 @@ const updateUserInfo = async (userInfo: UserInfoUpdate): Promise<void> => {
     // update submissions
     const submissions = await db.submissionResults.where('userId', '==', userInfo.id).get();
     functions.logger.info(`Updating ${submissions.docs.length} submissions...`);
-    await Promise.all(submissions.docs.map((d) => d.ref.set({
+    await Promise.all(submissions.docs.map(async (d) => d.ref.set({
         userDisplayName: userInfo.displayName,
         userImageUrl: userInfo.imageUrl,
     }, {merge: true})));

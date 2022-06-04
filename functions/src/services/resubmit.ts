@@ -1,11 +1,11 @@
-import * as moment from 'moment';
 import * as functions from 'firebase-functions';
 import {firestore} from 'firebase-admin';
 
 import {db} from './db';
-import {updateUserProgress} from './metrics';
+import {recordInsights, updateUserProgress} from './metrics';
 
 
+// Resubmit basically reverts all the operations made by processResult
 export const resubmitSolutions = async (courseId: string, exerciseId: string): Promise<void> => {
     functions.logger.info(`Re-evaluating submissions for ${courseId} ${exerciseId}`);
     const courseRef = db.course(courseId);
@@ -16,6 +16,7 @@ export const resubmitSolutions = async (courseId: string, exerciseId: string): P
 
     const level = Math.trunc(exercise.order).toString();
 
+    // Reset metrics
     return firestore().runTransaction(async (transaction) => {
         const query = await transaction.get(db.submissionResults.where('exercise', '==', exerciseRef));
         const submissions = query.docs.map((s) => s.data());
@@ -49,7 +50,13 @@ export const resubmitSolutions = async (courseId: string, exerciseId: string): P
                 user,
                 (await transaction.get(db.userProgress(courseId, user).collection('exerciseSolved').doc(level))).data(),
                 (await transaction.get(db.userProgress(courseId, user).collection('exerciseScore').doc(level))).data(),
+                (await transaction.get(db.userProgress(courseId, user).collection('exerciseDailyScore').doc(level))).data(),
+                (await transaction.get(db.userProgress(courseId, user).collection('exerciseWeeklyScore').doc(level))).data(),
+                (await transaction.get(db.userProgress(courseId, user).collection('exerciseMonthlyScore').doc(level))).data(),
                 (await transaction.get(db.userProgress(courseId, user).collection('exerciseUpsolveScore').doc(level))).data(),
+                (await transaction.get(db.userProgress(courseId, user).collection('exerciseDailyUpsolveScore').doc(level))).data(),
+                (await transaction.get(db.userProgress(courseId, user).collection('exerciseWeeklyUpsolveScore').doc(level))).data(),
+                (await transaction.get(db.userProgress(courseId, user).collection('exerciseMonthlyUpsolveScore').doc(level))).data(),
                 (await transaction.get(db.userProgress(courseId, user).collection('exerciseAttempts').doc(level))).data(),
             ]);
             /* eslint-enable max-len */
@@ -59,9 +66,10 @@ export const resubmitSolutions = async (courseId: string, exerciseId: string): P
         await Promise.all(prevData.map(async (data) => {
             if (!data)
                 return;
-            const [user, prevSolved, prevScore, upsolveScore, prevAttempts] = data;
-            const weekly = moment().format('YYYY_MM_WW');
-            functions.logger.info(`weekly score path: ${weekly}`);
+            const [user, prevSolved,
+                prevScore, prevDaily, prevWeekly, prevMonthly,
+                upsolveScore, upsolveDaily, upsolveWeekly, upsolveMonthly,
+                prevAttempts] = data;
             console.log('user:', user);  // , 'prevSolved:', prevSolved, 'upsolve:', upsolveScore
 
             const reset = (metric: string, prevValue: number) => updateUserProgress(
@@ -71,10 +79,24 @@ export const resubmitSolutions = async (courseId: string, exerciseId: string): P
             );
             reset('solved', prevSolved?.progress?.[exerciseId] === 'Solved' ? 1 : 0);
             reset('score', prevScore?.progress?.[exerciseId] ?? 0);
-            reset(`score_${weekly}`, prevScore?.progress?.[exerciseId] ?? 0);
+            reset('dailyScore', prevDaily?.progress?.[exerciseId] ?? 0);
+            reset('weeklyScore', prevWeekly?.progress?.[exerciseId] ?? 0);
+            reset('monthlyScore', prevMonthly?.progress?.[exerciseId] ?? 0);
             reset('upsolveScore', upsolveScore?.progress?.[exerciseId] ?? 0);
+            reset('upsolveDailyScore', upsolveDaily?.progress?.[exerciseId] ?? 0);
+            reset('upsolveWeeklyScore', upsolveWeekly?.progress?.[exerciseId] ?? 0);
+            reset('upsolveMonthlyScore', upsolveMonthly?.progress?.[exerciseId] ?? 0);
             reset('attempts', prevAttempts?.progress?.[exerciseId] ?? 0);
         }));
+
+        // Reset course/exercise insights
+        const now = new Date();
+        recordInsights(transaction, 'submissions', courseId, exerciseId, now, -submissions.length);
+        recordInsights(transaction, 'totalScore', courseId, exerciseId, now, -submissions
+            .map((s) => s.score)
+            .reduce((prev, cur) => prev + cur, 0));
+        recordInsights(transaction, 'solved', courseId, exerciseId, now,
+            -submissions.filter((s) => s.status === 'Solved').length);
 
         // submit again
         await Promise.all(newSubmissions.map(async (submission) => {

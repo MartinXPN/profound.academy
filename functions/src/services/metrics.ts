@@ -41,8 +41,9 @@ export const updateUserProgress = (
     }, {merge: true});
 
     if (!rollbackDate)
-        return functions.logger.info('No rollback');
+        return;
 
+    functions.logger.info(`Rollback provided... ${JSON.stringify(rollbackDate)}`);
     const rollback = (key: string, doc: firestore.DocumentReference) => {
         transaction.set(db.updateQueue.doc(), { // @ts-ignore
             doc: doc,
@@ -64,6 +65,7 @@ export const recordInsights = (
     value = 1,
 ) => {
     const insightDay = format(date);
+    functions.logger.info(`Record insight ${metric} at ${insightDay} with value ${value}`);
     const record = (location: firestore.DocumentReference) => {
         transaction.set(location, {
             date: insightDay,

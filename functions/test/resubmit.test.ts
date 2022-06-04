@@ -73,6 +73,9 @@ describe('Re-Evaluate Submissions', function () {
     afterEach(async () => {
         await firestore().recursiveDelete(db.exercise(courseId, exerciseId));
         await firestore().recursiveDelete(db.course(courseId));
+        await firestore().recursiveDelete(db.updateQueue);
+        await firestore().recursiveDelete(db.submissionResults);
+        await firestore().recursiveDelete(db.submissionQueue(userId));
         await admin.firestore().recursiveDelete(db.user(userId));
         await admin.auth().deleteUser(userId);
         firestoreStub.restore();
@@ -111,6 +114,42 @@ describe('Re-Evaluate Submissions', function () {
             assert.equal(userProgress?.['levelDailyScore']?.['1'], 0, `Level daily score should be reset to 0: ${JSON.stringify(userProgress)}`);
             assert.equal(userProgress?.['levelWeeklyScore']?.['1'], 0, `Level weekly score should be reset to 0: ${JSON.stringify(userProgress)}`);
             assert.equal(userProgress?.['levelMonthlyScore']?.['1'], 0, `Level monthly score should be reset to 0: ${JSON.stringify(userProgress)}`);
+        });
+    });
+
+    describe('Re-evaluate for an exercise', () => {
+        it('Should reset exercise insights', async () => {
+            const submission = {
+                id: '',
+                userId: userId,
+                course: db.course(courseId), exercise: db.exercise(courseId, exerciseId),
+                createdAt: admin.firestore.FieldValue.serverTimestamp(),
+                code: {'main.py': 'print("hello hello")'},
+                language: 'python',
+                isTestRun: false,
+            };
+            const submissionDoc = await db.submissionQueue(userId).add(submission as unknown as Submission);
+            const judgeResult = {
+                overall: {status: 'Solved', score: 100, memory: 52, time: 0.1, returnCode: 0},
+                compileResult: {status: 'Solved', score: 0, memory: 100, time: 1, returnCode: 0},
+            } as JudgeResult;
+
+            await submissionResults.processResult(judgeResult, userId, submissionDoc.id);
+            await resubmit.resubmitSolutions(courseId, exerciseId);
+
+            const courseInsights = (await db.courseOverallInsights(courseId).get()).data();
+            console.log('courseInsights', courseInsights);
+            assert.equal(courseInsights?.submissions, 0);
+            assert.equal(courseInsights?.solved, 0);
+            assert.equal(courseInsights?.runs ?? 0, 0);
+            assert.equal(courseInsights?.totalScore, 0);
+
+            const exerciseInsights = (await db.exerciseInsights(courseId, exerciseId).get()).data();
+            console.log('exerciseInsights', exerciseInsights);
+            assert.equal(exerciseInsights?.submissions, 0);
+            assert.equal(exerciseInsights?.solved, 0);
+            assert.equal(exerciseInsights?.runs ?? 0, 0);
+            assert.equal(exerciseInsights?.totalScore, 0);
         });
     });
 });

@@ -114,7 +114,7 @@ function Editor({disableCodeSync, userId}: {disableCodeSync?: boolean, userId?: 
 
         const unsubscribeResult = onResultChanged(auth.currentUserId, submissionId, result => {
             setSubmissionResult(result);
-            if(result)
+            if(result && result.status !== 'Checking')
                 setSubmitted(false);
         });
         // Do not get results per test case when submitting (only when running the program)

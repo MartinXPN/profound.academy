@@ -5,7 +5,7 @@ import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import ArrowRightIcon from '@mui/icons-material/ArrowRight';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import ClickableTableCell from "../../common/ClickableTableCell";
-import {Collapse, Stack, Typography} from "@mui/material";
+import {Collapse, LinearProgress, Stack, Typography} from "@mui/material";
 import SmallAvatar from "../../common/SmallAvatar";
 import {LANGUAGES} from "models/language";
 import {statusToColor} from "../colors";
@@ -61,13 +61,21 @@ function SubmissionView({submission, orderNumber, displayColumns, onUserClicked,
 
                 if( column.id === 'language' && typeof value === 'string' )
                     return <TableCell key={column.id} align={column.align}>{LANGUAGES[value].displayName}</TableCell>
-                // @ts-ignore
-                const style = column.id === 'status' ? {color: statusToColor(value)} : {};
-                return (
-                    <TableCell key={column.id} align={column.align} style={style}>
+
+                if( column.id === 'status' ) {
+                    if( value === 'Checking')
+                        return <TableCell key={column.id} align={column.align}>
+                            <LinearProgress />
+                        </TableCell>
+
+                    return <TableCell key={column.id} align={column.align} style={{color: statusToColor(value as string)}}>
                         {column.format ? column.format(value) : value}
                     </TableCell>
-                );
+                }
+
+                return <TableCell key={column.id} align={column.align}>
+                    {column.format ? column.format(value) : value}
+                </TableCell>
             })}
         </TableRow>
 

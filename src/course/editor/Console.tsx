@@ -50,7 +50,7 @@ function Console({onSubmitClicked, onRunClicked, isProcessing, submissionResult,
         setSelectedTest(null);
 
     useEffect(() => {
-        if (selectedTest === null && submissionResult)
+        if (selectedTest === null && submissionResult && submissionResult.status !== 'Checking')
             setSelectedTest(0);
         // the dependency array does not include selectedTest on purpose
         // eslint-disable-next-line react-hooks/exhaustive-deps

@@ -2,13 +2,12 @@ import * as functions from 'firebase-functions';
 import * as https from 'https';
 import * as http from 'node:http';
 import * as needle from 'needle';
-import * as admin from 'firebase-admin';
 import {firestore} from 'firebase-admin';
 
 import {db} from './db';
 import {Course} from '../models/courses';
 import {Exercise} from '../models/exercise';
-import {Submission} from '../models/submissions';
+import {Submission, SubmissionResult} from '../models/submissions';
 import {processResult} from './submissionResults';
 import {recordNewUserInsight, updateUserProgress} from './metrics';
 
@@ -101,27 +100,31 @@ const attemptSubmit = async (submission: Submission, course: Course, exercise: E
         functions.logger.info(`#Attempts: ${numAttempts}, Allowed attempts: ${allowedAttempts}`);
 
         // new submission
+        const user = (await db.user(submission.userId).get()).data();
         await recordNewUserInsight(transaction, submission.userId, submission.course.id, submission.createdAt.toDate());
+        const submissionResult = {
+            ...submission,
+            userDisplayName: user?.displayName ?? '',
+            userImageUrl: user?.imageUrl ?? '',
+            status: 'Checking',
+            isBest: false, memory: 0, time: 0, score: 0,
+            courseTitle: course.title,
+            exerciseTitle: exercise.title,
+        } as SubmissionResult;
 
         // Do not allow a new attempts if the number exceeds the allowed threshold
         if (allowedAttempts <= numAttempts) {
             functions.logger.info('Do not allow this submission');
-            const user = await admin.auth().getUser(submission.userId);
-            transaction.set(db.submissionResult(submission.id), {
-                ...submission,
-                userDisplayName: user.displayName ?? '',
-                userImageUrl: user.photoURL ?? '',
-                status: 'Unavailable',
-                isBest: false, memory: 0, time: 0, score: 0,
+            transaction.set(db.submissionResult(submission.id), {...submissionResult, status: 'Unavailable',
                 message: `Exceeded the number of allowed attempts (${allowedAttempts})`,
-                courseTitle: course.title,
-                exerciseTitle: exercise.title,
             });
             return false;
         }
         updateUserProgress(transaction, 'attempts', submission.userId, course.id, exercise.id, levelName,
             numAttempts, numAttempts + 1, numAttempts + 1);
         functions.logger.info(`Updated attempts to ${numAttempts + 1}`);
+
+        transaction.set(db.submissionResult(submission.id), submissionResult);
         return true;
     });
 };

@@ -95,6 +95,10 @@ describe('Submit a solution', function () {
             const processResultCall = submissionResultStub.getCall(0).args[0] as JudgeResult;
             assert.equal(processResultCall.overall.status, 'Solved');
             assert.equal(processResultCall.overall.score, 100);
+
+            const submissionResult = (await db.submissionResult(submissionDoc.id).get()).data();
+            assert.equal(submissionResult?.status, 'Checking', 'Make sure the result is in the processing stage');
+            assert.equal(submissionResult?.score, 0, 'Make sure the result is in the processing stage');
         });
     });
 

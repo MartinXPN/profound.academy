@@ -143,7 +143,7 @@ function Editor({disableCodeSync, userId}: {disableCodeSync?: boolean, userId?: 
                 </Box>
             </Box>
 
-            <Box width="100%" height="100%" sx={{backgroundColor: '#d9d9d9', overflowY: 'auto'}}>
+            <Box width="100%" height="100%" sx={{backgroundColor: '#e0e0e0', overflowY: 'auto'}}>
                 <Console
                     onSubmitClicked={handleSubmit}
                     onRunClicked={handleRun}

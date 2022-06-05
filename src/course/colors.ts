@@ -22,6 +22,7 @@ export const statusToColor = (status: SubmissionStatus | string | null | undefin
     if (status === 'Runtime error')         return statusColors.failed;
     if (status === 'Compilation error')     return statusColors.failed;
     if (status === 'Unavailable')           return statusColors.unavailable;
+    if (status === 'Checking')              return 'primary';
     // Checking and all other possible options
     return isBackground ? statusColors.neutral : statusColors.neutralText;
 };

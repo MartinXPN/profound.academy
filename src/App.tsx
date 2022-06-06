@@ -1,4 +1,4 @@
-import React, {Suspense, createContext, lazy, useEffect} from 'react';
+import {Suspense, createContext, lazy, useEffect} from 'react';
 import {BrowserRouter as Router, Route, Routes} from 'react-router-dom';
 
 import firebase from 'firebase/compat/app';
@@ -6,7 +6,7 @@ import 'firebase/compat/auth';
 import './firebase';
 
 import { ThemeProvider, StyledEngineProvider, createTheme } from '@mui/material/styles';
-import { HelmetProvider } from 'react-helmet-async';
+import {Helmet, HelmetProvider} from 'react-helmet-async';
 
 import {updateUserInfo} from "./services/users";
 import {useStickyState} from "./common/stickystate";
@@ -17,6 +17,7 @@ import UserProfile from './user/UserProfile';
 import Localization from "./common/Localization";
 import Privacy from "./home/Privacy";
 import TermsAndConditions from "./home/TermsAndConditions";
+import Logo from "./logo.svg";
 // Do not include the Course and the editor in the main bundle as they're pretty heavy
 const Course = lazy(() => import('./course/Course'));
 const CourseEditor = lazy(() => import('./course/CourseEditor'));
@@ -81,12 +82,21 @@ function App() {
             <Router>
             <Localization>
             <HelmetProvider>
+
+            <Helmet>
+                <title>Profound Academy</title>
+                <meta property="og:title" content="Profound Academy"/>
+                <meta property="og:image" content={Logo} />
+                <meta name="description" content="Get in-depth knowledge through hands-on interactive courses" />
+            </Helmet>
+
             <Suspense fallback={<div>Loading...</div>}>
                 <Routes>
                     <Route path="/" element={<Home/>} />
                     <Route path="/about" element={<About/>} />
                     <Route path="/privacy" element={<Privacy/>} />
                     <Route path="/terms" element={<TermsAndConditions/>} />
+                    <Route path="/404.html" element="/404.html" />
                     <Route path="/users/:userId" element={<UserProfile/>} />
                     <Route path="/new" element={<CourseEditor/>} />
                     <Route path=":courseId" element={<Course/>} />

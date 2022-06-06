@@ -1,4 +1,4 @@
-import React, {memo} from "react";
+import {memo} from "react";
 import Box from "@mui/material/Box";
 
 function Locale({locale, ...props}: {locale: string} & any) {

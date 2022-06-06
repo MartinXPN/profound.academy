@@ -1,4 +1,4 @@
-import React, {useCallback, useContext, useEffect, useState} from 'react';
+import {useCallback, useContext, useEffect, useState, MouseEvent} from 'react';
 import {IconButton, MenuItem, ListItemIcon, ListItemText, Badge, Avatar, Typography} from "@mui/material";
 import Menu from '@mui/material/Menu';
 import NotificationsIcon from '@mui/icons-material/Notifications';
@@ -16,7 +16,7 @@ export default function AppBarNotifications() {
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
     const open = Boolean(anchorEl);
 
-    const handleMenu = (event: React.MouseEvent<HTMLElement>) => setAnchorEl(event.currentTarget);
+    const handleMenu = (event: MouseEvent<HTMLElement>) => setAnchorEl(event.currentTarget);
     const handleClose = () => setAnchorEl(null);
     const [notifications, setNotifications] = useState<Notification[]>([]);
     const [unreadNotifications, setUnreadNotifications] = useState(0);

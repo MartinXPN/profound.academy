@@ -1,4 +1,4 @@
-import React, {memo, useContext, useState} from "react";
+import {memo, useContext, useState} from "react";
 import {SubmissionResult} from "models/submissions";
 import useAsyncEffect from "use-async-effect";
 import SubmissionView from "./SubmissionView";

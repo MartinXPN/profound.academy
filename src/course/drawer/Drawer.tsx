@@ -1,4 +1,4 @@
-import React, {useContext, useEffect, useState, memo} from "react";
+import {useContext, useEffect, useState, memo} from "react";
 import {useNavigate} from "react-router-dom";
 
 import { styled, useTheme, Theme, CSSObject } from '@mui/material/styles';

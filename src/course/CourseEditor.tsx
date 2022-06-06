@@ -1,4 +1,4 @@
-import React, {memo, useCallback, useContext, useEffect, useState} from "react";
+import {memo, useCallback, useContext, useEffect, useState} from "react";
 import {Course} from "models/courses";
 import {AuthContext} from "../App";
 import {Button, FormControlLabel, Stack, TextField, Typography, Switch, Grid, Alert, Snackbar, MenuItem, Collapse, ListItemIcon, ListItemText, ListItemButton} from "@mui/material";

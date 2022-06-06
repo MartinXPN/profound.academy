@@ -1,12 +1,11 @@
-import React, {memo, useContext, useState} from "react";
-import * as locales from "@mui/material/locale";
+import {memo, useContext, useState} from "react";
 import Locale from "../common/Locale";
 import {ListItemIcon, ListItemText, Menu, MenuItem} from "@mui/material";
 import ArrowRightIcon from "@mui/icons-material/ArrowRight";
 import {LocalizeContext} from "../common/Localization";
 
 
-const allLocales = Object.keys(locales);
+const allLocales = ['enUS', 'hyAM'];
 console.log('all locales:', allLocales);
 
 

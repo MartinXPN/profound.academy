@@ -1,4 +1,4 @@
-import React, {memo, useContext, useState} from "react";
+import {memo, useContext, useState} from "react";
 import {Button, CircularProgress, FormControl, FormControlLabel, FormLabel, Grid, Checkbox, FormGroup} from "@mui/material";
 import {AuthContext} from "../../App";
 import {CourseContext, CurrentExerciseContext} from "../Course";

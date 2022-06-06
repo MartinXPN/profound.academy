@@ -1,4 +1,4 @@
-import React, {memo, useCallback, useContext, useEffect, useState} from 'react';
+import {memo, useCallback, useContext, useEffect, useState, MouseEvent} from 'react';
 import {Avatar, IconButton, MenuItem, ListItemIcon, ListItemText, Typography} from "@mui/material";
 import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
@@ -60,7 +60,7 @@ export function AppBarProfile() {
     const [showLanguageOptions, setShowLanguageOptions] = useState(false);
     const open = Boolean(anchorEl);
 
-    const handleMenu = (event: React.MouseEvent<HTMLElement>) => setAnchorEl(event.currentTarget);
+    const handleMenu = (event: MouseEvent<HTMLElement>) => setAnchorEl(event.currentTarget);
     const handleClose = () => {
         setShowLanguageOptions(false);
         setAnchorEl(null);

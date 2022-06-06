@@ -1,4 +1,4 @@
-import React, {memo, useContext} from "react";
+import {memo, useContext} from "react";
 import Grid from "@mui/material/Grid";
 import Box from "@mui/material/Box";
 import OutlinedButton from "../common/OutlinedButton";

@@ -1,4 +1,4 @@
-import React, {memo} from "react";
+import {memo} from "react";
 import Content from "../common/notion/Content";
 import ProfileAppBar from "../user/ProfileAppBar";
 import Footer from "./Footer";

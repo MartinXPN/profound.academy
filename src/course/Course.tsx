@@ -1,4 +1,4 @@
-import React, {createContext, memo, lazy, useCallback, useContext, useEffect, useState, Suspense} from "react";
+import {createContext, memo, lazy, useCallback, useContext, useEffect, useState, Suspense} from "react";
 import {Route, Routes, useNavigate, useParams} from "react-router-dom";
 
 import {styled} from '@mui/material/styles';
@@ -41,6 +41,9 @@ export const CurrentExerciseContext = createContext<{ exercise: ExerciseModel | 
 
 export const lastExerciseId = (userId?: string, courseId?: string) => {
     const key = `ex-${userId}-${courseId}`;
+    if( !(key in localStorage) )
+        return null;
+
     const storageValue = localStorage.getItem(key);
     return safeParse(storageValue, '');
 };
@@ -150,6 +153,7 @@ function CourseView() {
             <meta property="og:image" content={course.img} />
             <meta property="og:image:alt" content={course.title} />
             <meta property="og:type" content="article" />
+            <meta name="description" content={`Hands on course for ${course.title}`} />
         </Helmet>
 
         <CourseContext.Provider value={{course: course}}>

@@ -1,4 +1,4 @@
-import React, {memo, useRef, useState} from 'react';
+import {memo, useRef, useState} from 'react';
 import useAsyncEffect from 'use-async-effect';
 
 import {ExtendedRecordMap} from 'notion-types';

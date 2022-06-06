@@ -1,4 +1,4 @@
-import React, {useContext, memo, useEffect, useState} from "react";
+import {useContext, memo, useEffect, useState} from "react";
 import Content from "../common/notion/Content";
 import Button from "@mui/material/Button";
 import Countdown from "react-countdown";

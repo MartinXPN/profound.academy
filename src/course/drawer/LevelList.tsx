@@ -1,4 +1,4 @@
-import React, {useContext, useEffect, useState, memo} from "react";
+import {useContext, useEffect, useState, memo} from "react";
 
 import List from '@mui/material/List';
 import ListItemIcon from '@mui/material/ListItemIcon';

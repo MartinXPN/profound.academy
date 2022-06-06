@@ -1,5 +1,5 @@
+import {memo} from "react";
 import {Button, IconButton, List, ListItem, Checkbox, Stack, TextField} from "@mui/material";
-import React, {memo} from "react";
 import {Controller, useFormContext} from "react-hook-form";
 import CloseIcon from "@mui/icons-material/Close";
 import AddIcon from "@mui/icons-material/Add";

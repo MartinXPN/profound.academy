@@ -1,4 +1,4 @@
-import React, {memo, ReactElement, useContext, useEffect, useState} from "react";
+import {memo, ReactElement, useContext, useEffect, useState} from "react";
 import {Grid, Typography, Box, CircularProgress, Paper} from "@mui/material";
 import {Send, Person, Done, ThumbUpAlt} from "@mui/icons-material";
 import {onCourseHistoricalInsightsChanged, onCourseInsightsChanged} from "../services/courses";

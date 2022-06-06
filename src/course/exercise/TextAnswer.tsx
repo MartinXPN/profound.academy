@@ -1,4 +1,4 @@
-import React, {memo, useContext, useState} from "react";
+import {memo, useContext, useState} from "react";
 import {Button, CircularProgress, Grid, TextField, Typography} from "@mui/material";
 import {CourseContext, CurrentExerciseContext} from "../Course";
 import {useStickyState} from "../../common/stickystate";

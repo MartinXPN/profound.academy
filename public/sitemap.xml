@@ -3,7 +3,7 @@
         xmlns:xhtml="http://www.w3.org/1999/xhtml">
     <url>
         <loc>https://profound.academy</loc>
-        <xhtml:link rel="alternate" hreflang="en" href="https://profound.academy?lang=enUS"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://profound.academy"/>
         <xhtml:link rel="alternate" hreflang="hy" href="https://profound.academy?lang=hyAM"/>
     </url>
     <url><loc>https://profound.academy/about</loc></url>
@@ -12,7 +12,7 @@
 
     <url>
         <loc>https://profound.academy/python-introduction</loc>
-        <xhtml:link rel="alternate" hreflang="en" href="https://profound.academy/python-introduction?lang=enUS"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://profound.academy/python-introduction"/>
     </url>
     <url>
         <loc>https://profound.academy/competitive-programming</loc>

@@ -1,5 +1,5 @@
+import {lazy, useCallback, useContext, useState, memo, Suspense, useEffect, ReactChild} from "react";
 import {useParams} from "react-router-dom";
-import React, {lazy, useCallback, useContext, useState, memo, Suspense, useEffect, ReactChild} from "react";
 import {AuthContext} from "../../App";
 import {useStickyState} from "../../common/stickystate";
 import CourseLandingPage from "../CourseLandingPage";

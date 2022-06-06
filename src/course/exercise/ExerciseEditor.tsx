@@ -1,4 +1,4 @@
-import React, {memo, useCallback, useContext, useEffect, useState} from "react";
+import {memo, useCallback, useContext, useEffect, useState} from "react";
 import {CourseContext, CurrentExerciseContext} from "../Course";
 import {Course} from 'models/courses';
 import {COMPARISON_MODES, Exercise, EXERCISE_TYPES} from 'models/exercise';

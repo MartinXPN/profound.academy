@@ -1,4 +1,4 @@
-import React, {memo, useContext, useState} from "react";
+import {memo, useContext, useState} from "react";
 import TableRow from "@mui/material/TableRow";
 import TableCell from "@mui/material/TableCell";
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';

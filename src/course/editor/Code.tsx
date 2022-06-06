@@ -1,4 +1,4 @@
-import React, {memo, useState, useEffect} from "react";
+import {memo, useState, useEffect} from "react";
 import {Ace, Range} from "ace-builds";
 import {themesByName} from 'ace-builds/src-noconflict/ext-themelist';
 import AceEditor from "react-ace";

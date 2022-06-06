@@ -1,4 +1,4 @@
-import React, {useContext, useState} from "react";
+import {useContext, useState} from "react";
 import useAsyncEffect from "use-async-effect";
 import {CircularProgress} from "@mui/material";
 import {SubmissionResult} from "models/submissions";

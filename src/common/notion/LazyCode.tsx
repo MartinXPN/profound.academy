@@ -1,4 +1,4 @@
-import React, {memo, useState, useRef, useCallback, FC, useEffect} from 'react'
+import {memo, useState, useRef, useCallback, FC, useEffect} from 'react'
 import {highlightElement} from 'prismjs'
 import {CodeBlock, Decoration} from 'notion-types'
 import {getBlockTitle} from 'notion-utils'

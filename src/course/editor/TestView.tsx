@@ -1,6 +1,6 @@
+import {memo, useEffect, useState} from "react";
 import {TestCase} from "models/exercise";
 import { TextField, Typography } from "@mui/material";
-import React, {memo, useEffect, useState} from "react";
 import {statusToColor} from "../colors";
 import {StatusTypography} from "../../common/StatusTypography";
 

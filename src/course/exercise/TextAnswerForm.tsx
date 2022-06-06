@@ -1,5 +1,5 @@
 import {Stack, TextField} from "@mui/material";
-import React, {memo} from "react";
+import {memo} from "react";
 import {Controller, useFormContext} from "react-hook-form";
 
 function TextAnswerForm() {

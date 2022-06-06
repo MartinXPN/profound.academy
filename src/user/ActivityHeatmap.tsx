@@ -1,4 +1,4 @@
-import React, {memo, useState} from 'react';
+import {memo, useState, cloneElement} from 'react';
 import CalendarHeatmap from 'react-calendar-heatmap';
 import 'react-calendar-heatmap/dist/styles.css';
 import {Collapse, Tooltip, Typography} from "@mui/material";
@@ -78,7 +78,7 @@ function ActivityHeatmap({userId}: {userId: string}) {
                                 ? `${value.count} solutions on ${formattedDate}` + ( value.count >= 10 ? '!' : '')
                                 : `No solutions on ${formattedDate}`
                             }>
-                            {React.cloneElement(element)}
+                            {cloneElement(element)}
                         </Tooltip>
                     );
                 }}

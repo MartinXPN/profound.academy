@@ -1,4 +1,4 @@
-import React, {memo, useState} from "react";
+import {memo, useState} from "react";
 import {Autocomplete, Button, Chip, Stack, TextField} from "@mui/material";
 import {Controller, useFormContext} from "react-hook-form";
 

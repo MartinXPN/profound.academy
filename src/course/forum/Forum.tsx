@@ -1,4 +1,4 @@
-import React, {useCallback, useContext, useEffect, useState} from "react";
+import {useCallback, useContext, useEffect, useState} from "react";
 import { Button, Divider, List, TextField, Typography } from "@mui/material";
 import {onExerciseCommentsChanged, saveComment} from "../../services/forum";
 import {Comment} from 'models/forum';

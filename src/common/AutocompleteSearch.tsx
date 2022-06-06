@@ -1,4 +1,3 @@
-import * as React from 'react';
 import {memo, useState, useEffect} from "react";
 import {TextField, Autocomplete, Chip, Avatar, Box, SxProps} from "@mui/material";
 import {Theme} from "@mui/material/styles/createTheme";

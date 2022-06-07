@@ -11,8 +11,10 @@ const StyledButton = styled(Button)(({theme}) => ({
 }));
 
 interface OutlinedButtonProps extends ButtonProps {
-    selected: boolean,
-    endIcon?: React.ReactNode,
+    selected: boolean;
+    endIcon?: React.ReactNode;
+    component?: React.ElementType;
+    to?: string;
 }
 
 function OutlinedButton({children, selected, ...props}: OutlinedButtonProps) {

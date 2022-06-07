@@ -9,17 +9,20 @@ import {CourseSubmissionsTable} from "./submission/SubmissionsTable";
 import RankingTable from "./ranking/RankingTable";
 import Dashboard from "./Dashboard";
 import Content from "../common/notion/Content";
+import {Link} from "react-router-dom";
+import {Edit} from "@mui/icons-material";
 
 
 function StatusPage() {
     const auth = useContext(AuthContext);
     const {course} = useContext(CourseContext);
-    const [currentTab, setCurrentTab] = useStickyState<'description' | 'dashboard' | 'submissions' | 'ranking' | 'lastWeeksProgress' | 'upsolving'>('description', `status-${auth.currentUserId}-${course?.id}`);
+    const [currentTab, setCurrentTab] = useStickyState<'description' | 'dashboard' | 'submissions' | 'ranking' | 'lastWeeksProgress' | 'upsolving' | 'edit'>('description', `status-${auth.currentUserId}-${course?.id}`);
 
     const showDashboard = course && auth.currentUserId && course.instructors.includes(auth.currentUserId);
     const showRanking = course && auth.currentUserId && (course.instructors.includes(auth.currentUserId) || course.rankingVisibility === 'public');
     const showUpsolving = course && course.freezeAt.toDate().getTime() < new Date().getTime();
     const showLastWeekProgress = showRanking && !showUpsolving && course && new Date().getTime() - course.revealsAt.toDate().getTime() > 24 * 60 * 1000; // at least one day has passed
+    const showEdit = course && auth.currentUserId && course.instructors.includes(auth.currentUserId);
 
     if( !course )
         return <></>
@@ -32,6 +35,7 @@ function StatusPage() {
                 {showLastWeekProgress && <OutlinedButton selected={currentTab === 'lastWeeksProgress'} onClick={() => setCurrentTab('lastWeeksProgress')}>Last week</OutlinedButton>}
                 {showRanking && <OutlinedButton selected={currentTab === 'ranking'} onClick={() => setCurrentTab('ranking')}>Ranking</OutlinedButton>}
                 {showUpsolving && <OutlinedButton selected={currentTab === 'upsolving'} onClick={() => setCurrentTab('upsolving')}>Upsolving ranking</OutlinedButton>}
+                {showEdit && <OutlinedButton selected={currentTab === 'edit'} endIcon={<Edit />} component={Link} to="../edit">Edit</OutlinedButton>}
             </Grid>
 
             {currentTab === 'description' && <Box mb={20}><Content notionPage={course.introduction} /></Box>}

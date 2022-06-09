@@ -3,26 +3,24 @@ import {Avatar, IconButton, MenuItem, ListItemIcon, ListItemText, Typography} fr
 import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import Menu from '@mui/material/Menu';
-import StyledFirebaseAuth from 'react-firebaseui/StyledFirebaseAuth';
 import firebase from 'firebase/compat/app';
 import 'firebase/compat/auth';
 import {AuthContext} from "../App";
 import {useNavigate} from "react-router-dom";
 import PreferredLanguage from "./PreferredLanguage";
+import FirebaseAuth from "./FirebaseAuth";
 
 // Configure FirebaseUI.
 const uiConfig = {
-    // Popup signin flow rather than redirect flow.
     signInFlow: 'popup',
-    // We will display Google and Facebook as auth providers.
     signInOptions: [
+        firebase.auth.GoogleAuthProvider.PROVIDER_ID,
+        firebase.auth.FacebookAuthProvider.PROVIDER_ID,
+        'microsoft.com',
         {
             provider: firebase.auth.EmailAuthProvider.PROVIDER_ID,
             requireDisplayName: true,
         },
-        firebase.auth.GoogleAuthProvider.PROVIDER_ID,
-        firebase.auth.FacebookAuthProvider.PROVIDER_ID,
-        'microsoft.com',
     ],
     callbacks: {
         // Avoid redirects after sign-in.
@@ -43,7 +41,7 @@ export const SignIn = memo(function SignIn() {
         return (
             <div style={{left: '50%', textAlign: 'center'}}>
                 <Typography variant="h6">Sign in to continue</Typography>
-                <StyledFirebaseAuth uiCallback={ui => ui.disableAutoSignIn()} uiConfig={uiConfig} firebaseAuth={firebase.auth()} />
+                <FirebaseAuth uiCallback={ui => ui.disableAutoSignIn()} uiConfig={uiConfig} firebaseAuth={firebase.auth()} />
             </div>
         );
     }

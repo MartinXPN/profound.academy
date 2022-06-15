@@ -10,7 +10,7 @@ import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
-import {Add, Home} from "@mui/icons-material";
+import {Add} from "@mui/icons-material";
 import QueryStatsIcon from '@mui/icons-material/QueryStats';
 
 import {Exercise} from "models/exercise";
@@ -22,7 +22,8 @@ import {AuthContext} from "../../App";
 import {onUserProgressChanged} from "../../services/progress";
 import {CourseContext} from "../Course";
 import Countdown from "react-countdown";
-import {Divider, List, ListItem, ListItemButton, Typography} from "@mui/material";
+import {Divider, List, ListItem, ListItemButton, SvgIcon, Typography} from "@mui/material";
+import { ReactComponent as Logo } from "../../logo.svg";
 
 
 const drawerWidth = 240;
@@ -148,10 +149,11 @@ function CourseDrawer({onItemSelected, onStatusClicked, onCreateExerciseClicked}
             <Drawer variant="permanent" open={open}>
                 <ListItem disablePadding key="home">
                     <ListItemButton onClick={onHomeClicked} sx={{height: '64px', py: 2}}>
-                        <ListItemIcon><Home/></ListItemIcon>
-                        <ListItemText primary="Home"/>
+                        <ListItemIcon><SvgIcon fontSize="large"><Logo/></SvgIcon></ListItemIcon>
+                        <ListItemText primary={<Typography fontWeight="bold">Profound Academy</Typography>}/>
                     </ListItemButton>
                 </ListItem>
+                <Divider />
 
 
                 <List sx={{overflowY: 'auto'}}>
@@ -161,16 +163,6 @@ function CourseDrawer({onItemSelected, onStatusClicked, onCreateExerciseClicked}
                         <ListItemText primary="Status"/>
                     </ListItemButton>
                 </ListItem>
-                {isCourseInstructor && <Box key="drafts">
-                    <LevelList
-                        drafts
-                        levelName="0"
-                        levelStatus={'In Progress'}
-                        onItemSelected={onItemSelected}
-                        isDrawerOpen={open}
-                        isSingleLevel={false} />
-                    <Divider />
-                </Box>}
 
                 {Object.entries(course.levelExercises).map(([levelName, numExercises]) => {
                     const numSolved = progress && progress.levelSolved && levelName in progress.levelSolved ? progress.levelSolved[levelName] : 0;
@@ -187,6 +179,16 @@ function CourseDrawer({onItemSelected, onStatusClicked, onCreateExerciseClicked}
                     }
                 )}
 
+                {isCourseInstructor && <Box key="drafts">
+                    <LevelList
+                        drafts
+                        levelName="0"
+                        levelStatus={'In Progress'}
+                        onItemSelected={onItemSelected}
+                        isDrawerOpen={open}
+                        isSingleLevel={false} />
+                    <Divider />
+                </Box>}
                 {isCourseInstructor &&
                 <ListItem disablePadding key="add-exercise">
                     <ListItemButton onClick={onCreateExerciseClicked}>
@@ -200,16 +202,16 @@ function CourseDrawer({onItemSelected, onStatusClicked, onCreateExerciseClicked}
 
                 {/* Open/Close the Drawer */}
                 <Divider/>
-                <ListItemButton
-                    color="inherit"
-                    onClick={() => open ? handleDrawerClose(): handleDrawerOpen()}
-                    sx={{display: 'flex', justifyContent: open ? 'flex-end' : 'flex-start'}}>
-                    {open
-                        ? (theme.direction === 'rtl' ? <ChevronRightIcon /> : <ChevronLeftIcon />)
-                        : (theme.direction === 'rtl' ? <ChevronLeftIcon /> : <ChevronRightIcon /> )
-                    }
-                </ListItemButton>
-
+                <ListItem disablePadding key="expand-drawer">
+                    <ListItemButton
+                        onClick={() => open ? handleDrawerClose(): handleDrawerOpen()}
+                        sx={{display: 'flex', justifyContent: open ? 'flex-end' : 'flex-start'}}>
+                        {open
+                            ? (theme.direction === 'rtl' ? <ChevronRightIcon /> : <ChevronLeftIcon />)
+                            : (theme.direction === 'rtl' ? <ChevronLeftIcon /> : <ChevronRightIcon /> )
+                        }
+                    </ListItemButton>
+                </ListItem>
             </Drawer>
         </Box>
     </>

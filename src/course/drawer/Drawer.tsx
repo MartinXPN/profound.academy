@@ -156,7 +156,7 @@ function CourseDrawer({onItemSelected, onStatusClicked, onCreateExerciseClicked}
                 <Divider />
 
 
-                <List sx={{overflowY: 'auto'}}>
+                <List sx={{overflowY: 'auto', overflowX: 'hidden'}}>
                 <ListItem disablePadding key="status">
                     <ListItemButton onClick={onStatusClicked}>
                         <ListItemIcon><QueryStatsIcon/></ListItemIcon>

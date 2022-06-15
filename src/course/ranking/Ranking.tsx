@@ -6,6 +6,7 @@ import ToggleButton from "@mui/material/ToggleButton";
 import {styled} from "@mui/material/styles";
 import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 import {useStickyState} from "../../common/stickystate";
+import {useScreenAnalytics} from "../../analytics";
 
 const MetricButtonGroup = styled(ToggleButtonGroup)(({theme}) => ({
     '& .MuiToggleButtonGroup-grouped': {
@@ -31,6 +32,7 @@ function Ranking() {
     const {course} = useContext(CourseContext);
     const [metric, setMetric] = useStickyState<METRICS>('score', `ranking-metric-${course?.id}`);
     const showUpsolving = course && course.freezeAt.toDate().getTime() < new Date().getTime();
+    useScreenAnalytics(`ranking_${course?.id}`);
 
     const handleChange = (event: MouseEvent<HTMLElement>, newValue: METRICS | null) => newValue && setMetric(newValue);
 

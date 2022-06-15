@@ -24,6 +24,7 @@ import CourseInvitations from "./CourseInvitations";
 import {CoursePrivateFields} from "models/lib/courses";
 import {ExpandLess, ExpandMore} from "@mui/icons-material";
 import { notionPageToId } from "../services/notion";
+import {useScreenAnalytics} from "../analytics";
 
 
 const schema = object({
@@ -68,6 +69,7 @@ function CourseEditor({course}: {course?: Course | null}) {
     const [openSnackbar, setOpenSnackbar] = useState(false);
     const [invitesOpen, setInvitesOpen] = useState(false);
     const [privateFields, setPrivateFields] = useState<CoursePrivateFields | null>(null);
+    useScreenAnalytics(`course_editor_${course?.id}`);
 
     const onInviteUsersClicked = () => setInvitesOpen(open => !open)
 

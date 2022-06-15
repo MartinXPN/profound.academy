@@ -7,12 +7,13 @@ import UserInfo from "./UserInfo";
 import {Box} from "@mui/material";
 import {UserSubmissionsTable} from "../course/submission/SubmissionsTable";
 import OutlinedButton from "../common/OutlinedButton";
+import {useScreenAnalytics} from "../analytics";
 
 
 function UserProfile() {
     const {userId} = useParams<{ userId: string }>();
     const [currentTab, setCurrentTab] = useState('overview');
-    console.log(userId);
+    useScreenAnalytics(`user_${userId}`);
 
     if( !userId )
         return <></>

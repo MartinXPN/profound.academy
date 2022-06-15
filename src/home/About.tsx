@@ -2,6 +2,7 @@ import {memo, useContext} from "react";
 import StaticContent from "./StaticContent";
 import {Helmet} from "react-helmet-async";
 import {LocalizeContext} from "../common/Localization";
+import {useScreenAnalytics} from "../analytics";
 
 const content = {
     enUS: '95e3c00cd1d744cd9bff906885af6a87',
@@ -9,6 +10,7 @@ const content = {
 
 function About() {
     const {localize} = useContext(LocalizeContext);
+    useScreenAnalytics('about');
 
     return <>
         <Helmet>

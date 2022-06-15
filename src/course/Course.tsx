@@ -17,6 +17,7 @@ import LandingPage from "../home/LandingPage";
 import {Helmet} from "react-helmet-async";
 import {LocalizeContext} from "../common/Localization";
 import {Box} from "@mui/material";
+import {useScreenAnalytics} from "../analytics";
 
 const CourseEditor = lazy(() => import('./CourseEditor'));
 
@@ -51,6 +52,7 @@ function CurrentCourseView({openPage}: {openPage: (page: string) => void}) {
     const {exerciseId} = useParams<{ exerciseId: string }>();
     const [currentExercise, setCurrentExercise] = useState<ExerciseModel | null>(null);
     const [drawerWidth, setDrawerWidth] = useState<string>(theme.spacing(9));
+    useScreenAnalytics(`exercise_${exerciseId}`);
 
     useEffect(() => {
         const key = `ex-${auth?.currentUserId}-${course?.id}`;
@@ -132,6 +134,7 @@ function CourseView() {
     const {courseId} = useParams<{ courseId: string }>();
     const [course, setCourse] = useState<Course | null>(null);
     const [error, setError] = useState<string | null>(null);
+    useScreenAnalytics(`course_${courseId}`);
 
     useEffect(() => {
         if( !courseId )

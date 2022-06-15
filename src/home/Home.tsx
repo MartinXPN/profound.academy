@@ -9,6 +9,7 @@ import Box from "@mui/material/Box";
 import LandingPage from "./LandingPage";
 import Footer from "./Footer";
 import {Divider} from "@mui/material";
+import {useScreenAnalytics} from "../analytics";
 
 
 function HeaderView() {
@@ -29,6 +30,7 @@ const Header = memo(HeaderView);
 
 function Home() {
     const auth = useContext(AuthContext);
+    useScreenAnalytics('home');
 
     return <>
         <Box minHeight="100vh">

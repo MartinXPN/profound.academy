@@ -22,7 +22,7 @@ import {AuthContext} from "../../App";
 import {onUserProgressChanged} from "../../services/progress";
 import {CourseContext} from "../Course";
 import Countdown from "react-countdown";
-import {Divider, ListItem, ListItemButton, Typography} from "@mui/material";
+import {Divider, List, ListItem, ListItemButton, Typography} from "@mui/material";
 
 
 const drawerWidth = 240;
@@ -92,35 +92,6 @@ const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== 'open' 
     }),
 );
 
-function ExpandDrawer({isOpen, onOpen, onClose}: {
-    isOpen: boolean,
-    onOpen: () => void,
-    onClose: () => void,
-}) {
-    const theme = useTheme();
-    return <>
-        <Box key="open-drawer"
-             sx={{position: 'fixed', bottom: 0, left: 0, zIndex: theme.zIndex.drawer + 1,
-                 flexShrink: 0, boxSizing: 'border-box',
-                 backgroundColor: theme.palette.background.paper,
-                 width: isOpen ? drawerWidth - 2 : theme.spacing(9),
-                 ...(isOpen && {...openedMixin(theme)}),
-                 ...(!isOpen && {...closedMixin(theme)}),
-             }}>
-            <Divider/>
-            <ListItemButton
-                color="inherit"
-                onClick={() => isOpen ? onClose(): onOpen()}
-                sx={{display: 'flex', justifyContent: isOpen ? 'flex-end' : 'flex-start'}}>
-                {isOpen
-                    ? (theme.direction === 'rtl' ? <ChevronRightIcon /> : <ChevronLeftIcon />)
-                    : (theme.direction === 'rtl' ? <ChevronLeftIcon /> : <ChevronRightIcon /> )
-                }
-            </ListItemButton>
-        </Box>
-    </>
-}
-
 
 function CourseDrawer({onItemSelected, onStatusClicked, onCreateExerciseClicked}: {
     onItemSelected: (exercise: Exercise) => void,
@@ -128,8 +99,9 @@ function CourseDrawer({onItemSelected, onStatusClicked, onCreateExerciseClicked}
     onCreateExerciseClicked: () => void,
 }) {
     const auth = useContext(AuthContext);
-    const {course} = useContext(CourseContext);
+    const theme = useTheme();
     const navigate = useNavigate();
+    const {course} = useContext(CourseContext);
     const [open, setOpen] = useState(false);
     const [progress, setProgress] = useState<Progress | null>(null);
 
@@ -182,6 +154,7 @@ function CourseDrawer({onItemSelected, onStatusClicked, onCreateExerciseClicked}
                 </ListItem>
 
 
+                <List sx={{overflowY: 'auto'}}>
                 <ListItem disablePadding key="status">
                     <ListItemButton onClick={onStatusClicked}>
                         <ListItemIcon><QueryStatsIcon/></ListItemIcon>
@@ -222,10 +195,22 @@ function CourseDrawer({onItemSelected, onStatusClicked, onCreateExerciseClicked}
                     </ListItemButton>
                 </ListItem>}
 
-                <ListItem key="dummy" sx={{margin: 4}} />
-            </Drawer>
+                <ListItem key="dummy" sx={{margin: 2}} />
+                </List>
 
-            <ExpandDrawer isOpen={open} onOpen={handleDrawerOpen} onClose={handleDrawerClose} />
+                {/* Open/Close the Drawer */}
+                <Divider/>
+                <ListItemButton
+                    color="inherit"
+                    onClick={() => open ? handleDrawerClose(): handleDrawerOpen()}
+                    sx={{display: 'flex', justifyContent: open ? 'flex-end' : 'flex-start'}}>
+                    {open
+                        ? (theme.direction === 'rtl' ? <ChevronRightIcon /> : <ChevronLeftIcon />)
+                        : (theme.direction === 'rtl' ? <ChevronLeftIcon /> : <ChevronRightIcon /> )
+                    }
+                </ListItemButton>
+
+            </Drawer>
         </Box>
     </>
 }

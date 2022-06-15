@@ -1,5 +1,5 @@
 import {useContext, useEffect, useState, memo} from "react";
-import {useNavigate} from "react-router-dom";
+import {Link} from "react-router-dom";
 
 import { styled, useTheme, Theme, CSSObject } from '@mui/material/styles';
 import Box from '@mui/material/Box';
@@ -22,7 +22,7 @@ import {AuthContext} from "../../App";
 import {onUserProgressChanged} from "../../services/progress";
 import {CourseContext} from "../Course";
 import Countdown from "react-countdown";
-import {Divider, List, ListItem, ListItemButton, Stack, SvgIcon, Typography} from "@mui/material";
+import {Divider, List, ListItem, ListItemButton, Stack, SvgIcon, Tooltip, Typography} from "@mui/material";
 import { ReactComponent as Logo } from "../../logo.svg";
 
 
@@ -98,14 +98,12 @@ function CourseDrawer({onItemSelected, onStatusClicked, onCreateExerciseClicked}
 }) {
     const auth = useContext(AuthContext);
     const theme = useTheme();
-    const navigate = useNavigate();
     const {course} = useContext(CourseContext);
     const [open, setOpen] = useState(false);
     const [progress, setProgress] = useState<Progress | null>(null);
 
     const handleDrawerOpen = () => setOpen(true);
     const handleDrawerClose = () => setOpen(false);
-    const onHomeClicked = () => navigate('/');
     const isCourseInstructor = course && auth.currentUserId && course.instructors.includes(auth.currentUserId);
 
 
@@ -149,7 +147,7 @@ function CourseDrawer({onItemSelected, onStatusClicked, onCreateExerciseClicked}
 
             <Drawer variant="permanent" open={open}>
                 <ListItem disablePadding key="home">
-                    <ListItemButton onClick={onHomeClicked} sx={{height: '64px', py: 2}}>
+                    <ListItemButton component={Link} to="/" sx={{height: '64px', py: 2}}>
                         <ListItemIcon><SvgIcon fontSize="large"><Logo/></SvgIcon></ListItemIcon>
                         <ListItemText primary={<Typography fontWeight="bold">Profound Academy</Typography>}/>
                     </ListItemButton>
@@ -158,12 +156,14 @@ function CourseDrawer({onItemSelected, onStatusClicked, onCreateExerciseClicked}
 
 
                 <List sx={{overflowY: 'auto', overflowX: 'hidden'}}>
-                <ListItem disablePadding key="status">
-                    <ListItemButton onClick={onStatusClicked}>
-                        <ListItemIcon><QueryStatsIcon/></ListItemIcon>
-                        <ListItemText primary="Status"/>
-                    </ListItemButton>
-                </ListItem>
+                    <Tooltip title="Status" arrow placement="right" key="toggle-status">
+                        <ListItem disablePadding key="status">
+                            <ListItemButton onClick={onStatusClicked}>
+                                <ListItemIcon><QueryStatsIcon/></ListItemIcon>
+                                <ListItemText primary="Status"/>
+                            </ListItemButton>
+                        </ListItem>
+                    </Tooltip>
 
                 {Object.entries(course.levelExercises).map(([levelName, numExercises]) => {
                     const numSolved = progress && progress.levelSolved && levelName in progress.levelSolved ? progress.levelSolved[levelName] : 0;
@@ -190,12 +190,14 @@ function CourseDrawer({onItemSelected, onStatusClicked, onCreateExerciseClicked}
                         isDrawerOpen={open}
                         isSingleLevel={false} />
 
-                    <ListItem disablePadding key="add-exercise">
-                        <ListItemButton onClick={onCreateExerciseClicked}>
-                            <ListItemIcon><Add/></ListItemIcon>
-                            <ListItemText primary="Create exercise"/>
-                        </ListItemButton>
-                    </ListItem>
+                    <Tooltip title="Create exercise" arrow placement="right" key="toggle-add-exercise">
+                        <ListItem disablePadding key="add-exercise">
+                            <ListItemButton onClick={onCreateExerciseClicked}>
+                                <ListItemIcon><Add/></ListItemIcon>
+                                <ListItemText primary="Create exercise"/>
+                            </ListItemButton>
+                        </ListItem>
+                    </Tooltip>
                 </Box>}
 
                 <ListItem key="dummy" sx={{margin: 2}} />

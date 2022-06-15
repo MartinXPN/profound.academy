@@ -23,6 +23,7 @@ const UserInfoRoot = styled('div')(({theme}) => ({
 
 const UserInfoContents = styled('div')({
     width: 600,
+    maxWidth: '95%',
     minHeight: 150,
     flex: 'left',
     display: 'flex',

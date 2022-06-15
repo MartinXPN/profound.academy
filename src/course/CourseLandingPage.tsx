@@ -5,8 +5,6 @@ import Countdown from "react-countdown";
 import {Typography} from "@mui/material";
 import {AuthContext} from "../App";
 import {CourseContext} from "./Course";
-import {Edit} from "@mui/icons-material";
-import {useNavigate} from "react-router-dom";
 import Box from "@mui/material/Box";
 import {onUserInfoChanged} from "../services/users";
 import {useTheme} from "@mui/material/styles";
@@ -18,9 +16,7 @@ function CourseLandingPage({onStartCourseClicked, onRegisterCourseClicked}: {
 }) {
     const auth = useContext(AuthContext);
     const {course} = useContext(CourseContext);
-    const navigate = useNavigate();
     const theme = useTheme();
-    const onEditClicked = () => navigate('edit');
     const [registered, setRegistered] = useState(false);
     useEffect(() => {
         if( !course?.id || !auth.currentUserId )
@@ -48,13 +44,6 @@ function CourseLandingPage({onStartCourseClicked, onRegisterCourseClicked}: {
     if( !course )
         return <></>
     return <>
-        {auth.currentUserId && course.instructors.includes(auth.currentUserId) &&
-            <Box width="100%">
-            <Button variant="outlined" endIcon={<Edit />} onClick={onEditClicked} sx={{float: 'right', marginRight: '5em', marginTop: '2em'}}>
-                Edit
-            </Button>
-            </Box>
-        }
         {course.introduction && <Content notionPage={course.introduction} />}
         <Box textAlign="center" paddingBottom="3em">
             <Countdown

@@ -8,11 +8,10 @@ const content = {
 } as const;
 
 function Privacy() {
-    const {localize, locale} = useContext(LocalizeContext);
+    const {localize} = useContext(LocalizeContext);
 
     return <>
         <Helmet>
-            <html lang={locale.substring(0, 2)} />
             <title>Privacy Policy • Profound Academy</title>
         </Helmet>
 

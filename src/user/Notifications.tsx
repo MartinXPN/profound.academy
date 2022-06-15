@@ -45,7 +45,7 @@ export default function AppBarNotifications() {
         return <></>
 
     return <>
-        <IconButton onClick={handleMenu} edge="end" size="large" color="inherit" style={{marginRight: 10}}>
+        <IconButton onClick={handleMenu} edge="end" size="large" color="inherit" sx={{mx: 2}}>
             <Badge badgeContent={unreadNotifications} color="info">
                 <NotificationsIcon />
             </Badge>

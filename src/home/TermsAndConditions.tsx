@@ -8,11 +8,10 @@ const content = {
 } as const;
 
 function TermsAndConditions() {
-    const {localize, locale} = useContext(LocalizeContext);
+    const {localize} = useContext(LocalizeContext);
 
     return <>
         <Helmet>
-            <html lang={locale.substring(0, 2)} />
             <title>Terms and Conditions • Profound Academy</title>
         </Helmet>
 

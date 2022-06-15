@@ -9,8 +9,6 @@ import Box from "@mui/material/Box";
 import LandingPage from "./LandingPage";
 import Footer from "./Footer";
 import {Divider} from "@mui/material";
-import {Helmet} from "react-helmet-async";
-import {LocalizeContext} from "../common/Localization";
 
 
 function HeaderView() {
@@ -31,13 +29,8 @@ const Header = memo(HeaderView);
 
 function Home() {
     const auth = useContext(AuthContext);
-    const {locale} = useContext(LocalizeContext);
 
     return <>
-        <Helmet>
-            <html lang={locale.substring(0, 2)} />
-        </Helmet>
-
         <Box minHeight="100vh">
             <Header/>
             {auth.currentUserId && <ActivityHeatmap userId={auth.currentUserId} />}

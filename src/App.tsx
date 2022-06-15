@@ -1,4 +1,4 @@
-import {Suspense, createContext, lazy, useEffect} from 'react';
+import {Suspense, createContext, lazy, useEffect, useContext} from 'react';
 import {BrowserRouter as Router, Route, Routes} from 'react-router-dom';
 
 import firebase from 'firebase/compat/app';
@@ -14,10 +14,9 @@ import ErrorBoundary from './common/ErrorBoundary';
 import Home from './home/Home';
 import About from "./home/About";
 import UserProfile from './user/UserProfile';
-import Localization from "./common/Localization";
+import Localization, {LocalizeContext} from "./common/Localization";
 import Privacy from "./home/Privacy";
 import TermsAndConditions from "./home/TermsAndConditions";
-import Logo from "./logo.svg";
 // Do not include the Course and the editor in the main bundle as they're pretty heavy
 const Course = lazy(() => import('./course/Course'));
 const CourseEditor = lazy(() => import('./course/CourseEditor'));
@@ -41,6 +40,18 @@ const theme = createTheme({
     }
 });
 
+const MetaTags = () => {
+    const {locale} = useContext(LocalizeContext);
+    return <>
+        <Helmet>
+            <html lang={locale.substring(0, 2)} />
+            <title>Profound Academy</title>
+            <meta property="og:title" content="Profound Academy"/>
+            <meta property="og:image" content="/logo.svg" />
+            <meta name="description" content="Get in-depth knowledge through hands-on interactive courses" />
+        </Helmet>
+    </>
+}
 
 interface AuthContextProps {
     isSignedIn: boolean;
@@ -82,14 +93,7 @@ function App() {
             <Router>
             <Localization>
             <HelmetProvider>
-
-            <Helmet>
-                <title>Profound Academy</title>
-                <meta property="og:title" content="Profound Academy"/>
-                <meta property="og:image" content={Logo} />
-                <meta name="description" content="Get in-depth knowledge through hands-on interactive courses" />
-            </Helmet>
-
+            <MetaTags/>
             <Suspense fallback={<div>Loading...</div>}>
                 <Routes>
                     <Route path="/" element={<Home/>} />

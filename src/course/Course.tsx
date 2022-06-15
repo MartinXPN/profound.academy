@@ -15,6 +15,7 @@ import {safeParse} from "../common/stickystate";
 import StatusPage from "./StatusPage";
 import LandingPage from "../home/LandingPage";
 import {Helmet} from "react-helmet-async";
+import {LocalizeContext} from "../common/Localization";
 
 const CourseEditor = lazy(() => import('./CourseEditor'));
 
@@ -50,6 +51,7 @@ export const lastExerciseId = (userId?: string, courseId?: string) => {
 
 function CurrentCourseView({openPage}: {openPage: (page: string) => void}) {
     const auth = useContext(AuthContext);
+    const {localize} = useContext(LocalizeContext);
     const {course} = useContext(CourseContext);
     const {exerciseId} = useParams<{ exerciseId: string }>();
     const [currentExercise, setCurrentExercise] = useState<ExerciseModel | null>(null);
@@ -105,6 +107,9 @@ function CurrentCourseView({openPage}: {openPage: (page: string) => void}) {
     else if (exerciseId === 'edit' )    content = <Suspense fallback={<></>}><CourseEditor course={course} /></Suspense>
     else                                content = <Exercise launchCourse={launchCourse} registerCourse={registerCourse} />
     return <>
+        <Helmet>
+            <title>{currentExercise?.title ? `${localize(currentExercise?.title)} • ` : ''}{course?.title}</title>
+        </Helmet>
         <CurrentExerciseContext.Provider value={{exercise: currentExercise}}>
             <CourseDrawer
                 onItemSelected={openExercise}
@@ -153,7 +158,7 @@ function CourseView() {
             <meta property="og:image" content={course.img} />
             <meta property="og:image:alt" content={course.title} />
             <meta property="og:type" content="article" />
-            <meta name="description" content={`Hands on course for ${course.title}`} />
+            <meta name="description" content={`Comprehensive course for ${course.title} with hands-on experience in mind`} />
         </Helmet>
 
         <CourseContext.Provider value={{course: course}}>

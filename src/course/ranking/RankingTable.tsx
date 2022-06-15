@@ -95,7 +95,7 @@ function RankingTable({metric, showProgress}: {metric: string, showProgress?: bo
                 <TableHead>
                     <TableRow>
                         <TableCell key="#" align="center" sx={{minWidth: 20}}>#</TableCell>
-                        <TableCell key="userDisplayName" align="left" sx={{minWidth: 100}}>User</TableCell>
+                        <TableCell key="userDisplayName" align="left" sx={{minWidth: 200}}>User</TableCell>
                         <TableCell key="total" align="right" sx={{width: 50}}>Total</TableCell>
 
                         {(maxLevel >= 1) && Array(maxLevel).fill(1).map((_, index) => {

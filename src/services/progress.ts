@@ -8,7 +8,7 @@ export const onProgressChanged = async (
     onChanged: (progress: Progress[]) => void
 ) => {
     console.log('building query with:', startAfterId);
-    let query = db.progress(courseId).orderBy(metric, 'desc');
+    let query = db.progress(courseId).where(metric, '>', 0.01).orderBy(metric, 'desc');
     if( startAfterId ) {
         const startAfter = await db.userProgress(courseId, startAfterId).get();
         query = query.startAfter(startAfter);

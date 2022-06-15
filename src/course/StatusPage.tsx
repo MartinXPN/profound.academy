@@ -6,7 +6,7 @@ import {AuthContext} from "../App";
 import {CourseContext} from "./Course";
 import {useStickyState} from "../common/stickystate";
 import {CourseSubmissionsTable} from "./submission/SubmissionsTable";
-import RankingTable from "./ranking/RankingTable";
+import Ranking from "./ranking/Ranking";
 import Dashboard from "./Dashboard";
 import Content from "../common/notion/Content";
 import {Link} from "react-router-dom";
@@ -20,8 +20,6 @@ function StatusPage() {
 
     const showDashboard = course && auth.currentUserId && course.instructors.includes(auth.currentUserId);
     const showRanking = course && auth.currentUserId && (course.instructors.includes(auth.currentUserId) || course.rankingVisibility === 'public');
-    const showUpsolving = course && course.freezeAt.toDate().getTime() < new Date().getTime();
-    const showLastWeekProgress = showRanking && !showUpsolving && course && new Date().getTime() - course.revealsAt.toDate().getTime() > 24 * 60 * 1000; // at least one day has passed
     const showEdit = course && auth.currentUserId && course.instructors.includes(auth.currentUserId);
 
     if( !course )
@@ -32,18 +30,14 @@ function StatusPage() {
                 <OutlinedButton selected={currentTab === 'description'} onClick={() => setCurrentTab('description')}>Description</OutlinedButton>
                 {showDashboard && <OutlinedButton selected={currentTab === 'dashboard'} onClick={() => setCurrentTab('dashboard')}>Dashboard</OutlinedButton>}
                 {auth.isSignedIn && <OutlinedButton selected={currentTab === 'submissions'} onClick={() => setCurrentTab('submissions')}>Submissions</OutlinedButton>}
-                {showLastWeekProgress && <OutlinedButton selected={currentTab === 'lastWeeksProgress'} onClick={() => setCurrentTab('lastWeeksProgress')}>Last week</OutlinedButton>}
                 {showRanking && <OutlinedButton selected={currentTab === 'ranking'} onClick={() => setCurrentTab('ranking')}>Ranking</OutlinedButton>}
-                {showUpsolving && <OutlinedButton selected={currentTab === 'upsolving'} onClick={() => setCurrentTab('upsolving')}>Upsolving ranking</OutlinedButton>}
                 {showEdit && <OutlinedButton selected={currentTab === 'edit'} endIcon={<Edit />} component={Link} to="../edit">Edit</OutlinedButton>}
             </Grid>
 
             {currentTab === 'description' && <Box mb={20}><Content notionPage={course.introduction} /></Box>}
             {currentTab === 'dashboard' && <Dashboard />}
             {currentTab === 'submissions' && <CourseSubmissionsTable rowsPerPage={20} course={course} />}
-            {currentTab === 'ranking' && <RankingTable metric="score"/>}
-            {currentTab === 'lastWeeksProgress' && <RankingTable metric="weeklyScore" showProgress/>}
-            {currentTab === 'upsolving' && <RankingTable metric="upsolveScore"/>}
+            {currentTab === 'ranking' && <Ranking />}
         </Box>
     </>
 }

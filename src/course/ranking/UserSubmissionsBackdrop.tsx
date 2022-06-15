@@ -30,7 +30,7 @@ function UserSubmissionsBackdrop({submissionsInfo, handleClose}: {
     return <>
         <SubmissionsBackdrop open={!!submissionsInfo}>
             <ClickAwayListener onClickAway={handleClose}>
-                <Paper sx={{position: 'relative', height: '100%', width: '70%', borderRadius: 4, overflowY: 'auto'}}>
+                <Paper sx={{position: 'relative', height: '100%', width: '70em', maxWidth: '100%', borderRadius: 4, overflowY: 'auto'}}>
                     <Stack direction="row" alignItems="center" alignContent="center" margin={1} marginLeft={4}>
                         <SmallAvatar src={submissionsInfo.userImageUrl} />
                         {submissionsInfo.userDisplayName}

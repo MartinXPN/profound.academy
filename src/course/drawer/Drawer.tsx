@@ -180,6 +180,7 @@ function CourseDrawer({onItemSelected, onStatusClicked, onCreateExerciseClicked}
                 )}
 
                 {isCourseInstructor && <Box key="drafts">
+                    <Divider />
                     <LevelList
                         drafts
                         levelName="0"
@@ -187,15 +188,14 @@ function CourseDrawer({onItemSelected, onStatusClicked, onCreateExerciseClicked}
                         onItemSelected={onItemSelected}
                         isDrawerOpen={open}
                         isSingleLevel={false} />
-                    <Divider />
+
+                    <ListItem disablePadding key="add-exercise">
+                        <ListItemButton onClick={onCreateExerciseClicked}>
+                            <ListItemIcon><Add/></ListItemIcon>
+                            <ListItemText primary="Create exercise"/>
+                        </ListItemButton>
+                    </ListItem>
                 </Box>}
-                {isCourseInstructor &&
-                <ListItem disablePadding key="add-exercise">
-                    <ListItemButton onClick={onCreateExerciseClicked}>
-                        <ListItemIcon><Add/></ListItemIcon>
-                        <ListItemText primary="Create exercise"/>
-                    </ListItemButton>
-                </ListItem>}
 
                 <ListItem key="dummy" sx={{margin: 2}} />
                 </List>

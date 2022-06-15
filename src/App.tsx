@@ -30,10 +30,10 @@ const theme = createTheme({
             paper: '#ffffff',
         },
         primary: {
-            main: '#4B5FAA',
+            main: '#38618d',
         },
         secondary: {
-            main: '#37a4dc'
+            main: '#5e92f3'
         },
         info: {
             main: '#f44336'

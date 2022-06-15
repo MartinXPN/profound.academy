@@ -138,6 +138,7 @@ function CourseDrawer({onItemSelected, onStatusClicked, onCreateExerciseClicked}
             <CssBaseline/>
             <AppBar
                 position="fixed"
+                color="default"
                 open={open}>
                 <Toolbar>
                     <IconButton

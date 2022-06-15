@@ -35,7 +35,7 @@ function SubmissionCode({submission}: {submission: SubmissionResult}) {
 
     return (<>
         {submissionCode
-            ? <LazyCode language={language} content={submissionCode} showLineNumbers />
+            ? <LazyCode language={language} content={submissionCode} />
             : <CircularProgress color="inherit"/>
         }
     </>);

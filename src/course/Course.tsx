@@ -1,7 +1,7 @@
 import {createContext, memo, lazy, useCallback, useContext, useEffect, useState, Suspense} from "react";
 import {Route, Routes, useNavigate, useParams} from "react-router-dom";
 
-import {styled} from '@mui/material/styles';
+import {styled, useTheme} from '@mui/material/styles';
 
 import {onCourseChanged, registerForCourse} from "../services/courses";
 import {createCourseExercise, getExercise, getFirstExercise} from "../services/exercises";
@@ -16,6 +16,7 @@ import StatusPage from "./StatusPage";
 import LandingPage from "../home/LandingPage";
 import {Helmet} from "react-helmet-async";
 import {LocalizeContext} from "../common/Localization";
+import {Box} from "@mui/material";
 
 const CourseEditor = lazy(() => import('./CourseEditor'));
 
@@ -27,13 +28,6 @@ const DrawerHeader = styled('div')(({ theme }) => ({
     padding: theme.spacing(0, 2),
     // necessary for content to be below app bar
     ...theme.mixins.toolbar,
-}));
-
-const Content = styled('main')(({ theme }) => ({
-    // maxWidth = screenWidth - drawerWidth
-    maxWidth: `calc(100vw - ${theme.spacing(9)} - 1px)`,
-    flexGrow: 1,
-    padding: 0,
 }));
 
 export const CourseContext = createContext<{ course: Course | null }>({course: null});
@@ -51,10 +45,12 @@ export const lastExerciseId = (userId?: string, courseId?: string) => {
 
 function CurrentCourseView({openPage}: {openPage: (page: string) => void}) {
     const auth = useContext(AuthContext);
+    const theme = useTheme();
     const {localize} = useContext(LocalizeContext);
     const {course} = useContext(CourseContext);
     const {exerciseId} = useParams<{ exerciseId: string }>();
     const [currentExercise, setCurrentExercise] = useState<ExerciseModel | null>(null);
+    const [drawerWidth, setDrawerWidth] = useState<string>(theme.spacing(9));
 
     useEffect(() => {
         const key = `ex-${auth?.currentUserId}-${course?.id}`;
@@ -112,12 +108,13 @@ function CurrentCourseView({openPage}: {openPage: (page: string) => void}) {
             <CourseDrawer
                 onItemSelected={openExercise}
                 onStatusClicked={openStatus}
-                onCreateExerciseClicked={createExercise}/>
+                onCreateExerciseClicked={createExercise}
+                onWidthChanged={setDrawerWidth}/>
 
-            <Content>
+            <Box flexGrow={1} padding={0} maxWidth={`calc(100vw - ${drawerWidth} - 1px)`}>
                 <DrawerHeader />
                 {content}
-            </Content>
+            </Box>
         </CurrentExerciseContext.Provider>
     </>
 }

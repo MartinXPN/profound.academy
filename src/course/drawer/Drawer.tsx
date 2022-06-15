@@ -24,6 +24,7 @@ import {CourseContext} from "../Course";
 import Countdown from "react-countdown";
 import {Divider, List, ListItem, ListItemButton, Stack, SvgIcon, Tooltip, Typography} from "@mui/material";
 import { ReactComponent as Logo } from "../../logo.svg";
+import useWindowDimensions from "../../common/windowDimensions";
 
 
 const drawerWidth = 240;
@@ -91,19 +92,27 @@ const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== 'open' 
 );
 
 
-function CourseDrawer({onItemSelected, onStatusClicked, onCreateExerciseClicked}: {
+function CourseDrawer({onItemSelected, onStatusClicked, onCreateExerciseClicked, onWidthChanged}: {
     onItemSelected: (exercise: Exercise) => void,
     onStatusClicked: () => void,
     onCreateExerciseClicked: () => void,
+    onWidthChanged: (width: string) => void,
 }) {
     const auth = useContext(AuthContext);
     const theme = useTheme();
+    const {width} = useWindowDimensions();
     const {course} = useContext(CourseContext);
     const [open, setOpen] = useState(false);
     const [progress, setProgress] = useState<Progress | null>(null);
 
-    const handleDrawerOpen = () => setOpen(true);
-    const handleDrawerClose = () => setOpen(false);
+    const handleDrawerOpen = () => {
+        setOpen(true);
+        onWidthChanged(`${drawerWidth}px`);
+    }
+    const handleDrawerClose = () => {
+        setOpen(false);
+        onWidthChanged(theme.spacing(9));
+    }
     const isCourseInstructor = course && auth.currentUserId && course.instructors.includes(auth.currentUserId);
 
 
@@ -113,14 +122,13 @@ function CourseDrawer({onItemSelected, onStatusClicked, onCreateExerciseClicked}
         return onUserProgressChanged(course.id, auth.currentUserId, setProgress);
     }, [course?.id, auth]);
 
-    const renderTimeRemaining = ({days, hours, minutes, seconds}: {
-        days: number, hours: number, minutes: number, seconds: number
+    const renderTimeRemaining = ({hours, minutes, seconds}: {
+        hours: number, minutes: number, seconds: number
     }) => <Typography variant="h4" paddingLeft="1em">
-        {days * 24 + hours}:{minutes.toString().padStart(2, '0')}:{seconds.toString().padStart(2, '0')}
+        {hours}:{minutes.toString().padStart(2, '0')}:{seconds.toString().padStart(2, '0')}
     </Typography>
 
     const now = new Date().getTime();
-
     if( !course )
         return <></>
     return <>
@@ -134,9 +142,10 @@ function CourseDrawer({onItemSelected, onStatusClicked, onCreateExerciseClicked}
                         course.freezeAt.toDate().getTime() - now < 24 * 60 * 60 * 1000 && // show only if < 1 day remains
                         <Countdown date={course.freezeAt.toDate()} intervalDelay={0} precision={3} renderer={renderTimeRemaining}/> }
 
+                    {width > 500 &&
                     <Typography noWrap fontSize={18} fontWeight="bold" marginX="1em">
                         {course.title}
-                    </Typography>
+                    </Typography>}
 
                     <Stack direction="row" marginLeft="auto" key="auth">
                         <AppBarNotifications />
@@ -146,24 +155,25 @@ function CourseDrawer({onItemSelected, onStatusClicked, onCreateExerciseClicked}
             </AppBar>
 
             <Drawer variant="permanent" open={open}>
+                <List disablePadding>
                 <ListItem disablePadding key="home">
                     <ListItemButton component={Link} to="/" sx={{height: '64px', py: 2}}>
                         <ListItemIcon><SvgIcon fontSize="large"><Logo/></SvgIcon></ListItemIcon>
                         <ListItemText primary={<Typography fontWeight="bold">Profound Academy</Typography>}/>
                     </ListItemButton>
                 </ListItem>
-                <Divider />
+                </List>
 
 
-                <List sx={{overflowY: 'auto', overflowX: 'hidden'}}>
-                    <Tooltip title="Status" arrow placement="right" key="toggle-status">
-                        <ListItem disablePadding key="status">
-                            <ListItemButton onClick={onStatusClicked}>
-                                <ListItemIcon><QueryStatsIcon/></ListItemIcon>
-                                <ListItemText primary="Status"/>
-                            </ListItemButton>
-                        </ListItem>
-                    </Tooltip>
+                <List disablePadding sx={{overflowY: 'auto', overflowX: 'hidden'}}>
+                <Tooltip title="Status" arrow placement="right" key="toggle-status">
+                    <ListItem disablePadding key="status">
+                        <ListItemButton onClick={onStatusClicked}>
+                            <ListItemIcon><QueryStatsIcon/></ListItemIcon>
+                            <ListItemText primary="Status"/>
+                        </ListItemButton>
+                    </ListItem>
+                </Tooltip>
 
                 {Object.entries(course.levelExercises).map(([levelName, numExercises]) => {
                     const numSolved = progress && progress.levelSolved && levelName in progress.levelSolved ? progress.levelSolved[levelName] : 0;

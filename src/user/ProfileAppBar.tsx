@@ -14,7 +14,7 @@ export default function ProfileAppBar() {
 
     return (
         <Box sx={{ flexGrow: 1 }}>
-            <AppBar position="static">
+            <AppBar position="static" color="default">
                 <Toolbar>
                     <IconButton key="home" color="inherit" onClick={onHomeClicked} size="large"><Home/></IconButton>
                     <Typography sx={{ flexGrow: 1 }} />

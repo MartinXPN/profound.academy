@@ -277,19 +277,19 @@ export const getAllDependencies = (lang: string | string[]): string[] => {
 
 class DependencyLoader {
     private readonly languages: string | string[];
-    private startedLoading: Set<string>;
+    static startedLoading: Set<string>;
     constructor(languages: string | string[]) {
         this.languages = languages;
-        this.startedLoading = new Set<string>();
+        DependencyLoader.startedLoading = new Set<string>();
     }
 
     /// DFS
     private loadLanguage = async (lang: string): Promise<void> => {
         // console.log('loadLanguage', lang, 'startedLoading:', this.startedLoading);
-        this.startedLoading.add(lang);
+        DependencyLoader.startedLoading.add(lang);
         const dep = getAllDependencies(lang);
 
-        await Promise.all(dep.filter(l => !this.startedLoading.has(l)).map(async l => this.loadLanguage(l)));
+        await Promise.all(dep.filter(l => !DependencyLoader.startedLoading.has(l)).map(async l => this.loadLanguage(l)));
         await import(`prismjs/components/prism-${lang}.min`);
     }
 

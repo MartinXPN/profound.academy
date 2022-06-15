@@ -22,7 +22,7 @@ import {AuthContext} from "../../App";
 import {onUserProgressChanged} from "../../services/progress";
 import {CourseContext} from "../Course";
 import Countdown from "react-countdown";
-import {Divider, List, ListItem, ListItemButton, SvgIcon, Typography} from "@mui/material";
+import {Divider, List, ListItem, ListItemButton, Stack, SvgIcon, Typography} from "@mui/material";
 import { ReactComponent as Logo } from "../../logo.svg";
 
 
@@ -46,9 +46,6 @@ const closedMixin = (theme: Theme): CSSObject => ({
     width: `calc(${theme.spacing(9)} + 1px)`,
 });
 
-const AuthDiv = styled('div')({
-    marginLeft: 'auto',
-});
 
 interface AppBarProps extends MuiAppBarProps {
     open?: boolean;
@@ -139,10 +136,14 @@ function CourseDrawer({onItemSelected, onStatusClicked, onCreateExerciseClicked}
                         course.freezeAt.toDate().getTime() - now < 24 * 60 * 60 * 1000 && // show only if < 1 day remains
                         <Countdown date={course.freezeAt.toDate()} intervalDelay={0} precision={3} renderer={renderTimeRemaining}/> }
 
-                    <AuthDiv key="auth">
+                    <Typography noWrap fontSize={18} fontWeight="bold" marginX="1em">
+                        {course.title}
+                    </Typography>
+
+                    <Stack direction="row" marginLeft="auto" key="auth">
                         <AppBarNotifications />
                         <AppBarProfile />
-                    </AuthDiv>
+                    </Stack>
                 </Toolbar>
             </AppBar>
 

@@ -92,10 +92,8 @@ function CurrentCourseView({openPage}: {openPage: (page: string) => void}) {
     useAsyncEffect(async () => {
         if( !course || !exerciseId )
             return;
-        if( currentExercise && currentExercise.id === exerciseId ) {
-            console.log('Not loading the exercise as it is already the current one', currentExercise.id, exerciseId, currentExercise);
-            return;
-        }
+        if( currentExercise && currentExercise.id === exerciseId )
+            return console.log('Not loading the exercise as it is already the current one', currentExercise.id, exerciseId, currentExercise);
 
         const ex = await getExercise(course.id, exerciseId);
         if( ex )    openExercise(ex);

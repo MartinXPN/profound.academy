@@ -9,7 +9,6 @@ import {CourseContext, CurrentExerciseContext} from "../Course";
 import {Grid, Stack, Typography} from "@mui/material";
 import Content from "../../common/notion/Content";
 import Forum from "../forum/Forum";
-import {ExerciseSubmissionsTable} from "../submission/SubmissionsTable";
 import {SplitPane} from "react-multi-split-pane";
 import "../SplitPane.css";
 import OutlinedButton from "../../common/OutlinedButton";
@@ -23,6 +22,7 @@ import MultipleChoice from "./MultipleChoice";
 import Dashboard from "./Dashboard";
 import {LocalizeContext} from "../../common/Localization";
 import useWindowDimensions from "../../common/windowDimensions";
+import ExerciseSubmissions from "../submission/ExerciseSubmissions";
 
 const ExerciseEditor = lazy(() => import('./ExerciseEditor'));
 
@@ -52,7 +52,7 @@ function Exercise({launchCourse, registerCourse}: {launchCourse: () => void, reg
     const {exerciseId} = useParams<{ exerciseId: string }>();
     const [exerciseType, setExerciseType] = useState<keyof typeof EXERCISE_TYPES>(exercise?.exerciseType ?? 'code');
     const [splitPos, setSplitPos] = useStickyState<number[] | null>(null, `splitPos-${auth?.currentUserId}`);
-    const [currentTab, setCurrentTab] = useState<'description' | 'solve' | 'allSubmissions' | 'bestSubmissions' | 'codeDrafts' | 'edit'>('description');
+    const [currentTab, setCurrentTab] = useState<'description' | 'solve' | 'submissions' | 'codeDrafts' | 'edit'>('description');
     const [codeDraftId, setCodeDraftId] = useState<string | null>(null);
     const isCourseInstructor = course && auth.currentUserId && course.instructors.includes(auth.currentUserId);
     const split = Boolean(width > 800);
@@ -106,16 +106,14 @@ function Exercise({launchCourse, registerCourse}: {launchCourse: () => void, reg
                     <Grid container justifyContent="center">
                         <OutlinedButton selected={currentTab === 'description'} onClick={() => setCurrentTab('description')}>Description</OutlinedButton>
                         {!split && <OutlinedButton selected={currentTab === 'solve'} onClick={() => setCurrentTab('solve')}>Solve</OutlinedButton>}
-                        {auth.isSignedIn && <OutlinedButton selected={currentTab === 'bestSubmissions'} onClick={() => setCurrentTab('bestSubmissions')}>Best Submissions</OutlinedButton>}
-                        {auth.isSignedIn && <OutlinedButton selected={currentTab === 'allSubmissions'} onClick={() => setCurrentTab('allSubmissions')}>All Submissions</OutlinedButton>}
+                        {auth.isSignedIn && <OutlinedButton selected={currentTab === 'submissions'} onClick={() => setCurrentTab('submissions')}>Submissions</OutlinedButton>}
                         {isCourseInstructor && <OutlinedButton selected={currentTab === 'codeDrafts'} onClick={() => setCurrentTab('codeDrafts')}>Code Drafts</OutlinedButton>}
                         {isCourseInstructor && <OutlinedButton selected={currentTab === 'edit'} endIcon={<Edit />} onClick={() => setCurrentTab('edit')}>Edit</OutlinedButton>}
                     </Grid>
 
                     {currentTab === 'description' && <>{isCourseInstructor && <Dashboard/>}<Content notionPage={localize(exercise.pageId)}/>{auth.isSignedIn && <Forum/>}</>}
                     {currentTab === 'solve' && <>{right}</>}
-                    {currentTab === 'bestSubmissions' && <ExerciseSubmissionsTable rowsPerPage={20} course={course} exercise={exercise} mode="best" />}
-                    {currentTab === 'allSubmissions' && <ExerciseSubmissionsTable rowsPerPage={20} course={course} exercise={exercise} mode="all" />}
+                    {currentTab === 'submissions' && <ExerciseSubmissions rowsPerPage={20} />}
                     {currentTab === 'codeDrafts' && <CodeDrafts onCodeDraftSelected={setCodeDraftId} />}
                     {currentTab === 'edit' && <Suspense fallback={<></>}><ExerciseEditor cancelEditing={() => setCurrentTab('description')} exerciseTypeChanged={setExerciseType} /></Suspense>}
                 </Box>

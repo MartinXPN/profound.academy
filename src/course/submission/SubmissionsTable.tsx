@@ -139,9 +139,11 @@ export function CourseSubmissionsTable({rowsPerPage, course}: {rowsPerPage: numb
     return <SubmissionsTable reset={reset} loadSubmissions={loadSubmissions} columns={columns.filter(c => c.id !== 'courseTitle')} rowsPerPage={rowsPerPage}/>
 }
 
-export function ExerciseSubmissionsTable({rowsPerPage, course, exercise, mode}: {rowsPerPage: number, course: Course, exercise: Exercise, mode: 'all' | 'best'}) {
+export function ExerciseSubmissionsTable({rowsPerPage, course, exercise, userId, mode}: {
+    rowsPerPage: number, course: Course, exercise: Exercise, userId: string, mode: 'all' | 'best' | 'my'}
+) {
     const loadSubmissions = async (startAfterId: string | null, onChange: (submissions: SubmissionResult[], more: boolean) => void) =>
-        await onSubmissionsChanged(course.id, exercise.id, mode, startAfterId ?? null, rowsPerPage, onChange);
+        await onSubmissionsChanged(course.id, exercise.id, userId, mode, startAfterId ?? null, rowsPerPage, onChange);
 
     const [reset, setReset] = useState(0);
     useEffect(() => setReset(r => r + 1), [course.id, exercise.id, mode]);

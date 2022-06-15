@@ -91,20 +91,25 @@ const submissionQuery = async (query: firebase.firestore.Query<SubmissionResult>
     return query;
 };
 
-export const onSubmissionsChanged = async (courseId: string, exerciseId: string, mode: 'all' | 'best',
-                                     startAfterId: string | null, numItems: number,
-                                     onChanged: (submissionResult: SubmissionResult[], hasMore: boolean) => void) => {
+export const onSubmissionsChanged = async (
+    courseId: string, exerciseId: string, userId: string, mode: 'all' | 'best' | 'my',
+    startAfterId: string | null, numItems: number,
+    onChanged: (submissionResult: SubmissionResult[], hasMore: boolean) => void
+) => {
     const exercise = db.exercise(courseId, exerciseId);
     let query = db.submissionResults
         .where('exercise', '==', exercise);
     if( mode === 'all' )
         query = query.orderBy('createdAt', 'desc');
-    else
+    else if( mode === 'best' )
         query = query.where('isBest', '==', true)
             .where('status', '==', 'Solved')
             .orderBy('score', 'desc')
             .orderBy('time', 'asc')
             .orderBy('memory', 'asc');
+    else
+        query = query.where('userId', '==', userId)
+            .orderBy('createdAt', 'desc');
 
     console.log('startAfterId:', startAfterId);
     query = await submissionQuery(query, startAfterId, numItems);

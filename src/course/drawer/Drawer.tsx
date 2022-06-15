@@ -6,9 +6,6 @@ import Box from '@mui/material/Box';
 import MuiDrawer from '@mui/material/Drawer';
 import MuiAppBar, { AppBarProps as MuiAppBarProps } from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
-import CssBaseline from '@mui/material/CssBaseline';
-import IconButton from '@mui/material/IconButton';
-import MenuIcon from '@mui/icons-material/Menu';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import ListItemIcon from '@mui/material/ListItemIcon';
@@ -48,15 +45,6 @@ const closedMixin = (theme: Theme): CSSObject => ({
     width: `calc(${theme.spacing(9)} + 1px)`,
 });
 
-const DrawerHeader = styled('div')(({ theme }) => ({
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'flex-start',
-    padding: theme.spacing(0, 2),
-    // necessary for content to be below app bar
-    ...theme.mixins.toolbar,
-}));
-
 const AuthDiv = styled('div')({
     marginLeft: 'auto',
 });
@@ -81,6 +69,10 @@ const AppBar = styled(MuiAppBar, {
             duration: theme.transitions.duration.enteringScreen,
         }),
     }),
+    ...(!open && {
+        marginLeft: `calc(${theme.spacing(9)} + 2px)`,
+        width: `calc(100% - ${theme.spacing(9)} - 2px)`,
+    }),
 }));
 
 const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== 'open' })(
@@ -100,6 +92,35 @@ const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== 'open' 
     }),
 );
 
+function ExpandDrawer({isOpen, onOpen, onClose}: {
+    isOpen: boolean,
+    onOpen: () => void,
+    onClose: () => void,
+}) {
+    const theme = useTheme();
+    return <>
+        <Box key="open-drawer"
+             sx={{position: 'fixed', bottom: 0, left: 0, zIndex: theme.zIndex.drawer + 1,
+                 flexShrink: 0, boxSizing: 'border-box',
+                 backgroundColor: theme.palette.background.paper,
+                 width: isOpen ? drawerWidth - 2 : theme.spacing(9),
+                 ...(isOpen && {...openedMixin(theme)}),
+                 ...(!isOpen && {...closedMixin(theme)}),
+             }}>
+            <Divider/>
+            <ListItemButton
+                color="inherit"
+                onClick={() => isOpen ? onClose(): onOpen()}
+                sx={{display: 'flex', justifyContent: isOpen ? 'flex-end' : 'flex-start'}}>
+                {isOpen
+                    ? (theme.direction === 'rtl' ? <ChevronRightIcon /> : <ChevronLeftIcon />)
+                    : (theme.direction === 'rtl' ? <ChevronLeftIcon /> : <ChevronRightIcon /> )
+                }
+            </ListItemButton>
+        </Box>
+    </>
+}
+
 
 function CourseDrawer({onItemSelected, onStatusClicked, onCreateExerciseClicked}: {
     onItemSelected: (exercise: Exercise) => void,
@@ -108,7 +129,6 @@ function CourseDrawer({onItemSelected, onStatusClicked, onCreateExerciseClicked}
 }) {
     const auth = useContext(AuthContext);
     const {course} = useContext(CourseContext);
-    const theme = useTheme();
     const navigate = useNavigate();
     const [open, setOpen] = useState(false);
     const [progress, setProgress] = useState<Progress | null>(null);
@@ -125,32 +145,23 @@ function CourseDrawer({onItemSelected, onStatusClicked, onCreateExerciseClicked}
         return onUserProgressChanged(course.id, auth.currentUserId, setProgress);
     }, [course?.id, auth]);
 
-    const renderTimeRemaining = ({days, hours, minutes, seconds}:
-                                 { days: number, hours: number, minutes: number, seconds: number }) => {
-        return <Typography variant="h4" paddingLeft="1em">{days * 24 + hours}:{minutes.toString().padStart(2, '0')}:{seconds.toString().padStart(2, '0')}</Typography>
-    }
+    const renderTimeRemaining = ({days, hours, minutes, seconds}: {
+        days: number, hours: number, minutes: number, seconds: number
+    }) => <Typography variant="h4" paddingLeft="1em">
+        {days * 24 + hours}:{minutes.toString().padStart(2, '0')}:{seconds.toString().padStart(2, '0')}
+    </Typography>
+
     const now = new Date().getTime();
 
     if( !course )
         return <></>
-    return (
+    return <>
         <Box sx={{ display: 'flex' }}>
-            <CssBaseline/>
             <AppBar
                 position="fixed"
                 color="default"
                 open={open}>
                 <Toolbar>
-                    <IconButton
-                        key="drawerOpen"
-                        color="inherit"
-                        aria-label="open drawer"
-                        onClick={() => open ? handleDrawerClose(): handleDrawerOpen()}
-                        edge="start"
-                        sx={{marginRight: '36px'}}>
-                        {open ? (theme.direction === 'rtl' ? <ChevronRightIcon /> : <ChevronLeftIcon />) : <MenuIcon/>}
-                    </IconButton>
-                    <IconButton key="home" color="inherit" onClick={onHomeClicked} size="large"><Home/></IconButton>
                     {course.revealsAt.toDate().getTime() < now && now < course.freezeAt.toDate().getTime() &&
                         course.freezeAt.toDate().getTime() - now < 24 * 60 * 60 * 1000 && // show only if < 1 day remains
                         <Countdown date={course.freezeAt.toDate()} intervalDelay={0} precision={3} renderer={renderTimeRemaining}/> }
@@ -163,9 +174,13 @@ function CourseDrawer({onItemSelected, onStatusClicked, onCreateExerciseClicked}
             </AppBar>
 
             <Drawer variant="permanent" open={open}>
-                <DrawerHeader key="header">
-                    <Box component="span" fontWeight="fontWeightMedium">My Progress</Box>
-                </DrawerHeader>
+                <ListItem disablePadding key="home">
+                    <ListItemButton onClick={onHomeClicked} sx={{height: '64px', py: 2}}>
+                        <ListItemIcon><Home/></ListItemIcon>
+                        <ListItemText primary="Home"/>
+                    </ListItemButton>
+                </ListItem>
+
 
                 <ListItem disablePadding key="status">
                     <ListItemButton onClick={onStatusClicked}>
@@ -206,9 +221,13 @@ function CourseDrawer({onItemSelected, onStatusClicked, onCreateExerciseClicked}
                         <ListItemText primary="Create exercise"/>
                     </ListItemButton>
                 </ListItem>}
+
+                <ListItem key="dummy" sx={{margin: 4}} />
             </Drawer>
+
+            <ExpandDrawer isOpen={open} onOpen={handleDrawerOpen} onClose={handleDrawerClose} />
         </Box>
-    );
+    </>
 }
 
 export default memo(CourseDrawer);

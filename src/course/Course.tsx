@@ -52,7 +52,7 @@ function CurrentCourseView({openPage}: {openPage: (page: string) => void}) {
     const {exerciseId} = useParams<{ exerciseId: string }>();
     const [currentExercise, setCurrentExercise] = useState<ExerciseModel | null>(null);
     const [drawerWidth, setDrawerWidth] = useState<string>(theme.spacing(9));
-    useScreenAnalytics(`exercise_${exerciseId}`);
+    useScreenAnalytics(`exercise-${exerciseId}`);
 
     useEffect(() => {
         const key = `ex-${auth?.currentUserId}-${course?.id}`;
@@ -134,7 +134,7 @@ function CourseView() {
     const {courseId} = useParams<{ courseId: string }>();
     const [course, setCourse] = useState<Course | null>(null);
     const [error, setError] = useState<string | null>(null);
-    useScreenAnalytics(`course_${courseId}`);
+    useScreenAnalytics(`course-${courseId}`);
 
     useEffect(() => {
         if( !courseId )

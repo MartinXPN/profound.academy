@@ -32,7 +32,7 @@ function Ranking() {
     const {course} = useContext(CourseContext);
     const [metric, setMetric] = useStickyState<METRICS>('score', `ranking-metric-${course?.id}`);
     const showUpsolving = course && course.freezeAt.toDate().getTime() < new Date().getTime();
-    useScreenAnalytics(`ranking_${course?.id}`);
+    useScreenAnalytics(`ranking-${course?.id}`);
 
     const handleChange = (event: MouseEvent<HTMLElement>, newValue: METRICS | null) => newValue && setMetric(newValue);
 

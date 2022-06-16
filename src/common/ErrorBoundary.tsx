@@ -1,5 +1,6 @@
 import {Component, ErrorInfo} from "react";
 import {Typography} from "@mui/material";
+import {getAnalytics, logEvent} from "firebase/analytics";
 
 class ErrorBoundary extends Component<{}, { error: Error | null }> {
     constructor(props: {}) {
@@ -14,6 +15,16 @@ class ErrorBoundary extends Component<{}, { error: Error | null }> {
 
     componentDidCatch(error: Error, errorInfo: ErrorInfo) {
         // You can also log the error to an error reporting service
+        const analytics = getAnalytics();
+        logEvent(analytics, 'exception', {
+            description: error.name,
+            fatal: true,
+            cause: error.cause,
+            message: error.message,
+            stack: error.stack,
+            componentStack: errorInfo.componentStack,
+        });
+
         console.error(error, errorInfo);
     }
 

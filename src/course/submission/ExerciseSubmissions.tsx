@@ -11,7 +11,7 @@ function ExerciseSubmissions({rowsPerPage}: {rowsPerPage: number}) {
     const {course} = useContext(CourseContext);
     const {exercise} = useContext(CurrentExerciseContext);
     const [currentTab, setCurrentTab] = useState<'all' | 'best' | 'my'>('all');
-    useScreenAnalytics(`exercise_submissions_${exercise?.id}`);
+    useScreenAnalytics(`exercise-submissions-${exercise?.id}`);
 
     if( !course || !exercise || !auth.currentUserId )
         return <></>

@@ -13,7 +13,7 @@ import {useScreenAnalytics} from "../analytics";
 function UserProfile() {
     const {userId} = useParams<{ userId: string }>();
     const [currentTab, setCurrentTab] = useState('overview');
-    useScreenAnalytics(`user_${userId}`);
+    useScreenAnalytics(`user-${userId}`);
 
     if( !userId )
         return <></>

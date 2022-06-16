@@ -69,7 +69,7 @@ function CourseEditor({course}: {course?: Course | null}) {
     const [openSnackbar, setOpenSnackbar] = useState(false);
     const [invitesOpen, setInvitesOpen] = useState(false);
     const [privateFields, setPrivateFields] = useState<CoursePrivateFields | null>(null);
-    useScreenAnalytics(`course_editor_${course?.id}`);
+    useScreenAnalytics(`course-editor-${course?.id}`);
 
     const onInviteUsersClicked = () => setInvitesOpen(open => !open)
 

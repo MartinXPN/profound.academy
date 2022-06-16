@@ -155,17 +155,15 @@ function CourseDrawer({onItemSelected, onStatusClicked, onCreateExerciseClicked,
             </AppBar>
 
             <Drawer variant="permanent" open={open}>
-                <List disablePadding>
                 <ListItem disablePadding key="home">
-                    <ListItemButton component={Link} to="/" sx={{height: '64px', py: 2}}>
+                    <ListItemButton component={Link} to="/" sx={{height: '64px'}}>
                         <ListItemIcon><SvgIcon fontSize="large"><Logo/></SvgIcon></ListItemIcon>
                         <ListItemText primary={<Typography fontWeight="bold">Profound Academy</Typography>}/>
                     </ListItemButton>
                 </ListItem>
-                </List>
 
-
-                <List disablePadding sx={{overflowY: 'auto', overflowX: 'hidden'}}>
+                {/* List of levels that fills up the whole vertical space (excluding the home and expand buttons) */}
+                <List disablePadding sx={{overflowY: 'auto', overflowX: 'hidden', minHeight: 'calc(100vh - 64px - 48px)'}}>
                 <Tooltip title="Status" arrow placement="right" key="toggle-status">
                     <ListItem disablePadding key="status">
                         <ListItemButton onClick={onStatusClicked}>
@@ -218,7 +216,7 @@ function CourseDrawer({onItemSelected, onStatusClicked, onCreateExerciseClicked,
                 <ListItem disablePadding key="expand-drawer">
                     <ListItemButton
                         onClick={() => open ? handleDrawerClose(): handleDrawerOpen()}
-                        sx={{display: 'flex', justifyContent: open ? 'flex-end' : 'flex-start'}}>
+                        sx={{display: 'flex', justifyContent: open ? 'flex-end' : 'flex-start', height: '48px'}}>
                         {open
                             ? (theme.direction === 'rtl' ? <ChevronRightIcon /> : <ChevronLeftIcon />)
                             : (theme.direction === 'rtl' ? <ChevronLeftIcon /> : <ChevronRightIcon /> )

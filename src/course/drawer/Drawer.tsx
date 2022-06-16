@@ -163,7 +163,7 @@ function CourseDrawer({onItemSelected, onStatusClicked, onCreateExerciseClicked,
                 </ListItem>
 
                 {/* List of levels that fills up the whole vertical space (excluding the home and expand buttons) */}
-                <List disablePadding sx={{overflowY: 'auto', overflowX: 'hidden', minHeight: 'calc(100vh - 64px - 48px)'}}>
+                <List disablePadding sx={{overflowY: 'auto', overflowX: 'hidden', minHeight: 'calc(100% - 64px - 50px)'}}>
                 <Tooltip title="Status" arrow placement="right" key="toggle-status">
                     <ListItem disablePadding key="status">
                         <ListItemButton onClick={onStatusClicked}>

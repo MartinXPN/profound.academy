@@ -8,26 +8,25 @@ import AppBarNotifications from "../user/Notifications";
 import Box from "@mui/material/Box";
 import LandingPage from "./LandingPage";
 import Footer from "./Footer";
-import {Button, Divider, Typography} from "@mui/material";
+import {Button, Divider} from "@mui/material";
 import {useScreenAnalytics} from "../analytics";
 import ElevationScroll from "./ElevationScroll";
 import AppBar from "@mui/material/AppBar";
 import Toolbar from "@mui/material/Toolbar";
 import AppBarHome from "../common/AppBarHome";
 import {Link} from "react-router-dom";
+import Pricing from "./Pricing";
 
 
 function Home() {
     const auth = useContext(AuthContext);
     useScreenAnalytics('home');
 
-    const coursesRef = useRef(null);
-    const pricingRef = useRef(null);
-    const onHomeClicked = () => window.scrollTo({top: 0, behavior: 'smooth'});
-    // @ts-ignore
-    const onCoursesClicked = () => coursesRef.current.scrollIntoView({behavior: 'smooth'});
-    // @ts-ignore
-    const onPricingClicked = () => pricingRef.current.scrollIntoView({behavior: 'smooth'});
+    const onHomeClicked = () => window.scrollTo({behavior: 'smooth', top: 0});
+    const coursesRef = useRef(null);    // @ts-ignore
+    const onCoursesClicked = () => window.scrollTo({ behavior: 'smooth', top: coursesRef.current.offsetTop - 70 });
+    const pricingRef = useRef(null);    // @ts-ignore
+    const onPricingClicked = () => window.scrollTo({ behavior: 'smooth', top: pricingRef.current.offsetTop - 70 });
 
     return <>
         <Box minHeight="100vh">
@@ -50,12 +49,8 @@ function Home() {
             {auth.currentUserId && <ActivityHeatmap userId={auth.currentUserId} />}
             {auth.currentUserId && <CourseList variant="userCourses" title="My Curriculum" userId={auth.currentUserId}/>}
 
-            <Box ref={coursesRef}>
-                <CourseList variant="allCourses" title="All Courses" />
-            </Box>
-            <Box ref={pricingRef}>
-                <Typography>PRICING!!??</Typography>
-            </Box>
+            <Box ref={coursesRef}><CourseList variant="allCourses" title="All Courses" /></Box>
+            <Box ref={pricingRef}><Pricing /></Box>
         </Box>
         <Divider />
         <Footer />

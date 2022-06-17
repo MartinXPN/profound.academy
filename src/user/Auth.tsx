@@ -1,5 +1,5 @@
 import {memo, useCallback, useContext, useEffect, useState, MouseEvent} from 'react';
-import {Avatar, IconButton, MenuItem, ListItemIcon, ListItemText, Typography} from "@mui/material";
+import {Avatar, IconButton, MenuItem, ListItemIcon, ListItemText, Typography, MenuList} from "@mui/material";
 import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import Menu from '@mui/material/Menu';
@@ -87,14 +87,8 @@ export function AppBarProfile() {
             {auth.currentUser ? <Avatar src={auth.currentUser.photoURL} alt={auth.currentUser.displayName} /> : <Avatar/>}
         </IconButton>
 
-        {
-            // Rendering multiple StyledFirebaseAuth components result in https://github.com/firebase/firebaseui-web-react/issues/59
-            // <MenuList autoFocusItem={open} id="menu-list-grow" style={{width: '20em'}}>
-            //     <MenuItem key='sign-in'><SignIn /></MenuItem>
-            // </MenuList>
-        }
 
-        {auth.currentUser && <Menu
+        <Menu
             anchorEl={anchorEl}
             open={open}
             onClose={handleClose}
@@ -109,17 +103,25 @@ export function AppBarProfile() {
             transformOrigin={{ horizontal: 'right', vertical: 'top' }}
             anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}>
 
-            {!showLanguageOptions && <MenuItem onClick={onUserProfileClicked} key="user-profile">
+            {!auth.isSignedIn && !showLanguageOptions && <MenuList
+                autoFocusItem={open}
+                id="menu-list-grow"
+                style={{width: '20em'}}>
+                    <SignIn />
+                </MenuList>
+            }
+
+            {auth.isSignedIn && !showLanguageOptions && <MenuItem onClick={onUserProfileClicked} key="user-profile">
                 <ListItemIcon><AccountCircleIcon fontSize="medium" /></ListItemIcon>
                 <ListItemText>Profile</ListItemText>
             </MenuItem>}
 
             <PreferredLanguage onShowOptions={onShowOptions} onOptionSelected={handleClose} anchorEl={anchorEl} />
 
-            {!showLanguageOptions && <MenuItem onClick={onSignOutClicked} key="sign-out">
+            {auth.isSignedIn && !showLanguageOptions && <MenuItem onClick={onSignOutClicked} key="sign-out">
                 <ListItemIcon><ExitToAppIcon fontSize="medium" /></ListItemIcon>
                 <ListItemText>Logout</ListItemText>
             </MenuItem>}
-        </Menu>}
+        </Menu>
     </>;
 }

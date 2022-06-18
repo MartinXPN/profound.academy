@@ -45,7 +45,7 @@ function Home() {
             </ElevationScroll>
             <Toolbar /> {/* To place the content under the toolbar */}
 
-            {!auth.isSignedIn && <LandingPage onCoursesClicked={onCoursesClicked} />}
+            {!auth.isSignedIn && <LandingPage onCoursesClicked={onCoursesClicked} onPricingClicked={onPricingClicked} />}
             {auth.currentUserId && <ActivityHeatmap userId={auth.currentUserId} />}
             {auth.currentUserId && <CourseList variant="userCourses" title="My Curriculum" userId={auth.currentUserId}/>}
 

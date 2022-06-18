@@ -1,10 +1,11 @@
 import {memo} from "react";
 import {Button, Grid, Typography} from "@mui/material";
-import Container from "@mui/material/Container";
 import Box from "@mui/material/Box";
 import DiscordInvite from "./DiscordInvite";
 import {ReactComponent as Product} from "../assets/product.svg";
 import {ReactComponent as Moon} from "../assets/moon-stars.svg";
+import practice from "../assets/practice.png";
+import Feature from "./Feature";
 
 function Header({onCoursesClicked}: {onCoursesClicked: () => void}) {
     return <>
@@ -22,9 +23,7 @@ function Header({onCoursesClicked}: {onCoursesClicked: () => void}) {
             </Grid>
 
             <Grid item width="50%">
-                <Container>
-                    <Product />
-                </Container>
+                <Product />
             </Grid>
         </Grid>
 
@@ -42,18 +41,11 @@ function LandingPage({error, onCoursesClicked}: {error?: string, onCoursesClicke
         {!!error && <Typography variant="h6" color="error">{error}</Typography>}
         {onCoursesClicked && <Header onCoursesClicked={onCoursesClicked} />}
 
-        <Container>
-            <Box sx={{ my: 2 }}>
-                {[...new Array(32)]
-                    .map(
-                        () => `Cras mattis consectetur purus sit amet fermentum.
-    Cras justo odio, dapibus ac facilisis in, egestas eget quam.
-    Morbi leo risus, porta ac consectetur ac, vestibulum at eros.
-    Praesent commodo cursus magna, vel scelerisque nisl consectetur et.`,
-                    )
-                    .join('\n')}
-            </Box>
-        </Container>
+        <Feature title="Learn through practice"
+                 description="Each concept is explained through many exercises that help you master the topics.
+                 You make progress my solving various challenges instead of only consuming content."
+                 media={practice}
+                 mediaPosition="left"/>
 
         <DiscordInvite />
     </>

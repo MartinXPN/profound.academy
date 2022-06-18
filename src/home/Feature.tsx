@@ -1,11 +1,13 @@
 import {memo} from "react";
-import {Box, Grid, Typography} from "@mui/material";
+import {Box, Card, CardMedia, Grid, Typography} from "@mui/material";
 
 function Feature({title, description, media, mediaPosition}: {
     title: string, description: string, media: string, mediaPosition: 'left' | 'right',
 }) {
     const mediaPart = <>
-        <img src={media} alt={title} loading="lazy" style={{height: '100%', width: '100%', objectFit: 'cover'}} />
+        <Card raised sx={{borderRadius: 8}}>
+            <CardMedia component="img" alt={title} image={media} height="100%" width="100%" />
+        </Card>
     </>
     const contentPart = <>
         <Box marginX={4}>

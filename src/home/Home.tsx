@@ -31,7 +31,7 @@ function Home() {
     return <>
         <Box minHeight="100vh">
             <ElevationScroll>
-                <AppBar sx={{background: auth.isSignedIn ? '#FFFFFF' : '#0F1729'}} {...(auth.isSignedIn && {color: 'default'})}>
+                <AppBar color={auth.isSignedIn ? 'default' : 'secondary'} sx={{...(auth.isSignedIn && {background: 'white'})}}>
                     <Toolbar>
                         <AppBarHome onClick={onHomeClicked} sx={{mr: 2}} />
                         <Button onClick={onCoursesClicked} size="large" color="inherit" sx={{textTransform: 'none'}}>Courses</Button>
@@ -45,7 +45,7 @@ function Home() {
             </ElevationScroll>
             <Toolbar /> {/* To place the content under the toolbar */}
 
-            {!auth.isSignedIn && <LandingPage />}
+            {!auth.isSignedIn && <LandingPage onCoursesClicked={onCoursesClicked} />}
             {auth.currentUserId && <ActivityHeatmap userId={auth.currentUserId} />}
             {auth.currentUserId && <CourseList variant="userCourses" title="My Curriculum" userId={auth.currentUserId}/>}
 

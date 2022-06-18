@@ -2,6 +2,7 @@ import {memo} from "react";
 import {Typography} from "@mui/material";
 import Container from "@mui/material/Container";
 import Box from "@mui/material/Box";
+import DiscordInvite from "./DiscordInvite";
 
 
 function LandingPage({error}: {error?: string}) {
@@ -21,6 +22,8 @@ function LandingPage({error}: {error?: string}) {
                     .join('\n')}
             </Box>
         </Container>
+
+        <DiscordInvite />
     </>
 }
 

@@ -1,4 +1,4 @@
-# <img alt="Profound Academy logo" src="src/logo.svg" width="80"/> Profound Academy
+# <img alt="Profound Academy logo" src="public/logo.svg" width="30"/> Profound Academy
 
 [Profound Academy](https://profound.academy) is an educational platform with a primary focus on hands-on learning 
 that enables teachers and course makers to easily create courses with rigorous practice exercises and tests. 

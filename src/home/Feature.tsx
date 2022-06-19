@@ -8,7 +8,7 @@ function Feature({title, description, media, mediaPosition, action, onButtonClic
 }) {
     const mediaPart = <>
         <Card raised sx={{borderRadius: 8}}>
-            <CardMedia component="img" alt={title} image={media} height="100%" width="100%" />
+            <CardMedia component="img" alt={title} image={media} loading="lazy" height="100%" width="100%" />
         </Card>
     </>
     const contentPart = <>

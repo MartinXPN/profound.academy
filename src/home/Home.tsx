@@ -1,4 +1,4 @@
-import {useContext, memo, useRef, lazy, Suspense} from "react";
+import {useContext, memo, useRef} from "react";
 import {AuthContext} from "../App";
 import ActivityHeatmap from "../user/ActivityHeatmap";
 import CourseList from "../course/CourseList";
@@ -15,7 +15,7 @@ import Toolbar from "@mui/material/Toolbar";
 import AppBarHome from "../common/AppBarHome";
 import {Link} from "react-router-dom";
 import Pricing from "./Pricing";
-const LandingPage = lazy(() => import('./LandingPage'));
+import LandingPage from "./LandingPage";
 
 
 function Home() {
@@ -45,7 +45,7 @@ function Home() {
             </ElevationScroll>
             <Toolbar /> {/* To place the content under the toolbar */}
 
-            {!auth.isSignedIn && <Suspense fallback={<></>}><LandingPage onCoursesClicked={onCoursesClicked} onPricingClicked={onPricingClicked} /></Suspense>}
+            {!auth.isSignedIn && <LandingPage onCoursesClicked={onCoursesClicked} onPricingClicked={onPricingClicked} />}
             {auth.currentUserId && <ActivityHeatmap userId={auth.currentUserId} />}
             {auth.currentUserId && <CourseList variant="userCourses" title="My Curriculum" userId={auth.currentUserId}/>}
 

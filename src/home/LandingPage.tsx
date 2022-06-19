@@ -1,11 +1,10 @@
-import {memo} from "react";
+import {memo, lazy, Suspense} from "react";
 import {Button, Grid, Typography} from "@mui/material";
 import Box from "@mui/material/Box";
 import DiscordInvite from "./DiscordInvite";
-import {ReactComponent as Product} from "../assets/product.svg";
-import {ReactComponent as Moon} from "../assets/moon-stars.svg";
 import Feature from "./Feature";
-import practice from '../assets/practice.png';
+const Product = lazy(() => import('../assets/Product'));
+const Moon = lazy(() => import('../assets/Moon'));
 
 function Header({onCoursesClicked}: {onCoursesClicked: () => void}) {
     return <>
@@ -23,12 +22,12 @@ function Header({onCoursesClicked}: {onCoursesClicked: () => void}) {
             </Grid>
 
             <Grid item width="50%">
-                <Product />
+                <Suspense fallback={<></>}><Product /></Suspense>
             </Grid>
         </Grid>
 
         <Box marginLeft={10} position="absolute" bottom={-3} width={600}>
-            <Moon />
+            <Suspense fallback={<></>}><Moon /></Suspense>
         </Box>
         </Box>
     </>
@@ -46,41 +45,39 @@ function LandingPage({error, onCoursesClicked, onPricingClicked}: {
         <Feature title="Learn Through Practice"
                  description="Each concept in the courses is explained through many exercises that help you master the topics.
                  Everything is hands-on and interactive, so you make progress by solving various challenges instead of only consuming content."
-                 media={practice}
-                 mediaPosition="left"/>
+                 media="/demo/practice.png" mediaPosition="left"/>
 
         <Feature title="Group Tutoring"
                  description="Sign up for group tutoring sessions to get the benefit of a more regular practice.
                  Meetings take place at the time you pick. You can participate in 2-3 weekly sessions."
-                 media={practice} mediaPosition="right"
+                 media="/demo/practice.png" mediaPosition="right"
                  action="Sign up for group tutoring" onButtonClicked={onPricingClicked} />
 
         <Feature title="Free Tailored Courses"
                  description="Sign up for courses of different levels and start learning for free!
                  Courses contain exercises of different difficulty levels to keep you engaged and motivated."
-                 media={practice} mediaPosition="left"
+                 media="/demo/practice.png" mediaPosition="left"
                  action="Explore Courses" onButtonClicked={onCoursesClicked} />
-
         <DiscordInvite />
 
         <Feature title="Profound Academy for Individuals"
                  description="With Profound Academy students have the flexibility of learning at their own pace.
                  Each concept is explained with a supplementary exercise, where the platform provides instant feedback for each submission.
                  Every exercise can be submitted with a single click, providing instant feedback on the correctness of a solution."
-                 media={practice} mediaPosition="right"
+                 media="/demo/practice.png" mediaPosition="right"
                  action="Explore Courses" onButtonClicked={onCoursesClicked} />
 
         <Feature title="Profound Academy for Teachers"
                  description="Teachers can create courses within several clicks, while the platform automatically checks for solution correctness.
                  Contests can help with organizing the screening process for a course or to motivate students and increase their engagement.
                  Please contact us so that we can best help you get started."
-                 media={practice} mediaPosition="left" />
+                 media="/demo/practice.png" mediaPosition="left" />
 
         <Feature title="Profound Academy for Institutions"
                  description="Institutions can get the courses and competitions created by us to teach their students without creating everything from scratch.
                  All the content is customizable, so the tutors can adjust the courses to their needs.
                  Please contact us so that we can best help you get started."
-                 media={practice} mediaPosition="right" />
+                 media="/demo/practice.png" mediaPosition="right" />
     </>
 }
 

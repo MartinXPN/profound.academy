@@ -8,7 +8,7 @@ function DiscordInvite() {
     return <>
         <Box bgcolor="secondary.main">
         <Grid container direction="column" justifyContent="center" alignContent="center" alignItems="center"
-              spacing={4} paddingY={4} paddingX={8} marginY={4}>
+              spacing={4} padding={8} marginY={4}>
 
             <Typography variant="h1" fontSize={32} textAlign="center" color="white">Join the community of learners</Typography>
             <Typography textAlign="center" color="white">

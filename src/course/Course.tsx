@@ -13,12 +13,11 @@ import CourseDrawer from "./drawer/Drawer";
 import Exercise from "./exercise/Exercise";
 import {safeParse} from "../common/stickystate";
 import StatusPage from "./StatusPage";
-import LandingPage from "../home/LandingPage";
 import {Helmet} from "react-helmet-async";
 import {LocalizeContext} from "../common/Localization";
 import {Box} from "@mui/material";
 import {useScreenAnalytics} from "../analytics";
-
+const LandingPage = lazy(() => import('../home/LandingPage'));
 const CourseEditor = lazy(() => import('./CourseEditor'));
 
 
@@ -147,7 +146,7 @@ function CourseView() {
 
     const openPage = useCallback((pageId: string) => navigate(pageId), [navigate]);
 
-    if( error )     return <LandingPage error={error} />
+    if( error )     return <Suspense fallback={<></>}><LandingPage error={error} /></Suspense>
     if( !course )   return <></>
     return <>
         <Helmet>

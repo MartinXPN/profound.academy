@@ -4,8 +4,8 @@ import Box from "@mui/material/Box";
 import DiscordInvite from "./DiscordInvite";
 import {ReactComponent as Product} from "../assets/product.svg";
 import {ReactComponent as Moon} from "../assets/moon-stars.svg";
-import practice from "../assets/practice.png";
 import Feature from "./Feature";
+import practice from '../assets/practice.png';
 
 function Header({onCoursesClicked}: {onCoursesClicked: () => void}) {
     return <>

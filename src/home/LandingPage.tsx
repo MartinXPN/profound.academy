@@ -50,13 +50,13 @@ function LandingPage({error, onCoursesClicked, onPricingClicked}: {
         <Feature title="Group Tutoring"
                  description="Sign up for group tutoring sessions to get the benefit of a more regular practice.
                  Meetings take place at the time you pick. You can participate in 2-3 weekly sessions."
-                 media="/demo/practice.png" mediaPosition="right"
+                 media="/demo/group-tutoring.jpg" mediaPosition="right"
                  action="Sign up for group tutoring" onButtonClicked={onPricingClicked} />
 
         <Feature title="Free Tailored Courses"
                  description="Sign up for courses of different levels and start learning for free!
                  Courses contain exercises of different difficulty levels to keep you engaged and motivated."
-                 media="/demo/practice.png" mediaPosition="left"
+                 media="/demo/courses.jpg" mediaPosition="left"
                  action="Explore Courses" onButtonClicked={onCoursesClicked} />
         <DiscordInvite />
 
@@ -64,20 +64,20 @@ function LandingPage({error, onCoursesClicked, onPricingClicked}: {
                  description="With Profound Academy students have the flexibility of learning at their own pace.
                  Each concept is explained with a supplementary exercise, where the platform provides instant feedback for each submission.
                  Every exercise can be submitted with a single click, providing instant feedback on the correctness of a solution."
-                 media="/demo/practice.png" mediaPosition="right"
+                 media="/demo/individual.jpg" mediaPosition="right"
                  action="Explore Courses" onButtonClicked={onCoursesClicked} />
 
         <Feature title="Profound Academy for Teachers"
                  description="Teachers can create courses within several clicks, while the platform automatically checks for solution correctness.
                  Contests can help with organizing the screening process for a course or to motivate students and increase their engagement.
                  Please contact us so that we can best help you get started."
-                 media="/demo/practice.png" mediaPosition="left" />
+                 media="/demo/teacher.jpg" mediaPosition="left" />
 
         <Feature title="Profound Academy for Institutions"
                  description="Institutions can get the courses and competitions created by us to teach their students without creating everything from scratch.
                  All the content is customizable, so the tutors can adjust the courses to their needs.
                  Please contact us so that we can best help you get started."
-                 media="/demo/practice.png" mediaPosition="right" />
+                 media="/demo/institution.jpg" mediaPosition="right" />
     </>
 }
 

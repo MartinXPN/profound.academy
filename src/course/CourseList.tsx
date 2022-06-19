@@ -52,7 +52,7 @@ function CourseList({variant, title, userId}: {
     if( !courses || (courses.length === 0 && !hasInstructorPermissions) )
         return <></>
     return <>
-        <Typography variant="h5" textAlign="center" marginTop={2}>{title}</Typography>
+        <Typography variant="h1" textAlign="center" marginTop={2} fontSize={32}>{title}</Typography>
         <Box display="flex" justifyContent="center" alignItems="center">
             <Grid container alignItems="center" justifyContent="center" width={1000} maxWidth="100%" spacing={0.5}>
                 {isCurrentUserCourses && hasInstructorPermissions &&

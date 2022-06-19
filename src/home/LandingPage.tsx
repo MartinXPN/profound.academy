@@ -1,101 +1,83 @@
-import {memo, useContext, useState} from "react";
-import Button from "@mui/material/Button";
-import {SignIn} from "../user/Auth";
+import {memo, lazy, Suspense} from "react";
+import {Button, Grid, Typography} from "@mui/material";
 import Box from "@mui/material/Box";
-import {styled} from "@mui/material/styles";
-import {Grid, Typography} from "@mui/material";
-import {LocalizeContext} from "../common/Localization";
-import Content from "../common/notion/Content";
+import DiscordInvite from "./DiscordInvite";
+import Feature from "./Feature";
+const Product = lazy(() => import('../assets/Product'));
+const Moon = lazy(() => import('../assets/Moon'));
+
+function Header({onCoursesClicked}: {onCoursesClicked: () => void}) {
+    return <>
+        <Box bgcolor="secondary.main" position="relative" height={1000} maxHeight="calc(100vh - 64px)">
+        <Grid container justifyContent="center" padding={8} sx={{display: 'flex'}}>
+            <Grid item width="50%" padding={6}>
+                <Typography variant="h1" color="white" fontSize={50} fontWeight="bold" marginY={2}>
+                    In-depth hands-on interactive courses
+                </Typography>
+                <Typography variant="h2" color="white" fontSize={18} marginY={2}>
+                    Explore tailored courses that guide your programming journey from beginner to the advanced level.
+                </Typography>
+
+                <Button onClick={onCoursesClicked} size="large" color="primary" variant="contained" sx={{textTransform: 'none', my: 2}}>Explore Courses</Button>
+            </Grid>
+
+            <Grid item width="50%">
+                <Suspense fallback={<></>}><Product /></Suspense>
+            </Grid>
+        </Grid>
+
+        <Box marginLeft={10} position="absolute" bottom={-3} width={600}>
+            <Suspense fallback={<></>}><Moon /></Suspense>
+        </Box>
+        </Box>
+    </>
+}
 
 
-const TopOval = styled('div')(({ theme }) => ({
-    background: '#151c26',
-    position: 'absolute',
-    top: 0,
-    right: 0,
-    zIndex: -1,
-
-    [theme.breakpoints.down('md')]: {
-        width: 0,
-        height: 0,
-    },
-    [theme.breakpoints.up('md')]: {
-        width: '160%',
-        height: '200%',
-        borderRadius: '50% 50% 50% 50% / 80% 80% 80% 80%',
-        transform: 'translate(50%, -50%)',
-    },
-}));
-
-const StartActions = styled(Grid)(({ theme }) => ({
-    alignContent: 'center',
-    alignItems: 'center',
-    justifyContent: 'center',
-
-    [theme.breakpoints.down('md')]: {
-        color: 'black',
-    },
-    [theme.breakpoints.up('md')]: {
-        color: 'white',
-        paddingTop: '10em',
-        paddingBottom: '10em',
-    },
-}));
-
-const Root = styled(Box)(({ theme }) => ({
-    position: 'relative',
-    width: '100%',
-    maxWidth: '100vw',
-    overflow: 'hidden',
-    [theme.breakpoints.down('md')]: {
-        height: '65em',
-        minHeight: '35em',
-    },
-    [theme.breakpoints.up('md')]: {
-        height: '50em',
-        minHeight: '35em',
-        maxHeight: '100vh',
-    },
-}));
-
-const content = {
-    enUS: '2f7d510201724893be5679ba69e5f543',
-} as const;
-
-
-function LandingPage({error}: {error?: string}) {
-    const {localize} = useContext(LocalizeContext);
-    const [showSignInOptions, setShowSignInOptions] = useState(false);
-    const landingPageImageURL = 'https://firebasestorage.googleapis.com/v0/b/profound-academy.appspot.com/o/images%2Fwebsite-landing-removebg.png?alt=media&token=ebd74cb6-4eab-4ac8-87af-6ef0442ab699';
+function LandingPage({error, onCoursesClicked, onPricingClicked}: {
+    error?: string, onCoursesClicked?: () => void, onPricingClicked?: () => void,
+}) {
 
     return <>
-        <Root>
-            <TopOval />
-            <Grid container direction="row">
-                <Grid item xs={12} sm={10} md={5} lg={5} xl={4} padding="5em">
-                    <img width="100%" src={landingPageImageURL} alt="Landing page cover"/>
-                </Grid>
-                <StartActions item xs={12} sm={12} md={7} lg={7} xl={7} paddingX="1em">
-                    <Typography variant="h3" sx={{fontWeight: 'bold'}}>Profound Academy</Typography>
-                    <Typography variant="h5">Get in-depth knowledge</Typography>
-                    <Typography variant="h6" sx={{color: '#bdbdbd'}}>
-                        Explore various courses that guide your journey from beginner to advanced level
-                    </Typography>
-                    {!!error && <Typography variant="h6" color="error">{error}</Typography>}
-                    <Box alignContent="center" textAlign="center" paddingTop={4}>
-                        {showSignInOptions
-                            ? <SignIn />
-                            : <Button
-                                variant="contained" color="primary" size="large" sx={{margin: 4}}
-                                onClick={() => setShowSignInOptions(true)}>GET STARTED</Button>}
-                    </Box>
-                </StartActions>
+        {!!error && <Typography variant="h6" color="error">{error}</Typography>}
+        {onCoursesClicked && <Header onCoursesClicked={onCoursesClicked} />}
 
-            </Grid>
-        </Root>
+        <Feature title="Learn Through Practice"
+                 description="Each concept in the courses is explained through many exercises that help you master the topics.
+                 Everything is hands-on and interactive, so you make progress by solving various challenges instead of only consuming content."
+                 media="/demo/practice.png" mediaPosition="left"/>
 
-        <Content notionPage={localize(content)} />
-        <br/>
+        <Feature title="Group Tutoring"
+                 description="Sign up for group tutoring sessions to get the benefit of a more regular practice.
+                 Meetings take place at the time you pick. You can participate in 2-3 weekly sessions."
+                 media="/demo/group-tutoring.jpg" mediaPosition="right"
+                 action="Sign up for group tutoring" onButtonClicked={onPricingClicked} />
+
+        <Feature title="Free Tailored Courses"
+                 description="Sign up for courses of different levels and start learning for free!
+                 Courses contain exercises of different difficulty levels to keep you engaged and motivated."
+                 media="/demo/courses.jpg" mediaPosition="left"
+                 action="Explore Courses" onButtonClicked={onCoursesClicked} />
+        <DiscordInvite />
+
+        <Feature title="Profound Academy for Individuals"
+                 description="With Profound Academy students have the flexibility of learning at their own pace.
+                 Each concept is explained with a supplementary exercise, where the platform provides instant feedback for each submission.
+                 Every exercise can be submitted with a single click, providing instant feedback on the correctness of a solution."
+                 media="/demo/individual.jpg" mediaPosition="right"
+                 action="Explore Courses" onButtonClicked={onCoursesClicked} />
+
+        <Feature title="Profound Academy for Teachers"
+                 description="Teachers can create courses within several clicks, while the platform automatically checks for solution correctness.
+                 Contests can help with organizing the screening process for a course or to motivate students and increase their engagement.
+                 Please contact us so that we can best help you get started."
+                 media="/demo/teacher.jpg" mediaPosition="left" />
+
+        <Feature title="Profound Academy for Institutions"
+                 description="Institutions can get the courses and competitions created by us to teach their students without creating everything from scratch.
+                 All the content is customizable, so the tutors can adjust the courses to their needs.
+                 Please contact us so that we can best help you get started."
+                 media="/demo/institution.jpg" mediaPosition="right" />
     </>
 }
 

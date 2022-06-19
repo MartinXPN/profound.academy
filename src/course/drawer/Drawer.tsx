@@ -23,7 +23,7 @@ import {onUserProgressChanged} from "../../services/progress";
 import {CourseContext} from "../Course";
 import Countdown from "react-countdown";
 import {Divider, List, ListItem, ListItemButton, Stack, SvgIcon, Tooltip, Typography} from "@mui/material";
-import { ReactComponent as Logo } from "../../logo.svg";
+import { ReactComponent as Logo } from "../../assets/logo.svg";
 import useWindowDimensions from "../../common/windowDimensions";
 
 

@@ -22,7 +22,7 @@ import {AuthContext} from "../../App";
 import {onUserProgressChanged} from "../../services/progress";
 import {CourseContext} from "../Course";
 import Countdown from "react-countdown";
-import {Divider, List, ListItem, ListItemButton, Stack, SvgIcon, Tooltip, Typography} from "@mui/material";
+import {Button, Divider, List, ListItem, ListItemButton, Stack, SvgIcon, Tooltip, Typography} from "@mui/material";
 import { ReactComponent as Logo } from "../../assets/logo.svg";
 import useWindowDimensions from "../../common/windowDimensions";
 
@@ -55,22 +55,20 @@ interface AppBarProps extends MuiAppBarProps {
 const AppBar = styled(MuiAppBar, {
     shouldForwardProp: (prop) => prop !== 'open',
 })<AppBarProps>(({ theme, open }) => ({
-    zIndex: theme.zIndex.drawer + 1,
+    zIndex: theme.zIndex.drawer - 1,
     transition: theme.transitions.create(['width', 'margin'], {
         easing: theme.transitions.easing.sharp,
         duration: theme.transitions.duration.leavingScreen,
     }),
     ...(open && {
-        marginLeft: drawerWidth,
-        width: `calc(100% - ${drawerWidth}px)`,
+        paddingLeft: drawerWidth,
         transition: theme.transitions.create(['width', 'margin'], {
             easing: theme.transitions.easing.sharp,
             duration: theme.transitions.duration.enteringScreen,
         }),
     }),
     ...(!open && {
-        marginLeft: `calc(${theme.spacing(9)} + 2px)`,
-        width: `calc(100% - ${theme.spacing(9)} - 2px)`,
+        paddingLeft: `calc(${theme.spacing(9)} + 2px)`,
     }),
 }));
 
@@ -142,6 +140,12 @@ function CourseDrawer({onItemSelected, onStatusClicked, onCreateExerciseClicked,
                         course.freezeAt.toDate().getTime() - now < 24 * 60 * 60 * 1000 && // show only if < 1 day remains
                         <Countdown date={course.freezeAt.toDate()} intervalDelay={0} precision={3} renderer={renderTimeRemaining}/> }
 
+                    {!auth.isSignedIn && <>
+                        <Button component={Link} to="/">
+                            <SvgIcon fontSize="large"><Logo/></SvgIcon>
+                        </Button>
+                    </>}
+
                     {width > 500 &&
                     <Typography noWrap fontSize={18} fontWeight="bold" marginX="1em">
                         {course.title}
@@ -154,7 +158,7 @@ function CourseDrawer({onItemSelected, onStatusClicked, onCreateExerciseClicked,
                 </Toolbar>
             </AppBar>
 
-            <Drawer variant="permanent" open={open}>
+            {auth.isSignedIn && <Drawer variant="permanent" open={open}>
                 <ListItem disablePadding key="home">
                     <ListItemButton component={Link} to="/" sx={{height: '64px'}}>
                         <ListItemIcon><SvgIcon fontSize="large"><Logo/></SvgIcon></ListItemIcon>
@@ -223,7 +227,7 @@ function CourseDrawer({onItemSelected, onStatusClicked, onCreateExerciseClicked,
                         }
                     </ListItemButton>
                 </ListItem>
-            </Drawer>
+            </Drawer>}
         </Box>
     </>
 }

@@ -15,20 +15,11 @@ import {safeParse} from "../common/stickystate";
 import StatusPage from "./StatusPage";
 import {Helmet} from "react-helmet-async";
 import {LocalizeContext} from "../common/Localization";
-import {Box} from "@mui/material";
+import {Box, Toolbar} from "@mui/material";
 import {useScreenAnalytics} from "../analytics";
 const LandingPage = lazy(() => import('../home/LandingPage'));
 const CourseEditor = lazy(() => import('./CourseEditor'));
 
-
-const DrawerHeader = styled('div')(({ theme }) => ({
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'flex-start',
-    padding: theme.spacing(0, 2),
-    // necessary for content to be below app bar
-    ...theme.mixins.toolbar,
-}));
 
 export const CourseContext = createContext<{ course: Course | null }>({course: null});
 export const CurrentExerciseContext = createContext<{ exercise: ExerciseModel | null }>({exercise: null});
@@ -113,7 +104,7 @@ function CurrentCourseView({openPage}: {openPage: (page: string) => void}) {
                 onWidthChanged={setDrawerWidth}/>
 
             <Box flexGrow={1} padding={0} maxWidth={`calc(100vw - ${drawerWidth} - 1px)`}>
-                <DrawerHeader />
+                <Toolbar /> {/* To place the content under the toolbar */}
                 {content}
             </Box>
         </CurrentExerciseContext.Provider>

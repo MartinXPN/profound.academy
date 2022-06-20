@@ -10,7 +10,7 @@ const Moon = lazy(() => import('../assets/Moon'));
 
 function Header({onCoursesClicked}: {onCoursesClicked: () => void}) {
     const theme = useTheme();
-    const smallScreen = useMediaQuery(theme.breakpoints.up('md'));
+    const largeScreen = useMediaQuery(theme.breakpoints.up('md'));
 
     return <>
         <Box bgcolor="secondary.main" position="relative" height={1000} maxHeight="calc(100vh - 64px)">
@@ -25,7 +25,7 @@ function Header({onCoursesClicked}: {onCoursesClicked: () => void}) {
                         Explore tailored courses that guide your programming journey from beginner to the advanced level.
                     </Typography>
                 }
-                media={<Suspense fallback={<></>}><Product width={smallScreen ? '100%' : 300} height={smallScreen ? '100%' : 300} /></Suspense>}
+                media={<Suspense fallback={<></>}><Product width={largeScreen ? '100%' : 300} height={largeScreen ? '100%' : 300} /></Suspense>}
                 mediaPosition="right"
                 action="Explore Courses" onButtonClicked={onCoursesClicked} />
 

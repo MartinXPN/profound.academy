@@ -13,7 +13,7 @@ function Header({onCoursesClicked}: {onCoursesClicked: () => void}) {
     const largeScreen = useMediaQuery(theme.breakpoints.up('md'));
 
     return <>
-        <Box bgcolor="secondary.main" position="relative" height={1000} maxHeight="calc(100vh - 64px)">
+        <Box bgcolor="secondary.main" position="relative" height={1000} maxHeight="calc(100vh - 64px)" minHeight={700} marginBottom={4}>
             <MediaFeature
                 title={
                     <Typography variant="h1" color="white" fontWeight="bold" marginY={2}>

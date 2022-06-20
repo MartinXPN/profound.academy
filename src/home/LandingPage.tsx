@@ -1,29 +1,35 @@
 import {memo, lazy, Suspense} from "react";
-import {Typography} from "@mui/material";
+import {Typography, useMediaQuery} from "@mui/material";
 import Box from "@mui/material/Box";
 import DiscordInvite from "./DiscordInvite";
 import Feature, {MediaFeature} from "./Feature";
+import {useTheme} from "@mui/material/styles";
 const Product = lazy(() => import('../assets/Product'));
 const Moon = lazy(() => import('../assets/Moon'));
 
 
 function Header({onCoursesClicked}: {onCoursesClicked: () => void}) {
-    const content = <>
-        <Typography variant="h1" color="white" fontWeight="bold" marginY={2}>
-            In-depth hands-on interactive courses
-        </Typography>
-        <Typography variant="h3" color="white" fontSize={18} marginTop={2} marginBottom={4}>
-            Explore tailored courses that guide your programming journey from beginner to the advanced level.
-        </Typography>
-    </>
+    const theme = useTheme();
+    const smallScreen = useMediaQuery(theme.breakpoints.up('md'));
 
     return <>
         <Box bgcolor="secondary.main" position="relative" height={1000} maxHeight="calc(100vh - 64px)">
-            <MediaFeature content={content}
-                          media={<Suspense fallback={<></>}><Product /></Suspense>} mediaPosition="right"
-                          action="Explore Courses" onButtonClicked={onCoursesClicked} />
+            <MediaFeature
+                title={
+                    <Typography variant="h1" color="white" fontWeight="bold" marginY={2}>
+                        In-depth hands-on interactive courses
+                    </Typography>
+                }
+                description={
+                    <Typography variant="h3" color="white" fontSize={18} marginTop={2} marginBottom={4}>
+                        Explore tailored courses that guide your programming journey from beginner to the advanced level.
+                    </Typography>
+                }
+                media={<Suspense fallback={<></>}><Product width={smallScreen ? '100%' : 300} height={smallScreen ? '100%' : 300} /></Suspense>}
+                mediaPosition="right"
+                action="Explore Courses" onButtonClicked={onCoursesClicked} />
 
-            <Box marginLeft={10} position="absolute" bottom={-3} width={600}>
+            <Box marginLeft={10} position="absolute" bottom={0} width={600} sx={{ display: { xs: 'none', md: 'flex' } }}>
                 <Suspense fallback={<></>}><Moon /></Suspense>
             </Box>
         </Box>

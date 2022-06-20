@@ -1,9 +1,13 @@
 # <img alt="Profound Academy logo" src="public/logo.svg" width="30"/> Profound Academy
 
-[Profound Academy](https://profound.academy) is an educational platform with a primary focus on hands-on learning 
-that enables teachers and course makers to easily create courses with rigorous practice exercises and tests. 
-The aim of the platform is to save tutors’ time on homework checking 
-and allow students to learn at their own pace while increasing their engagement throughout the learning process.
+[Profound Academy](https://profound.academy) is an educational platform that provides tailored courses for hands-on learning about computer science topics. Everything is hands-on and interactive, so the only way to make progress is by solving various challenges, instead of only consuming content.
+Students seeking a regular learning schedule can sign up for our group tutoring sessions, which is especially useful for increasing the chances of actually completing the course.
+
+🤔 Did you know that the completion rate of an online computer science course is ~5%?
+
+So, ~95% of people don’t get to the end of the course and drop it as soon as they reach a challenging topic.
+
+We try to fix that problem by providing tutoring sessions that help people get unstuck and progress faster.
 
 
 | Join the community                                                                                  | Visit Profound Academy   | Contact us                                                |

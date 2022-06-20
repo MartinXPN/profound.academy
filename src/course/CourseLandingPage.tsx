@@ -7,7 +7,6 @@ import {AuthContext} from "../App";
 import {CourseContext} from "./Course";
 import Box from "@mui/material/Box";
 import {onUserInfoChanged} from "../services/users";
-import {useTheme} from "@mui/material/styles";
 
 
 function CourseLandingPage({onStartCourseClicked, onRegisterCourseClicked}: {
@@ -16,7 +15,6 @@ function CourseLandingPage({onStartCourseClicked, onRegisterCourseClicked}: {
 }) {
     const auth = useContext(AuthContext);
     const {course} = useContext(CourseContext);
-    const theme = useTheme();
     const [registered, setRegistered] = useState(false);
     useEffect(() => {
         if( !course?.id || !auth.currentUserId )
@@ -37,7 +35,7 @@ function CourseLandingPage({onStartCourseClicked, onRegisterCourseClicked}: {
             <Typography variant="h2">Starts in</Typography>
             <Typography variant="h1">{days}d {hours}:{minutes.toString().padStart(2, '0')}:{seconds.toString().padStart(2, '0')}</Typography>
             {!registered && <Button color="primary" variant="contained" onClick={onRegisterCourseClicked}>REGISTER</Button>}
-            {registered && <Typography fontWeight="bold" sx={{color: theme.palette.success.light}}>Registered!</Typography>}
+            {registered && <Typography fontWeight="bold" color="success.light">Registered!</Typography>}
         </>;
     };
 

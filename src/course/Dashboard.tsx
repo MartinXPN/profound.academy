@@ -16,9 +16,9 @@ function CourseMetricStat({title, icon, value, difference}: {title: string, icon
         <Grid container direction="column" sx={{padding: '2em'}}>
             <Box marginX="auto" textAlign="center">
                 <Grid container direction="row" alignItems="center">
-                    {value ? <Typography variant="h6" textAlign="center">{value}</Typography> : <CircularProgress/>}
-                    {!!difference && difference > 0 && <Typography variant="h6" textAlign="center" noWrap sx={{color: theme.palette.success.light}}>&nbsp; (+{difference})</Typography>}
-                    {!!difference && difference < 0 && <Typography variant="h6" textAlign="center" noWrap sx={{color: theme.palette.error.main}}>&nbsp; ({difference})</Typography>}
+                    {value ? <Typography variant="h3" textAlign="center">{value}</Typography> : <CircularProgress/>}
+                    {!!difference && difference > 0 && <Typography variant="h3" textAlign="center" noWrap sx={{color: theme.palette.success.light}}>&nbsp; (+{difference})</Typography>}
+                    {!!difference && difference < 0 && <Typography variant="h3" textAlign="center" noWrap sx={{color: theme.palette.error.main}}>&nbsp; ({difference})</Typography>}
                 </Grid>
             </Box>
 

@@ -1,34 +1,31 @@
 import {memo, lazy, Suspense} from "react";
-import {Button, Grid, Typography} from "@mui/material";
+import {Typography} from "@mui/material";
 import Box from "@mui/material/Box";
 import DiscordInvite from "./DiscordInvite";
-import Feature from "./Feature";
+import Feature, {MediaFeature} from "./Feature";
 const Product = lazy(() => import('../assets/Product'));
 const Moon = lazy(() => import('../assets/Moon'));
 
+
 function Header({onCoursesClicked}: {onCoursesClicked: () => void}) {
+    const content = <>
+        <Typography variant="h1" color="white" fontSize={50} fontWeight="bold" marginY={2}>
+            In-depth hands-on interactive courses
+        </Typography>
+        <Typography variant="h2" color="white" fontSize={18} marginTop={2} marginBottom={4}>
+            Explore tailored courses that guide your programming journey from beginner to the advanced level.
+        </Typography>
+    </>
+
     return <>
         <Box bgcolor="secondary.main" position="relative" height={1000} maxHeight="calc(100vh - 64px)">
-        <Grid container justifyContent="center" padding={8} sx={{display: 'flex'}}>
-            <Grid item width="50%" padding={6}>
-                <Typography variant="h1" color="white" fontSize={50} fontWeight="bold" marginY={2}>
-                    In-depth hands-on interactive courses
-                </Typography>
-                <Typography variant="h2" color="white" fontSize={18} marginY={2}>
-                    Explore tailored courses that guide your programming journey from beginner to the advanced level.
-                </Typography>
+            <MediaFeature content={content}
+                          media={<Suspense fallback={<></>}><Product /></Suspense>} mediaPosition="right"
+                          action="Explore Courses" onButtonClicked={onCoursesClicked} />
 
-                <Button onClick={onCoursesClicked} size="large" color="primary" variant="contained" sx={{textTransform: 'none', my: 2}}>Explore Courses</Button>
-            </Grid>
-
-            <Grid item width="50%">
-                <Suspense fallback={<></>}><Product /></Suspense>
-            </Grid>
-        </Grid>
-
-        <Box marginLeft={10} position="absolute" bottom={-3} width={600}>
-            <Suspense fallback={<></>}><Moon /></Suspense>
-        </Box>
+            <Box marginLeft={10} position="absolute" bottom={-3} width={600}>
+                <Suspense fallback={<></>}><Moon /></Suspense>
+            </Box>
         </Box>
     </>
 }

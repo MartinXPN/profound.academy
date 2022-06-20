@@ -32,7 +32,7 @@ class ErrorBoundary extends Component<{}, { error: Error | null }> {
         // You can render any custom fallback UI
         if (this.state.error)
             return <>
-                <Typography variant="h2" textAlign="center">Something went wrong</Typography>
+                <Typography variant="h1" textAlign="center">Something went wrong</Typography>
                 <Typography whiteSpace="pre-wrap" textAlign="center">{this.state.error.message}</Typography>
             </>
 

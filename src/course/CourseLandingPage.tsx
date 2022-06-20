@@ -34,8 +34,8 @@ function CourseLandingPage({onStartCourseClicked, onRegisterCourseClicked}: {
             </>
         return <>
             <br/><br/><br/>
-            <Typography variant="h5">Starts in</Typography>
-            <Typography variant="h2">{days * 24 + hours}:{minutes.toString().padStart(2, '0')}:{seconds.toString().padStart(2, '0')}</Typography>
+            <Typography variant="h2">Starts in</Typography>
+            <Typography variant="h1">{days}d {hours}:{minutes.toString().padStart(2, '0')}:{seconds.toString().padStart(2, '0')}</Typography>
             {!registered && <Button color="primary" variant="contained" onClick={onRegisterCourseClicked}>REGISTER</Button>}
             {registered && <Typography fontWeight="bold" sx={{color: theme.palette.success.light}}>Registered!</Typography>}
         </>;

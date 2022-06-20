@@ -127,7 +127,7 @@ function CodeForm() {
             </>}
         </Stack>
 
-        <Typography variant="h6" marginBottom={2} marginTop={8}>Execution Parameters (per test-case)</Typography>
+        <Typography variant="h5" marginBottom={2} marginTop={8}>Execution Parameters (per test-case)</Typography>
         <Stack direction="row" spacing={1} marginBottom={8}>
             <Controller name="memoryLimit" control={control} render={({ field: { ref, onChange, ...field } }) => (
                 <TextField
@@ -154,7 +154,7 @@ function CodeForm() {
             )}/>
         </Stack>
 
-        <Typography variant="h6" marginBottom={2} marginTop={8}>Test cases (public and private)</Typography>
+        <Typography variant="h5" marginBottom={2} marginTop={8}>Test cases (public and private)</Typography>
         <Grid container direction="row" alignItems="center">
             <Grid item key="public-tests-title"><Typography marginRight={1}>Public tests: </Typography></Grid>
 

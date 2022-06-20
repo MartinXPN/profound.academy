@@ -14,7 +14,7 @@ function Plan({name, price, children}: {name: string, price: string, children: R
     return <>
         <Card sx={{ width: 240, borderRadius: 8, padding: 4 }}>
             <CardContent>
-                <Typography variant="h5" textAlign="center">{name}</Typography>
+                <Typography variant="h4" textAlign="center">{name}</Typography>
                 <Typography variant="h6" textAlign="center">{price}</Typography>
                 <Box marginBottom={2} />
 
@@ -31,7 +31,7 @@ function Plan({name, price, children}: {name: string, price: string, children: R
 
 function Pricing() {
     return <>
-        <Typography variant="h1" fontSize={32} textAlign="center" marginTop={10}>
+        <Typography variant="h1" textAlign="center" marginTop={10}>
             Picking the best plan for you
         </Typography>
 

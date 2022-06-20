@@ -1,4 +1,4 @@
-import {useCallback, useContext, useEffect, useState} from "react";
+import {useCallback, useContext, useEffect, useState, ChangeEvent} from "react";
 import {Avatar, Badge, Button, darken, IconButton, Paper, Stack, TextField, Typography} from "@mui/material";
 import {styled} from "@mui/material/styles";
 import CircularProgress from "@mui/material/CircularProgress";
@@ -123,13 +123,13 @@ function UserName({user}: {user: User}) {
         await updateUserInfo(user.id, name);
         setEditing(false);
     };
-    const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
         setName(event.target.value);
     };
 
 
     return <Stack direction="row" sx={{paddingTop: '10px'}}>
-        {!editing && <Typography variant="h5" sx={{fontWeight: 600}}>{user.displayName}</Typography>}
+        {!editing && <Typography variant="h5" fontWeight="bold">{user.displayName}</Typography>}
         {editing && <TextField required variant="outlined" label="First & Last name" size="medium" value={name} onChange={handleChange} sx={{fontWeight: 600}} />}
         {auth.currentUserId === user.id && <>
             {!editing && <IconButton color="inherit" onClick={onEditClicked}><Edit /></IconButton>}

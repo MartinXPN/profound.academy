@@ -107,7 +107,9 @@ function CourseDrawer({onItemSelected, onStatusClicked, onCreateExerciseClicked,
     }
     const isCourseInstructor = course && auth.currentUserId && course.instructors.includes(auth.currentUserId);
 
-
+    useEffect(() => {
+        !auth.isSignedIn && onWidthChanged('0px');
+    }, [auth.isSignedIn]);
     useEffect(() => {
         if( !auth.currentUserId || !course?.id )
             return;

@@ -2,13 +2,13 @@ import {useEffect, useState} from "react";
 
 
 export function safeParse<T>(str: string | null, defaultValue: T) {
-    if( !str )
+    if( !str || str.trim() === '' || str === 'undefined' )
         return defaultValue;
     try {
         return JSON.parse(str);
     }
     catch (e) {
-        console.error(e);
+        console.error(`Could not parse "${str}" => ${e}`);
         return defaultValue;
     }
 }

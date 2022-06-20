@@ -15,7 +15,7 @@ function DiscordInvite() {
                 Ask and answer questions, participate in discussions, meet new people, and learn from others!
             </Typography>
             <Grid item>
-                <Button href={INVITE_LINK} target="_blank"
+                <Button href={INVITE_LINK} target="_blank" rel="noopener noreferrer"
                         size="large" sx={{textTransform: 'none'}}
                         variant="contained"
                         endIcon={<Suspense fallback={<></>}><DiscordIcon /></Suspense>}>

@@ -9,10 +9,10 @@ const Moon = lazy(() => import('../assets/Moon'));
 
 function Header({onCoursesClicked}: {onCoursesClicked: () => void}) {
     const content = <>
-        <Typography variant="h1" color="white" fontSize={50} fontWeight="bold" marginY={2}>
+        <Typography variant="h1" color="white" fontWeight="bold" marginY={2}>
             In-depth hands-on interactive courses
         </Typography>
-        <Typography variant="h2" color="white" fontSize={18} marginTop={2} marginBottom={4}>
+        <Typography variant="h3" color="white" fontSize={18} marginTop={2} marginBottom={4}>
             Explore tailored courses that guide your programming journey from beginner to the advanced level.
         </Typography>
     </>

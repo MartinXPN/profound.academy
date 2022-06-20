@@ -10,7 +10,7 @@ function DiscordInvite() {
         <Grid container direction="column" justifyContent="center" alignContent="center" alignItems="center"
               spacing={4} padding={8} marginY={4}>
 
-            <Typography variant="h1" textAlign="center" color="white">Join the community of learners</Typography>
+            <Typography variant="h2" textAlign="center" color="white">Join the community of learners</Typography>
             <Typography textAlign="center" color="white">
                 Ask and answer questions, participate in discussions, meet new people, and learn from others!
             </Typography>

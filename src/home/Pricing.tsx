@@ -31,7 +31,7 @@ function Plan({name, price, children}: {name: string, price: string, children: R
 
 function Pricing() {
     return <>
-        <Typography variant="h1" textAlign="center" marginTop={10}>
+        <Typography variant="h2" textAlign="center" marginTop={10}>
             Picking the best plan for you
         </Typography>
 

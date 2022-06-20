@@ -129,7 +129,7 @@ function UserName({user}: {user: User}) {
 
 
     return <Stack direction="row" sx={{paddingTop: '10px'}}>
-        {!editing && <Typography variant="h5" fontWeight="bold">{user.displayName}</Typography>}
+        {!editing && <Typography variant="h4" fontWeight="bold">{user.displayName}</Typography>}
         {editing && <TextField required variant="outlined" label="First & Last name" size="medium" value={name} onChange={handleChange} sx={{fontWeight: 600}} />}
         {auth.currentUserId === user.id && <>
             {!editing && <IconButton color="inherit" onClick={onEditClicked}><Edit /></IconButton>}

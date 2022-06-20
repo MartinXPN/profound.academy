@@ -14,9 +14,9 @@ function CourseMetricStat({title, icon, value, difference}: {title: string, icon
         <Grid container direction="column" sx={{padding: '2em', maxWidth: '45%'}}>
             <Box marginX="auto" textAlign="center">
                 <Stack direction="row" alignItems="center">
-                    <Typography variant="h5" textAlign="center">{value ?? '-'}</Typography>
-                    {!!difference && difference > 0 && <Typography variant="h5" textAlign="center" color="success.light" noWrap>&nbsp; (+{difference})</Typography>}
-                    {!!difference && difference < 0 && <Typography variant="h5" textAlign="center" color="error.main" noWrap>&nbsp; ({difference})</Typography>}
+                    <Typography variant="h4" textAlign="center">{value ?? '-'}</Typography>
+                    {!!difference && difference > 0 && <Typography variant="h4" textAlign="center" color="success.light" noWrap>&nbsp; (+{difference})</Typography>}
+                    {!!difference && difference < 0 && <Typography variant="h4" textAlign="center" color="error.main" noWrap>&nbsp; ({difference})</Typography>}
                 </Stack>
             </Box>
 

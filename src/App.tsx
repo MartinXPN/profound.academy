@@ -24,24 +24,12 @@ const CourseEditor = lazy(() => import('./course/CourseEditor'));
 
 const theme = createTheme({
     typography: {
-        h1: {
-            fontSize: 32,
-        },
-        h2: {
-            fontWeight: 28,
-        },
-        h3: {
-            fontWeight: 24,
-        },
-        h4: {
-            fontWeight: 20,
-        },
-        h5: {
-            fontWeight: 18,
-        },
-        h6: {
-            fontWeight: 16,
-        },
+        h1: {fontSize: 50},
+        h2: {fontSize: 32},
+        h3: {fontSize: 26},
+        h4: {fontSize: 20},
+        h5: {fontSize: 18},
+        h6: {fontSize: 16},
     },
     palette: {
         background: {

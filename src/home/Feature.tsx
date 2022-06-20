@@ -37,7 +37,7 @@ function Feature({title, description, media, mediaPosition, action, onButtonClic
         </Card>
     </>
     const contentPart = <>
-        <Typography variant="h1" fontWeight="bold" marginBottom={2}>{title}</Typography>
+        <Typography variant="h2" fontWeight="bold" marginBottom={2}>{title}</Typography>
         <Typography variant="body1" marginBottom={2}>{description}</Typography>
     </>
     return <>

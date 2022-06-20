@@ -1,5 +1,5 @@
 import {memo, ReactElement, useContext, useEffect, useState} from "react";
-import {Grid, Typography, Box, CircularProgress, Paper} from "@mui/material";
+import {Grid, Typography, Box, Paper, Stack} from "@mui/material";
 import {Send, Person, Done, ThumbUpAlt} from "@mui/icons-material";
 import {onCourseHistoricalInsightsChanged, onCourseInsightsChanged} from "../services/courses";
 import {CourseContext} from "./Course";
@@ -13,19 +13,20 @@ import {useTheme} from "@mui/material/styles";
 function CourseMetricStat({title, icon, value, difference}: {title: string, icon: ReactElement, value?: number, difference?: number}) {
     const theme = useTheme();
     return <>
-        <Grid container direction="column" sx={{padding: '2em'}}>
+        <Grid container direction="column" sx={{padding: '2em', maxWidth: '45%'}}>
             <Box marginX="auto" textAlign="center">
-                <Grid container direction="row" alignItems="center">
-                    {value ? <Typography variant="h3" textAlign="center">{value}</Typography> : <CircularProgress/>}
-                    {!!difference && difference > 0 && <Typography variant="h3" textAlign="center" noWrap sx={{color: theme.palette.success.light}}>&nbsp; (+{difference})</Typography>}
-                    {!!difference && difference < 0 && <Typography variant="h3" textAlign="center" noWrap sx={{color: theme.palette.error.main}}>&nbsp; ({difference})</Typography>}
-                </Grid>
+                <Stack direction="row" alignItems="center">
+                    <Typography variant="h5" textAlign="center">{value ?? '-'}</Typography>
+                    {!!difference && difference > 0 && <Typography variant="h5" textAlign="center" noWrap sx={{color: theme.palette.success.light}}>&nbsp; (+{difference})</Typography>}
+                    {!!difference && difference < 0 && <Typography variant="h5" textAlign="center" noWrap sx={{color: theme.palette.error.main}}>&nbsp; ({difference})</Typography>}
+                </Stack>
             </Box>
 
             <Box marginX="auto" textAlign="center">
-                <Grid container direction="row" alignItems="center">
-                    {icon} &nbsp; {title}
-                </Grid>
+                <Stack direction="row" alignItems="center" gap={1}>
+                    {icon}
+                    <Typography>{title}</Typography>
+                </Stack>
             </Box>
         </Grid>
     </>

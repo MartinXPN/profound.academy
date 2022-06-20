@@ -1,5 +1,5 @@
 import {memo, lazy, Suspense} from "react";
-import {Typography, useMediaQuery} from "@mui/material";
+import {Container, Typography, useMediaQuery} from "@mui/material";
 import Box from "@mui/material/Box";
 import DiscordInvite from "./DiscordInvite";
 import Feature, {MediaFeature} from "./Feature";
@@ -29,9 +29,11 @@ function Header({onCoursesClicked}: {onCoursesClicked: () => void}) {
                 mediaPosition="right"
                 action="Explore Courses" onButtonClicked={onCoursesClicked} />
 
-            <Box marginLeft={10} position="absolute" bottom={0} width={600} sx={{ display: { xs: 'none', md: 'flex' } }}>
-                <Suspense fallback={<></>}><Moon /></Suspense>
-            </Box>
+            <Container maxWidth="xl">
+                <Box marginLeft={10} position="absolute" bottom={0} width={600} sx={{ display: { xs: 'none', md: 'flex' } }}>
+                    <Suspense fallback={<></>}><Moon /></Suspense>
+                </Box>
+            </Container>
         </Box>
     </>
 }

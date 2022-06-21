@@ -19,8 +19,8 @@ export function MediaFeature({title, description, media, mediaPosition, action, 
             </Grid>
 
             <Grid container justifyContent="center" padding={8} sx={{ display: { xs: 'none', md: 'flex' } }}>
-                <Grid item width="50%">{mediaPosition === 'left' ? media : contentPart}</Grid>
-                <Grid item width="50%">{mediaPosition === 'right' ? media : contentPart}</Grid>
+                <Grid item width={mediaPosition === 'left' ? '60%' : '40%'}>{mediaPosition === 'left' ? media : contentPart}</Grid>
+                <Grid item width={mediaPosition === 'right' ? '60%' : '40%'}>{mediaPosition === 'right' ? media : contentPart}</Grid>
             </Grid>
         </Container>
     </>

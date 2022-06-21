@@ -54,9 +54,6 @@ const MetaTags = () => {
         <Helmet>
             <html lang={locale.substring(0, 2)} />
             <title>Profound Academy</title>
-            <meta property="og:title" content="Profound Academy"/>
-            <meta property="og:image" content="/logo.svg" />
-            <meta name="description" content="Get in-depth knowledge through hands-on interactive courses" />
         </Helmet>
     </>
 }

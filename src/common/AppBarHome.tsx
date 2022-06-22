@@ -13,7 +13,8 @@ function AppBarHome(props: Props) {
     return <>
         <Button {...props} color="inherit" size="large" sx={{textTransform: 'none'}}>
             <SvgIcon><Logo/></SvgIcon>
-            <Typography fontWeight="bold" sx={{ml: 1, display: {xs: 'none', sm: 'flex'}}} noWrap>Profound Academy</Typography>
+            <Typography fontWeight="bold" sx={{ml: 1}} noWrap>Profound</Typography>
+            <Typography fontWeight="bold" sx={{display: {xs: 'none', sm: 'flex'}}} noWrap>&nbsp;Academy</Typography>
         </Button>
     </>
 }

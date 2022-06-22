@@ -44,9 +44,10 @@ function Home() {
                     </IconButton>
                     <Menu anchorEl={anchorElNav} anchorOrigin={{vertical: 'bottom', horizontal: 'left'}}
                           keepMounted transformOrigin={{vertical: 'top', horizontal: 'left'}}
-                          open={Boolean(anchorElNav)} onClose={handleCloseNavMenu} sx={{display: { xs: 'block', md: 'none' }}}>
+                          open={Boolean(anchorElNav)} onClose={handleCloseNavMenu}
+                          sx={{display: { xs: 'block', md: 'none' }}}>
 
-                        <MenuItem key="courses" onClick={() => { handleCloseNavMenu(); onCoursesClicked(); }}>
+                        <MenuItem key="courses" onClick={() => { handleCloseNavMenu(); onCoursesClicked(); }} sx={{paddingRight: 8}}>
                             <ListItemIcon><ViewList/></ListItemIcon>
                             <ListItemText>Courses</ListItemText>
                         </MenuItem>

@@ -61,6 +61,24 @@
       ]
     },
     {
+      "collectionGroup": "exerciseWeeklyScore",
+      "queryScope": "COLLECTION_GROUP",
+      "fields": [
+        {
+          "fieldPath": "courseId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "level",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "userId",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
       "collectionGroup": "forum",
       "queryScope": "COLLECTION",
       "fields": [

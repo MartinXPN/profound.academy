@@ -4,6 +4,7 @@ import {Check} from "@mui/icons-material";
 import {SignIn} from "../user/Auth";
 import {AuthContext} from "../App";
 import {useStickyState} from "../common/stickystate";
+import {preRegister} from "../services/users";
 
 function Benefit({name}: {name: string}) {
     return <>
@@ -45,22 +46,27 @@ function Pricing() {
 
     // Default user email
     useEffect(() => {
+        if( !auth.isSignedIn )
+            setShowProInstructions(false);
+
         if( email === null && auth.currentUser !== null )
             setEmail(auth.currentUser.email);
     }, [auth]);
 
     const handleStartFreePlan = () => {
         setShowSignIn(true);
-        window.scrollTo({ behavior: 'smooth', top: window.scrollY + 200 });
+        setTimeout(() => window.scrollTo({ behavior: 'smooth', top: window.scrollY + 200 }), 100);
     }
     const handleStartProPlan = () => {
         if( auth.isSignedIn )   setShowProInstructions(true);
         else                    setShowSignIn(true);
-        window.scrollTo({ behavior: 'smooth', top: window.scrollY + 200 });
+        setTimeout(() => window.scrollTo({ behavior: 'smooth', top: window.scrollY + 200 }), 100);
     }
-    const handlePreRegisterPro = () => {
+    const handlePreRegisterPro = async () => {
+        if( !auth.currentUserId )
+            return;
         setPreRegisteredEmail(email);
-        // TODO: Save this somewhere
+        await preRegister(auth.currentUserId, email);
     }
 
     return <>

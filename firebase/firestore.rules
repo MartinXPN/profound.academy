@@ -14,6 +14,11 @@ service cloud.firestore {
       allow create, update: if isCurrentUser(request, userId);
     }
 
+    match /preRegisters/{userId} {
+      allow read: if isCurrentUser(request, userId);
+      allow create, update: if isCurrentUser(request, userId);
+    }
+
     match /users/{userId} {
       allow read: if isCurrentUser(request, userId);
       allow create, update: if isCurrentUser(request, userId);

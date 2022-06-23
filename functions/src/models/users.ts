@@ -33,3 +33,10 @@ export interface UserRole {
     grantedBy: string,
     updatedAt: firebase.firestore.Timestamp,
 }
+
+export interface PreRegister {
+    id: string;
+    userId: string;
+    email: string;
+    createdAt: firebase.firestore.Timestamp;
+}

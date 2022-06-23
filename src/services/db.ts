@@ -12,6 +12,7 @@ import {CodeDraft} from "models/codeDrafts";
 import {Insight} from "models/lib/courses";
 import {CoursePrivateFields} from "../../functions/src/models/courses";
 import {TestResults} from "../../functions/src/models/submissions";
+import {PreRegister} from "models/lib/users";
 
 // Add ids when getting the data and removing when sending it
 const converter = <T>() => ({
@@ -31,6 +32,7 @@ const db = {
     users: dataPoint<User>('users'),
     user: (userId: string) => dataPoint<User>('users').doc(userId),
     userRoles: (userId: string) => dataPoint<UserRole>(`users/${userId}/roles`),
+    userPreRegistrations: (userId: string) => dataPoint<PreRegister>(`preRegisters`).doc(userId),
     infoUpdates: dataPoint<UserInfoUpdate>('infoUpdates'),
     userInfoUpdate: (userId: string) => dataPoint<UserInfoUpdate>('infoUpdates').doc(userId),
     userVotes: (commentId: string, userId: string) => dataPoint<Vote>(`users/${userId}/votes`).doc(commentId),

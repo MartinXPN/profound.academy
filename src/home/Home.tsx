@@ -16,6 +16,7 @@ import {Link} from "react-router-dom";
 import Pricing from "./Pricing";
 import LandingPage from "./LandingPage";
 import {Info, Sell, ViewList} from "@mui/icons-material";
+import HelpChat from "./HelpChat";
 
 
 function Home() {
@@ -83,6 +84,8 @@ function Home() {
 
             <Box ref={coursesRef}><CourseList variant="allCourses" title="All Courses" /></Box>
             <Box ref={pricingRef}><Pricing /></Box>
+
+            <HelpChat />
         </Box>
         <Divider />
         <Footer />

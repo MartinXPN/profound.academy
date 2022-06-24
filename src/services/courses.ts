@@ -19,12 +19,10 @@ export const getAllCourses = async () => {
 }
 
 export const getCourses = async (courseIds: string[]) => {
-    const courses: Course[] = (await Promise.all(courseIds
-        .map(async id => (await db.course(id).get()).data() ?? null)
-        .filter(c => !!c)
-    )) as Course[];
-    console.log('Got courses:', courses);
-    return courses;
+    const courses = await Promise.all(courseIds.map(async id => (await db.course(id).get()).data() ?? null));
+    const presentCourses: Course[] = courses.filter(c => !!c) as Course[];
+    console.log('Got courses:', presentCourses);
+    return presentCourses;
 }
 
 

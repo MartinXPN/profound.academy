@@ -8,6 +8,7 @@ function Footer() {
         <Grid container justifyContent="center" alignContent="center" alignItems="center" spacing={4} paddingY={4} paddingX={8}>
             <Grid item><Typography>Copyright &copy;2022 Profound Academy</Typography></Grid>
             <Grid item><Link component={RouterLink} to="/about">About</Link></Grid>
+            <Grid item><Link component={RouterLink} to="/faq">FAQ</Link></Grid>
             <Grid item><Link component={RouterLink} to="/privacy">Privacy Policy</Link></Grid>
             <Grid item><Link component={RouterLink} to="/terms">Terms and Conditions</Link></Grid>
         </Grid>

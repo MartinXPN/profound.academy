@@ -9,16 +9,21 @@ export interface ExerciseProgress<T> {
     progress: { [key: string]: T };             // {exId: score | 'Solved'}
 }
 
+/**
+ * Progress of the user for the course
+ */
 export interface Progress {
     id: string;                                             // userId
     userId: string;                                         // userId for collction group queries
     userDisplayName: string;                                // how to show the user
     userImageUrl?: string;                                  // Image of the user
+
     score?: number;                                         // total score for the course
-    upsolveScore?: number;                                  // total score for the course (after the freeze)
     levelScore?: { [key: string]: number };                 // {level: score}
-    levelUpsolveScore?: { [key: string]: number };          // {level: score}
     exerciseScore?: ExerciseProgress<number>;               // [subcollection] progress = {exId: score}
+
+    upsolveScore?: number;                                  // total score for the course (after the freeze)
+    levelUpsolveScore?: { [key: string]: number };          // {level: score}
     exerciseUpsolveScore?: ExerciseProgress<number>;        // [subcollection] progress = {exId: score}
 
     solved?: number;                                        // total solved exercises

@@ -107,9 +107,10 @@ function Pricing() {
                 <Grid item><Typography>• Group tutoring sessions start this August.</Typography></Grid>
                 <Grid item>
                     <Grid container direction="row" justifyContent="center" alignContent="center" alignItems="center" spacing={2} marginY={2}>
-                        <Grid item>
-                            <TextField placeholder="john.smith@gmail.com" label="Sign up with your preferred email" type="email"
-                                       onChange={event => setEmail(event.target.value)} value={email} sx={{width: 400}} />
+                        <Grid item flex={1} minWidth={300}>
+                            <TextField fullWidth type="email"
+                                       placeholder="john.smith@gmail.com" label="Sign up with your preferred email"
+                                       onChange={event => setEmail(event.target.value)} value={email}/>
                         </Grid>
                         <Grid item>
                             {preRegisteredEmail === email

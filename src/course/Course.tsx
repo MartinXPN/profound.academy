@@ -143,10 +143,12 @@ function CourseView() {
         <Helmet>
             <title>{course.title}</title>
             <meta property="og:title" content={course.title} />
+            <meta property="twitter:title" content={course.title} />
             <meta property="og:image" content={course.img} />
             <meta property="og:image:alt" content={course.title} />
+            <meta property="twitter:image" content={course.img} />
             <meta property="og:type" content="article" />
-            <meta name="description" content={`Comprehensive course for ${course.title} with hands-on experience in mind`} />
+            <meta name="description" content={`Comprehensive course on ${course.title} with hands-on experience in mind`} />
         </Helmet>
 
         <CourseContext.Provider value={{course: course}}>

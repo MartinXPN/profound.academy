@@ -34,7 +34,7 @@ function CheckboxesForm() {
                 <TextField
                     required multiline fullWidth variant="outlined" placeholder="How would you do this?" label="Question"
                     error={Boolean(errors.question) || Boolean(errors.answer)}
-                    helperText={errors.question?.message ?? (errors.answer?.message ? ('Answer: ' + errors.answer?.message) : null)}
+                    helperText={errors.question?.message ? <>{errors.question?.message}</> : (errors.answer?.message ? <>Answer: {errors.answer?.message}</> : undefined)}
                     inputRef={ref} {...field} />
             )}/>
 
@@ -56,6 +56,7 @@ function CheckboxesForm() {
                                     updateAnswer(item, e.target.value);
                                 update(index, e.target.value);
                             }}
+                            // @ts-ignore
                             error={Boolean(errors.options?.[index])} helperText={errors.options?.[index]?.message} />
                     </ListItem>
                 ))}

@@ -10,14 +10,14 @@ function TextAnswerForm() {
             <Controller name="question" control={control} render={({ field: { ref, ...field } }) => (
                 <TextField
                     required multiline fullWidth variant="outlined" placeholder="How would you do this?" label="Question"
-                    error={Boolean(errors.question)} helperText={errors.question?.message}
+                    error={Boolean(errors.question)} helperText={<>{errors.question?.message}</>}
                     inputRef={ref} {...field} />
             )}/>
 
             <Controller name="answer" control={control} render={({ field: { ref, ...field } }) => (
                 <TextField
                     required multiline fullWidth variant="outlined" placeholder="Simple..." label="Expected answer"
-                    error={Boolean(errors.answer)} helperText={errors.answer?.message}
+                    error={Boolean(errors.answer)} helperText={<>{errors.answer?.message}</>}
                     inputRef={ref} {...field} />
             )}/>
 

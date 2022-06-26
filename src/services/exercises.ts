@@ -43,6 +43,7 @@ export const createCourseExercise = async (courseId: string) => {
         id: '',
         title: '',
         pageId: '',
+        levelId: 'drafts',
         order: 0,
         testCases: [],
     });

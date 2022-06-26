@@ -2,10 +2,9 @@ import {memo, useCallback, useContext, useEffect, useState} from "react";
 import {CourseContext, CurrentExerciseContext} from "../Course";
 import {Course} from 'models/courses';
 import {COMPARISON_MODES, Exercise, EXERCISE_TYPES} from 'models/exercise';
-import {Alert, Autocomplete, Button, FormControlLabel, Snackbar, Stack, Switch, TextField} from "@mui/material";
+import {Alert, Button, FormControlLabel, MenuItem, Snackbar, Stack, Switch, TextField} from "@mui/material";
 import LocalizedFields, {FieldSchema, fieldSchema} from "./LocalizedFields";
 import Box from "@mui/material/Box";
-import {LANGUAGE_KEYS} from "models/language";
 import AutocompleteSearch from "../../common/AutocompleteSearch";
 import {getCourses, searchCourses} from "../../services/courses";
 import {getExercisePrivateFields, updateExercise} from "../../services/exercises";
@@ -21,7 +20,9 @@ import MultipleChoiceForm from "./MultipleChoiceForm";
 import useAsyncEffect from "use-async-effect";
 import {AlertColor} from "@mui/material/Alert/Alert";
 import {testGroupSchema} from "./TestGroupsForm";
+import {LANGUAGES} from "models/language";
 
+const LANGUAGE_KEYS = Object.keys(LANGUAGES) as [keyof typeof LANGUAGES] as unknown as readonly [string, ...string[]];
 
 const baseSchema = {
     localizedFields: array(fieldSchema).nonempty(),
@@ -35,7 +36,7 @@ const baseSchema = {
 const codeSchema = object({
     ...baseSchema,
     exerciseType: literal('code'),
-    allowedLanguages: array(zodEnum(LANGUAGE_KEYS)).nonempty(),
+    allowedLanguages: zodEnum(LANGUAGE_KEYS).array().nonempty(),
     memoryLimit: number().min(10).max(1000),
     timeLimit: number().min(0.001).max(30),
     outputLimit: number().min(0.001).max(10),
@@ -140,15 +141,11 @@ function ExerciseEditor({cancelEditing, exerciseTypeChanged}: {
     errors && Object.keys(errors).length && console.log('errors:', errors);
     const isPublic = watch('isPublic');
 
-    const exerciseType: keyof typeof EXERCISE_TYPES = watch('exerciseType');
+    const exerciseType = watch('exerciseType');
     const onExerciseTypeChanged = (newType: keyof typeof EXERCISE_TYPES) => {
-        if (newType !== 'code' && newType !== 'textAnswer' && newType !== 'checkboxes' && newType !== 'multipleChoice')
-            throw Error(`Wrong exercise type: ${newType}`);
-
         setValue('exerciseType', newType, {shouldTouch: true});
         exerciseTypeChanged(newType);
     }
-    const nameToExerciseType = (name: string) => Object.keys(EXERCISE_TYPES).find(key => EXERCISE_TYPES[key].displayName === name);
 
     // @ts-ignore
     useEffect(() => reset(getDefaultFieldValues()), [exercise, getDefaultFieldValues, reset]);
@@ -275,17 +272,14 @@ function ExerciseEditor({cancelEditing, exerciseTypeChanged}: {
             </Stack>
 
             <br/><br/><br/>
-            <Controller name="exerciseType" control={control} render={({field}) => (
-                <Autocomplete
-                    sx={{width: 200}} autoHighlight autoSelect disableClearable ref={field.ref}
-                    value={EXERCISE_TYPES[field.value].displayName}
-                    options={Object.keys(EXERCISE_TYPES).map(key => EXERCISE_TYPES[key].displayName)}
-                    onChange={(event, value: string | null) => value && onExerciseTypeChanged(nameToExerciseType(value)!)}
-                    renderInput={(params) => (
-                        <TextField
-                            {...params} label="Exercise type"
-                            error={Boolean(errors.exerciseType)} helperText={errors.exerciseType?.message}/>
-                    )}/>
+            <Controller name="exerciseType" control={control} render={({ field: { ref, ...field } }) => (
+                <TextField select label="Exercise type" variant="outlined" inputRef={ref} {...field}
+                           value={exerciseType}
+                           onChange={e => e.target.value && onExerciseTypeChanged(e.target.value as keyof typeof EXERCISE_TYPES)}
+                           error={Boolean(errors.exerciseType)} helperText={<>{errors.exerciseType?.message}</>}
+                           sx={{ width: 200 }}>
+                    {Object.entries(EXERCISE_TYPES).map(([id, exerciseType]) => <MenuItem value={id}>{exerciseType.displayName}</MenuItem>)}
+                </TextField>
             )} />
             <br/>
 

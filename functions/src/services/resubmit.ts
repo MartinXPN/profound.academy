@@ -14,7 +14,7 @@ export const resubmitSolutions = async (courseId: string, exerciseId: string): P
     if (!exercise)
         return;
 
-    const level = Math.trunc(exercise.order).toString();
+    const level = exercise.levelId;
 
     // Reset metrics
     return firestore().runTransaction(async (transaction) => {

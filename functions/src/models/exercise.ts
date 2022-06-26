@@ -7,7 +7,7 @@ export interface ExerciseType {
     description: string;
 }
 
-export const EXERCISE_TYPES: { [key: string]: ExerciseType } = {
+export const EXERCISE_TYPES: { [key in 'code' | 'textAnswer' | 'checkboxes' | 'multipleChoice']: ExerciseType } = {
     code: {id: 'code', displayName: 'Code',
         description: 'An exercise with predefined test cases (input/output or unittest)'},
     textAnswer: {id: 'textAnswer', displayName: 'Text answer',
@@ -16,7 +16,7 @@ export const EXERCISE_TYPES: { [key: string]: ExerciseType } = {
         description: 'An exercise which has several correct answers'},
     multipleChoice: {id: 'multipleChoice', displayName: 'Multiple choice',
         description: 'An exercise with a single correct answer'},
-};
+} as const;
 export const COMPARISON_MODES = ['whole', 'token', 'custom'] as const;
 
 export interface TestCase {
@@ -34,7 +34,8 @@ export interface Exercise {
     id: string;
     title: string | {[key: string]: string};        // string or mapping {locale => titleText}
     pageId: string | {[key: string]: string};       // string or mapping {locale => pageId}
-    order: number;
+    levelId: string;                                // ID of the level exercise belongs to
+    order: number;                                  // Order of the exercise within the level
     score?: number;
     allowedAttempts?: number;
     exerciseType?: keyof typeof EXERCISE_TYPES;

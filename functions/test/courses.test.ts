@@ -50,6 +50,7 @@ describe('Handle Course Instructor Permissions', function () {
                 author: 'Test Framework',
                 instructors: [instructorUserId],
                 introduction: '',
+                levels: [{id: '1', title: 'Level 1'}],
                 levelExercises: {},
                 levelScores: {},
                 exercises: [],

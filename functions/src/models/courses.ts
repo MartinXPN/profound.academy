@@ -1,5 +1,6 @@
 import firebase from 'firebase/compat/app';
 import {Exercise} from './exercise';
+import { Level } from './levels';
 
 
 export interface Course {
@@ -8,24 +9,28 @@ export interface Course {
     revealsAt: firebase.firestore.Timestamp;
     freezeAt: firebase.firestore.Timestamp;
     visibility: 'public' | 'unlisted' | 'private';
-    rankingVisibility: 'public' | 'private';
-    allowViewingSolutions: boolean;
+    rankingVisibility: 'public' | 'private';    // is the progress of other users visible?
+    allowViewingSolutions: boolean;             // allow viewing others' solutions after solving
+    author: string;                             // organization/person name
+    instructors: string[],                      // userIds
+
+    // TODO: Localize title and introduction
     title: string;
-    author: string;
-    instructors: string[],
-    introduction: string; // notion id for the introduction page
-    levelExercises: { [key: string]: number };
-    levelScores: { [key: string]: number };
-    exercises: Exercise[];
+    introduction: string;                       // notion id for the introduction page
+
+    levels: Level[];
+    levelExercises: { [key: string]: number };  // {levelId: numberOfExercisesInLevel}
+    levelScores: { [key: string]: number };     // {levelId: scorePerLevel}
+    exercises: Exercise[];                      // [sub-collection] all the exercises in the course
 }
 
 export interface CoursePrivateFields {
-    id: string;
-    invitedEmails?: string[];   // list of invited users (emails)
-    invitedUsers?: string[];    // list of invited users (ids)
-    mailSubject?: string;       // subject of the invitation email
-    mailText?: string;          // contents of the invitation email
-    sentEmails?: string[];      // list of emails that have already been sent
+    id: string;                                 // id is fixed to be `fields`
+    invitedEmails?: string[];                   // list of invited users (emails)
+    invitedUsers?: string[];                    // list of invited users (ids)
+    mailSubject?: string;                       // subject of the invitation email
+    mailText?: string;                          // contents of the invitation email
+    sentEmails?: string[];                      // list of emails that have already been sent
 }
 
 

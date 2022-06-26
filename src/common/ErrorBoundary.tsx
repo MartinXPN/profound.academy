@@ -1,8 +1,8 @@
-import {Component, ErrorInfo} from "react";
+import {Component, ErrorInfo, ReactNode} from "react";
 import {Typography} from "@mui/material";
 import {getAnalytics, logEvent} from "firebase/analytics";
 
-class ErrorBoundary extends Component<{}, { error: Error | null }> {
+class ErrorBoundary extends Component<{children?: ReactNode}, { error: Error | null }> {
     constructor(props: {}) {
         super(props);
         this.state = {error: null};

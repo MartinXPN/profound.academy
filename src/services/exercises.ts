@@ -2,7 +2,6 @@ import {db} from "./db";
 import {Exercise, EXERCISE_TYPES, PrivateTestsSummary, TestCase} from "models/exercise";
 import firebase from "firebase/compat/app";
 import { getFunctions, httpsCallable } from "firebase/functions";
-import axios from "axios";
 import {LANGUAGES} from "models/language";
 import {Insight} from "models/lib/courses";
 import {SubtaskTestGroup} from "models/lib/exercise";
@@ -159,6 +158,7 @@ export const updateTestCases = async (
     if( !uploadUrl || !uploadUrl.data )
         return onProgressChanged(0);
 
+    const axios = (await import('axios')).default;
     const res = await axios.request({
         method: 'put',
         url: uploadUrl.data as string,
@@ -167,7 +167,7 @@ export const updateTestCases = async (
             'Content-Type': file.type,
             'x-amz-server-side-encryption': 'AES256'
         },
-        onUploadProgress: p => {
+        onUploadProgress: (p) => {
             onProgressChanged(100 * p.loaded / p.total);
             console.log('progress:', p);
         },

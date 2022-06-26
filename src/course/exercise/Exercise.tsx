@@ -63,7 +63,7 @@ function Exercise({launchCourse, registerCourse}: {launchCourse: () => void, reg
             setCurrentTab('edit');
     }, [exercise, isCourseInstructor]);
 
-    const onSplitChanged = useCallback((newSplit) => {
+    const onSplitChanged = useCallback((newSplit: number[]) => {
         console.log('split:', newSplit);
         setSplitPos(newSplit);
     }, [setSplitPos]);

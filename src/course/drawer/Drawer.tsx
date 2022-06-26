@@ -97,23 +97,21 @@ function CourseDrawer({onItemSelected, onStatusClicked, onCreateExerciseClicked,
     const [open, setOpen] = useState(false);
     const [progress, setProgress] = useState<Progress | null>(null);
 
-    const handleDrawerOpen = () => {
-        setOpen(true);
-        onWidthChanged(`${drawerWidth}px`);
-    }
-    const handleDrawerClose = () => {
-        setOpen(false);
-        onWidthChanged(theme.spacing(9));
-    }
+    const handleDrawerOpen = () => setOpen(true);
+    const handleDrawerClose = () => setOpen(false);
     const isCourseInstructor = course && auth.currentUserId && course.instructors.includes(auth.currentUserId);
 
+    // Content width based on the drawer width
     useEffect(() => {
-        !auth.isSignedIn && onWidthChanged('0px');
-    }, [auth.isSignedIn]);
+        if( !auth.isSignedIn )  return onWidthChanged('0px');
+        if( open )              onWidthChanged(`${drawerWidth}px`);
+        else                    onWidthChanged(theme.spacing(9));
+    }, [auth.isSignedIn, open]);
+
+    // User progress listener
     useEffect(() => {
-        if( !auth.currentUserId || !course?.id )
-            return;
-        return onUserProgressChanged(course.id, auth.currentUserId, setProgress);
+        if( auth.currentUserId && course?.id )
+            return onUserProgressChanged(course.id, auth.currentUserId, setProgress);
     }, [course?.id, auth]);
 
     const renderTimeRemaining = ({hours, minutes, seconds}: {

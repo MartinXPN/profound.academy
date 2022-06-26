@@ -52,7 +52,7 @@ function CodeForm() {
 
         const summaries = await getExercisePrivateTestSummaries(course.id, exercise.id);
         setPrivateTestSummaries(summaries.tests);
-    }, [progress, privateTestSummaries, course?.id, exercise?.id]);
+    }, [progress, course?.id, exercise?.id]);
 
     useEffect(() => {
         setProgress(0);
@@ -99,7 +99,7 @@ function CodeForm() {
                     options={Object.keys(LANGUAGES).map(key => LANGUAGES[key].displayName)}
                     renderInput={(params) => (
                         <TextField {...params} label="Allowed languages"
-                                   error={Boolean(errors.allowedLanguages)} helperText={errors.allowedLanguages?.message}/>
+                                   error={Boolean(errors.allowedLanguages)} helperText={<>{errors.allowedLanguages?.message}</>}/>
                     )} />
             )} />
 
@@ -120,7 +120,7 @@ function CodeForm() {
                 <Controller name="floatPrecision" control={control} render={({field: {ref, onChange, ...field}}) => (
                     <TextField required variant="outlined" placeholder="0.001" type="number" label="Float precision"
                                onChange={e => e.target.value ? onChange(Number(e.target.value)) : onChange(e.target.value)}
-                               error={Boolean(errors.floatPrecision)} helperText={errors.floatPrecision?.message}
+                               error={Boolean(errors.floatPrecision)} helperText={<>{errors.floatPrecision?.message}</>}
                                inputProps={{inputMode: 'numeric', pattern: '[0-9]*'}} inputRef={ref}
                                {...field} sx={{flex: 1, minWidth: 100}} />
                 )}/>
@@ -133,7 +133,7 @@ function CodeForm() {
                 <TextField
                     required variant="outlined" placeholder="512" type="number" label="Memory limit (MB)"
                     onChange={e => e.target.value ? onChange(Number(e.target.value)) : onChange(e.target.value)}
-                    error={Boolean(errors.memoryLimit)} helperText={errors.memoryLimit?.message}
+                    error={Boolean(errors.memoryLimit)} helperText={<>{errors.memoryLimit?.message}</>}
                     inputProps={{ inputMode: 'numeric', pattern: '[0-9]*' }} inputRef={ref} {...field} sx={{flex: 1}} />
             )}/>
 
@@ -141,7 +141,7 @@ function CodeForm() {
                 <TextField
                     required variant="outlined" placeholder="2" type="number" label="Time limit (s)"
                     onChange={e => e.target.value ? onChange(Number(e.target.value)) : onChange(e.target.value)}
-                    error={Boolean(errors.timeLimit)} helperText={errors.timeLimit?.message}
+                    error={Boolean(errors.timeLimit)} helperText={<>{errors.timeLimit?.message}</>}
                     inputProps={{ inputMode: 'numeric', pattern: '[0-9]*' }} inputRef={ref} {...field} sx={{flex: 1}} />
             )}/>
 
@@ -149,7 +149,7 @@ function CodeForm() {
                 <TextField
                     required variant="outlined" placeholder="1" type="number" label="Output limit (MB)"
                     onChange={e => e.target.value ? onChange(Number(e.target.value)) : onChange(e.target.value)}
-                    error={Boolean(errors.outputLimit)} helperText={errors.outputLimit?.message}
+                    error={Boolean(errors.outputLimit)} helperText={<>{errors.outputLimit?.message}</>}
                     inputProps={{ inputMode: 'numeric', pattern: '[0-9]*' }} inputRef={ref} {...field} sx={{flex: 1}} />
             )}/>
         </Stack>
@@ -166,6 +166,7 @@ function CodeForm() {
                 }>
                     <ToggleButton value={index} id={`${index}`}
                                   onClick={() => onTestSelected(index)}
+                                  // @ts-ignore
                                   color={(!Boolean(errors.testCases?.[index]?.input) && !Boolean(errors.testCases?.[index]?.target)) ? 'standard' : 'error'}
                                   sx={{paddingLeft: 3, paddingRight: 3}}
                                   selected={true}>
@@ -182,6 +183,7 @@ function CodeForm() {
                 <Controller name={`testCases.${index}.input`} control={control} render={({ field: { ref, ...field } }) => (
                     <TextField
                         multiline fullWidth variant="outlined" label="Input" placeholder="Start typing the input..."
+                        // @ts-ignore
                         error={Boolean(errors.testCases?.[index]?.input)} helperText={errors.testCases?.[index]?.input?.message}
                         inputRef={ref} {...field} />
                 )}/>
@@ -189,6 +191,7 @@ function CodeForm() {
                 <Controller name={`testCases.${index}.target`} control={control} render={({ field: { ref, ...field } }) => (
                     <TextField
                         multiline fullWidth variant="outlined" label="Expected output" placeholder="Start typing the expected output..."
+                        // @ts-ignore
                         error={Boolean(errors.testCases?.[index]?.target)} helperText={errors.testCases?.[index]?.target?.message}
                         inputRef={ref} {...field} />
                 )}/>

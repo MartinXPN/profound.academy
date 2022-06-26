@@ -42,7 +42,7 @@ function Editor({disableCodeSync, userId}: {disableCodeSync?: boolean, userId?: 
     const decreaseFontSize = useCallback(() => setFontSize(Math.max(fontSize - 1, 5)), [fontSize, setFontSize]);
     const increaseFontSize = useCallback(() => setFontSize(Math.min(fontSize + 1, 30)), [fontSize, setFontSize]);
 
-    const onSplitChanged = useCallback((newSplit) => {
+    const onSplitChanged = useCallback((newSplit: number[]) => {
         console.log('split:', newSplit);
         setSplitPos(newSplit);
     }, [setSplitPos]);
@@ -125,7 +125,7 @@ function Editor({disableCodeSync, userId}: {disableCodeSync?: boolean, userId?: 
         }
     }, [auth.currentUserId, auth.currentUser, course, exercise, code, language, setSubmissionResult, setSubmissionTestResults]);
     const handleSubmit = useCallback(async () => onEvaluate('submit'), [onEvaluate]);
-    const handleRun = useCallback(async (tests) => onEvaluate('run', tests), [onEvaluate]);
+    const handleRun = useCallback(async (tests: TestCase[]) => onEvaluate('run', tests), [onEvaluate]);
 
 
     return <>

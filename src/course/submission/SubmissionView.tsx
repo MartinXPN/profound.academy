@@ -48,8 +48,10 @@ function SubmissionView({submission, orderNumber, displayColumns, onUserClicked,
                 if( column.id === 'userDisplayName' )
                     return <ClickableTableCell key={column.id} align={column.align} onClick={() => onUserClicked(submission.userId)}>
                         <Stack direction="row" alignItems="center" alignContent="center">
+                            <>
                             <SmallAvatar src={submission.userImageUrl} />
                             {value}
+                            </>
                         </Stack>
                     </ClickableTableCell>
                 if( column.id === 'courseTitle' )
@@ -69,12 +71,12 @@ function SubmissionView({submission, orderNumber, displayColumns, onUserClicked,
                         </TableCell>
 
                     return <TableCell key={column.id} align={column.align} style={{color: statusToColor(value as string)}}>
-                        {column.format ? column.format(value) : value}
+                        <>{column.format ? column.format(value) : value}</>
                     </TableCell>
                 }
 
                 return <TableCell key={column.id} align={column.align}>
-                    {column.format ? column.format(value) : value}
+                    <>{column.format ? column.format(value) : value}</>
                 </TableCell>
             })}
         </TableRow>

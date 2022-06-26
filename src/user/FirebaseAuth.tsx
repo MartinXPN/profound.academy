@@ -18,9 +18,7 @@ interface Props {
 
 
 const FirebaseAuth = ({uiConfig, firebaseAuth, className, uiCallback}: Props) => {
-
     const [userSignedIn, setUserSignedIn] = useState(false);
-
     const elementRef = useRef(null);
 
     useEffect(() => {
@@ -30,7 +28,7 @@ const FirebaseAuth = ({uiConfig, firebaseAuth, className, uiCallback}: Props) =>
             firebaseUiWidget.reset();
 
         // We track the auth state to reset firebaseUi if the user signs out.
-        const unregisterAuthObserver = onAuthStateChanged(firebaseAuth, (user) => {
+        const unregisterAuthObserver = onAuthStateChanged(firebaseAuth, user => {
             if (!user && userSignedIn)
                 firebaseUiWidget.reset();
             setUserSignedIn(!!user);
@@ -48,6 +46,7 @@ const FirebaseAuth = ({uiConfig, firebaseAuth, className, uiCallback}: Props) =>
             unregisterAuthObserver();
             firebaseUiWidget.reset();
         };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [firebaseui, uiConfig]);
 
     return <div className={className} ref={elementRef} />;

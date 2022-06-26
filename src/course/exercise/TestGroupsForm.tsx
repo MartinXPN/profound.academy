@@ -18,6 +18,7 @@ function TestGroupView({namePrefix}: {namePrefix: string}) {
     const getError = (path: string) => {
         if( path.includes('.') ) {
             const [rootName, index, fieldName] = path.split('.');
+            // @ts-ignore
             return errors?.[rootName]?.[Number(index)]?.[fieldName];
         }
         return errors[path];

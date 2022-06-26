@@ -23,6 +23,7 @@ export function LocalizedFieldView({allowedLocales, namePrefix}: { allowedLocale
     const getError = (path: string) => {
         if( path.includes('.') ) {
             const [rootName, index, fieldName] = path.split('.');
+            // @ts-ignore
             return errors?.[rootName]?.[Number(index)]?.[fieldName];
         }
         return errors[path];

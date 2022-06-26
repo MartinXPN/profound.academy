@@ -35,7 +35,9 @@ function CourseInvitations({onSendInvites}: {onSendInvites: () => Promise<void>}
                             placeholder="abc@gmail.com hello@yahoo.com"
                             value={currentSearch}
                             error={Boolean(errors.invitedEmails)}
-                            helperText={Boolean(errors.invitedEmails) ? errors.invitedEmails?.message : 'Invites are only sent to new users. Removing an email from the list blocks the user'}
+                            helperText={Boolean(errors.invitedEmails)
+                                ? <>{errors.invitedEmails?.message}</>
+                                : <>Invites are only sent to new users. Removing an email from the list blocks the user</>}
                             {...params}
                             onChange={(e) => {
                                 const val = e.target.value.toLowerCase();
@@ -57,12 +59,12 @@ function CourseInvitations({onSendInvites}: {onSendInvites: () => Promise<void>}
 
         <Controller name="mailSubject" control={control} render={({ field: { ref, ...field } }) => (
             <TextField fullWidth label="Subject" variant="outlined" placeholder="Invitation email subject"
-                       error={Boolean(errors.mailSubject)} helperText={errors.mailSubject?.message}
+                       error={Boolean(errors.mailSubject)} helperText={<>{errors.mailSubject?.message}</>}
                        inputRef={ref} {...field} sx={{marginBottom: 2}} InputLabelProps={{ shrink: true }} />
         )}/>
         <Controller name="mailText" control={control} render={({ field: { ref, ...field } }) => (
             <TextField fullWidth multiline label="Mail text" variant="outlined" placeholder="Invite users to participate..."
-                       error={Boolean(errors.mailText)} helperText={errors.mailText?.message}
+                       error={Boolean(errors.mailText)} helperText={<>{errors.mailText?.message}</>}
                        inputRef={ref} {...field} sx={{marginBottom: 2}} InputLabelProps={{ shrink: true }} />
         )}/>
     </>

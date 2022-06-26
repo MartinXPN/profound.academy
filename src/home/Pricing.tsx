@@ -51,7 +51,7 @@ function Pricing() {
 
         if( email === null && auth.currentUser !== null )
             setEmail(auth.currentUser.email);
-    }, [auth]);
+    }, [auth, email, setEmail]);
 
     const handleStartFreePlan = () => {
         setShowSignIn(true);

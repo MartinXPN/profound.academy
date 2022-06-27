@@ -90,9 +90,9 @@ function LevelList({level, levelStatus, levelOrder, levelIcon, onItemSelected, i
                 <Tooltip title={localize(level.title)} arrow placement="right" key={`toggle-${level.id}`}>
                     <ListItem disablePadding key={`level-${level.id}`} sx={{width: '100%'}}>
                         <ListItemButton onClick={onLevelClicked} style={levelStyle}>
-                            <ListItemIcon sx={{maxWidth: '100%'}}>
+                            <ListItemIcon sx={{width: '100%'}}>
                                 {levelIcon}
-                                {levelOrder && <Typography variant="subtitle1" noWrap>{levelOrder}</Typography>}
+                                {levelOrder && <Typography variant="subtitle1">{levelOrder}</Typography>}
                                 {isDrawerOpen && <Typography variant="subtitle1" noWrap flex={1}>&nbsp; • &nbsp;{localize(level.title)}</Typography>}
                                 {open ? <ArrowDropUp/> : <ArrowDropDown/>}
                             </ListItemIcon>

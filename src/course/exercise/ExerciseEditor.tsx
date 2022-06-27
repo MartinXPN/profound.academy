@@ -3,12 +3,13 @@ import {CourseContext, CurrentExerciseContext} from "../Course";
 import {Course} from 'models/courses';
 import {COMPARISON_MODES, Exercise, EXERCISE_TYPES} from 'models/exercise';
 import {Alert, Button, FormControlLabel, MenuItem, Snackbar, Stack, Switch, TextField} from "@mui/material";
-import LocalizedFields, {FieldSchema, fieldSchema} from "./LocalizedFields";
+import LocalizedFields, {FieldSchema, fieldSchema} from "../../common/LocalizedFields";
 import Box from "@mui/material/Box";
 import AutocompleteSearch from "../../common/AutocompleteSearch";
 import {getCourses, searchCourses} from "../../services/courses";
 import {getExercisePrivateFields, updateExercise} from "../../services/exercises";
 import { reEvaluateSubmissions } from "../../services/submissions";
+import {newLevel, saveLevels} from "../../services/levels";
 
 import {Controller, useForm, FormProvider} from "react-hook-form";
 import {zodResolver} from "@hookform/resolvers/zod";
@@ -22,13 +23,15 @@ import {AlertColor} from "@mui/material/Alert/Alert";
 import {testGroupSchema} from "./TestGroupsForm";
 import {LANGUAGES} from "models/language";
 import {LocalizeContext} from "../../common/Localization";
+import LevelEditor, {AddLevel} from "./LevelEditor";
+import {Level} from "models/levels";
 
 const LANGUAGE_KEYS = Object.keys(LANGUAGES) as [keyof typeof LANGUAGES] as unknown as readonly [string, ...string[]];
 
 const baseSchema = {
     localizedFields: array(fieldSchema).nonempty(),
     isPublic: boolean(),
-    level: string().min(3).max(50), // levelId
+    level: string().min(1).max(50), // levelId
     levelOrder: number().nonnegative(),
     score: number().min(0).max(1000).int(),
     allowedAttempts: number().min(1).max(100).int(),
@@ -105,13 +108,14 @@ function ExerciseEditor({cancelEditing, exerciseTypeChanged}: {
     const {course} = useContext(CourseContext);
     const {exercise} = useContext(CurrentExerciseContext);
     const {localize} = useContext(LocalizeContext);
+    const [levels, setLevels] = useState<Level[]>(course?.levels ?? []);
     const [snackbar, setSnackbar] = useState<{message: string, severity: AlertColor} | null>(null);
     const handleCloseSnackbar = () => setSnackbar(null);
 
     const getDefaultFieldValues = useCallback(() => {
         return {
             localizedFields: getExerciseLocalizedFields(exercise, 'enUS'),
-            isPublic: Boolean(exercise &&  exercise.order && exercise.order >= 1),
+            isPublic: Boolean(exercise &&  exercise.levelId !== 'drafts'),
             level: exercise?.levelId ?? 'drafts',
             levelOrder: exercise?.order ?? 0,
             score:  exercise?.score ?? 100,
@@ -140,6 +144,24 @@ function ExerciseEditor({cancelEditing, exerciseTypeChanged}: {
     const {control, watch, handleSubmit, formState: {errors, isValid, isDirty}, reset, setValue} = formMethods;
     errors && Object.keys(errors).length && console.log('errors:', errors);
     const isPublic = watch('isPublic');
+    const level = watch('level');
+    if( isPublic && level === 'drafts' )
+        setValue('level', course?.levels?.at(-1)?.id ?? 'drafts');
+
+    // Keep track of the available levels
+    useEffect(() => setLevels(course?.levels ?? []), [JSON.stringify(course?.levels)]);
+    const onAddLevel = () => {
+        if( !course?.id )
+            return;
+        const created = {id: newLevel(course.id), title: 'New level'};
+        setLevels(levels => [...levels, created]);
+    }
+    const onSaveLevel = async (levelId: string, title: string | {[key: string]: string}) => {
+        if( !course?.id )
+            return;
+        const newLevels = levels.map(l => l.id === levelId ? {id: levelId, title: title} : l);
+        await saveLevels(course.id, newLevels);
+    }
 
     const exerciseType = watch('exerciseType');
     const onExerciseTypeChanged = (newType: keyof typeof EXERCISE_TYPES) => {
@@ -218,11 +240,14 @@ function ExerciseEditor({cancelEditing, exerciseTypeChanged}: {
                         <TextField
                             select required label="Level" variant="outlined" fullWidth
                             error={Boolean(errors.level)} helperText={errors.level?.message}
-                            inputRef={ref} {...field} sx={{flex: 1}}>
-                            {course?.levels.map((level) => <MenuItem key={level.id} value={level.id}>
-                                {localize(level.title)}
+                            inputRef={ref} {...field} sx={{flex: 1}}
+                            // @ts-ignore
+                            SelectProps={{renderValue: option => localize(levels.filter(l => l.id === option)[0]?.title ?? '')}}>
+                            {levels.map((level) => <MenuItem key={level.id} value={level.id}>
+                                <LevelEditor level={level} onSaveLevel={title => onSaveLevel(level.id, title)} />
                             </MenuItem>)}
-                            {/* TODO: Add functionality to edit and add levels */}
+
+                            <MenuItem key="add-level"><AddLevel onAddLevel={onAddLevel} /></MenuItem>
                         </TextField>
                     )}/>
 

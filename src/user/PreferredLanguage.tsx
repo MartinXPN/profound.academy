@@ -48,7 +48,7 @@ function PreferredLanguage({onShowOptions, onOptionSelected, anchorEl}: {
         </Menu>
         : <MenuItem key="preferred-language" onClick={onShowOptionsClicked}>
             <ListItemText><Locale locale={locale} /></ListItemText>
-            <ListItemIcon><ArrowRightIcon fontSize="medium" /></ListItemIcon>
+            <ListItemIcon><ArrowRightIcon /></ListItemIcon>
         </MenuItem>}
     </>
 }

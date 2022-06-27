@@ -59,7 +59,7 @@ function Exercise({launchCourse, registerCourse}: {launchCourse: () => void, reg
 
     useEffect(() => setExerciseType(exercise?.exerciseType ?? 'code'), [exercise]);
     useEffect(() => {
-        if( isCourseInstructor && exercise?.order === 0 )
+        if( isCourseInstructor && exercise?.levelId === 'drafts' )
             setCurrentTab('edit');
     }, [exercise, isCourseInstructor]);
 

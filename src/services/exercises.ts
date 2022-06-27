@@ -6,10 +6,10 @@ import {LANGUAGES} from "models/language";
 import {Insight} from "models/lib/courses";
 import {SubtaskTestGroup} from "models/lib/exercise";
 
-export const getFirstExercise = async (courseId: string) => {
+export const getFirstExercise = async (courseId: string, levelId: string) => {
     const exercise = await db.exercises(courseId)
+        .where('levelId', '==', levelId)
         .orderBy('order', 'asc')
-        .where('order', '>=', 1)
         .limit(1).get();
     return exercise.docs?.[0]?.data() ?? null;
 }

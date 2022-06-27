@@ -58,9 +58,9 @@ function CurrentCourseView({openPage}: {openPage: (page: string) => void}) {
     const openStatus = useCallback(() => openPage('status'), [openPage]);
 
     const launchCourse = useCallback(async () => {
-        if( !course )   return;
+        if( !course || course.levels.length === 0 )   return;
         console.log('Launching the course');
-        const firstExercise = await getFirstExercise(course.id);
+        const firstExercise = await getFirstExercise(course.id, course.levels[0].id);
         openExercise(firstExercise);
     }, [course, openExercise]);
 

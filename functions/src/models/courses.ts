@@ -1,6 +1,6 @@
 import firebase from 'firebase/compat/app';
 import {Exercise} from './exercise';
-import { Level } from './levels';
+import {Level} from './levels';
 
 
 export interface Course {

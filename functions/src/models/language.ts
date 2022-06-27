@@ -4,7 +4,9 @@ export interface Language {
     displayName: string;
 }
 
-export const LANGUAGES: { [key in 'txt' | 'C++11' | 'C++14' | 'C++17' | 'python' | 'python3' | 'C#' | 'js' | 'java']: Language } = {
+export const LANGUAGES: {[
+    key in 'txt' | 'C++11' | 'C++14' | 'C++17' | 'python' | 'python3' | 'C#' | 'js' | 'java'
+]: Language } = {
     'txt': {extension: 'txt', languageCode: 'txt', displayName: 'Text'},
     // 'C': {extension: 'c', languageCode: 'C', displayName: 'C'}, // haven't added support in CodeRunner
     'C++11': {extension: 'cpp', languageCode: 'C++11', displayName: 'C++11'},

@@ -78,7 +78,7 @@ function LevelEditor({level, onSaveLevel}: {
             {editing && <>
                 <FormProvider {...formMethods}>
                 <form key="languages-form">
-                <Box onClick={e => e.stopPropagation()}>
+                <Box onClick={e => e.stopPropagation()} onKeyDown={e => e.stopPropagation()}>
                     <Box flexBasis="100%" height={0} />
                     <LocalizedFields excludeContent />
 

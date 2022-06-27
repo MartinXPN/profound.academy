@@ -18,6 +18,7 @@ export interface Course {
     title: string;
     introduction: string;                       // notion id for the introduction page
 
+    drafts: Level;                              // Exercises that are still in draft phase (not public)
     levels: Level[];
     levelExercises: { [key: string]: number };  // {levelId: numberOfExercisesInLevel}
     levelScores: { [key: string]: number };     // {levelId: scorePerLevel}

@@ -10,7 +10,7 @@ import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
-import {Add} from "@mui/icons-material";
+import {Add, Edit, Equalizer} from "@mui/icons-material";
 import QueryStatsIcon from '@mui/icons-material/QueryStats';
 
 import {Exercise} from "models/exercise";
@@ -171,14 +171,16 @@ function CourseDrawer({onItemSelected, onStatusClicked, onCreateExerciseClicked,
                     </ListItem>
                 </Tooltip>
 
-                {Object.entries(course.levelExercises).map(([levelName, numExercises]) => {
-                    const numSolved = progress && progress.levelSolved && levelName in progress.levelSolved ? progress.levelSolved[levelName] : 0;
-                    const isLevelSolved = numExercises <= numSolved;
+                {course.levels.map((level, levelOrder) => {
+                    const numSolved = progress?.levelSolved?.[level.id] ?? 0;
+                    const isLevelSolved = course.levelExercises[level.id] <= numSolved;
 
-                    return <Box key={`drawer-level-${levelName}`}>
+                    return <Box key={`drawer-level-${level.id}`}>
                             <LevelList
-                                levelName={levelName}
+                                level={level}
                                 levelStatus={isLevelSolved ? 'Solved' : 'In Progress'}
+                                levelOrder={levelOrder + 1}
+                                levelIcon={<Equalizer/>}
                                 onItemSelected={onItemSelected}
                                 isDrawerOpen={open}
                                 isSingleLevel={Object.keys(course?.levelExercises ?? {}).length <= 1}/>
@@ -189,9 +191,9 @@ function CourseDrawer({onItemSelected, onStatusClicked, onCreateExerciseClicked,
                 {isCourseInstructor && <Box key="drafts">
                     <Divider />
                     <LevelList
-                        drafts
-                        levelName="0"
-                        levelStatus={'In Progress'}
+                        level={course.drafts}
+                        levelStatus="In Progress"
+                        levelIcon={<Edit/>}
                         onItemSelected={onItemSelected}
                         isDrawerOpen={open}
                         isSingleLevel={false} />

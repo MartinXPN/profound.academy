@@ -21,14 +21,15 @@ import useAsyncEffect from "use-async-effect";
 import {AlertColor} from "@mui/material/Alert/Alert";
 import {testGroupSchema} from "./TestGroupsForm";
 import {LANGUAGES} from "models/language";
+import {LocalizeContext} from "../../common/Localization";
 
 const LANGUAGE_KEYS = Object.keys(LANGUAGES) as [keyof typeof LANGUAGES] as unknown as readonly [string, ...string[]];
 
 const baseSchema = {
     localizedFields: array(fieldSchema).nonempty(),
     isPublic: boolean(),
-    level: number().positive().int(),
-    levelOrder: number().nonnegative().int(),
+    level: string().min(3).max(50), // levelId
+    levelOrder: number().nonnegative(),
     score: number().min(0).max(1000).int(),
     allowedAttempts: number().min(1).max(100).int(),
     unlockContent: array(string().min(5).max(35)),
@@ -103,17 +104,16 @@ function ExerciseEditor({cancelEditing, exerciseTypeChanged}: {
 }) {
     const {course} = useContext(CourseContext);
     const {exercise} = useContext(CurrentExerciseContext);
+    const {localize} = useContext(LocalizeContext);
     const [snackbar, setSnackbar] = useState<{message: string, severity: AlertColor} | null>(null);
     const handleCloseSnackbar = () => setSnackbar(null);
 
     const getDefaultFieldValues = useCallback(() => {
-        const level = exercise?.order ? Math.trunc(exercise.order) : 1;
-        const levelOrder = exercise?.order ? parseInt((exercise.order - level).toFixed(3).substring(2)) : 0;
         return {
             localizedFields: getExerciseLocalizedFields(exercise, 'enUS'),
             isPublic: Boolean(exercise &&  exercise.order && exercise.order >= 1),
-            level: level,
-            levelOrder: levelOrder,
+            level: exercise?.levelId ?? 'drafts',
+            levelOrder: exercise?.order ?? 0,
             score:  exercise?.score ?? 100,
             allowedAttempts: exercise?.allowedAttempts ?? 100,
             exerciseType: exercise?.exerciseType ?? 'code',
@@ -164,15 +164,12 @@ function ExerciseEditor({cancelEditing, exerciseTypeChanged}: {
             return;
         console.log('submit!', data);
 
-        const levelOrder = String(data.levelOrder).padStart(3, '0');
-        const order = data.isPublic ? parseFloat(`${data.level}.${levelOrder}`) : 0;
-        console.log('Order:', order);
-
         await updateExercise(
             course.id, exercise.id,
             data.localizedFields.reduce((map, field) => {map[field.locale] = field.title; return map;}, {} as {[key: string]: string}),
             data.localizedFields.reduce((map, field) => {map[field.locale] = field.notionId; return map;}, {} as {[key: string]: string}),
-            order,
+            data.isPublic ? data.level : 'drafts',
+            data.levelOrder,
             data.score,
             data.allowedAttempts,
             data.exerciseType,
@@ -217,13 +214,16 @@ function ExerciseEditor({cancelEditing, exerciseTypeChanged}: {
                 )} />
 
                 {isPublic && <>
-                    <Controller name="level" control={control} render={({ field: { ref, onChange, ...field } }) => (
+                    <Controller name="level" control={control} render={({ field: { ref, ...field } }) => (
                         <TextField
-                            required label="Level" variant="outlined" placeholder="4" type="number" fullWidth
-                            onChange={e => e.target.value ? onChange(Number(e.target.value)) : onChange(e.target.value)}
+                            select required label="Level" variant="outlined" fullWidth
                             error={Boolean(errors.level)} helperText={errors.level?.message}
-                            inputProps={{inputMode: 'numeric', pattern: '[0-9]*'}} inputRef={ref}
-                            {...field} sx={{flex: 1}} />
+                            inputRef={ref} {...field} sx={{flex: 1}}>
+                            {course?.levels.map((level) => <MenuItem key={level.id} value={level.id}>
+                                {localize(level.title)}
+                            </MenuItem>)}
+                            {/* TODO: Add functionality to edit and add levels */}
+                        </TextField>
                     )}/>
 
                     <Controller name="levelOrder" control={control} render={({ field: { ref, onChange, ...field } }) => (

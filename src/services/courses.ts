@@ -183,7 +183,7 @@ export const updateCourse = async (
         author: author,
         instructors: instructors,
         introduction: introduction,
-        ...(!exists && {levelExercises: {'1': 0}}),
+        ...(!exists && {levels: [], levelExercises: {}, drafts: {id: 'drafts', title: 'Drafts'}}),
     }, {merge: true});
 }
 

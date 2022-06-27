@@ -1,13 +1,14 @@
-import {useContext, useEffect, useState, memo} from "react";
+import {useContext, useEffect, useState, memo, ReactNode} from "react";
 
 import List from '@mui/material/List';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
-import {ArrowDropUp, ArrowDropDown, Equalizer, Edit} from "@mui/icons-material";
+import {ArrowDropUp, ArrowDropDown} from "@mui/icons-material";
 import ArrowRightIcon from '@mui/icons-material/ArrowRight';
 
 import {Exercise} from "models/exercise";
 import {ExerciseProgress} from "models/progress";
+import {Level} from "models/levels";
 import {statusToStyledBackground} from "../colors";
 import {ListItem, ListItemButton, Stack, Tooltip, Typography} from "@mui/material";
 import {onCourseLevelExercisesChanged} from "../../services/exercises";
@@ -19,13 +20,14 @@ import {useParams} from "react-router-dom";
 import {LocalizeContext} from "../../common/Localization";
 
 
-function LevelList({levelName, levelStatus, onItemSelected, isDrawerOpen, isSingleLevel, drafts}: {
-    levelName: string,
+function LevelList({level, levelStatus, levelOrder, levelIcon, onItemSelected, isDrawerOpen, isSingleLevel}: {
+    level: Level,
     levelStatus: 'Solved' | 'In Progress' | 'Unavailable',
+    levelOrder?: number,
+    levelIcon: ReactNode,
     onItemSelected: (exercise: Exercise) => void,
     isDrawerOpen: boolean,
     isSingleLevel: boolean,
-    drafts?: boolean,
 }) {
     const auth = useContext(AuthContext);
     const {exerciseId} = useParams<{ exerciseId: string }>();
@@ -36,7 +38,6 @@ function LevelList({levelName, levelStatus, onItemSelected, isDrawerOpen, isSing
     const [open, setOpen] = useState(isSingleLevel);
     const [progress, setProgress] = useState<ExerciseProgress<SubmissionStatus> | null>(null);
     const isCourseOpen = course && course.revealsAt.toDate() < new Date();
-    const levelNumber = parseInt(levelName);
 
     // Open the level in the drawer
     useEffect(() => {
@@ -44,26 +45,25 @@ function LevelList({levelName, levelStatus, onItemSelected, isDrawerOpen, isSing
             return setOpen(true);
         if( !exercise )
             return;
-        const exerciseLevel = Math.trunc(exercise.order).toString();
-        const isExerciseInLevel = exerciseLevel === levelName;
+        const isExerciseInLevel = exercise.levelId === level.id;
 
         if( !open )
             setOpen(isExerciseInLevel);
         // intentionally leave out open - because we might want to close the level by clicking
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [exercise, levelName, isSingleLevel]);
+    }, [exercise, level.id, isSingleLevel]);
 
     // Level exercise listener
     useEffect(() => {
         if( course && open )
-            return onCourseLevelExercisesChanged(course.id, levelNumber, setLevelExercises);
-    }, [course, open, levelNumber, isCourseOpen]);
+            return onCourseLevelExercisesChanged(course.id, level.id, setLevelExercises);
+    }, [course, open, level.id, isCourseOpen]);
 
     // Level exercises progress listener
     useEffect(() => {
         if( open && auth.currentUserId && course?.id )
-            return onCourseExerciseProgressChanged(course.id, auth.currentUserId, levelName, setProgress);
-    }, [open, levelName, auth.currentUserId, course?.id, isCourseOpen]);
+            return onCourseExerciseProgressChanged(course.id, auth.currentUserId, level.id, setProgress);
+    }, [open, level.id, auth.currentUserId, course?.id, isCourseOpen]);
 
     // Current exercise data update
     useEffect(() => levelExercises.forEach(exercise => {
@@ -87,21 +87,15 @@ function LevelList({levelName, levelStatus, onItemSelected, isDrawerOpen, isSing
     return <>
         <List disablePadding>
             {!isSingleLevel &&
-                <Tooltip title={drafts ? 'Drafts' : `Level ${levelName}`} arrow placement="right" key={`toggle-${levelName}`}>
-                    <ListItem disablePadding key={`level-${levelName}`}>
+                <Tooltip title={localize(level.title)} arrow placement="right" key={`toggle-${level.id}`}>
+                    <ListItem disablePadding key={`level-${level.id}`}>
                         <ListItemButton onClick={onLevelClicked} style={levelStyle}>
-                            {drafts
-                                ? <ListItemIcon>
-                                    <Edit/>
-                                    {isDrawerOpen && <Typography variant="subtitle1">Drafts</Typography>}
-                                    {open ? <ArrowDropUp/> : <ArrowDropDown/>}
-                                </ListItemIcon>
-                                : <ListItemIcon>
-                                    <Equalizer/>
-                                    {!isDrawerOpen && <Typography variant="subtitle1">{levelName}</Typography>}
-                                    {isDrawerOpen && <Typography variant="subtitle1">Level {levelName}</Typography>}
-                                    {open ? <ArrowDropUp/> : <ArrowDropDown/>}
-                                </ListItemIcon>}
+                            <ListItemIcon>
+                                {levelIcon}
+                                {!isDrawerOpen && levelOrder && <Typography variant="subtitle1">{levelOrder}</Typography>}
+                                {isDrawerOpen && <Typography variant="subtitle1">{localize(level.title)}</Typography>}
+                                {open ? <ArrowDropUp/> : <ArrowDropDown/>}
+                            </ListItemIcon>
                         </ListItemButton>
                     </ListItem>
                 </Tooltip>

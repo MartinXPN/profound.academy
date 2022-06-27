@@ -15,10 +15,10 @@ import {statusColors} from "../colors";
 import UserSubmissionsBackdrop, {SubmissionsInfo} from "./UserSubmissionsBackdrop";
 
 
-function RankingPage({metric, numRows, startAfterId, startIndex, showProgress, levelOpen, maxLevel, levelExercises, setCurrentUserIds}: {
+function RankingPage({metric, numRows, startAfterId, startIndex, showProgress, levelOpen, levelExercises, setCurrentUserIds}: {
     metric: string, numRows: number, startAfterId: string | null, startIndex: number,
     showProgress?: boolean,
-    levelOpen: {[key: string]: boolean}, maxLevel: number,
+    levelOpen: {[key: string]: boolean},
     levelExercises: {[key: string]: Exercise[]},
     setCurrentUserIds: (userIds: string[]) => void,
 }) {
@@ -96,19 +96,17 @@ function RankingPage({metric, numRows, startAfterId, startIndex, showProgress, l
                     {showProgress ? '+' : ''}{metric in row ? Math.round(row[metric]): '-' }
                 </TableCell>
 
-                {(maxLevel >= 1) && Array(maxLevel).fill(1).map((_, index) => {
-                    const levelName = (index + 1).toString();
+                {course?.levels.map((level, index) => {
                     // @ts-ignore
-                    const levelScore = row?.[levelMetric]?.[levelName];
+                    const levelScore = row?.[levelMetric]?.[level.id];
                     return <>
-                        {maxLevel >= 2 &&
-                            <TableCell key={levelName} align="right">
+                        {course?.levels.length >= 2 &&
+                            <TableCell key={level.id} align="right">
                                 {levelScore ? Math.round(levelScore) : '-'}
                             </TableCell>}
 
-
-                        {levelOpen[levelName] && levelName in levelExercises && levelExercises[levelName].map(ex => {
-                            const exerciseScore = levelExerciseProgress?.[levelName]?.[row.id]?.[ex.id];
+                        {levelOpen[level.id] && levelExercises?.[level.id]?.map(ex => {
+                            const exerciseScore = levelExerciseProgress?.[level.id]?.[row.id]?.[ex.id];
                             return <>
                                 <ClickableTableCell key={ex.id} align="right" onClick={() => onUserExerciseClicked(row.id, row.userImageUrl, row.userDisplayName, ex)}>
                                     {exerciseScore ? Math.round(exerciseScore) : '-'}

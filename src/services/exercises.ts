@@ -14,11 +14,10 @@ export const getFirstExercise = async (courseId: string) => {
     return exercise.docs?.[0]?.data() ?? null;
 }
 
-export const getCourseLevelExercises = async (courseId: string, level: number) => {
+export const getCourseLevelExercises = async (courseId: string, level: string) => {
     const snapshot = await db.exercises(courseId)
+        .where('levelId', '==', level)
         .orderBy('order', 'asc')
-        .where('order', '>=', level)
-        .where('order', '<', level + 1 )
         .get();
 
     const exercises: Exercise[] = snapshot.docs.map(x => x.data());
@@ -26,11 +25,10 @@ export const getCourseLevelExercises = async (courseId: string, level: number) =
     return exercises;
 }
 
-export const onCourseLevelExercisesChanged = (courseId: string, level: number, onChanged: (exercises: Exercise[]) => void) => {
+export const onCourseLevelExercisesChanged = (courseId: string, level: string, onChanged: (exercises: Exercise[]) => void) => {
     return db.exercises(courseId)
+        .where('levelId', '==', level)
         .orderBy('order', 'asc')
-        .where('order', '>=', level)
-        .where('order', '<', level + 1 )
         .onSnapshot(snapshot => {
             const exercises = snapshot.docs.map(d => d.data());
             console.log(`Got level-${level} exercises`, exercises);
@@ -58,21 +56,21 @@ export const getExercise = async (courseId: string, exerciseId: string) => {
 export const updateExercise = async (
     courseId: string, exerciseId: string,
     title: {[key: string]: string}, pageId: {[key: string]: string},
-    order: number, score: number, allowedAttempts: number,
+    level: string, order: number, score: number, allowedAttempts: number,
     exerciseType: keyof typeof EXERCISE_TYPES,
     unlockContent: string[],
     allowedLanguages?: (keyof typeof LANGUAGES)[],
     memoryLimit?: number, timeLimit?: number, outputLimit?: number,
-    floatPrecision?: number, comparisonMode?: 'whole' | 'token' | 'custom', testCases?: TestCase[], testGroups?: SubtaskTestGroup[],
+    floatPrecision?: number, comparisonMode?: 'whole' | 'token' | 'custom',
+    testCases?: TestCase[], testGroups?: SubtaskTestGroup[],
     question?: string, answer?: string, options?: string[],
 ) => {
     const previousValues = (await db.exercise(courseId, exerciseId).get()).data();
-    const prevOrder = previousValues?.order ?? 0;
     const prevScore = previousValues?.score ?? 0;
-    const prevLevelName = `${Math.trunc(prevOrder)}`;
-    const newLevelName = `${Math.trunc(order)}`;
+    const prevLevel = previousValues?.levelId;
 
     await db.exercise(courseId, exerciseId).set({
+        levelId: level,
         order: order,
         score: score,
         allowedAttempts: allowedAttempts,
@@ -89,6 +87,8 @@ export const updateExercise = async (
         question: question,
         options: options,
     }, {merge: true});
+    // Update title and pageId as we don't want to merge {local => content} maps - we want to change them
+    // in case we remove an element
     await db.exercise(courseId, exerciseId).update({
         title: title,
         pageId: pageId,
@@ -97,24 +97,24 @@ export const updateExercise = async (
         await db.exercisePrivateFields(courseId, exerciseId).set({answer: answer}, {merge: true});
 
     // update the course as well (levelExercises and levelScores)
-    if( prevLevelName !== newLevelName ) {
+    if( prevLevel !== level ) {
         await db.course(courseId).set({
             // @ts-ignore
             levelExercises: {
-                ...(prevLevelName !== '0' && {[prevLevelName]: firebase.firestore.FieldValue.increment(-1)}),
-                ...(newLevelName !== '0' && {[newLevelName]: firebase.firestore.FieldValue.increment(1)}),
+                ...(prevLevel && prevLevel !== 'drafts' && {[prevLevel]: firebase.firestore.FieldValue.increment(-1)}),
+                ...(level !== 'drafts' && {[level]: firebase.firestore.FieldValue.increment(1)}),
             },
             // @ts-ignore
             levelScores: {
-                ...(prevLevelName !== '0' && {[prevLevelName]: firebase.firestore.FieldValue.increment(-prevScore)}),
-                ...(newLevelName !== '0' && {[newLevelName]: firebase.firestore.FieldValue.increment(score)}),
+                ...(prevLevel && prevLevel !== 'drafts' && {[prevLevel]: firebase.firestore.FieldValue.increment(-prevScore)}),
+                ...(level !== 'drafts' && {[level]: firebase.firestore.FieldValue.increment(score)}),
             },
         }, {merge: true});
     }
-    else if( prevScore !== score && newLevelName !== '0' ) {
+    else if( prevScore !== score && level !== 'drafts' ) {
         await db.course(courseId).set({
             // @ts-ignore
-            levelScores: {[newLevelName]: firebase.firestore.FieldValue.increment(score - prevScore)},
+            levelScores: {[level]: firebase.firestore.FieldValue.increment(score - prevScore)},
         }, {merge: true});
     }
 }
@@ -146,7 +146,7 @@ export const updateTestCases = async (
     courseId: string, exerciseId: string, file: File,
     onProgressChanged: (progress: number) => void,
 ) => {
-    onProgressChanged(5);
+    onProgressChanged(3);
     const functions = getFunctions();
     const upload = httpsCallable(functions, 'getS3UploadUrl');
 
@@ -156,6 +156,7 @@ export const updateTestCases = async (
         contentType: file.type,
     });
     console.log('uploadURL:', uploadUrl.data);
+    onProgressChanged(7);
     if( !uploadUrl || !uploadUrl.data )
         return onProgressChanged(0);
 
@@ -168,7 +169,7 @@ export const updateTestCases = async (
             'Content-Type': file.type,
             'x-amz-server-side-encryption': 'AES256'
         },
-        onUploadProgress: (p) => {
+        onUploadProgress: p => {
             onProgressChanged(100 * p.loaded / p.total);
             console.log('progress:', p);
         },

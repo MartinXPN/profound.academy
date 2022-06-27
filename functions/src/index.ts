@@ -11,15 +11,14 @@ export const helloWorld = functions.https.onRequest((req, res) => {
 });
 
 export const getNotionPage = functions.https.onRequest(async (req, res) => {
-    const {fetchNotionPage} = await import('./services/notion');
-    const corsLib = await import('cors');
-
     res.set('Cache-Control', 'public, max-age=300, s-maxage=600');
     if (req.method !== 'GET') {
         res.status(403).send('Forbidden');
         return;
     }
 
+    const {fetchNotionPage} = await import('./services/notion');
+    const corsLib = await import('cors');
     const cors = corsLib({origin: true});
     cors(req, res, async () => {
         functions.logger.info(`query: ${JSON.stringify(req.query)}`);

@@ -48,10 +48,7 @@ function SubmissionView({submission, orderNumber, displayColumns, onUserClicked,
                 if( column.id === 'userDisplayName' )
                     return <ClickableTableCell key={column.id} align={column.align} onClick={() => onUserClicked(submission.userId)}>
                         <Stack direction="row" alignItems="center" alignContent="center">
-                            <>
-                            <SmallAvatar src={submission.userImageUrl} />
-                            {value}
-                            </>
+                            <><SmallAvatar src={submission.userImageUrl} />{value}</>
                         </Stack>
                     </ClickableTableCell>
                 if( column.id === 'courseTitle' )
@@ -62,7 +59,7 @@ function SubmissionView({submission, orderNumber, displayColumns, onUserClicked,
                     </ClickableTableCell>
 
                 if( column.id === 'language' && typeof value === 'string' )
-                    return <TableCell key={column.id} align={column.align}>{LANGUAGES[value]?.displayName ?? ''}</TableCell>
+                    return <TableCell key={column.id} align={column.align}>{LANGUAGES[value as keyof typeof LANGUAGES]?.displayName ?? ''}</TableCell>
 
                 if( column.id === 'status' ) {
                     if( value === 'Checking')

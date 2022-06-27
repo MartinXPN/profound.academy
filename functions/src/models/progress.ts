@@ -14,19 +14,19 @@ export interface ExerciseProgress<T> {
  */
 export interface Progress {
     id: string;                                             // userId
-    userId: string;                                         // userId for collction group queries
+    userId: string;                                         // userId for collection group queries
     userDisplayName: string;                                // how to show the user
     userImageUrl?: string;                                  // Image of the user
 
     score?: number;                                         // total score for the course
-    levelScore?: { [key: string]: number };                 // {level: score}
-    exerciseScore?: ExerciseProgress<number>;               // [subcollection] progress = {exId: score}
+    levelScore?: { [key: string]: number };                 // {levelId: score}
+    exerciseScore?: ExerciseProgress<number>;               // [sub-collection] progress = {exId: score}
 
     upsolveScore?: number;                                  // total score for the course (after the freeze)
-    levelUpsolveScore?: { [key: string]: number };          // {level: score}
-    exerciseUpsolveScore?: ExerciseProgress<number>;        // [subcollection] progress = {exId: score}
+    levelUpsolveScore?: { [key: string]: number };          // {levelId: score}
+    exerciseUpsolveScore?: ExerciseProgress<number>;        // [sub-collection] progress = {exId: score}
 
     solved?: number;                                        // total solved exercises
-    levelSolved?: { [key: string]: number };                // {level: #solved}
-    exerciseSolved?: ExerciseProgress<SubmissionStatus>;    // [subcollection] progress = {exId: status}
+    levelSolved?: { [key: string]: number };                // {levelId: #solved}
+    exerciseSolved?: ExerciseProgress<SubmissionStatus>;    // [sub-collection] progress = {exId: status}
 }

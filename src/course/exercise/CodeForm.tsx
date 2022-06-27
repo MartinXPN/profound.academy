@@ -1,5 +1,5 @@
 import {memo, useCallback, useContext, useEffect, useState} from "react";
-import {Autocomplete, Badge, IconButton, LinearProgress, Link, MenuItem, Stack, TextField, Typography, Grid} from "@mui/material";
+import {Badge, IconButton, LinearProgress, Link, MenuItem, Stack, TextField, Typography, Grid, Autocomplete} from "@mui/material";
 import {Controller, useFieldArray, useFormContext} from "react-hook-form";
 import {LANGUAGES} from "models/language";
 import {COMPARISON_MODES, TestCase} from "models/exercise";
@@ -64,13 +64,10 @@ function CodeForm() {
     const onTestSelected = (newTest: number | null) => setSelectedTest(newTest === selectedTest ? null : newTest);
     const onPrivateTestSelected = (newTest: number | null) => setSelectedPrivateTest(newTest === selectedPrivateTest ? null : newTest);
 
-    const nameToLanguageId = (name: string) => Object.keys(LANGUAGES).find(key => LANGUAGES[key].displayName === name);
     const comparisonMode = watch('comparisonMode');
     const { fields, append, remove } = useFieldArray({control, name: 'testCases'});
     const watchTests = watch('testCases');
-    const tests = fields.map((field, index) => {
-        return {...field, ...watchTests[index]};
-    });
+    const tests = fields.map((field, index) => ({...field, ...watchTests[index]}));
     const removeTest = (index: number) => {
         setSelectedTest(1 <= index && index < tests.length ? index - 1 : null);
         remove(index);
@@ -91,15 +88,16 @@ function CodeForm() {
 
     return <>
         <Stack direction="row" spacing={1}>
-            <Controller name="allowedLanguages" control={control} render={({field}) => (
+            <Controller name="allowedLanguages" control={control} render={({ field: {ref, value, onChange} }) => (
                 <Autocomplete
-                    sx={{ width: 200 }} ref={field.ref} multiple autoHighlight disableCloseOnSelect disableClearable
-                    value={field.value.map((l: string) => LANGUAGES[l].displayName)}
-                    onChange={(event, values: string[] | null) => values && field.onChange(values.map(v => nameToLanguageId(v)!))}
-                    options={Object.keys(LANGUAGES).map(key => LANGUAGES[key].displayName)}
+                    sx={{ width: 300 }} multiple autoHighlight disableCloseOnSelect disableClearable
+                    ref={ref} value={value} onChange={(event, value) => onChange(value)}
+                    options={Object.keys(LANGUAGES) as unknown as readonly [keyof typeof LANGUAGES]}
+                    getOptionLabel={(option: keyof typeof LANGUAGES) => LANGUAGES[option].displayName}
                     renderInput={(params) => (
                         <TextField {...params} label="Allowed languages"
-                                   error={Boolean(errors.allowedLanguages)} helperText={<>{errors.allowedLanguages?.message}</>}/>
+                                   error={Boolean(errors.allowedLanguages)}
+                                   helperText={<>{errors.allowedLanguages?.message}</>}/>
                     )} />
             )} />
 
@@ -110,9 +108,9 @@ function CodeForm() {
                     'custom': 'Need to implement a custom checker',
                 }[field.value as typeof COMPARISON_MODES[number]]}>
 
-                    <MenuItem value="whole">Exact match</MenuItem>
-                    <MenuItem value="token">Token-by-token match</MenuItem>
-                    <MenuItem value="custom">Custom</MenuItem>
+                    <MenuItem key="whole" value="whole">Exact match</MenuItem>
+                    <MenuItem key="token" value="token">Token-by-token match</MenuItem>
+                    <MenuItem key="custom" value="custom">Custom</MenuItem>
                 </TextField>
             )} />
 

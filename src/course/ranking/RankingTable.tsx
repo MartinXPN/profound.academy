@@ -10,38 +10,33 @@ import {Exercise} from "models/exercise";
 import {getCourseLevelExercises} from "../../services/exercises";
 import {CourseContext} from "../Course";
 import {Equalizer} from "@mui/icons-material";
-import {Typography} from "@mui/material";
+import {Tooltip, Typography} from "@mui/material";
 import useAsyncEffect from "use-async-effect";
 import {useNavigate} from "react-router-dom";
 import ClickableTableCell from "../../common/ClickableTableCell";
 import InfiniteScrollLoading from "../../common/InfiniteScrollLoading";
 import RankingPage from "./RankingPage";
+import {LocalizeContext} from "../../common/Localization";
 
 
 function RankingTable({metric, showProgress}: {metric: string, showProgress?: boolean}) {
     const navigate = useNavigate();
     const {course} = useContext(CourseContext);
+    const {localize} = useContext(LocalizeContext);
     const [hasMore, setHasMore] = useState(true);
-    const [maxLevel, setMaxLevel] = useState(0);
     const [levelOpen, setLevelOpen] = useState<{[key: string]: boolean}>({});
     const [levelExercises, setLevelExercises] = useState<{[key: string]: Exercise[]}>({});
     const [lastIds, setLastIds] = useState<(string | null)[]>([]);
     const rowsPerPage = 10; // Can't be more because of onLevelExerciseProgressChanged
                             // "Firestore 'in' filters support a maximum of 10 elements in the value array"
 
+    // single-level rankings should always be open
     useMemo(() => {
-        if( !course )
-            return;
-        const maxLevel = Object.keys(course.levelExercises)
-            .map(k => parseInt(k))
-            .reduce((prev, cur) => Math.max(prev, cur), 1);
-        setMaxLevel(maxLevel);
-
-        // single-level rankings should always be open
-        if( maxLevel <= 1 )
-            setLevelOpen(lOpen => {return {...lOpen, '1': true}});
+        if( course && course.levels.length === 1 )
+            setLevelOpen(lOpen => {return {...lOpen, [course.levels[0].id]: true}});
     }, [course]);
 
+    // Exercises for open levels
     useAsyncEffect(async () => {
         if( !course )
             return;
@@ -52,7 +47,7 @@ function RankingTable({metric, showProgress}: {metric: string, showProgress?: bo
             if( level in levelExercises )
                 return levelExercises[level];
 
-            const levelEx = await getCourseLevelExercises(course.id, parseInt(level));
+            const levelEx = await getCourseLevelExercises(course.id, level);
             setLevelExercises(levelExercises => {return {...levelExercises, [level]: levelEx}});
         }));
     }, [course, levelOpen]);
@@ -89,34 +84,38 @@ function RankingTable({metric, showProgress}: {metric: string, showProgress?: bo
         setLastIds(lastIds => [...lastIds, null]);
     }
 
+    if( !course )
+        return <></>
     return (
         <TableContainer sx={{ maxHeight: 'calc(100vh - 64px)', width: '100%' }}>
             <Table stickyHeader>
                 <TableHead>
-                    <TableRow>
-                        <TableCell key="#" align="center" sx={{minWidth: 20}}>#</TableCell>
-                        <TableCell key="userDisplayName" align="left" sx={{minWidth: 200}}>User</TableCell>
-                        <TableCell key="total" align="right" sx={{width: 50}}>Total</TableCell>
+                <TableRow>
+                    <TableCell key="#" align="center" sx={{minWidth: 20}}>#</TableCell>
+                    <TableCell key="userDisplayName" align="left" sx={{minWidth: 200}}>User</TableCell>
+                    <TableCell key="total" align="right" sx={{width: 50}}>Total</TableCell>
 
-                        {(maxLevel >= 1) && Array(maxLevel).fill(1).map((_, index) => {
-                            const levelName = (index + 1).toString();
-                            return <>
-                                {maxLevel >= 2 &&
-                                <ClickableTableCell key={levelName} align="right" onClick={() => onLevelClicked(levelName)} sx={{width: 50}}>
-                                    <Typography variant="subtitle1" sx={{verticalAlign: 'middle', display: 'inline-flex'}}>
-                                        <Equalizer /> {levelName}
-                                    </Typography>
-                                    <Typography variant="body2">{course?.levelScores?.[levelName] ?? '?'}</Typography>
-                                </ClickableTableCell>}
+                    {course.levels.map((level, index) => <>
+                        {course.levels.length >= 2 &&
+                            <Tooltip key={`tooltip-${level.id}`} disableInteractive placement="top-start" title={localize(level.title)}>
+                            <ClickableTableCell key={level.id} align="right" onClick={() => onLevelClicked(level.id)} sx={{width: 50}}>
+                                <Typography variant="subtitle1" sx={{verticalAlign: 'middle', display: 'inline-flex'}}>
+                                    <Equalizer/> {index + 1}
+                                </Typography>
+                                <Typography variant="body2">{course.levelScores?.[level.id] ?? '?'}</Typography>
+                            </ClickableTableCell>
+                            </Tooltip>
+                        }
 
-                                {levelOpen[levelName] && levelName in levelExercises && levelExercises[levelName].map((ex, index) =>
-                                    <ClickableTableCell key={ex.id} align="right" sx={{width: 50}} onClick={() => onExerciseClicked(ex.id)}>
-                                        {index + 1}
-                                    </ClickableTableCell>
-                                )}
-                            </>
-                        })}
-                    </TableRow>
+                        {levelOpen[level.id] && level.id in levelExercises && levelExercises[level.id].map((ex, index) =>
+                            <Tooltip key={`tooltip-${ex.id}`} disableInteractive title={localize(ex.title)}>
+                                <ClickableTableCell key={ex.id} align="right" sx={{width: 50}} onClick={() => onExerciseClicked(ex.id)}>
+                                    <Typography variant="subtitle1">{index + 1}</Typography>
+                                </ClickableTableCell>
+                            </Tooltip>
+                        )}
+                    </>)}
+                </TableRow>
                 </TableHead>
 
                 <TableBody>
@@ -128,7 +127,7 @@ function RankingTable({metric, showProgress}: {metric: string, showProgress?: bo
                             <RankingPage
                                 metric={metric} numRows={rowsPerPage} startAfterId={startAfterId} startIndex={index * rowsPerPage + 1}
                                 showProgress={showProgress}
-                                levelOpen={levelOpen} maxLevel={maxLevel} levelExercises={levelExercises}
+                                levelOpen={levelOpen} levelExercises={levelExercises}
                                 setCurrentUserIds={(userIds) => onPageUserIdsChanged(index, userIds)} />
                         </>
                     })}

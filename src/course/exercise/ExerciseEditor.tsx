@@ -2,14 +2,14 @@ import {memo, useCallback, useContext, useEffect, useState} from "react";
 import {CourseContext, CurrentExerciseContext} from "../Course";
 import {Course} from 'models/courses';
 import {COMPARISON_MODES, Exercise, EXERCISE_TYPES} from 'models/exercise';
-import {Alert, Autocomplete, Button, FormControlLabel, Snackbar, Stack, Switch, TextField} from "@mui/material";
-import LocalizedFields, {FieldSchema, fieldSchema} from "./LocalizedFields";
+import {Alert, Button, FormControlLabel, MenuItem, Snackbar, Stack, Switch, TextField} from "@mui/material";
+import LocalizedFields, {FieldSchema, fieldSchema} from "../../common/LocalizedFields";
 import Box from "@mui/material/Box";
-import {LANGUAGE_KEYS} from "models/language";
 import AutocompleteSearch from "../../common/AutocompleteSearch";
 import {getCourses, searchCourses} from "../../services/courses";
 import {getExercisePrivateFields, updateExercise} from "../../services/exercises";
 import { reEvaluateSubmissions } from "../../services/submissions";
+import {newLevel, saveLevels} from "../../services/levels";
 
 import {Controller, useForm, FormProvider} from "react-hook-form";
 import {zodResolver} from "@hookform/resolvers/zod";
@@ -21,13 +21,18 @@ import MultipleChoiceForm from "./MultipleChoiceForm";
 import useAsyncEffect from "use-async-effect";
 import {AlertColor} from "@mui/material/Alert/Alert";
 import {testGroupSchema} from "./TestGroupsForm";
+import {LANGUAGES} from "models/language";
+import {LocalizeContext} from "../../common/Localization";
+import LevelEditor, {AddLevel} from "./LevelEditor";
+import {Level} from "models/levels";
 
+const LANGUAGE_KEYS = Object.keys(LANGUAGES) as [keyof typeof LANGUAGES] as unknown as readonly [string, ...string[]];
 
 const baseSchema = {
     localizedFields: array(fieldSchema).nonempty(),
     isPublic: boolean(),
-    level: number().positive().int(),
-    levelOrder: number().nonnegative().int(),
+    level: string().min(1).max(50), // levelId
+    levelOrder: number().nonnegative(),
     score: number().min(0).max(1000).int(),
     allowedAttempts: number().min(1).max(100).int(),
     unlockContent: array(string().min(5).max(35)),
@@ -35,7 +40,7 @@ const baseSchema = {
 const codeSchema = object({
     ...baseSchema,
     exerciseType: literal('code'),
-    allowedLanguages: array(zodEnum(LANGUAGE_KEYS)).nonempty(),
+    allowedLanguages: zodEnum(LANGUAGE_KEYS).array().nonempty(),
     memoryLimit: number().min(10).max(1000),
     timeLimit: number().min(0.001).max(30),
     outputLimit: number().min(0.001).max(10),
@@ -102,17 +107,17 @@ function ExerciseEditor({cancelEditing, exerciseTypeChanged}: {
 }) {
     const {course} = useContext(CourseContext);
     const {exercise} = useContext(CurrentExerciseContext);
+    const {localize} = useContext(LocalizeContext);
+    const [levels, setLevels] = useState<Level[]>(course?.levels ?? []);
     const [snackbar, setSnackbar] = useState<{message: string, severity: AlertColor} | null>(null);
     const handleCloseSnackbar = () => setSnackbar(null);
 
     const getDefaultFieldValues = useCallback(() => {
-        const level = exercise?.order ? Math.trunc(exercise.order) : 1;
-        const levelOrder = exercise?.order ? parseInt((exercise.order - level).toFixed(3).substring(2)) : 0;
         return {
             localizedFields: getExerciseLocalizedFields(exercise, 'enUS'),
-            isPublic: Boolean(exercise &&  exercise.order && exercise.order >= 1),
-            level: level,
-            levelOrder: levelOrder,
+            isPublic: Boolean(exercise &&  exercise.levelId !== 'drafts'),
+            level: exercise?.levelId ?? 'drafts',
+            levelOrder: exercise?.order ?? 0,
             score:  exercise?.score ?? 100,
             allowedAttempts: exercise?.allowedAttempts ?? 100,
             exerciseType: exercise?.exerciseType ?? 'code',
@@ -139,16 +144,30 @@ function ExerciseEditor({cancelEditing, exerciseTypeChanged}: {
     const {control, watch, handleSubmit, formState: {errors, isValid, isDirty}, reset, setValue} = formMethods;
     errors && Object.keys(errors).length && console.log('errors:', errors);
     const isPublic = watch('isPublic');
+    const level = watch('level');
+    if( isPublic && level === 'drafts' )
+        setValue('level', course?.levels?.at(-1)?.id ?? 'drafts');
 
-    const exerciseType: keyof typeof EXERCISE_TYPES = watch('exerciseType');
+    // Keep track of the available levels
+    useEffect(() => setLevels(course?.levels ?? []), [JSON.stringify(course?.levels)]);
+    const onAddLevel = () => {
+        if( !course?.id )
+            return;
+        const created = {id: newLevel(course.id), title: 'New level'};
+        setLevels(levels => [...levels, created]);
+    }
+    const onSaveLevel = async (levelId: string, title: string | {[key: string]: string}) => {
+        if( !course?.id )
+            return;
+        const newLevels = levels.map(l => l.id === levelId ? {id: levelId, title: title} : l);
+        await saveLevels(course.id, newLevels);
+    }
+
+    const exerciseType = watch('exerciseType');
     const onExerciseTypeChanged = (newType: keyof typeof EXERCISE_TYPES) => {
-        if (newType !== 'code' && newType !== 'textAnswer' && newType !== 'checkboxes' && newType !== 'multipleChoice')
-            throw Error(`Wrong exercise type: ${newType}`);
-
         setValue('exerciseType', newType, {shouldTouch: true});
         exerciseTypeChanged(newType);
     }
-    const nameToExerciseType = (name: string) => Object.keys(EXERCISE_TYPES).find(key => EXERCISE_TYPES[key].displayName === name);
 
     // @ts-ignore
     useEffect(() => reset(getDefaultFieldValues()), [exercise, getDefaultFieldValues, reset]);
@@ -161,21 +180,18 @@ function ExerciseEditor({cancelEditing, exerciseTypeChanged}: {
                 setValue('answer', fields.answer, {shouldTouch: true});
         }
     }, [exercise]);
-    const onCancel = () => cancelEditing();
+
     const onSubmit = async (data: Schema) => {
         if( !course || !exercise )
             return;
         console.log('submit!', data);
 
-        const levelOrder = String(data.levelOrder).padStart(3, '0');
-        const order = data.isPublic ? parseFloat(`${data.level}.${levelOrder}`) : 0;
-        console.log('Order:', order);
-
         await updateExercise(
             course.id, exercise.id,
             data.localizedFields.reduce((map, field) => {map[field.locale] = field.title; return map;}, {} as {[key: string]: string}),
             data.localizedFields.reduce((map, field) => {map[field.locale] = field.notionId; return map;}, {} as {[key: string]: string}),
-            order,
+            data.isPublic ? data.level : 'drafts',
+            data.levelOrder,
             data.score,
             data.allowedAttempts,
             data.exerciseType,
@@ -204,7 +220,7 @@ function ExerciseEditor({cancelEditing, exerciseTypeChanged}: {
             <Stack direction="row" spacing={1} marginTop={4} marginBottom={2} justifyContent="right" alignItems="center" alignContent="center">
                 <Button size="medium" variant="outlined" color="warning" disabled={!isValid || isDirty} onClick={onReEvaluate}>Re-evaluate submissions</Button>
                 <Button size="large" variant="outlined" type="submit" disabled={!isValid && false}>Save</Button>
-                <Button size="large" variant="outlined" onClick={onCancel}>Cancel</Button>
+                <Button size="large" variant="outlined" onClick={cancelEditing}>Cancel</Button>
             </Stack>
 
             <LocalizedFields />
@@ -220,13 +236,19 @@ function ExerciseEditor({cancelEditing, exerciseTypeChanged}: {
                 )} />
 
                 {isPublic && <>
-                    <Controller name="level" control={control} render={({ field: { ref, onChange, ...field } }) => (
+                    <Controller name="level" control={control} render={({ field: { ref, ...field } }) => (
                         <TextField
-                            required label="Level" variant="outlined" placeholder="4" type="number" fullWidth
-                            onChange={e => e.target.value ? onChange(Number(e.target.value)) : onChange(e.target.value)}
+                            select required label="Level" variant="outlined" fullWidth
                             error={Boolean(errors.level)} helperText={errors.level?.message}
-                            inputProps={{inputMode: 'numeric', pattern: '[0-9]*'}} inputRef={ref}
-                            {...field} sx={{flex: 1}} />
+                            inputRef={ref} {...field} sx={{flex: 1}}
+                            // @ts-ignore
+                            SelectProps={{renderValue: option => localize(levels.filter(l => l.id === option)[0]?.title ?? '')}}>
+                            {levels.map((level) => <MenuItem key={level.id} value={level.id}>
+                                <LevelEditor level={level} onSaveLevel={title => onSaveLevel(level.id, title)} />
+                            </MenuItem>)}
+
+                            <MenuItem key="add-level"><AddLevel onAddLevel={onAddLevel} /></MenuItem>
+                        </TextField>
                     )}/>
 
                     <Controller name="levelOrder" control={control} render={({ field: { ref, onChange, ...field } }) => (
@@ -275,17 +297,14 @@ function ExerciseEditor({cancelEditing, exerciseTypeChanged}: {
             </Stack>
 
             <br/><br/><br/>
-            <Controller name="exerciseType" control={control} render={({field}) => (
-                <Autocomplete
-                    sx={{width: 200}} autoHighlight autoSelect disableClearable ref={field.ref}
-                    value={EXERCISE_TYPES[field.value].displayName}
-                    options={Object.keys(EXERCISE_TYPES).map(key => EXERCISE_TYPES[key].displayName)}
-                    onChange={(event, value: string | null) => value && onExerciseTypeChanged(nameToExerciseType(value)!)}
-                    renderInput={(params) => (
-                        <TextField
-                            {...params} label="Exercise type"
-                            error={Boolean(errors.exerciseType)} helperText={errors.exerciseType?.message}/>
-                    )}/>
+            <Controller name="exerciseType" control={control} render={({ field: { ref, ...field } }) => (
+                <TextField select label="Exercise type" variant="outlined" inputRef={ref} {...field}
+                           value={exerciseType}
+                           onChange={e => e.target.value && onExerciseTypeChanged(e.target.value as keyof typeof EXERCISE_TYPES)}
+                           error={Boolean(errors.exerciseType)} helperText={<>{errors.exerciseType?.message}</>}
+                           sx={{ width: 200 }}>
+                    {Object.entries(EXERCISE_TYPES).map(([id, exerciseType]) => <MenuItem value={id}>{exerciseType.displayName}</MenuItem>)}
+                </TextField>
             )} />
             <br/>
 

@@ -154,7 +154,7 @@ service cloud.firestore {
       let submission = get(/databases/$(database)/documents/submissions/$(submissionId)).data;
       let course = get(submission.course);
       let exercise = get(submission.exercise);
-      let level = string(int(math.floor(exercise.data.order)));
+      let level = exercise.data.levelId;
       let userId = request.auth.uid;
       let exerciseSolved = get(/databases/$(database)/documents/courses/$(course.id)/progress/$(userId)/exerciseSolved/$(level)).data;
 

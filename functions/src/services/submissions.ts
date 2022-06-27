@@ -89,11 +89,10 @@ const attemptSubmit = async (submission: Submission, course: Course, exercise: E
     if (submission.isTestRun)
         return true;
 
-    const levelName = Math.trunc(exercise.order).toString();
     return await firestore().runTransaction(async (transaction) => {
         // new attempt
         const attempts = (await transaction.get(db.userProgress(course.id, submission.userId)
-            .collection('exerciseAttempts').doc(levelName))).data();
+            .collection('exerciseAttempts').doc(exercise.levelId))).data();
         functions.logger.info(`Attempts: ${JSON.stringify(attempts)}`);
         const numAttempts = attempts?.progress?.[exercise.id] ?? 0;
         const allowedAttempts = exercise?.allowedAttempts ?? 100;
@@ -120,7 +119,7 @@ const attemptSubmit = async (submission: Submission, course: Course, exercise: E
             });
             return false;
         }
-        updateUserProgress(transaction, 'attempts', submission.userId, course.id, exercise.id, levelName,
+        updateUserProgress(transaction, 'attempts', submission.userId, course.id, exercise.id, exercise.levelId,
             numAttempts, numAttempts + 1, numAttempts + 1);
         functions.logger.info(`Updated attempts to ${numAttempts + 1}`);
 

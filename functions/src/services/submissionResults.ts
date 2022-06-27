@@ -140,7 +140,6 @@ export const processResult = async (
     };
     functions.logger.info(`submissionResult: ${JSON.stringify(submissionResult)}`);
     const submissionDate = submissionResult.createdAt.toDate();
-    const level = Math.trunc(exercise.order).toString();
 
     if (submissionResult.isTestRun) {
         // save the results to /runs/userId/private/<submissionId>
@@ -178,11 +177,14 @@ export const processResult = async (
     // another transaction to update user metrics
     await firestore().runTransaction(async (transaction) => {
         const getProgress = async (metric: string) => {
-            return (await transaction.get(db.userProgress(course.id, userId).collection(metric).doc(level))).data();
+            return (await transaction.get(db.userProgress(course.id, userId)
+                .collection(metric)
+                .doc(exercise.levelId))
+            ).data();
         };
         const setProgress = (metric: string, prev: number, cur: number, res: number | string, rollbackDate?: Date) =>
             updateUserProgress(
-                transaction, metric, submissionResult.userId, course.id, exercise.id, level,
+                transaction, metric, submissionResult.userId, course.id, exercise.id, exercise.levelId,
                 prev, cur, res, false, rollbackDate
             );
 

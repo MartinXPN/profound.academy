@@ -58,6 +58,7 @@ describe('Comment Notifications', function () {
             author: 'Test Framework',
             instructors: [instructor1Id, instructor2Id],
             introduction: '',
+            levels: [{id: '1', title: 'Level 1'}],
             levelExercises: {},
             levelScores: {},
             exercises: [],
@@ -66,6 +67,7 @@ describe('Comment Notifications', function () {
             id: exerciseId,
             title: 'EX TITLE',
             pageId: '',
+            levelId: '1',
             order: 1.55,
             testCases: []
         });

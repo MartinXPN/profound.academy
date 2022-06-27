@@ -1,24 +1,23 @@
-import {lazy, useCallback, useContext, useState, memo, Suspense, useEffect, ReactChild} from "react";
+import {lazy, useCallback, useContext, useState, memo, Suspense, useEffect, ReactNode} from "react";
 import {useParams} from "react-router-dom";
 import {AuthContext} from "../../App";
 import {useStickyState} from "../../common/stickystate";
 import CourseLandingPage from "../CourseLandingPage";
 import {SignIn} from "../../user/Auth";
 import Editor from "../editor/Editor";
-import {CourseContext, CurrentExerciseContext} from "../Course";
-import {Grid, Stack, Typography} from "@mui/material";
+import {Edit} from "@mui/icons-material";
+import {Grid, Typography, Box} from "@mui/material";
 import Content from "../../common/notion/Content";
 import Forum from "../forum/Forum";
 import {SplitPane} from "react-multi-split-pane";
 import "../SplitPane.css";
 import OutlinedButton from "../../common/OutlinedButton";
-import Box from "@mui/material/Box";
 import CodeDrafts from "../CodeDrafts";
-import {Edit} from "@mui/icons-material";
 import {EXERCISE_TYPES} from "models/exercise";
 import TextAnswer from "./TextAnswer";
 import Checkboxes from "./Checkboxes";
 import MultipleChoice from "./MultipleChoice";
+import {CourseContext, CurrentExerciseContext} from "../Course";
 import Dashboard from "./Dashboard";
 import {LocalizeContext} from "../../common/Localization";
 import useWindowDimensions from "../../common/windowDimensions";
@@ -30,11 +29,12 @@ function ConditionalSplitPane({split, children, defaultSizes, onDragFinished}: {
     split: boolean,
     defaultSizes?: number[],
     onDragFinished?: (sizes: number[]) => void,
-    children: ReactChild[],
+    children: ReactNode,
 }) {
     if( !split )
         return <>{children}</>
     return <>
+        {/*@ts-ignore*/}
         <SplitPane split="vertical" defaultSizes={defaultSizes} onDragFinished={onDragFinished}>
             {children}
         </SplitPane>
@@ -59,7 +59,7 @@ function Exercise({launchCourse, registerCourse}: {launchCourse: () => void, reg
 
     useEffect(() => setExerciseType(exercise?.exerciseType ?? 'code'), [exercise]);
     useEffect(() => {
-        if( isCourseInstructor && exercise?.order === 0 )
+        if( isCourseInstructor && exercise?.levelId === 'drafts' )
             setCurrentTab('edit');
     }, [exercise, isCourseInstructor]);
 
@@ -74,12 +74,10 @@ function Exercise({launchCourse, registerCourse}: {launchCourse: () => void, reg
     if( !auth.isSignedIn ) {
         right = <>
             <Grid container direction="column" alignItems="center" justifyContent="center" height="100%">
-                <Stack direction="column" alignItems="center">
-                    <Typography variant="subtitle2" textAlign="center">
-                        To check your solution you need to sign in
-                    </Typography>
-                    <SignIn/>
-                </Stack>
+                <Typography variant="subtitle2" textAlign="center">
+                    To check your solution you need to sign in
+                </Typography>
+                <SignIn/>
             </Grid>
         </>
     }

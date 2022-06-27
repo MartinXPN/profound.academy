@@ -158,7 +158,7 @@ function ExerciseEditor({cancelEditing, exerciseTypeChanged}: {
                 setValue('answer', fields.answer, {shouldTouch: true});
         }
     }, [exercise]);
-    const onCancel = () => cancelEditing();
+
     const onSubmit = async (data: Schema) => {
         if( !course || !exercise )
             return;
@@ -201,7 +201,7 @@ function ExerciseEditor({cancelEditing, exerciseTypeChanged}: {
             <Stack direction="row" spacing={1} marginTop={4} marginBottom={2} justifyContent="right" alignItems="center" alignContent="center">
                 <Button size="medium" variant="outlined" color="warning" disabled={!isValid || isDirty} onClick={onReEvaluate}>Re-evaluate submissions</Button>
                 <Button size="large" variant="outlined" type="submit" disabled={!isValid && false}>Save</Button>
-                <Button size="large" variant="outlined" onClick={onCancel}>Cancel</Button>
+                <Button size="large" variant="outlined" onClick={cancelEditing}>Cancel</Button>
             </Stack>
 
             <LocalizedFields />

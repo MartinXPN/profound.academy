@@ -1,16 +1,5 @@
 import {memo, useCallback, useContext, useEffect, useState} from "react";
-import {
-    Badge,
-    IconButton,
-    LinearProgress,
-    Link,
-    MenuItem,
-    Stack,
-    TextField,
-    Typography,
-    Grid,
-    Autocomplete
-} from "@mui/material";
+import {Badge, IconButton, LinearProgress, Link, MenuItem, Stack, TextField, Typography, Grid, Autocomplete} from "@mui/material";
 import {Controller, useFieldArray, useFormContext} from "react-hook-form";
 import {LANGUAGES} from "models/language";
 import {COMPARISON_MODES, TestCase} from "models/exercise";

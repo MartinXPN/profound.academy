@@ -37,8 +37,8 @@ export function AddLevel({onAddLevel}: {onAddLevel: () => void}) {
     </>
 }
 
-function LevelEditor({level, onSaveLevel}: {
-    level: Level, onSaveLevel: (title: string | {[key: string]: string}) => void,
+function LevelEditor({level, levelOrder, onSaveLevel}: {
+    level: Level, levelOrder: number, onSaveLevel: (title: string | {[key: string]: string}) => void,
 }) {
     const getDefaultFieldValues = useCallback(() => ({
         localizedFields: getLevelLocalizedFields(level, 'enUS'),
@@ -72,7 +72,7 @@ function LevelEditor({level, onSaveLevel}: {
         <Box display="flex" flexWrap="wrap" sx={{width: '100%'}}
              onMouseOver={() => setShowEdit(true)}
              onMouseOut={() => setShowEdit(editing)}>
-            {!editing && <ListItemText>{localize(level.title)}</ListItemText>}
+            {!editing && <ListItemText>{levelOrder} &nbsp; • &nbsp; {localize(level.title)}</ListItemText>}
             {!editing && showEdit && <ListItemIcon onClick={handleEdit} sx={{flex: 'end'}}><Edit /></ListItemIcon>}
 
             {editing && <>

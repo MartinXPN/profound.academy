@@ -8,7 +8,7 @@ function adjust(color: string, amount: number) {
 export const statusColors = {
     solved: '#4caf50',
     failed: '#F44336',
-    neutral: '#fafafa',
+    neutral: '#ffffff',
     neutralText: '#212121',
     unavailable: '#969696',
 };

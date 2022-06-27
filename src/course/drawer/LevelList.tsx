@@ -88,12 +88,12 @@ function LevelList({level, levelStatus, levelOrder, levelIcon, onItemSelected, i
         <List disablePadding>
             {!isSingleLevel &&
                 <Tooltip title={localize(level.title)} arrow placement="right" key={`toggle-${level.id}`}>
-                    <ListItem disablePadding key={`level-${level.id}`}>
+                    <ListItem disablePadding key={`level-${level.id}`} sx={{width: '100%'}}>
                         <ListItemButton onClick={onLevelClicked} style={levelStyle}>
-                            <ListItemIcon>
+                            <ListItemIcon sx={{maxWidth: '100%'}}>
                                 {levelIcon}
-                                {!isDrawerOpen && levelOrder && <Typography variant="subtitle1">{levelOrder}</Typography>}
-                                {isDrawerOpen && <Typography variant="subtitle1">{localize(level.title)}</Typography>}
+                                {levelOrder && <Typography variant="subtitle1" noWrap>{levelOrder}</Typography>}
+                                {isDrawerOpen && <Typography variant="subtitle1" noWrap flex={1}>&nbsp; • &nbsp;{localize(level.title)}</Typography>}
                                 {open ? <ArrowDropUp/> : <ArrowDropDown/>}
                             </ListItemIcon>
                         </ListItemButton>

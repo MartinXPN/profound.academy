@@ -242,8 +242,8 @@ function ExerciseEditor({cancelEditing, exerciseTypeChanged}: {
                             error={Boolean(errors.level)} helperText={errors.level?.message}
                             inputRef={ref} {...field} sx={{flex: 1}}
                             SelectProps={{renderValue: option => localize(levels.filter(l => l.id === option)[0]?.title ?? '')}}>
-                            {levels.map((level) => <MenuItem key={level.id} value={level.id}>
-                                <LevelEditor level={level} onSaveLevel={title => onSaveLevel(level.id, title)} />
+                            {levels.map((level, index) => <MenuItem key={level.id} value={level.id}>
+                                <LevelEditor level={level} levelOrder={index + 1} onSaveLevel={title => onSaveLevel(level.id, title)} />
                             </MenuItem>)}
 
                             <MenuItem key="add-level"><AddLevel onAddLevel={onAddLevel} /></MenuItem>

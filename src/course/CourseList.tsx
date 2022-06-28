@@ -10,6 +10,7 @@ import {useStickyState} from "../common/stickystate";
 import {lastExerciseId} from "./Course";
 import {AuthContext} from "../App";
 import {hasInstructorRole} from "../services/users";
+import {LocalizeContext} from "../common/Localization";
 
 
 function CourseList({variant, title, userId}: {
@@ -18,6 +19,7 @@ function CourseList({variant, title, userId}: {
     userId?: string
 }) {
     const auth = useContext(AuthContext);
+    const {localize} = useContext(LocalizeContext);
     const [courses, setCourses] = useStickyState<Course[] | null>(null, `${variant}-${userId}`);
     const [hasInstructorPermissions, setHasInstructorPermissions] = useStickyState(false, `isInstructor-${userId}`);
     const isCurrentUserCourses = userId && auth.currentUserId === userId && variant === 'userCourses';
@@ -68,8 +70,8 @@ function CourseList({variant, title, userId}: {
                 {courses.map((item: Course) => (
                     <Grid item height={180} width={300} maxWidth="50%" key={item.id}>
                     <ListItemButton component={Link} to={lastCoursePage(item.id)} sx={{width: '100%', height: '100%', padding: 0}}>
-                        <img src={item.img} alt={item.title} loading="lazy" style={{height: '100%', width: '100%', objectFit: 'cover'}} />
-                        <ImageListItemBar title={item.title} subtitle={<span>by: {item.author}</span>} />
+                        <img src={item.img} alt={localize(item.title)} loading="lazy" style={{height: '100%', width: '100%', objectFit: 'cover'}} />
+                        <ImageListItemBar title={localize(item.title)} subtitle={<span>by: {item.author}</span>} />
                     </ListItemButton>
                     </Grid>
                 ))}

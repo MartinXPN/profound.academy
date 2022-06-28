@@ -52,7 +52,9 @@ function SubmissionView({submission, orderNumber, displayColumns, onUserClicked,
                         </Stack>
                     </ClickableTableCell>
                 if( column.id === 'courseTitle' )
-                    return <ClickableTableCell key={column.id} align={column.align} onClick={() => onCourseClicked(submission.course.id)}>{submission.courseTitle}</ClickableTableCell>
+                    return <ClickableTableCell key={column.id} align={column.align} onClick={() => onCourseClicked(submission.course.id)}>
+                        {localize(submission.courseTitle)}
+                </ClickableTableCell>
                 if( column.id === 'exerciseTitle' )
                     return <ClickableTableCell key={column.id} align={column.align} onClick={() => onExerciseClicked(submission.course.id, submission.exercise.id)}>
                         {localize(submission.exerciseTitle)}

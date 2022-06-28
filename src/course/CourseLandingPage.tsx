@@ -7,6 +7,7 @@ import {AuthContext} from "../App";
 import {CourseContext} from "./Course";
 import Box from "@mui/material/Box";
 import {onUserInfoChanged} from "../services/users";
+import {LocalizeContext} from "../common/Localization";
 
 
 function CourseLandingPage({onStartCourseClicked, onRegisterCourseClicked}: {
@@ -14,6 +15,7 @@ function CourseLandingPage({onStartCourseClicked, onRegisterCourseClicked}: {
     onRegisterCourseClicked: () => void,
 }) {
     const auth = useContext(AuthContext);
+    const {localize} = useContext(LocalizeContext);
     const {course} = useContext(CourseContext);
     const [registered, setRegistered] = useState(false);
     useEffect(() => {
@@ -42,7 +44,7 @@ function CourseLandingPage({onStartCourseClicked, onRegisterCourseClicked}: {
     if( !course )
         return <></>
     return <>
-        {course.introduction && <Content notionPage={course.introduction} />}
+        {course.introduction && <Content notionPage={localize(course.introduction)} />}
         <Box textAlign="center" paddingBottom="3em">
             <Countdown
                 date={course.revealsAt.toDate()}

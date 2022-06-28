@@ -163,7 +163,8 @@ export const updateCourse = async (
     id: string, img: string,
     revealsAt: Date, freezesAt: Date,
     visibility: 'public' | 'unlisted' | 'private', rankingVisibility: 'public' | 'private', allowViewingSolutions: boolean,
-    title: string, author: string, instructors: string[], introduction: string) => {
+    title: string | {[key: string]: string}, introduction: string | {[key: string]: string},
+    author: string, instructors: string[]) => {
     console.log('update course:', id, img, revealsAt, freezesAt, visibility, rankingVisibility, allowViewingSolutions);
     if( !instructors.includes(userId) ) {
         console.log('Adding the current user as an instructor as well');

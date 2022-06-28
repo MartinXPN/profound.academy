@@ -11,10 +11,12 @@ import Dashboard from "./Dashboard";
 import Content from "../common/notion/Content";
 import {Link} from "react-router-dom";
 import {Edit} from "@mui/icons-material";
+import {LocalizeContext} from "../common/Localization";
 
 
 function StatusPage() {
     const auth = useContext(AuthContext);
+    const {localize} = useContext(LocalizeContext);
     const {course} = useContext(CourseContext);
     const [currentTab, setCurrentTab] = useStickyState<'description' | 'dashboard' | 'submissions' | 'ranking' | 'lastWeeksProgress' | 'upsolving' | 'edit'>('description', `status-${auth.currentUserId}-${course?.id}`);
 
@@ -34,7 +36,7 @@ function StatusPage() {
                 {showEdit && <OutlinedButton selected={currentTab === 'edit'} endIcon={<Edit />} component={Link} to="../edit">Edit</OutlinedButton>}
             </Grid>
 
-            {currentTab === 'description' && <Box mb={20}><Content notionPage={course.introduction} /></Box>}
+            {currentTab === 'description' && <Box mb={20}><Content notionPage={localize(course.introduction)} /></Box>}
             {currentTab === 'dashboard' && <Dashboard />}
             {currentTab === 'submissions' && <CourseSubmissionsTable rowsPerPage={20} course={course} />}
             {currentTab === 'ranking' && <Ranking />}

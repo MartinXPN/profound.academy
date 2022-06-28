@@ -25,6 +25,7 @@ import Countdown from "react-countdown";
 import {Button, Divider, List, ListItem, ListItemButton, Stack, SvgIcon, Tooltip, Typography} from "@mui/material";
 import { ReactComponent as Logo } from "../../assets/logo.svg";
 import useWindowDimensions from "../../common/windowDimensions";
+import {LocalizeContext} from "../../common/Localization";
 
 
 const drawerWidth = 240;
@@ -91,6 +92,7 @@ function CourseDrawer({onItemSelected, onStatusClicked, onCreateExerciseClicked,
     onWidthChanged: (width: string) => void,
 }) {
     const auth = useContext(AuthContext);
+    const {localize} = useContext(LocalizeContext);
     const theme = useTheme();
     const {width} = useWindowDimensions();
     const {course} = useContext(CourseContext);
@@ -142,7 +144,7 @@ function CourseDrawer({onItemSelected, onStatusClicked, onCreateExerciseClicked,
 
                     {width > 500 &&
                     <Typography noWrap fontSize={18} fontWeight="bold" marginX="1em">
-                        {course.title}
+                        {localize(course.title)}
                     </Typography>}
 
                     <Stack direction="row" marginLeft="auto" key="auth">

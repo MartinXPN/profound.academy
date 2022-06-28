@@ -40,7 +40,7 @@ export function LocalizedFieldView({allowedLocales, namePrefix, excludeContent}:
     // console.log(namePrefix);
 
     return <>
-        <Stack direction="row" alignItems="top" alignContent="top">
+        <Stack direction="row" alignItems="top" alignContent="top" width="100%">
             <Controller name={`${namePrefix}locale`} control={control} render={({field: {value, onChange, ...field}}) => (
                 <Autocomplete
                     {...field}
@@ -67,12 +67,12 @@ export function LocalizedFieldView({allowedLocales, namePrefix, excludeContent}:
             )} />
 
             <Controller name={`${namePrefix}title`} control={control} render={({ field: { ref, ...field } }) => (
-                <TextField required fullWidth label="Title" variant="outlined" size="small" placeholder="Exercise Title"
+                <TextField required fullWidth label="Title" variant="outlined" size="small" placeholder="Title..."
                            error={Boolean(getError(`${namePrefix}title`))} helperText={getError(`${namePrefix}title`)?.message}
                            inputRef={ref} {...field} sx={{flex: 1}} />
             )}/>
             {!excludeContent && <Controller name={`${namePrefix}notionId`} control={control} render={({ field: { ref, onChange, ...field } }) => (
-                <TextField required fullWidth label="Notion page" variant="outlined" size="small" placeholder="Exercise Notion ID"
+                <TextField required fullWidth label="Notion page" variant="outlined" size="small" placeholder="Notion ID"
                            error={Boolean(getError(`${namePrefix}notionId`))} helperText={getError(`${namePrefix}notionId`)?.message}
                            onChange={(e) => onChange(notionPageToId(e.target.value))}
                            inputRef={ref} {...field} sx={{flex: 1}} />

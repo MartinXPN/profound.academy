@@ -1,7 +1,7 @@
 import {memo, useCallback, useContext, useEffect, useState} from "react";
 import {Course} from "models/courses";
 import {AuthContext} from "../App";
-import {Button, FormControlLabel, Stack, TextField, Typography, Switch, Grid, Alert, Snackbar, MenuItem, Collapse, ListItemIcon, ListItemText, ListItemButton} from "@mui/material";
+import {Button, FormControlLabel, Stack, TextField, Typography, Switch, Grid, Alert, Snackbar, MenuItem, Collapse, ListItemIcon, ListItemText, ListItemButton, Container} from "@mui/material";
 import {GroupAdd} from "@mui/icons-material";
 import Box from "@mui/material/Box";
 import {FileUploader} from "react-drag-drop-files";
@@ -9,7 +9,6 @@ import AdapterMoment from '@mui/lab/AdapterMoment';
 import LocalizationProvider from '@mui/lab/LocalizationProvider';
 import DateTimePicker from '@mui/lab/DateTimePicker';
 import {styled} from "@mui/material/styles";
-import Content from "../common/notion/Content";
 import {useNavigate} from "react-router-dom";
 import {getUsers, searchUser, uploadPicture} from "../services/users";
 import {genCourseId, onCoursePrivateFieldsChanged, sendCourseInviteEmails, updateCourse, updateCoursePrivateFields} from "../services/courses";
@@ -23,20 +22,20 @@ import {Moment} from "moment";
 import CourseInvitations from "./CourseInvitations";
 import {CoursePrivateFields} from "models/lib/courses";
 import {ExpandLess, ExpandMore} from "@mui/icons-material";
-import { notionPageToId } from "../services/notion";
 import {useScreenAnalytics} from "../analytics";
+import LocalizedFields, {FieldSchema, fieldSchema} from "../common/LocalizedFields";
+import {LocalizeContext} from "../common/Localization";
 
 
 const schema = object({
+    localizedFields: array(fieldSchema).nonempty(),
     img: string().url(),
     revealsAt: date(),
     freezeAt: date(),
     visibility: zodEnum(['public', 'unlisted', 'private']),
     rankingVisibility: zodEnum(['public', 'private']),
     allowViewingSolutions: boolean(),
-    title: string().min(3).max(128),
     author: string().min(3).max(128),
-    introduction: string().min(20).max(35),
     instructors: array(string().min(25).max(30)),
 
     // private fields
@@ -45,6 +44,29 @@ const schema = object({
     mailText: string().min(10).max(5000).optional(),
 });
 type Schema = Infer<typeof schema>;
+
+const getCourseLocalizedFields = (course: Course | null, defaultLocale?: string) => {
+    if( !course ) {
+        if (defaultLocale)
+            return [{locale: defaultLocale, title: '', notionId: ''}]
+        return []
+    }
+
+    const fields: FieldSchema[] = [];
+    if( typeof course.title === 'string' ) {
+        if( typeof course.introduction !== 'string' )
+            throw Error('Locale-dependent fields course title and introduction are not of the same type (string)');
+
+        fields.push({locale: defaultLocale ?? 'enUS', title: course.title, notionId: course.introduction});
+    }
+    else if( typeof course.title === 'object' && typeof course.introduction === 'object' ) {
+        for( const locale of Object.keys(course.title) )
+            fields.push({locale: locale, title: course.title[locale], notionId: course.introduction[locale]});
+    }
+    else throw Error('Unsupported exercise title/pageId types');
+
+    return fields;
+}
 
 
 const UploadBackground = styled(Box)({
@@ -66,6 +88,7 @@ const fileTypes = ['jpeg', 'jpg', 'png', 'webp'];
 function CourseEditor({course}: {course?: Course | null}) {
     const navigate = useNavigate();
     const auth = useContext(AuthContext);
+    const {localize} = useContext(LocalizeContext);
     const [openSnackbar, setOpenSnackbar] = useState(false);
     const [invitesOpen, setInvitesOpen] = useState(false);
     const [privateFields, setPrivateFields] = useState<CoursePrivateFields | null>(null);
@@ -75,16 +98,15 @@ function CourseEditor({course}: {course?: Course | null}) {
 
     const getDefaultFieldValues = useCallback(() => {
         return {
+            localizedFields: getCourseLocalizedFields(course ?? null, 'enUS'),
             img: course?.img,
             revealsAt: course?.revealsAt ? course.revealsAt.toDate() : new Date(),
             freezeAt: course?.freezeAt ? course.freezeAt.toDate() : new Date(),
             visibility: course?.visibility ?? 'private',
             rankingVisibility: course?.rankingVisibility ?? 'private',
             allowViewingSolutions: course?.allowViewingSolutions ?? false,
-            title: course?.title,
             author: course?.author,
             instructors: course?.instructors,
-            introduction: course?.introduction,
 
             invitedEmails: privateFields?.invitedEmails ?? [],
             mailSubject: privateFields?.mailSubject ?? undefined,
@@ -97,8 +119,7 @@ function CourseEditor({course}: {course?: Course | null}) {
         resolver: zodResolver(schema),
         defaultValues: getDefaultFieldValues(),
     });
-    const {control, watch, handleSubmit, formState: { errors, isValid }, setValue, reset} = formMethods;
-    const introId = watch('introduction', course?.introduction);
+    const {control, handleSubmit, formState: { errors, isValid }, setValue, reset} = formMethods;
     errors && Object.keys(errors).length && console.log('errors:', errors);
     useEffect(() => reset(getDefaultFieldValues()), [course, reset, privateFields, getDefaultFieldValues]);
     useEffect(() => {
@@ -112,7 +133,9 @@ function CourseEditor({course}: {course?: Course | null}) {
     const onSubmit = async (data: Schema, navigateToCourse: boolean) => {
         if( !auth.currentUserId )
             return;
-        const id = course?.id ?? await genCourseId(data.title);
+        const title = data.localizedFields.reduce((map, field) => {map[field.locale] = field.title; return map;}, {} as {[key: string]: string});
+        const introduction = data.localizedFields.reduce((map, field) => {map[field.locale] = field.notionId; return map;}, {} as {[key: string]: string});
+        const id = course?.id ?? await genCourseId(localize(title));
 
         console.log('submit!', id, data)
         await updateCourse(
@@ -120,7 +143,8 @@ function CourseEditor({course}: {course?: Course | null}) {
             id, data.img,
             data.revealsAt, data.freezeAt,
             data.visibility, data.rankingVisibility, data.allowViewingSolutions,
-            data.title, data.author, data.instructors, data.introduction
+            title, introduction,
+            data.author, data.instructors,
         );
         console.log('updated the course:', id);
         // needs to happen sequentially for the instructor to have permission to update private fields
@@ -172,29 +196,25 @@ function CourseEditor({course}: {course?: Course | null}) {
     return <>
         <FormProvider {...formMethods}>
         <form onSubmit={handleSubmit(data => onSubmit(data, true))}>
-        <Box maxWidth="48em" marginLeft="auto" marginRight="auto" marginTop="2em" marginBottom="2em">
+        <Container maxWidth="md" sx={{marginY: 2}}>
+
         <Stack direction="column" spacing={3}>
             <Stack direction="row" spacing={1} justifyContent="center" alignItems="center" alignContent="center">
                 <Typography variant="h4" sx={{flex: 1}}>Course Editor</Typography>
-                <Button size="large" variant="outlined" type="submit" disabled={!isValid}>Save</Button>
-                <Button size="large" variant="outlined" onClick={onCancel}>Cancel</Button>
-            </Stack>
-
-            <Stack direction="row" justifyContent="top" alignItems="top" alignContent="top" spacing={2}>
-                <Controller name="title" control={control} render={({ field: { ref, ...field } }) => (
-                    <TextField required label="Title" variant="outlined" placeholder="Course Title"
-                               error={Boolean(errors.title)} helperText={errors.title?.message}
-                               inputRef={ref} {...field} sx={{flex: 1}} />
-                )}/>
 
                 <Controller name="visibility" control={control} render={({ field: { ref, ...field } }) => (
-                    <TextField select label="Visibility" variant="outlined" inputRef={ref} {...field}>
+                    <TextField select label="Visibility" variant="outlined" inputRef={ref} {...field} size="small" sx={{minWidth: 150}}>
                         <MenuItem value="public">Public</MenuItem>
                         <MenuItem value="unlisted">Unlisted</MenuItem>
                         <MenuItem value="private">Private</MenuItem>
                     </TextField>
                 )} />
+
+                <Button size="large" variant="outlined" type="submit" disabled={!isValid}>Save</Button>
+                <Button size="large" variant="outlined" onClick={onCancel}>Cancel</Button>
             </Stack>
+
+            <LocalizedFields />
 
             <Controller name="img" control={control} render={({field}) => <>
                 <Box width={300} height={180}>
@@ -252,24 +272,16 @@ function CourseEditor({course}: {course?: Course | null}) {
                                     renderInput={params => <TextField {...params} />}
                                     onChange={(newDate: Moment | null) => newDate && field.onChange(newDate.toDate())} />
                 )}/>
-
-                <Typography sx={{flex: 1}}/>
-                <Controller name="rankingVisibility" control={control} render={({ field }) => (
-                    <FormControlLabel label="Is ranking visible" labelPlacement="start" control={
-                        <Switch checked={field.value === 'public'} inputRef={field.ref}
-                                onChange={e => field.onChange(e.target.checked ? 'public' : 'private')} />
-                        } />
-                )} />
             </LocalizationProvider>
             </Stack>
 
             <Stack direction="row" spacing={2}>
-                <Controller name="introduction" control={control} render={({ field: { ref, onChange, ...field } }) => (
-                    <TextField required label="Introduction Notion Page" variant="outlined" placeholder="Notion page Page"
-                               error={Boolean(errors.introduction)} helperText={errors.introduction?.message}
-                               onChange={e => onChange(notionPageToId(e.target.value))}
-                               inputRef={ref} {...field} sx={{flex: 1}} />
-                )}/>
+                <Controller name="rankingVisibility" control={control} render={({ field }) => (
+                    <FormControlLabel label="Is ranking visible" labelPlacement="start" control={
+                        <Switch checked={field.value === 'public'} inputRef={field.ref}
+                                onChange={e => field.onChange(e.target.checked ? 'public' : 'private')} />
+                    } />
+                )} />
 
                 <Controller name="allowViewingSolutions" control={control} render={({ field: { ref, ...field } }) => (
                     <FormControlLabel label="Allow viewing solutions" labelPlacement="start" control={
@@ -292,9 +304,8 @@ function CourseEditor({course}: {course?: Course | null}) {
             </>
 
             <br/>
-            {introId && <Content notionPage={introId} />}
         </Stack>
-        </Box>
+        </Container>
         </form>
         </FormProvider>
 

@@ -88,13 +88,15 @@ function CurrentCourseView({openPage}: {openPage: (page: string) => void}) {
         else        setCurrentExercise(null);
     }, [exerciseId, currentExercise, course, openExercise, setCurrentExercise]);
 
+    const courseTitle = course?.title ? localize(course?.title) : '';
+    const exerciseTitle = currentExercise?.title ? `${localize(currentExercise?.title)} • ` : '';
     let content;
     if (exerciseId === 'status' )       content = <StatusPage />
     else if (exerciseId === 'edit' )    content = <Suspense fallback={<></>}><CourseEditor course={course} /></Suspense>
     else                                content = <Exercise launchCourse={launchCourse} registerCourse={registerCourse} />
     return <>
         <Helmet>
-            <title>{currentExercise?.title ? `${localize(currentExercise?.title)} • ` : ''}{course?.title}</title>
+            <title>{exerciseTitle}{courseTitle}</title>
         </Helmet>
         <CurrentExerciseContext.Provider value={{exercise: currentExercise}}>
             <CourseDrawer
@@ -120,6 +122,7 @@ const Root = styled('div')({
 
 function CourseView() {
     const auth = useContext(AuthContext);
+    const {localize} = useContext(LocalizeContext);
     const navigate = useNavigate();
     const {courseId} = useParams<{ courseId: string }>();
     const [course, setCourse] = useState<Course | null>(null);
@@ -141,14 +144,14 @@ function CourseView() {
     if( !course )   return <></>
     return <>
         <Helmet>
-            <title>{course.title}</title>
-            <meta property="og:title" content={course.title} />
-            <meta property="twitter:title" content={course.title} />
+            <title>{localize(course.title)}</title>
+            <meta property="og:title" content={localize(course.title)} />
+            <meta property="twitter:title" content={localize(course.title)} />
             <meta property="og:image" content={course.img} />
-            <meta property="og:image:alt" content={course.title} />
+            <meta property="og:image:alt" content={localize(course.title)} />
             <meta property="twitter:image" content={course.img} />
             <meta property="og:type" content="article" />
-            <meta name="description" content={`Comprehensive course on ${course.title} with hands-on experience in mind`} />
+            <meta name="description" content={`Comprehensive course on ${localize(course.title)} with hands-on experience in mind`} />
         </Helmet>
 
         <CourseContext.Provider value={{course: course}}>

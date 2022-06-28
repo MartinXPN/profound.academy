@@ -37,6 +37,14 @@ export const updateUserInfo = async (userId: string, displayName?: string, image
         await db.user(userId).set({displayName: displayName, imageUrl: imageUrl}, {merge: true});
 }
 
+export const updateUserPreferredLocale = async (userId: string, locale: string) => {
+    const userInfo = (await db.user(userId).get()).data();
+    if( userInfo?.preferredLocale !== locale ) {
+        console.log(`Setting ${userId} locale to ${locale}`);
+        await db.user(userId).set({preferredLocale: locale}, {merge: true});
+    }
+}
+
 export const uploadProfilePicture = async (userId: string, file: File) => {
     const storage = getStorage();
     const storageRef = ref(storage, `profilePictures/${userId}/${file.name}`);

@@ -3,6 +3,8 @@ import {useStickyState} from "./stickystate";
 import {createContext, memo, ReactNode, useCallback, useContext, useEffect} from "react";
 import {AuthContext} from "../App";
 import { useSearchParams } from "react-router-dom";
+import useAsyncEffect from "use-async-effect";
+import {updateUserPreferredLocale} from "../services/users";
 
 interface LocalizeContextProps {
     localize: (text: string | {[key: string]: string}) => string;
@@ -53,7 +55,15 @@ const useLocalize = (): [
 };
 
 function Localization({children}: { children: ReactNode }) {
+    const auth = useContext(AuthContext);
     const [localizeText, locale, setLocale] = useLocalize();
+
+    // Update user preferred-locale
+    useAsyncEffect(async () => {
+        if( auth.currentUserId )
+            return await updateUserPreferredLocale(auth.currentUserId, locale);
+    }, [auth.currentUserId, locale]);
+
     return <>
         <LocalizeContext.Provider value={{
             localize: localizeText,

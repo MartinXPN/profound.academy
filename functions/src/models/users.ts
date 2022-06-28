@@ -18,6 +18,7 @@ export interface User {
     id: string;
     imageUrl?: string;
     displayName?: string;
+    preferredLocale?: string;
     badges?: Badge;
     courses?: Course[];
     completed?: Course[];

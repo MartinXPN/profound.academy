@@ -196,7 +196,7 @@ function CourseEditor({course}: {course?: Course | null}) {
     return <>
         <FormProvider {...formMethods}>
         <form onSubmit={handleSubmit(data => onSubmit(data, true))}>
-        <Container maxWidth="md" sx={{marginY: 2}}>
+        <Container maxWidth="md" sx={{paddingTop: 4, paddingBottom: 24}}>
 
         <Stack direction="column" spacing={3}>
             <Stack direction="row" spacing={1} justifyContent="center" alignItems="center" alignContent="center">
@@ -275,33 +275,29 @@ function CourseEditor({course}: {course?: Course | null}) {
             </LocalizationProvider>
             </Stack>
 
-            <Stack direction="row" spacing={2}>
+            <Stack direction="row" spacing={4}>
                 <Controller name="rankingVisibility" control={control} render={({ field }) => (
                     <FormControlLabel label="Is ranking visible" labelPlacement="start" control={
                         <Switch checked={field.value === 'public'} inputRef={field.ref}
                                 onChange={e => field.onChange(e.target.checked ? 'public' : 'private')} />
                     } />
                 )} />
-
-                <Controller name="allowViewingSolutions" control={control} render={({ field: { ref, ...field } }) => (
+                <Controller name="allowViewingSolutions" control={control} render={({ field: { ref, value, onChange, ...field } }) => (
                     <FormControlLabel label="Allow viewing solutions" labelPlacement="start" control={
-                        <Switch inputRef={ref} {...field} />
+                        <Switch checked={value} onChange={e => onChange(e.target.checked)} inputRef={ref} {...field} />
                     } />
                 )} />
             </Stack>
 
-            <>
-                <ListItemButton onClick={onInviteUsersClicked}>
-                    <ListItemIcon>
-                        <GroupAdd />
-                    </ListItemIcon>
-                    <ListItemText primary="Invite users" />
-                    {invitesOpen ? <ExpandLess /> : <ExpandMore />}
-                </ListItemButton>
-                <Collapse in={invitesOpen}>
-                    <CourseInvitations onSendInvites={onSendInvites} />
-                </Collapse>
-            </>
+            {/*Invite Users*/}
+            <ListItemButton onClick={onInviteUsersClicked}>
+                <ListItemIcon><GroupAdd /></ListItemIcon>
+                <ListItemText primary="Invite users" />
+                {invitesOpen ? <ExpandLess /> : <ExpandMore />}
+            </ListItemButton>
+            <Collapse in={invitesOpen}>
+                <CourseInvitations onSendInvites={onSendInvites} />
+            </Collapse>
 
             <br/>
         </Stack>

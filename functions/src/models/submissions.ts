@@ -59,7 +59,7 @@ export interface SubmissionResult extends Submission {
     // for displaying results
     userDisplayName?: string;
     userImageUrl?: string;
-    courseTitle: string;
+    courseTitle: string | {[key: string]: string};
     exerciseTitle: string | {[key: string]: string};
 }
 

@@ -183,7 +183,7 @@ function CourseDrawer({onItemSelected, onStatusClicked, onCreateExerciseClicked,
                                 levelIcon={<Equalizer/>}
                                 onItemSelected={onItemSelected}
                                 isDrawerOpen={open}
-                                isSingleLevel={Object.keys(course?.levelExercises ?? {}).length <= 1}/>
+                                isSingleLevel={course.levels.length <= 1}/>
                         </Box>
                     }
                 )}

@@ -22,6 +22,8 @@ export const updateUserProgress = (
     force?: boolean,
     rollbackDate?: Date,
 ) => {
+    if (Math.abs(prev - cur) < 0.0001)
+        return functions.logger.info(`Not updating: ${metric} as ${prev} = ${cur}`);
     if (cur < prev && !force)
         return functions.logger.info(`Not updating: ${metric} prev: ${prev}, cur: ${cur}`);
 

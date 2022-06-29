@@ -224,6 +224,13 @@ describe('Update User Progress', function () {
             await admin.firestore().runTransaction(async (transaction) => {
                 metrics.updateUserProgress(transaction, 'score', userId, courseId, exercise1Id, 'level1', 0, 10, 10, false, dateDayDiff(new Date(), 7));
             });
+            // Update with the same value should be ignored
+            await admin.firestore().runTransaction(async (transaction) => {
+                metrics.updateUserProgress(transaction, 'score', userId, courseId, exercise1Id, 'level1', 10, 10, 10, false, dateDayDiff(new Date(), 7));
+            });
+            await admin.firestore().runTransaction(async (transaction) => {
+                metrics.updateUserProgress(transaction, 'score', userId, courseId, exercise1Id, 'level1', 10, 10, 10, true, dateDayDiff(new Date(), 7));
+            });
 
             let progress = (await db.userProgress(courseId, userId).get()).data();
             let exerciseProgress = (await db.userProgress(courseId, userId).collection('exerciseScore').doc('level1').get()).data();

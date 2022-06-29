@@ -8,9 +8,11 @@ import {db} from './db';
 
 export const getS3UploadSignedUrl = async (exerciseId: string, contentType: string): Promise<string> => {
     const clientParams = {
-        accessKeyId: functions.config().instructor.id,
-        secretAccessKey: functions.config().instructor.key,
         region: 'us-east-1',
+        credentials: {
+            accessKeyId: functions.config().instructor.id,
+            secretAccessKey: functions.config().instructor.key,
+        },
     };
     const s3 = new S3Client(clientParams);
 
@@ -23,7 +25,7 @@ export const getS3UploadSignedUrl = async (exerciseId: string, contentType: stri
     };
     const command = new PutObjectCommand(params);
 
-    const url = await getSignedUrl(s3, command, { expiresIn: 600 });
+    const url = await getSignedUrl(s3, command, {expiresIn: 600});
     functions.logger.info(`Got URL: ${url}`);
     return url;
 };

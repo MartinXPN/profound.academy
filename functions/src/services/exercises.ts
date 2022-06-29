@@ -7,9 +7,11 @@ import {PrivateTestsSummary} from '../models/exercise';
 export const getPrivateTestsSummary = async (exerciseId: string): Promise<PrivateTestsSummary> => {
     const TABLE = functions.config().tests.table;
     const clientParams = {
-        accessKeyId: functions.config().instructor.id,
-        secretAccessKey: functions.config().instructor.key,
         region: 'us-east-1',
+        credentials: {
+            accessKeyId: functions.config().instructor.id,
+            secretAccessKey: functions.config().instructor.key,
+        },
     };
     const client = new DynamoDBClient(clientParams);
 

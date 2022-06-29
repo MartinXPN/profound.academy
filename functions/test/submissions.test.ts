@@ -9,7 +9,7 @@ const assert = chai.assert;
 
 describe('Submit a solution', function () {
     // Firebase connection can take long to be established
-    this.timeout(5000);
+    this.timeout(10000);
 
     let submissions: typeof import('../src/services/submissions');
     let db: typeof import('../src/services/db').db;

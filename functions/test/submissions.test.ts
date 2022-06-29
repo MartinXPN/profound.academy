@@ -48,6 +48,7 @@ describe('Submit a solution', function () {
             author: 'Test Framework',
             instructors: [],
             introduction: '',
+            drafts: {id: 'drafts', title: 'Drafts'},
             levels: [{id: '1', title: 'Level 1'}],
             levelExercises: {},
             levelScores: {},

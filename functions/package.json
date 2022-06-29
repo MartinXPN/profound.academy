@@ -23,7 +23,10 @@
   ],
   "main": "lib/index.js",
   "dependencies": {
-    "aws-sdk": "^2.1072.0",
+    "@aws-sdk/client-dynamodb": "^3.118.1",
+    "@aws-sdk/client-s3": "^3.118.1",
+    "@aws-sdk/s3-request-presigner": "^3.118.1",
+    "@aws-sdk/util-dynamodb": "^3.118.1",
     "cors": "^2.8.5",
     "firebase-admin": "^10.0.2",
     "firebase-functions": "^3.18.0",
@@ -32,7 +35,6 @@
     "notion-client": "^4.16.1"
   },
   "devDependencies": {
-    "@firebase/rules-unit-testing": "^2.0.2",
     "@types/chai": "^4.3.0",
     "@types/chai-as-promised": "^7.1.5",
     "@types/mocha": "^9.1.0",

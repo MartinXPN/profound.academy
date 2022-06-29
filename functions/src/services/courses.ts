@@ -1,27 +1,31 @@
-import * as AWS from 'aws-sdk';
 import * as functions from 'firebase-functions';
 import {firestore} from 'firebase-admin';
+import {getSignedUrl} from '@aws-sdk/s3-request-presigner';
+import {S3Client, PutObjectCommand} from '@aws-sdk/client-s3';
 
 import {db} from './db';
 
 
-AWS.config.update({
-    accessKeyId: functions.config().instructor.id,
-    secretAccessKey: functions.config().instructor.key,
-    region: 'us-east-1',
-});
+export const getS3UploadSignedUrl = async (exerciseId: string, contentType: string): Promise<string> => {
+    const clientParams = {
+        accessKeyId: functions.config().instructor.id,
+        secretAccessKey: functions.config().instructor.key,
+        region: 'us-east-1',
+    };
+    const s3 = new S3Client(clientParams);
 
-export const getS3UploadSignedUrl = (exerciseId: string, contentType: string): string => {
-    const s3 = new AWS.S3();
     const params = {
         Bucket: 'lambda-judge-tests-bucket',
         Key: `${exerciseId}.zip`,
-        Expires: 600, // Expires in 10 minutes
+        expiresIn: 600, // Expires in 10 minutes
         ContentType: contentType,
         ServerSideEncryption: 'AES256',
     };
+    const command = new PutObjectCommand(params);
 
-    return s3.getSignedUrl('putObject', params);
+    const url = await getSignedUrl(s3, command, { expiresIn: 600 });
+    functions.logger.info(`Got URL: ${url}`);
+    return url;
 };
 
 

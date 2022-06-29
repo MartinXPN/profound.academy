@@ -1,18 +1,18 @@
-import * as AWS from 'aws-sdk';
 import * as functions from 'firebase-functions';
+import {DynamoDBClient, GetItemCommand} from '@aws-sdk/client-dynamodb';
+import {unmarshall} from '@aws-sdk/util-dynamodb';
 import {PrivateTestsSummary} from '../models/exercise';
 
 
-AWS.config.update({
-    accessKeyId: functions.config().instructor.id,
-    secretAccessKey: functions.config().instructor.key,
-    region: 'us-east-1',
-});
-const TABLE = functions.config().tests.table;
-
-
 export const getPrivateTestsSummary = async (exerciseId: string): Promise<PrivateTestsSummary> => {
-    const dynamo = new AWS.DynamoDB();
+    const TABLE = functions.config().tests.table;
+    const clientParams = {
+        accessKeyId: functions.config().instructor.id,
+        secretAccessKey: functions.config().instructor.key,
+        region: 'us-east-1',
+    };
+    const client = new DynamoDBClient(clientParams);
+
     const params = {
         TableName: TABLE,
         Key: {
@@ -21,9 +21,12 @@ export const getPrivateTestsSummary = async (exerciseId: string): Promise<Privat
             },
         },
     };
-    const tests = await dynamo.getItem(params).promise();
+    const command = new GetItemCommand(params);
+    const tests = await client.send(command);
     functions.logger.info(`Got tests: ${JSON.stringify(tests)}`);
-    const res = tests.Item ? AWS.DynamoDB.Converter.unmarshall(tests.Item) : {id: exerciseId, count: 0, tests: []};
+
+    const res = tests.Item ? unmarshall(tests.Item) : {id: exerciseId, count: 0, tests: []};
     functions.logger.info(`Therefore the result is: ${JSON.stringify(res)}`);
+
     return res as PrivateTestsSummary;
 };

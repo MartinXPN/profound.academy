@@ -55,6 +55,7 @@ describe('Re-Evaluate Submissions', function () {
             author: 'Test Framework',
             instructors: [],
             introduction: '',
+            drafts: {id: 'drafts', title: 'Drafts'},
             levels: [{id: '1', title: 'Level 1'}, {id: '2', title: 'Level 2'}],
             levelExercises: {'1': 3, '2': 2},
             levelScores: {'1': 300, '2': 150},

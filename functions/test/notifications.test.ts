@@ -58,6 +58,7 @@ describe('Comment Notifications', function () {
             author: 'Test Framework',
             instructors: [instructor1Id, instructor2Id],
             introduction: '',
+            drafts: {id: 'drafts', title: 'Drafts'},
             levels: [{id: '1', title: 'Level 1'}],
             levelExercises: {},
             levelScores: {},

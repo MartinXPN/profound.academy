@@ -114,7 +114,7 @@ function LevelList({level, levelStatus, levelOrder, levelIcon, onItemSelected, i
                                         </Stack>
                                         : <ListItemText primary={index + 1}/>}
                                 </ListItemIcon>
-                                <ListItemText primary={localize(ex.title)}/>
+                                <ListItemText><Typography variant="subtitle1" noWrap>{localize(ex.title)}</Typography></ListItemText>
                             </ListItemButton>
                         </ListItem>
                     </Tooltip>

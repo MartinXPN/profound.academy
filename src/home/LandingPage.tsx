@@ -39,13 +39,12 @@ function Header({onCoursesClicked}: {onCoursesClicked: () => void}) {
 }
 
 
-function LandingPage({error, onCoursesClicked, onPricingClicked}: {
-    error?: string, onCoursesClicked?: () => void, onPricingClicked?: () => void,
+function LandingPage({onCoursesClicked, onPricingClicked}: {
+    onCoursesClicked: () => void, onPricingClicked: () => void,
 }) {
 
     return <>
-        {!!error && <Typography variant="h6" color="error">{error}</Typography>}
-        {onCoursesClicked && <Header onCoursesClicked={onCoursesClicked} />}
+        <Header onCoursesClicked={onCoursesClicked} />
 
         <Feature title="Learn Through Practice"
                  description="Each concept in the courses is explained through many hands-on exercises that help you master the topic.

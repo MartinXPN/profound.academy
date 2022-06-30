@@ -7,7 +7,7 @@ import {AppBarProfile} from "../user/Auth";
 import AppBarNotifications from "../user/Notifications";
 import Box from "@mui/material/Box";
 import Footer from "./Footer";
-import {Button, Divider, Container, AppBar, Toolbar, IconButton, Menu, MenuItem, ListItemText, ListItemIcon} from "@mui/material";
+import {Button, Divider, Container, AppBar, Toolbar, IconButton, Menu, MenuItem, ListItemText, ListItemIcon, Typography} from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import {useScreenAnalytics} from "../analytics";
 import ElevationScroll from "./ElevationScroll";
@@ -19,7 +19,7 @@ import {Info, Sell, ViewList} from "@mui/icons-material";
 import HelpChat from "./HelpChat";
 
 
-function Home() {
+function Home({error}: {error?: string}) {
     const auth = useContext(AuthContext);
     useScreenAnalytics('home');
 
@@ -78,6 +78,7 @@ function Home() {
             </ElevationScroll>
             <Toolbar /> {/* To place the content under the toolbar */}
 
+            {!!error && <Box bgcolor="secondary.main"><Typography variant="h3" color="error" textAlign="center" padding={4}>{error}</Typography></Box>}
             {!auth.isSignedIn && <LandingPage onCoursesClicked={onCoursesClicked} onPricingClicked={onPricingClicked} />}
             {auth.currentUserId && <ActivityHeatmap userId={auth.currentUserId} />}
             {auth.currentUserId && <CourseList variant="userCourses" title="My Curriculum" userId={auth.currentUserId}/>}

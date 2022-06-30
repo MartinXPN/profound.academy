@@ -17,7 +17,7 @@ import {Helmet} from "react-helmet-async";
 import {LocalizeContext} from "../common/Localization";
 import {Box, Toolbar} from "@mui/material";
 import {useScreenAnalytics} from "../analytics";
-const LandingPage = lazy(() => import('../home/LandingPage'));
+const Home = lazy(() => import('../home/Home'));
 const CourseEditor = lazy(() => import('./CourseEditor'));
 
 
@@ -140,7 +140,7 @@ function CourseView() {
 
     const openPage = useCallback((pageId: string) => navigate(pageId), [navigate]);
 
-    if( error )     return <Suspense fallback={<></>}><LandingPage error={error} /></Suspense>
+    if( error )     return <Suspense fallback={<></>}><Home error={error} /></Suspense>
     if( !course )   return <></>
     return <>
         <Helmet>

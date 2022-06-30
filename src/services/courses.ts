@@ -173,19 +173,24 @@ export const updateCourse = async (
     const exists = await doesExist(id);
     if( !exists )
         await registerForCourse(userId, id);
-    return db.course(id).set({
+    await db.course(id).set({
         img: img,
         revealsAt: firebase.firestore.Timestamp.fromDate(revealsAt),
         freezeAt: firebase.firestore.Timestamp.fromDate(freezesAt),
         visibility: visibility,
         rankingVisibility: rankingVisibility,
         allowViewingSolutions: allowViewingSolutions,
-        title: title,
         author: author,
         instructors: instructors,
-        introduction: introduction,
-        ...(!exists && {levels: [], levelExercises: {}, drafts: {id: 'drafts', title: 'Drafts'}}),
+        ...(!exists && {levels: [], drafts: {id: 'drafts', title: 'Drafts', score: 0, exercises: 0}}),
     }, {merge: true});
+
+    // Update title and introduction as we don't want to merge {local: content} maps - we want to change them
+    // in case we remove an element
+    return await db.course(id).update({
+        title: title,
+        introduction: introduction,
+    });
 }
 
 export const updateCoursePrivateFields = (

@@ -140,8 +140,15 @@ function CourseView() {
 
     const openPage = useCallback((pageId: string) => navigate(pageId), [navigate]);
 
-    if( error )     return <Suspense fallback={<></>}><Home error={error} /></Suspense>
-    if( !course )   return <></>
+    if( error )
+        return <Suspense fallback={<></>}>
+            <Helmet>
+                <title>404 | Page not found</title>
+            </Helmet>
+            <Home error={error} />
+        </Suspense>
+    if( !course )
+        return <></>
     return <>
         <Helmet>
             <title>{localize(course.title)}</title>

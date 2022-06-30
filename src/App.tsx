@@ -107,7 +107,6 @@ function App() {
                     <Route path="/faq" element={<FAQ/>} />
                     <Route path="/privacy" element={<Privacy/>} />
                     <Route path="/terms" element={<TermsAndConditions/>} />
-                    <Route path="/404.html" element="/404.html" />
                     <Route path="/users/:userId" element={<UserProfile/>} />
                     <Route path="/new" element={<CourseEditor/>} />
                     <Route path=":courseId" element={<Course/>} />

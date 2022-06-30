@@ -175,7 +175,7 @@ function CourseDrawer({onItemSelected, onStatusClicked, onCreateExerciseClicked,
 
                 {course.levels.map((level, levelOrder) => {
                     const numSolved = progress?.levelSolved?.[level.id] ?? 0;
-                    const isLevelSolved = course.levelExercises[level.id] <= numSolved;
+                    const isLevelSolved = level.exercises <= numSolved;
 
                     return <Box key={`drawer-level-${level.id}`}>
                             <LevelList

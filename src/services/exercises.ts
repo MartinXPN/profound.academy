@@ -65,7 +65,10 @@ export const updateExercise = async (
     testCases?: TestCase[], testGroups?: SubtaskTestGroup[],
     question?: string, answer?: string, options?: string[],
 ) => {
-    const previousValues = (await db.exercise(courseId, exerciseId).get()).data();
+    const [course, previousValues] = await Promise.all([
+        (await db.course(courseId).get()).data(),
+        (await db.exercise(courseId, exerciseId).get()).data(),
+    ]);
     const prevScore = previousValues?.score ?? 0;
     const prevLevel = previousValues?.levelId;
 
@@ -87,36 +90,44 @@ export const updateExercise = async (
         question: question,
         options: options,
     }, {merge: true});
-    // Update title and pageId as we don't want to merge {local => content} maps - we want to change them
+
+    const batch = firebase.firestore().batch();
+    // Update title and pageId as we don't want to merge {local: content} maps - we want to change them
     // in case we remove an element
-    await db.exercise(courseId, exerciseId).update({
+    batch.update(db.exercise(courseId, exerciseId),{
         title: title,
         pageId: pageId,
     });
     if( answer )
-        await db.exercisePrivateFields(courseId, exerciseId).set({answer: answer}, {merge: true});
+        batch.set(db.exercisePrivateFields(courseId, exerciseId), {answer: answer}, {merge: true});
 
-    // update the course as well (levelExercises and levelScores)
-    if( prevLevel !== level ) {
-        await db.course(courseId).set({
-            // @ts-ignore
-            levelExercises: {
-                ...(prevLevel && prevLevel !== 'drafts' && {[prevLevel]: firebase.firestore.FieldValue.increment(-1)}),
-                ...(level !== 'drafts' && {[level]: firebase.firestore.FieldValue.increment(1)}),
-            },
-            // @ts-ignore
-            levelScores: {
-                ...(prevLevel && prevLevel !== 'drafts' && {[prevLevel]: firebase.firestore.FieldValue.increment(-prevScore)}),
-                ...(level !== 'drafts' && {[level]: firebase.firestore.FieldValue.increment(score)}),
-            },
-        }, {merge: true});
+    // update the course as well (level.exercises and level.scores)
+    const update = {
+        'drafts': {...course?.drafts ?? {id: 'drafts', title: 'Drafts', score: 0, exercises: 0}},
+        'levels': [...course?.levels ?? []],
+    };
+    const prevLevelIndex = update.levels.findIndex(item => item.id === prevLevel);
+    if( prevLevel === 'drafts' ) {
+        update.drafts.exercises -= 1;
+        update.drafts.score -= prevScore;
     }
-    else if( prevScore !== score && level !== 'drafts' ) {
-        await db.course(courseId).set({
-            // @ts-ignore
-            levelScores: {[level]: firebase.firestore.FieldValue.increment(score - prevScore)},
-        }, {merge: true});
+    else if( prevLevelIndex !== -1 ) {
+        update.levels[prevLevelIndex].exercises -= 1;
+        update.levels[prevLevelIndex].score -= prevScore;
     }
+
+    const levelIndex = update.levels.findIndex(item => item.id === level);
+    if( level === 'drafts' ) {
+        update.drafts.exercises += 1;
+        update.drafts.score += score;
+    }
+    else if( levelIndex !== -1 ) {
+        update.levels[levelIndex].exercises += 1;
+        update.levels[levelIndex].score += score;
+    }
+
+    batch.set(db.course(courseId), update, {merge: true});
+    return await batch.commit();
 }
 
 export const onExerciseInsightsChanged = (courseId: string, exerciseId: string, onChanged: (insights: Insight) => void) => {

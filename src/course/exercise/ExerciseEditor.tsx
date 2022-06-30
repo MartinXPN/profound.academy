@@ -153,13 +153,13 @@ function ExerciseEditor({cancelEditing, exerciseTypeChanged}: {
     const onAddLevel = () => {
         if( !course?.id )
             return;
-        const created = {id: newLevel(course.id), title: 'New level'};
+        const created = {id: newLevel(course.id), title: 'New level', score: 0, exercises: 0};
         setLevels(levels => [...levels, created]);
     }
     const onSaveLevel = async (levelId: string, title: string | {[key: string]: string}) => {
         if( !course?.id )
             return;
-        const newLevels = levels.map(l => l.id === levelId ? {id: levelId, title: title} : l);
+        const newLevels = levels.map(l => l.id === levelId ? {id: levelId, title: title, score: 0, exercises: 0} : l);
         await saveLevels(course.id, newLevels);
     }
 

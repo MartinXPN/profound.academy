@@ -102,7 +102,7 @@ function RankingTable({metric, showProgress}: {metric: string, showProgress?: bo
                                 <Typography variant="subtitle1" sx={{verticalAlign: 'middle', display: 'inline-flex'}}>
                                     <Equalizer/> {index + 1}
                                 </Typography>
-                                <Typography variant="body2">{course.levelScores?.[level.id] ?? '?'}</Typography>
+                                <Typography variant="body2">{level.score}</Typography>
                             </ClickableTableCell>
                             </Tooltip>
                         }

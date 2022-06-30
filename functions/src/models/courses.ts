@@ -17,10 +17,8 @@ export interface Course {
     title: string | {[key: string]: string};        // string or mapping {locale => titleText}
     introduction: string | {[key: string]: string}; // string or mapping {locale => introductionPageId}
 
-    drafts: Level;                                  // Exercises that are still in draft phase (not public)
-    levels: Level[];
-    levelExercises: { [key: string]: number };      // {levelId: numberOfExercisesInLevel}
-    levelScores: { [key: string]: number };         // {levelId: scorePerLevel}
+    drafts: Level;                                  // exercises that are still in draft phase (not public)
+    levels: Level[];                                // list of levels in the course
     exercises: Exercise[];                          // [sub-collection] all the exercises in the course
 }
 

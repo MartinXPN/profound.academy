@@ -18,6 +18,7 @@ export const resubmitSolutions = async (courseId: string, exerciseId: string): P
 
     // Reset metrics
     return firestore().runTransaction(async (transaction) => {
+        const scheduledUpdates = await transaction.get(db.updateQueue.where('invalidateDoc', '==', exerciseRef));
         const query = await transaction.get(db.submissionResults.where('exercise', '==', exerciseRef));
         const submissions = query.docs.map((s) => s.data());
         console.log('#submissions:', submissions.length);
@@ -61,6 +62,9 @@ export const resubmitSolutions = async (courseId: string, exerciseId: string): P
             ]);
             /* eslint-enable max-len */
         }));
+
+        // Remove scheduled updates
+        scheduledUpdates.forEach((snapshot) => transaction.delete(snapshot.ref));
 
         // reset user progress metrics
         await Promise.all(prevData.map(async (data) => {

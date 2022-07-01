@@ -52,6 +52,8 @@ export const updateUserProgress = (
             updateAt: firestore.Timestamp.fromDate(rollbackDate),
             key: key,
             diff: prev - cur,
+            // @ts-ignore
+            invalidateDoc: db.exercise(courseId, exerciseId),
         }, {merge: true});
     };
     rollback(metric, db.userProgress(courseId, userId));

@@ -1,3 +1,5 @@
 # https://www.robotstxt.org/robotstxt.html
+Sitemap: https://profound.academy/sitemap.xml
+
 User-agent: *
-Disallow:
+Disallow: /users/

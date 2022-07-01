@@ -63,7 +63,7 @@ function Home({error}: {error?: string}) {
                     </Menu>
                 </Box>
 
-                <AppBarHome onClick={onHomeClicked} sx={{mr: 2}} />
+                <AppBarHome onClick={onHomeClicked} />
                 <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
                     <Button onClick={onCoursesClicked} size="large" color="inherit" sx={{textTransform: 'none'}}>Courses</Button>
                     <Button onClick={onPricingClicked} size="large" color="inherit" sx={{textTransform: 'none'}}>Pricing</Button>

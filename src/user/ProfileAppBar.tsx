@@ -10,7 +10,7 @@ export default function ProfileAppBar() {
             <AppBar position="static" color="default">
                 <Container maxWidth="xl">
                     <Toolbar>
-                        <AppBarHome component={Link} to="/"/>
+                        <AppBarHome />
                         <Box flexGrow={1} />
                         <AppBarNotifications />
                         <AppBarProfile />

@@ -58,10 +58,8 @@ describe('Comment Notifications', function () {
             author: 'Test Framework',
             instructors: [instructor1Id, instructor2Id],
             introduction: '',
-            drafts: {id: 'drafts', title: 'Drafts'},
-            levels: [{id: '1', title: 'Level 1'}],
-            levelExercises: {},
-            levelScores: {},
+            drafts: {id: 'drafts', title: 'Drafts', score: 0, exercises: 0},
+            levels: [{id: '1', title: 'Level 1', score: 0, exercises: 0}],
             exercises: [],
         });
         await db.exercise(courseId, exerciseId).set({

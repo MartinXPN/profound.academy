@@ -5,4 +5,5 @@ export interface ScheduledUpdate {
     updateAt: firebase.firestore.Timestamp,
     key: string;
     diff: number;
+    invalidateDoc?: firebase.firestore.DocumentReference;
 }

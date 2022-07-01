@@ -55,10 +55,11 @@ describe('Re-Evaluate Submissions', function () {
             author: 'Test Framework',
             instructors: [],
             introduction: '',
-            drafts: {id: 'drafts', title: 'Drafts'},
-            levels: [{id: '1', title: 'Level 1'}, {id: '2', title: 'Level 2'}],
-            levelExercises: {'1': 3, '2': 2},
-            levelScores: {'1': 300, '2': 150},
+            drafts: {id: 'drafts', title: 'Drafts', score: 0, exercises: 0},
+            levels: [
+                {id: '1', title: 'Level 1', score: 300, exercises: 3},
+                {id: '2', title: 'Level 2', score: 150, exercises: 2}
+            ],
             exercises: [],
         });
 
@@ -121,7 +122,7 @@ describe('Re-Evaluate Submissions', function () {
     });
 
     describe('Re-evaluate for an exercise', () => {
-        it('Should reset exercise insights', async () => {
+        it('Should reset exercise insights and the update queue', async () => {
             const submission = {
                 id: '',
                 userId: userId,
@@ -138,6 +139,10 @@ describe('Re-Evaluate Submissions', function () {
             } as JudgeResult;
 
             await submissionResults.processResult(judgeResult, userId, submissionDoc.id);
+            const updates = (await db.updateQueue.get()).docs.map(d => d.data());
+            console.log('updates:', updates);
+            assert.equal(updates.length, 9, 'Should have the correct updates after submission results are processed');
+
             await resubmit.resubmitSolutions(courseId, exerciseId);
 
             const courseInsights = (await db.courseOverallInsights(courseId).get()).data();
@@ -153,6 +158,10 @@ describe('Re-Evaluate Submissions', function () {
             assert.equal(exerciseInsights?.solved, 0);
             assert.equal(exerciseInsights?.runs ?? 0, 0);
             assert.equal(exerciseInsights?.totalScore, 0);
+
+            const laterUpdates = (await db.updateQueue.get()).docs.map(d => d.data());
+            console.log('updates:', laterUpdates);
+            assert.isEmpty(laterUpdates, 'Should have no updates after resubmit - before the new results arrive');
         });
     });
 });

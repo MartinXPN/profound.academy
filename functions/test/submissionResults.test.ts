@@ -51,10 +51,11 @@ describe('Process submission result', function () {
             author: 'Test Framework',
             instructors: [],
             introduction: '',
-            drafts: {id: 'drafts', title: 'Drafts'},
-            levels: [{id: '1', title: 'Level 1'}, {id: '2', title: 'Level 2'}],
-            levelExercises: {'1': 3, '2': 2},
-            levelScores: {'1': 300, '2': 150},
+            drafts: {id: 'drafts', title: 'Drafts', score: 0, exercises: 0},
+            levels: [
+                {id: '1', title: 'Level 1', score: 300, exercises: 3},
+                {id: '2', title: 'Level 2', score: 150, exercises: 2}
+            ],
             exercises: [],
         });
 
@@ -235,10 +236,8 @@ describe('Process submission result', function () {
                 author: 'Test Framework',
                 instructors: [],
                 introduction: '',
-                drafts: {id: 'drafts', title: 'Drafts'},
-                levels: [{id: '1', title: 'Level 1'}],
-                levelExercises: {'1': 4},
-                levelScores: {'1': 400},
+                drafts: {id: 'drafts', title: 'Drafts', score: 0, exercises: 0},
+                levels: [{id: '1', title: 'Level 1', score: 400, exercises: 4}],
                 exercises: [],
             });
             await db.exercise(courseId, exerciseId).update({unlockContent: [questDoc.id]});

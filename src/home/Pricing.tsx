@@ -87,7 +87,7 @@ function Pricing() {
 
             {/*Pro*/}
             <Grid item>
-            <Plan name="Pro" price="$299/month" isSubscribed={false} onStartClicked={handleStartProPlan}>
+            <Plan name="Pro" price="$199/month" isSubscribed={false} onStartClicked={handleStartProPlan}>
                 <Benefit name="Group tutoring" />
                 <Benefit name="Certificates" />
                 <Benefit name="Weekly meetings" />
@@ -100,11 +100,10 @@ function Pricing() {
         {showProInstructions && <>
             <Grid container direction="column" justifyContent="center" alignContent="center" padding={4}>
                 <Grid item><Typography variant="h4" marginBottom={1}>Pre-register for the Pro plan to get:</Typography></Grid>
-                <Grid item><Typography>• Group tutoring sessions 3 times a week (each 1.5-2 hours).</Typography></Grid>
-                <Grid item><Typography>• Almost individual support (group sizes don't exceed 10 people).</Typography></Grid>
-                <Grid item><Typography>• First session is completely free.</Typography></Grid>
-                <Grid item><Typography>• Pre-registered users will get a 30% discount for the first month.</Typography></Grid>
-                <Grid item><Typography>• Group tutoring sessions start this August.</Typography></Grid>
+                <Grid item><Typography>• 3 times/week meetings (~6h/week).</Typography></Grid>
+                <Grid item><Typography>• 5-10 group size.</Typography></Grid>
+                <Grid item><Typography>• Free first session.</Typography></Grid>
+                <Grid item><Typography fontWeight="bold">• Start: 1st of August.</Typography></Grid>
                 <Grid item>
                     <Grid container direction="row" justifyContent="center" alignContent="center" alignItems="center" spacing={2} marginY={2}>
                         <Grid item flex={1} minWidth={300}>

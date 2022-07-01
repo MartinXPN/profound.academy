@@ -7,9 +7,9 @@ export function MediaFeature({title, description, media, mediaPosition, action, 
     action?: string, onButtonClicked?: () => void,
 }) {
     const buttonPart = <Button onClick={onButtonClicked} size="large" variant="contained" sx={{textTransform: 'none'}}>{action}</Button>;
-    const contentPart = <Box marginX={4}>{title}{description}{action && buttonPart}</Box>
+    const contentPart = <Box>{title}{description}{action && buttonPart}</Box>
     return <>
-        <Container maxWidth="xl">
+        <Container maxWidth="xl" sx={{paddingX: 4}}>
             <Grid container alignItems="center" justifyContent="center" textAlign="center" spacing={2} marginBottom={12}
                   sx={{ display: { xs: 'flex', md: 'none' } }}>
                 <Grid item>{title}</Grid>
@@ -18,7 +18,8 @@ export function MediaFeature({title, description, media, mediaPosition, action, 
                 {action && <Grid item>{buttonPart}</Grid>}
             </Grid>
 
-            <Grid container justifyContent="center" padding={8} sx={{ display: { xs: 'none', md: 'flex' } }}>
+            <Grid container justifyContent="center" padding={8} spacing={4}
+                  sx={{ display: { xs: 'none', md: 'flex' } }}>
                 <Grid item width={mediaPosition === 'left' ? '60%' : '40%'}>{mediaPosition === 'left' ? media : contentPart}</Grid>
                 <Grid item width={mediaPosition === 'right' ? '60%' : '40%'}>{mediaPosition === 'right' ? media : contentPart}</Grid>
             </Grid>
@@ -39,7 +40,7 @@ function Feature({title, description, media, mediaPosition, action, onButtonClic
     </>
     return <>
         <MediaFeature title={<Typography variant="h2" fontWeight="bold" marginBottom={2}>{title}</Typography>}
-                      description={<Typography variant="body1" marginBottom={2}>{description}</Typography>}
+                      description={<Typography whiteSpace="pre-wrap" marginBottom={2}>{description}</Typography>}
                       media={mediaPart} mediaPosition={mediaPosition}
                       action={action} onButtonClicked={onButtonClicked} />
     </>

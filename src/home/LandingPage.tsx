@@ -17,7 +17,7 @@ function Header({onCoursesClicked}: {onCoursesClicked: () => void}) {
             <MediaFeature
                 title={
                     <Typography variant="h1" color="white" fontWeight="bold" marginY={2}>
-                        In-depth hands-on interactive courses
+                        In-depth interactive courses
                     </Typography>
                 }
                 description={
@@ -47,8 +47,8 @@ function LandingPage({onCoursesClicked, onPricingClicked}: {
         <Header onCoursesClicked={onCoursesClicked} />
 
         <Feature title="Learn Through Practice"
-                 description="Each concept in the courses is explained through many hands-on exercises that help you master the topic.
-                 The curriculum is fully hands-on and interactive, so you make progress by solving various challenges instead of only consuming content."
+                 description={"Each concept in the courses is explained through many hands-on exercises that help you master the topic. The curriculum is fully hands-on and interactive, so you make progress by solving various challenges instead of only consuming content. \
+                 \n\n• Realtime feedback for each task.\n• No installation - write code right in the browser."}
                  media="/demo/practice.png" mediaPosition="left"/>
 
         <Feature title="Group Tutoring"

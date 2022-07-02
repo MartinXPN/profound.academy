@@ -1,12 +1,9 @@
 import {memo, useCallback, useContext, useEffect, useState} from "react";
 import {CourseContext, CurrentExerciseContext} from "../Course";
-import {Course} from 'models/courses';
 import {COMPARISON_MODES, Exercise, EXERCISE_TYPES} from 'models/exercise';
 import {Alert, Button, FormControlLabel, MenuItem, Snackbar, Stack, Switch, TextField} from "@mui/material";
 import LocalizedFields, {FieldSchema, fieldSchema} from "../../common/LocalizedFields";
 import Box from "@mui/material/Box";
-import AutocompleteSearch from "../../common/AutocompleteSearch";
-import {getCourses, searchCourses} from "../../services/courses";
 import {getExercisePrivateFields, updateExercise} from "../../services/exercises";
 import { reEvaluateSubmissions } from "../../services/submissions";
 import {newLevel, saveLevels} from "../../services/levels";
@@ -281,18 +278,19 @@ function ExerciseEditor({cancelEditing, exerciseTypeChanged}: {
                         {...field} sx={{flex: 1}} />
                 )}/>
 
-                <Controller name="unlockContent" control={control} render={({field}) => <>
-                    {/* @ts-ignore */}
-                    <AutocompleteSearch<Course>
-                        label="Unlock Content" placeholder="Courses or contests..."
-                        search={searchCourses} idsToValues={getCourses}
-                        optionToId={option => option.id}
-                        optionToLabel={option => option.title ?? ''}
-                        optionToImageUrl={option => option.img}
-                        initialIds={exercise?.unlockContent}
-                        onChange={content => field.onChange(content.map(c => c.id))}
-                        sx={{flex: 3}} />
-                </>} />
+                {/*TODO: Replace this with level-based side quest unlocking*/}
+                {/*<Controller name="unlockContent" control={control} render={({field}) => <>*/}
+                {/*    /!* @ts-ignore *!/*/}
+                {/*    <AutocompleteSearch<Course>*/}
+                {/*        label="Unlock Content" placeholder="Courses or contests..."*/}
+                {/*        search={searchCourses} idsToValues={getCourses}*/}
+                {/*        optionToId={option => option.id}*/}
+                {/*        optionToLabel={option => option.title ?? ''}*/}
+                {/*        optionToImageUrl={option => option.img}*/}
+                {/*        initialIds={exercise?.unlockContent}*/}
+                {/*        onChange={content => field.onChange(content.map(c => c.id))}*/}
+                {/*        sx={{flex: 3}} />*/}
+                {/*</>} />*/}
             </Stack>
 
             <br/><br/><br/>

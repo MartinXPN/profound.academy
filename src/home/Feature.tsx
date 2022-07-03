@@ -34,8 +34,10 @@ function Feature({title, description, media, mediaPosition, action, onButtonClic
     action?: string, onButtonClicked?: () => void,
 }) {
     const mediaPart = <>
-        <Card raised sx={{borderRadius: 8}}>
-            <CardMedia component="img" alt={title} image={media} loading="lazy" height="100%" width="100%" />
+        <Card raised sx={{borderRadius: 6}}>
+            <CardMedia component={media.endsWith('mp4') ? 'video' : 'img'}
+                       alt={title} image={media} loading="lazy" autoPlay muted loop
+                       height="100%" width="100%" />
         </Card>
     </>
     return <>

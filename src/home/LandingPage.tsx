@@ -49,20 +49,20 @@ function LandingPage({onCoursesClicked, onPricingClicked}: {
         <Feature title="Learn Through Practice"
                  description={"Each concept in the courses is explained through many hands-on exercises that help you master the topic. The curriculum is fully hands-on and interactive, so you make progress by solving various challenges instead of only consuming content. \
                  \n\n• Realtime feedback for each task.\n• No installation - write code right in the browser."}
-                 media="/demo/practice.gif" mediaPosition="left"/>
+                 media="/demo/practice.mp4" mediaPosition="left"/>
 
         <Feature title="Group Tutoring"
                  description="Sign up for group tutoring sessions to get the benefit of a more regular practice.
                  Learn programming consistently through weekly meetings and personalized guidance.
                  Meetings take place at the time you pick, while you have the flexibility to participate in 2-3 weekly sessions."
-                 media="/demo/group-tutoring.gif" mediaPosition="right"
+                 media="/demo/group-tutoring.mp4" mediaPosition="right"
                  action="Sign up for group tutoring" onButtonClicked={onPricingClicked} />
 
         <Feature title="Free Tailored Courses"
                  description="Sign up for courses of different levels and start learning for free!
                  Study Python, Javascript, and many others by taking a free course.
                  Courses contain exercises of different difficulty levels to keep you engaged and motivated."
-                 media="/demo/courses.gif" mediaPosition="left"
+                 media="/demo/courses.mp4" mediaPosition="left"
                  action="Explore Courses" onButtonClicked={onCoursesClicked} />
 
         <DiscordInvite />

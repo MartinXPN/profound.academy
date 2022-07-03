@@ -30,7 +30,7 @@ function Plan({name, price, children, isSubscribed, onStartClicked}: {
                 <Grid container justifyContent="center">
                     {isSubscribed
                         ? <Button variant="outlined" disabled>Current plan</Button>
-                        : <Button color="primary" variant="contained" onClick={onStartClicked}>Get started free</Button>}
+                        : <Button color="primary" variant="contained" onClick={onStartClicked}>Get started for free</Button>}
                 </Grid>
             </CardActions>
         </Card>

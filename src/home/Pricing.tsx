@@ -30,7 +30,7 @@ function Plan({name, price, children, isSubscribed, onStartClicked}: {
                 <Grid container justifyContent="center">
                     {isSubscribed
                         ? <Button variant="outlined" disabled>Current plan</Button>
-                        : <Button color="primary" variant="contained" onClick={onStartClicked}>Get started</Button>}
+                        : <Button color="primary" variant="contained" onClick={onStartClicked}>Get started free</Button>}
                 </Grid>
             </CardActions>
         </Card>
@@ -89,6 +89,7 @@ function Pricing() {
             <Grid item>
             <Plan name="Pro" price="$199/month" isSubscribed={false} onStartClicked={handleStartProPlan}>
                 <Benefit name="Group tutoring" />
+                <Benefit name="First session is FREE!" />
                 <Benefit name="Certificates" />
                 <Benefit name="Weekly meetings" />
                 <Benefit name="Personal guidance" />

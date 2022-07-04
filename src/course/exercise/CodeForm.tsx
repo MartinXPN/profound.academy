@@ -183,7 +183,8 @@ function CodeForm() {
                         multiline fullWidth variant="outlined" label="Input" placeholder="Start typing the input..."
                         // @ts-ignore
                         error={Boolean(errors.testCases?.[index]?.input)} helperText={errors.testCases?.[index]?.input?.message}
-                        inputRef={ref} {...field} />
+                        inputRef={ref} {...field}
+                        inputProps={{ style: {fontFamily: 'Monospace'} }}/>
                 )}/>
 
                 <Controller name={`testCases.${index}.target`} control={control} render={({ field: { ref, ...field } }) => (
@@ -191,7 +192,8 @@ function CodeForm() {
                         multiline fullWidth variant="outlined" label="Expected output" placeholder="Start typing the expected output..."
                         // @ts-ignore
                         error={Boolean(errors.testCases?.[index]?.target)} helperText={errors.testCases?.[index]?.target?.message}
-                        inputRef={ref} {...field} />
+                        inputRef={ref} {...field}
+                        inputProps={{ style: {fontFamily: 'Monospace'} }}/>
                 )}/>
             </Stack>
         </>)}
@@ -215,8 +217,8 @@ function CodeForm() {
         </>}
         {selectedPrivateTest !== null && 0 <= selectedPrivateTest && selectedPrivateTest < privateTestSummaries.length && privateTestSummaries.map((test, index) => index === selectedPrivateTest && <>
             <Stack spacing={1} hidden={selectedPrivateTest !== index} sx={{marginTop: 2}}>
-                <TextField multiline fullWidth disabled variant="outlined" label="Input" value={privateTestSummaries[index].input}/>
-                <TextField multiline fullWidth disabled variant="outlined" label="Expected output" value={privateTestSummaries[index].target}/>
+                <TextField multiline fullWidth disabled variant="outlined" label="Input" value={privateTestSummaries[index].input} inputProps={{ readOnly: true, style: {fontFamily: 'Monospace'} }}/>
+                <TextField multiline fullWidth disabled variant="outlined" label="Expected output" value={privateTestSummaries[index].target} inputProps={{ readOnly: true, style: {fontFamily: 'Monospace'} }}/>
             </Stack>
         </>)}
         <br/>

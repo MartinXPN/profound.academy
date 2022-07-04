@@ -1,6 +1,6 @@
 import {memo, useEffect, useState} from "react";
 import {TestCase} from "models/exercise";
-import { TextField, Typography } from "@mui/material";
+import {TextField, Typography} from "@mui/material";
 import {statusToColor} from "../colors";
 import {StatusTypography} from "../../common/StatusTypography";
 
@@ -50,7 +50,7 @@ function TestView({testCase, message, output, error, readOnly, status, score, me
                    placeholder="Start typing the input..."
                    onChange={event => setInput(event.target.value)}
                    value={input}
-                   inputProps={{ readOnly: readOnly }}/>
+                   inputProps={{ readOnly: readOnly, style: {fontFamily: 'Monospace'} }}/>
 
         <br/><br/>
         <TextField multiline fullWidth
@@ -59,7 +59,7 @@ function TestView({testCase, message, output, error, readOnly, status, score, me
                    placeholder="Start typing the expected output..."
                    onChange={event => setTarget(event.target.value)}
                    value={target}
-                   inputProps={{ readOnly: readOnly }}/>
+                   inputProps={{ readOnly: readOnly, style: {fontFamily: 'Monospace'} }}/>
 
         <br/><br/>
         {output &&
@@ -67,7 +67,7 @@ function TestView({testCase, message, output, error, readOnly, status, score, me
                    variant="outlined"
                    label="Program output"
                    value={output}
-                   inputProps={{ readOnly: true }}/>
+                   inputProps={{ readOnly: true, style: {fontFamily: 'Monospace'} }}/>
         }
         <br/><br/>
         {error &&
@@ -75,7 +75,7 @@ function TestView({testCase, message, output, error, readOnly, status, score, me
                    variant="outlined"
                    label="Program errors (stderr)"
                    value={error}
-                   inputProps={{ readOnly: true }}/>
+                   inputProps={{ readOnly: true, style: {fontFamily: 'Monospace'} }}/>
         }
     </>
 }

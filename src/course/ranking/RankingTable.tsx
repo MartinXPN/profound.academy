@@ -87,7 +87,7 @@ function RankingTable({metric, showProgress}: {metric: string, showProgress?: bo
     if( !course )
         return <></>
     return (
-        <TableContainer sx={{ maxHeight: 'calc(100vh - 64px)', width: '100%' }}>
+        <TableContainer sx={{overflowX: 'initial', width: '100%'}}>
             <Table stickyHeader>
                 <TableHead>
                 <TableRow>

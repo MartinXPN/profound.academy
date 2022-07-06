@@ -17,8 +17,9 @@ import {TestResult} from "models/lib/submissions";
 
 const StatusTypography = styled(Typography)({
     fontWeight: 'bold',
-    paddingTop: '8px',
-    paddingBottom: '8px',
+    marginTop: 12,
+    marginBottom: 12,
+    textAlign: 'center',
 });
 
 
@@ -115,15 +116,15 @@ function Console({onSubmitClicked, onRunClicked, isProcessing, submissionResult,
             <Button
                 variant="contained"
                 color="primary"
-                size='small'
-                sx={{float: 'right', margin: 1}}
+                size="small"
+                sx={{float: 'right', margin: 1, marginRight: 2, marginLeft: 0}}
                 onClick={onSubmitClicked}
                 endIcon={<Done />}>Submit</Button>
 
             <Button
                 variant="contained"
                 color="primary"
-                size='small'
+                size="small"
                 sx={{float: 'right', margin: 1}}
                 onClick={handleRun}
                 endIcon={<Send />}>Run</Button>

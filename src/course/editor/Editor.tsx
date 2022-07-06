@@ -51,6 +51,7 @@ function Editor({disableCodeSync, userId}: {disableCodeSync?: boolean, userId?: 
     }, [isMyCode]);
 
 
+    // save code every 500ms
     useEffect(() => {
         if( !auth.currentUserId || !auth.currentUser || !course || !exercise || disableCodeSync || !code )
             return;
@@ -59,7 +60,7 @@ function Editor({disableCodeSync, userId}: {disableCodeSync?: boolean, userId?: 
             const extension = language.extension;
             const projectCode = {[`main.${extension}`]: code};
             if( JSON.stringify(projectCode).length > 32000 ) {
-                console.log('source code too big');
+                console.warn('source code too big');
                 return;
             }
 
@@ -90,14 +91,18 @@ function Editor({disableCodeSync, userId}: {disableCodeSync?: boolean, userId?: 
         if( !auth.currentUserId || !auth.currentUser || !course || !exercise )
             return;
 
-        // if the code > 64 KB (2 bytes per character)
+        // if the code is empty or code > 64 KB (2 bytes per character)
         console.log('code length:', JSON.stringify(code).length);
-        if( JSON.stringify(code).length > 32000 ) {
+        const tooLong = JSON.stringify(code).length > 32000;
+        const tooShort = JSON.stringify(code).length < 4;
+        if( tooLong || tooShort ) {
             setSubmissionResult({
                 id: '', isBest: false, time: 0, score: 0, memory: 0, returnCode: 0, status: 'Compilation error',
                 compileResult: {
                     status: 'Compilation error', time: 0, score: 0, memory: 0, returnCode: 0,
-                    message: 'Source code exceeds the allowed 64KB limit',
+                    message: tooLong
+                        ? 'Source code exceeds the allowed 64KB limit'
+                        : 'Please put your code in the editor above before submitting',
                 },
             });
             setSubmissionTestResults(null);

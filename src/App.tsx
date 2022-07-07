@@ -18,6 +18,7 @@ import Localization, {LocalizeContext} from "./common/Localization";
 import Privacy from "./home/Privacy";
 import TermsAndConditions from "./home/TermsAndConditions";
 import FAQ from "./home/FAQ";
+import GroupTutoring from "./home/GroupTutoring";
 // Do not include the Course and the editor in the main bundle as they're pretty heavy
 const Course = lazy(() => import('./course/Course'));
 const CourseEditor = lazy(() => import('./course/CourseEditor'));
@@ -103,6 +104,7 @@ function App() {
             <Suspense fallback={<div>Loading...</div>}>
                 <Routes>
                     <Route path="/" element={<Home/>} />
+                    <Route path="/group-tutoring" element={<GroupTutoring/>} />
                     <Route path="/about" element={<About/>} />
                     <Route path="/faq" element={<FAQ/>} />
                     <Route path="/privacy" element={<Privacy/>} />

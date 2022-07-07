@@ -51,19 +51,19 @@ function LandingPage({onCoursesClicked, onPricingClicked}: {
                  \n\n• Realtime feedback for each task.\n• No installation - write code right in the browser."}
                  media="/demo/practice.mp4" mediaPosition="left"/>
 
-        <Feature title="Group Tutoring"
-                 description="Sign up for group tutoring sessions to get the benefit of a more regular practice.
-                 Learn programming consistently through weekly meetings and personalized guidance.
-                 Meetings take place at the time you pick, while you have the flexibility to participate in 2-3 weekly sessions."
-                 media="/demo/group-tutoring.mp4" mediaPosition="right"
-                 action="Sign up for group tutoring" onButtonClicked={onPricingClicked} />
-
         <Feature title="Free Tailored Courses"
                  description="Sign up for courses of different levels and start learning for free!
                  Study Python, Javascript, and many others by taking a free course.
                  Courses contain exercises of different difficulty levels to keep you engaged and motivated."
-                 media="/demo/courses.mp4" mediaPosition="left"
-                 action="Explore Courses" onButtonClicked={onCoursesClicked} />
+                 media="/demo/courses.mp4" mediaPosition="right"
+                 action="Explore Courses" onButtonClicked={onCoursesClicked} to="#courses" />
+
+        <Feature title="Group Tutoring"
+                 description="Sign up for group tutoring sessions to get the benefit of a more regular practice.
+                 Learn programming consistently through weekly meetings and personalized guidance.
+                 Meetings take place at the time you pick, while you have the flexibility to participate in 2-3 weekly sessions."
+                 media="/demo/group-tutoring.mp4" mediaPosition="left"
+                 action="Sign up for group tutoring" onButtonClicked={onPricingClicked} to="/group-tutoring" />
 
         <DiscordInvite />
 

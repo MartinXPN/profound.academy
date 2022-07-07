@@ -16,6 +16,7 @@ import {Link} from "react-router-dom";
 import Pricing from "./Pricing";
 import LandingPage from "./LandingPage";
 import {Info, Sell, ViewList} from "@mui/icons-material";
+import GroupIcon from '@mui/icons-material/Group';
 import HelpChat from "./HelpChat";
 
 
@@ -48,11 +49,15 @@ function Home({error}: {error?: string}) {
                           open={Boolean(anchorElNav)} onClose={handleCloseNavMenu}
                           sx={{display: { xs: 'block', md: 'none' }}}>
 
-                        <MenuItem key="courses" onClick={() => { handleCloseNavMenu(); onCoursesClicked(); }} sx={{paddingRight: 8}}>
+                        <MenuItem key="courses" component={Link} to="#courses" onClick={() => { handleCloseNavMenu(); onCoursesClicked(); }}>
                             <ListItemIcon><ViewList/></ListItemIcon>
                             <ListItemText>Courses</ListItemText>
                         </MenuItem>
-                        <MenuItem key="pricing" onClick={() => { handleCloseNavMenu(); onPricingClicked(); }}>
+                        <MenuItem key="group-tutoring" component={Link} to="/group-tutoring" sx={{paddingRight: 8}}>
+                            <ListItemIcon><GroupIcon/></ListItemIcon>
+                            <ListItemText>Group Tutoring</ListItemText>
+                        </MenuItem>
+                        <MenuItem key="pricing" component={Link} to="#pricing" onClick={() => { handleCloseNavMenu(); onPricingClicked(); }}>
                             <ListItemIcon><Sell/></ListItemIcon>
                             <ListItemText>Pricing</ListItemText>
                         </MenuItem>
@@ -65,8 +70,9 @@ function Home({error}: {error?: string}) {
 
                 <AppBarHome onClick={onHomeClicked} />
                 <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
-                    <Button onClick={onCoursesClicked} size="large" color="inherit" sx={{textTransform: 'none'}}>Courses</Button>
-                    <Button onClick={onPricingClicked} size="large" color="inherit" sx={{textTransform: 'none'}}>Pricing</Button>
+                    <Button component={Link} to="#courses" size="large" color="inherit" sx={{textTransform: 'none'}} onClick={onCoursesClicked}>Courses</Button>
+                    <Button component={Link} to="/group-tutoring" size="large" color="inherit" sx={{textTransform: 'none'}}>Group Tutoring</Button>
+                    <Button component={Link} to="#pricing" size="large" color="inherit" sx={{textTransform: 'none'}} onClick={onPricingClicked}>Pricing</Button>
                     <Button component={Link} to="/about" size="large" color="inherit" sx={{textTransform: 'none'}}>About</Button>
                 </Box>
                 <Box flexGrow={1} />

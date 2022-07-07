@@ -82,12 +82,13 @@ function Pricing() {
                 <Benefit name="Participate in courses" />
                 <Benefit name="Access side quests" />
                 <Benefit name="Community of learners" />
+                <Benefit name="Learn at your own pace" />
             </Plan>
             </Grid>
 
             {/*Pro*/}
             <Grid item>
-            <Plan name="Pro" price="$199/month" isSubscribed={false} onStartClicked={handleStartProPlan}>
+            <Plan name="Student" price="$199/month" isSubscribed={false} onStartClicked={handleStartProPlan}>
                 <Benefit name="Group tutoring" />
                 <Benefit name="First session is FREE!" />
                 <Benefit name="Certificates" />

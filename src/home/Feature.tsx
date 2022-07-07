@@ -39,7 +39,7 @@ export function MediaFeature({title, description, media, mediaPosition, action, 
 
 
 function Feature({title, description, media, mediaPosition, action, onButtonClicked, to}: {
-    title: string, description: string,
+    title: string, description: string | ReactNode,
     media: string, mediaPosition: 'left' | 'right',
     action?: string, onButtonClicked?: () => void, to?: string,
 }) {
@@ -50,9 +50,13 @@ function Feature({title, description, media, mediaPosition, action, onButtonClic
                        height="100%" width="100%" />
         </Card>
     </>
+    const descriptionPart = typeof description === 'string'
+        ? <Typography whiteSpace="pre-wrap" marginBottom={2}>{description}</Typography>
+        : description;
+
     return <>
         <MediaFeature title={<Typography variant="h2" fontWeight="bold" marginBottom={2}>{title}</Typography>}
-                      description={<Typography whiteSpace="pre-wrap" marginBottom={2}>{description}</Typography>}
+                      description={descriptionPart}
                       media={mediaPart} mediaPosition={mediaPosition}
                       action={action} onButtonClicked={onButtonClicked} to={to} />
     </>

@@ -24,7 +24,7 @@ export const getCourses = async (courseIds: string[]) => {
             return (await db.course(id).get()).data() ?? null;
         }
         catch (e) {
-            console.warn('An error occurred when getting courses', e);
+            console.warn('An error occurred when getting the course:', id, '-->', e);
             return null;
         }
     }));

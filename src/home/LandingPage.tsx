@@ -47,19 +47,24 @@ function LandingPage({onCoursesClicked, onPricingClicked}: {
         <Header onCoursesClicked={onCoursesClicked} />
 
         <Feature title="Learn Through Practice"
-                 description={"Each concept in the courses is explained through many hands-on exercises that help you master the topic. The curriculum is fully hands-on and interactive, so you make progress by solving various challenges instead of only consuming content. \
-                 \n\n• Realtime feedback for each task.\n• No installation - write code right in the browser."}
+                 description={<>
+                     <Typography whiteSpace="pre-wrap" marginBottom={2}>
+                         Each concept in the courses is explained through many interactive exercises that help you master the topic.
+                         The curriculum is fully hands-on and interactive, so you make progress by solving various challenges instead of only consuming content.
+                     </Typography>
+                     <Typography fontWeight="bold" marginBottom={0}>• Realtime feedback for each task.</Typography>
+                     <Typography fontWeight="bold" marginBottom={2}>• No installation - write code right in the browser.</Typography>
+                 </>}
                  media="/demo/practice.mp4" mediaPosition="left"/>
 
         <Feature title="Free Tailored Courses"
-                 description="Sign up for courses of different levels and start learning for free!
-                 Study Python, Javascript, and many others by taking a free course.
+                 description="Sign up for courses and start learning Python, Javascript and many others for free!
                  Courses contain exercises of different difficulty levels to keep you engaged and motivated."
                  media="/demo/courses.mp4" mediaPosition="right"
                  action="Explore Courses" onButtonClicked={onCoursesClicked} to="#courses" />
 
         <Feature title="Group Tutoring"
-                 description="Sign up for group tutoring sessions to get the benefit of a more regular practice.
+                 description="Sign up for group tutoring sessions to get the benefit of a regular practice.
                  Learn programming consistently through weekly meetings and personalized guidance.
                  Meetings take place at the time you pick, while you have the flexibility to participate in 2-3 weekly sessions."
                  media="/demo/group-tutoring.mp4" mediaPosition="left"
@@ -70,21 +75,25 @@ function LandingPage({onCoursesClicked, onPricingClicked}: {
         <Feature title="Profound Academy for Individuals"
                  description="With Profound Academy, students have the flexibility of learning at their own pace.
                  Each concept is explained with a supplementary exercise, where the platform provides instant feedback for each submission.
-                 Every exercise can be submitted with a single click, providing instant feedback on the correctness of a solution."
+                 After submitting their solutions, students get instant feedback and can edit their solutions until finding the right answer."
                  media="/demo/individual.jpg" mediaPosition="right"
                  action="Explore Courses" onButtonClicked={onCoursesClicked} />
 
-        <Feature title="Profound Academy for Teachers"
-                 description="Teachers can create courses within several clicks, while the platform automatically checks for solution correctness.
-                 Contests can help with organizing the screening process for a course or to motivate students and increase their engagement.
-                 Please contact us so that we can best help you get started."
-                 media="/demo/teacher.jpg" mediaPosition="left" />
-
         <Feature title="Profound Academy for Institutions"
-                 description="Institutions can get the courses and competitions created by us to teach their students without creating every course from scratch.
-                 All the content is customizable, so the tutors can adjust the courses to their needs.
-                 Please contact us so that we can best help you get started."
-                 media="/demo/institution.jpg" mediaPosition="right" />
+                 description={<>
+                     <Typography whiteSpace="pre-wrap" marginBottom={2}>
+                         Institutions and tutors
+                         can get the courses and competitions created by us to teach their students without creating every course from scratch.
+                         All the content is customizable, so the tutors can adjust the courses to their needs.
+                         Teachers can create courses with several clicks, while the platform automatically checks for solution correctness.
+                     </Typography>
+                     <Typography marginBottom={2}>
+                         Please contact us at
+                         <Box fontWeight="bold" display="inline"> support@profound.academy </Box>
+                         so that we can best help you get started.
+                     </Typography>
+                 </>}
+                 media="/demo/institution.jpg" mediaPosition="left" />
     </>
 }
 

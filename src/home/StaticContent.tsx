@@ -6,9 +6,7 @@ import {Box, Divider} from "@mui/material";
 
 function StaticContent({notionPage}: {notionPage: string}) {
     // Scroll to the top when the component is opened
-    useEffect(() => {
-        window.scrollTo({behavior: 'smooth', top: 0});
-    }, []);
+    useEffect(() => window.scrollTo({top: 0}), []);
 
     return <>
         <ProfileAppBar />

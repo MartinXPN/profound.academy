@@ -16,9 +16,7 @@ function GroupTutoring() {
     const {localize} = useContext(LocalizeContext);
     useScreenAnalytics('group-tutoring');
     // Scroll to the top when the component is opened
-    useEffect(() => {
-        window.scrollTo({behavior: 'smooth', top: 0});
-    }, []);
+    useEffect(() => window.scrollTo({top: 0}), []);
 
 
     return <>

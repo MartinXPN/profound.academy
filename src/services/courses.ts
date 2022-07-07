@@ -19,7 +19,15 @@ export const getAllCourses = async () => {
 }
 
 export const getCourses = async (courseIds: string[]) => {
-    const courses = await Promise.all(courseIds.map(async id => (await db.course(id).get()).data() ?? null));
+    const courses = await Promise.all(courseIds.map(async id => {
+        try {
+            return (await db.course(id).get()).data() ?? null;
+        }
+        catch (e) {
+            console.warn('An error occurred when getting courses', e);
+            return null;
+        }
+    }));
     const presentCourses: Course[] = courses.filter(c => !!c) as Course[];
     console.log('Got courses:', presentCourses);
     return presentCourses;

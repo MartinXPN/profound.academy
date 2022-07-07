@@ -63,7 +63,7 @@ function LandingPage({onCoursesClicked, onPricingClicked}: {
                  Learn programming consistently through weekly meetings and personalized guidance.
                  Meetings take place at the time you pick, while you have the flexibility to participate in 2-3 weekly sessions."
                  media="/demo/group-tutoring.mp4" mediaPosition="left"
-                 action="Sign up for group tutoring" onButtonClicked={onPricingClicked} to="/group-tutoring" />
+                 action="Learn More" onButtonClicked={onPricingClicked} to="/group-tutoring" />
 
         <DiscordInvite />
 

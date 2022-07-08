@@ -56,6 +56,8 @@ const MetaTags = () => {
         <Helmet>
             <html lang={locale.substring(0, 2)} />
             <title>Profound Academy</title>
+            <meta property="og:title" content="Profound Academy" />
+            <meta property="twitter:title" content="Profound Academy" />
         </Helmet>
     </>
 }

@@ -151,6 +151,7 @@ function UserInfo({userId}: {userId: string}) {
             <title>{user?.displayName ?? 'Profound Academy'}</title>
             <meta property="og:title" content={user?.displayName} />
             <meta property="twitter:title" content={user?.displayName} />
+
             <meta property="og:image" content={user?.imageUrl} />
             <meta property="og:image:alt" content={user?.displayName} />
             <meta property="twitter:image" content={user?.imageUrl} />

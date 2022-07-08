@@ -97,6 +97,8 @@ function CurrentCourseView({openPage}: {openPage: (page: string) => void}) {
     return <>
         <Helmet>
             <title>{exerciseTitle}{courseTitle}</title>
+            <meta property="og:title" content={`${exerciseTitle}${courseTitle}`} />
+            <meta property="twitter:title" content={`${exerciseTitle}${courseTitle}`} />
         </Helmet>
         <CurrentExerciseContext.Provider value={{exercise: currentExercise}}>
             <CourseDrawer
@@ -144,6 +146,11 @@ function CourseView() {
         return <Suspense fallback={<></>}>
             <Helmet>
                 <title>404 | Page not found</title>
+                <meta property="og:title" content="404 | Page not found" />
+                <meta property="twitter:title" content="404 | Page not found" />
+
+                <meta name="description" content={error} />
+                <meta property="og:description" content={error} />
             </Helmet>
             <Home error={error} />
         </Suspense>
@@ -151,14 +158,18 @@ function CourseView() {
         return <></>
     return <>
         <Helmet>
+            <meta property="og:type" content="article" />
+
             <title>{localize(course.title)}</title>
             <meta property="og:title" content={localize(course.title)} />
             <meta property="twitter:title" content={localize(course.title)} />
+
             <meta property="og:image" content={course.img} />
             <meta property="og:image:alt" content={localize(course.title)} />
             <meta property="twitter:image" content={course.img} />
-            <meta property="og:type" content="article" />
+
             <meta name="description" content={`Comprehensive course on ${localize(course.title)} with hands-on experience in mind`} />
+            <meta property="og:description" content={`Comprehensive course on ${localize(course.title)} with hands-on experience in mind`} />
         </Helmet>
 
         <CourseContext.Provider value={{course: course}}>

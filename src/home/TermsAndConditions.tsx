@@ -14,7 +14,13 @@ function TermsAndConditions() {
 
     return <>
         <Helmet>
+            <meta property="og:type" content="article" />
             <title>Terms and Conditions • Profound Academy</title>
+            <meta property="og:title" content="Terms and Conditions • Profound Academy" />
+            <meta property="twitter:title" content="Terms and Conditions • Profound Academy" />
+
+            <meta name="description" content="Terms and Conditions for Profound Academy." />
+            <meta property="og:description" content="Terms and Conditions for Profound Academy." />
         </Helmet>
 
         <StaticContent notionPage={localize(content)}/>

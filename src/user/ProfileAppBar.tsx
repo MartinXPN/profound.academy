@@ -1,5 +1,4 @@
 import {AppBar, Box, Toolbar, Container} from '@mui/material';
-import {Link} from "react-router-dom";
 import AppBarNotifications from "./Notifications";
 import {AppBarProfile} from "./Auth";
 import AppBarHome from "../common/AppBarHome";

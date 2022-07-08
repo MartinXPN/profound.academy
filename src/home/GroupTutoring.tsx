@@ -21,7 +21,13 @@ function GroupTutoring() {
 
     return <>
         <Helmet>
+            <meta property="og:type" content="article" />
             <title>Group Tutoring • Profound Academy</title>
+            <meta property="og:title" content="Group Tutoring • Profound Academy" />
+            <meta property="twitter:title" content="Group Tutoring • Profound Academy" />
+
+            <meta name="description" content="Group tutoring sessions are offered as part of a Student plan. Sessions in groups help in establishing a regular routine to practice and learn faster." />
+            <meta property="og:description" content="Group tutoring sessions are offered as part of a Student plan. Sessions in groups help in establishing a regular routine to practice and learn faster." />
         </Helmet>
 
         <ProfileAppBar />

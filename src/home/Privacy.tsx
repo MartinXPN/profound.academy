@@ -14,7 +14,13 @@ function Privacy() {
 
     return <>
         <Helmet>
+            <meta property="og:type" content="article" />
             <title>Privacy Policy • Profound Academy</title>
+            <meta property="og:title" content="Privacy Policy • Profound Academy" />
+            <meta property="twitter:title" content="Privacy Policy • Profound Academy" />
+
+            <meta name="description" content="Privacy Policy for Profound Academy." />
+            <meta property="og:description" content="Privacy Policy for Profound Academy." />
         </Helmet>
 
         <StaticContent notionPage={localize(content)}/>

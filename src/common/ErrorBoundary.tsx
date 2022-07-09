@@ -19,7 +19,7 @@ class ErrorBoundary extends Component<{children?: ReactNode}, { error: Error | n
         logEvent(analytics, 'exception', {
             description: error.name,
             fatal: true,
-            cause: error.cause,
+            cause: JSON.stringify(error.cause),
             message: error.message,
             stack: error.stack,
             componentStack: errorInfo.componentStack,

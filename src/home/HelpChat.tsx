@@ -1,6 +1,28 @@
-import {memo, useEffect} from "react";
+import {memo, useContext, useEffect} from "react";
+import {AuthContext} from "../App";
 
 function HelpChat() {
+    const auth = useContext(AuthContext);
+
+    useEffect(() => {
+        // @ts-ignore
+        if( !window.Tawk_API || !auth.isSignedIn )
+            return;
+
+        try {
+            // @ts-ignore
+            window.Tawk_API.setAttributes({
+                id: auth.currentUserId,
+                name: auth.currentUser?.displayName,
+                email: auth.currentUser?.email,
+            }, (error: any) => error && console.warn('tawk error:', error));
+        }
+        catch (e) {
+            console.warn('tawk error:', e);
+        }
+        // @ts-ignore
+    }, [auth.currentUser, window.Tawk_API]);
+
     useEffect(() => {
         const s1 = document.createElement('script');
         const s0 = document.getElementsByTagName('script')[0];

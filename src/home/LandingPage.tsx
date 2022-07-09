@@ -49,8 +49,8 @@ function LandingPage({onCoursesClicked, onPricingClicked}: {
         <Feature title="Learn Through Practice"
                  description={<>
                      <Typography whiteSpace="pre-wrap" marginBottom={2}>
-                         Each concept in the courses is explained through many interactive exercises that help you master the topic.
-                         The curriculum is fully hands-on and interactive, so you make progress by solving various challenges instead of only consuming content.
+                         Each concept in the computer science courses is explained through many interactive exercises that help you master the topic.
+                         The curriculum is fully hands-on and interactive, so you make progress by solving various challenges and writing code instead of only consuming content.
                      </Typography>
                      <Typography fontWeight="bold" marginBottom={0}>• Realtime feedback for each task.</Typography>
                      <Typography fontWeight="bold" marginBottom={2}>• No installation - write code right in the browser.</Typography>
@@ -59,33 +59,33 @@ function LandingPage({onCoursesClicked, onPricingClicked}: {
 
         <Feature title="Free Tailored Courses"
                  description="Sign up for courses and start learning Python, Javascript and many others for free!
-                 Courses contain exercises of different difficulty levels to keep you engaged and motivated."
+                 All the interactive courses are tailored to span various interests and cover a wide aspect of computer science topics.
+                 Each course contains hands-on exercises of different difficulty levels to keep you engaged and motivated."
                  media="/demo/courses.mp4" mediaPosition="right"
                  action="Explore Courses" onButtonClicked={onCoursesClicked} to="#courses" />
 
         <Feature title="Group Tutoring"
                  description="Sign up for group tutoring sessions to get the benefit of a regular practice.
                  Learn programming consistently through weekly meetings and personalized guidance.
-                 Meetings take place at the time you pick, while you have the flexibility to participate in 2-3 weekly sessions."
+                 Group meetings take place at the time you pick, while you have the flexibility to participate in 2-3 weekly sessions."
                  media="/demo/group-tutoring.mp4" mediaPosition="left"
                  action="Learn More" onButtonClicked={onPricingClicked} to="/group-tutoring" />
 
         <DiscordInvite />
 
         <Feature title="Profound Academy for Individuals"
-                 description="With Profound Academy, students have the flexibility of learning at their own pace.
-                 Each concept is explained with a supplementary exercise, where the platform provides instant feedback for each submission.
-                 After submitting their solutions, students get instant feedback and can edit their solutions until finding the right answer."
+                 description="Students have the flexibility of learning asynchronously - completely at their own pace.
+                 Each concept is explained with a supplementary interactive exercise, where the platform provides instant feedback for each submission.
+                 After submitting their code, students get instant feedback and can edit their solutions until finding the right answer."
                  media="/demo/individual.jpg" mediaPosition="right"
                  action="Explore Courses" onButtonClicked={onCoursesClicked} />
 
         <Feature title="Profound Academy for Institutions"
                  description={<>
                      <Typography whiteSpace="pre-wrap" marginBottom={2}>
-                         Institutions and tutors
-                         can get the courses and competitions created by us to teach their students without creating every course from scratch.
+                         Institutions and tutors can get the courses created by us to teach their students without creating every course from scratch.
                          All the content is customizable, so the tutors can adjust the courses to their needs.
-                         Teachers can create courses with several clicks, while the platform automatically checks for solution correctness.
+                         Teachers can create courses with several clicks, while the platform automatically checks for solution correctness and provides instant feedback.
                      </Typography>
                      <Typography marginBottom={2}>
                          Please contact us at

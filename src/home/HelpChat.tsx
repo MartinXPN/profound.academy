@@ -8,12 +8,18 @@ function HelpChat() {
         // @ts-ignore
         if( !window.Tawk_API || !auth.isSignedIn )
             return;
-        // @ts-ignore
-        window.Tawk_API.setAttributes({
-            id: auth.currentUserId,
-            name: auth.currentUser?.displayName,
-            email: auth.currentUser?.email,
-        }, (error: any) => error && console.warn('tawk error:', error));
+
+        try {
+            // @ts-ignore
+            window.Tawk_API.setAttributes({
+                id: auth.currentUserId,
+                name: auth.currentUser?.displayName,
+                email: auth.currentUser?.email,
+            }, (error: any) => error && console.warn('tawk error:', error));
+        }
+        catch (e) {
+            console.warn('tawk error:', e);
+        }
         // @ts-ignore
     }, [auth.currentUser, window.Tawk_API]);
 

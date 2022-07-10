@@ -19,8 +19,9 @@ import Privacy from "./home/Privacy";
 import TermsAndConditions from "./home/TermsAndConditions";
 import FAQ from "./home/FAQ";
 import GroupTutoring from "./home/GroupTutoring";
+import Course from './course/Course';
 // Do not include the Course and the editor in the main bundle as they're pretty heavy
-const Course = lazy(() => import('./course/Course'));
+// const Course = lazy(() => import('./course/Course'));
 const CourseEditor = lazy(() => import('./course/CourseEditor'));
 
 

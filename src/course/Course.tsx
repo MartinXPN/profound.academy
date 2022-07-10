@@ -27,7 +27,7 @@ export const CurrentExerciseContext = createContext<{ exercise: ExerciseModel | 
 
 export const lastExerciseId = (userId?: string, courseId?: string) => {
     const key = `ex-${userId}-${courseId}`;
-    if( !(key in localStorage) )
+    if( !(key in localStorage) || !userId )
         return null;
 
     const storageValue = localStorage.getItem(key);

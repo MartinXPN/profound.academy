@@ -19,8 +19,8 @@ import Privacy from "./home/Privacy";
 import TermsAndConditions from "./home/TermsAndConditions";
 import FAQ from "./home/FAQ";
 import GroupTutoring from "./home/GroupTutoring";
-// Do not include the Course and the editor in the main bundle as they're pretty heavy
-const Course = lazy(() => import('./course/Course'));
+import Course from './course/Course';
+// Do not include the Course editor in the main bundle as they're pretty heavy
 const CourseEditor = lazy(() => import('./course/CourseEditor'));
 
 
@@ -103,7 +103,6 @@ function App() {
             <Localization>
             <HelmetProvider>
             <MetaTags/>
-            <Suspense fallback={<div>Loading...</div>}>
                 <Routes>
                     <Route path="/" element={<Home/>} />
                     <Route path="/group-tutoring" element={<GroupTutoring/>} />
@@ -112,11 +111,10 @@ function App() {
                     <Route path="/privacy" element={<Privacy/>} />
                     <Route path="/terms" element={<TermsAndConditions/>} />
                     <Route path="/users/:userId" element={<UserProfile/>} />
-                    <Route path="/new" element={<CourseEditor/>} />
+                    <Route path="/new" element={<Suspense fallback={<div>Loading...</div>}><CourseEditor/></Suspense>} />
                     <Route path=":courseId" element={<Course/>} />
                     <Route path=":courseId/*" element={<Course/>} />
                 </Routes>
-            </Suspense>
             </HelmetProvider>
             </Localization>
             </Router>

@@ -25,6 +25,7 @@ import {ExpandLess, ExpandMore} from "@mui/icons-material";
 import {useScreenAnalytics} from "../analytics";
 import LocalizedFields, {FieldSchema, fieldSchema} from "../common/LocalizedFields";
 import {LocalizeContext} from "../common/Localization";
+import ProfileAppBar from "../user/ProfileAppBar";
 
 
 const schema = object({
@@ -180,6 +181,7 @@ function CourseEditor({course}: {course?: Course | null}) {
 
     if( !auth.currentUserId )
         return <>
+            <ProfileAppBar />
             <Grid container spacing={0} direction="column" alignItems="center" justifyContent="center" marginTop="5em" marginBottom="5em">
                 <Typography>You need to sign in to edit a course</Typography>
                 <Button onClick={onCancel} size="large" variant="outlined">Go Back</Button>

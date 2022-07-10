@@ -6,13 +6,13 @@ function HelpChat() {
 
     useEffect(() => {
         // @ts-ignore
-        if( !window.Tawk_API || !auth.isSignedIn )
+        if( !window.Tawk_API )
             return;
 
         try {
             // @ts-ignore
             window.Tawk_API.setAttributes({
-                id: auth.currentUserId,
+                id: auth.currentUser?.uid,
                 name: auth.currentUser?.displayName,
                 email: auth.currentUser?.email,
             }, (error: any) => error && console.warn('tawk error:', error));

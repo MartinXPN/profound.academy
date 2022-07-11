@@ -149,6 +149,34 @@ describe('Submit a solution', function () {
             assert.equal(processResultCall.overall.status, 'Wrong answer');
             assert.equal(processResultCall.overall.score, 0);
         });
+
+        it('Should submit checker code', async () => {
+            const submission = {
+                id: '',
+                userId: userId,
+                course: db.course(courseId), exercise: db.exercise(courseId, exerciseId),
+                createdAt: admin.firestore.FieldValue.serverTimestamp(),
+                code: {'main.py': 'print("some totally random thing in the program output")'},
+                testCases: [{'input': '', 'target': 'hello hello'}],
+                language: 'python',
+                isTestRun: true,
+            };
+            await db.exercise(courseId, exerciseId).set({
+                testCases: [{'input': '', 'target': 'hello hello'}],
+                exerciseType: 'code',
+                comparisonMode: 'custom',
+            }, {merge: true});
+            await db.exercisePrivateFields(courseId, exerciseId).set({
+                checkerCode: {'checker.py': 'print("Solved\\n90\\nGood job!\\n")'},
+                checkerLanguage: 'python',
+            }, {merge: true});
+
+            const submissionDoc = await db.submissionQueue(userId).add(submission as unknown as Submission);
+            await submissions.submit((await submissionDoc.get()).data() as unknown as Submission);
+            const processResultCall = submissionResultStub.getCall(0).args[0] as JudgeResult;
+            assert.equal(processResultCall.overall.status, 'Solved');
+            assert.equal(processResultCall.overall.score, 90);
+        });
     });
 
     describe('Test allowed attempts', () => {

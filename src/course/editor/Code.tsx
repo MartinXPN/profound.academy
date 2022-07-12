@@ -16,7 +16,7 @@ const Code = function Code({theme, language, fontSize, setCode, code, readOnly, 
     fontSize: number,
     setCode?: (code: string) => void,
     code?: string,
-    readOnly: boolean,
+    readOnly?: boolean,
     selection?: TextSelection,
     onSelectionChanged?: (selection: TextSelection) => void,
 }) {

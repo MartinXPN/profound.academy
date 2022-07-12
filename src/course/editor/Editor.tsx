@@ -134,7 +134,7 @@ function Editor({disableCodeSync, userId}: {disableCodeSync?: boolean, userId?: 
 
 
     return <>
-        <SplitPane split="horizontal" defaultSizes={splitPos ?? [3, 1]} onDragFinished={onSplitChanged}>
+        <SplitPane split="horizontal" defaultSizes={splitPos ?? [5, 4]} onDragFinished={onSplitChanged}>
             <Box width="100%" height="100%" position="relative">
                 <Code theme={theme} language={editorLanguage} fontSize={fontSize}
                       readOnly={!isMyCode}

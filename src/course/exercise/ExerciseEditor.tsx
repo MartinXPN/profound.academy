@@ -10,7 +10,7 @@ import {newLevel, saveLevels} from "../../services/levels";
 
 import {Controller, useForm, FormProvider} from "react-hook-form";
 import {zodResolver} from "@hookform/resolvers/zod";
-import {infer as Infer, object, string, array, enum as zodEnum, literal, number, boolean, union} from "zod";
+import {infer as Infer, object, string, array, enum as zodEnum, literal, number, boolean, union, record} from "zod";
 import CodeForm from "./CodeForm";
 import TextAnswerForm from "./TextAnswerForm";
 import CheckboxesForm from "./CheckboxesForm";
@@ -43,6 +43,10 @@ const codeSchema = object({
     outputLimit: number().min(0.001).max(10),
     floatPrecision: number().min(0.00000000000001).max(0.1),
     comparisonMode: zodEnum(COMPARISON_MODES),
+    checker: object({
+        code: record(string()),
+        language: zodEnum(LANGUAGE_KEYS),
+    }).optional(),
     testCases: array(object({
         input: string().max(10000),
         target: string().max(10000),
@@ -168,6 +172,7 @@ function ExerciseEditor({cancelEditing, exerciseTypeChanged}: {
 
     // @ts-ignore
     useEffect(() => reset(getDefaultFieldValues()), [exercise, getDefaultFieldValues, reset]);
+    // Answer for textAnswer, checkbox, and multipleChoice questions
     useAsyncEffect(async () => {
         if( course?.id && exercise?.id && exercise?.exerciseType
             && ['textAnswer', 'checkboxes', 'multipleChoice'].includes(exercise.exerciseType as string) ) {
@@ -177,6 +182,21 @@ function ExerciseEditor({cancelEditing, exerciseTypeChanged}: {
                 setValue('answer', fields.answer, {shouldTouch: true});
         }
     }, [exercise]);
+
+    // Checker code for coding exercises
+    const comparisonMode = watch('comparisonMode');
+    useAsyncEffect(async () => {
+        if( course?.id && exercise?.id && exerciseType === 'code' && comparisonMode === 'custom' ) {
+            const fields = await getExercisePrivateFields(course.id, exercise.id);
+
+            if( fields?.checkerCode && fields.checkerLanguage )
+                setValue('checker', {
+                    code: fields.checkerCode ?? {'checker.py': ''},
+                    language: fields.checkerLanguage ?? 'python'
+                }, {shouldTouch: true});
+        }
+    }, [exerciseType, comparisonMode]);
+
 
     const onSubmit = async (data: Schema) => {
         if( !course || !exercise )
@@ -194,7 +214,7 @@ function ExerciseEditor({cancelEditing, exerciseTypeChanged}: {
             data.exerciseType,
             data.unlockContent,
             // @ts-ignore
-            data.allowedLanguages, data.memoryLimit, data.timeLimit, data.outputLimit, data.floatPrecision, data.comparisonMode, data.testCases, data.testGroups,
+            data.allowedLanguages, data.memoryLimit, data.timeLimit, data.outputLimit, data.floatPrecision, data.comparisonMode, data.checker?.code, data.checker?.language, data.testCases, data.testGroups,
             // @ts-ignore
             data.question, data.answer, data.options,
         );

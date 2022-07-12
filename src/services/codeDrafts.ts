@@ -24,7 +24,7 @@ export const saveCode = async (
 }
 
 export const getCodeDrafts = async (courseId: string, exerciseId: string) => {
-    const snapshot = await db.codeDrafts(courseId, exerciseId).get();
+    const snapshot = await db.codeDrafts(courseId, exerciseId).orderBy('updatedAt', 'desc').get();
     const codeDrafts = snapshot.docs.map(d => d.data());
     console.log('Got codeDrafts:', codeDrafts);
     return codeDrafts;

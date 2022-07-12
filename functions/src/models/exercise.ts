@@ -55,6 +55,8 @@ export interface Exercise {
 export interface ExercisePrivateFields {
     id: string;
     answer?: string;
+    checkerCode?: { [key: string]: string };            // Same format as the user submission code
+    checkerLanguage?: keyof typeof LANGUAGES;           // the language code
 }
 
 export interface PrivateTestsSummary {

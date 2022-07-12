@@ -62,6 +62,7 @@ export const updateExercise = async (
     allowedLanguages?: (keyof typeof LANGUAGES)[],
     memoryLimit?: number, timeLimit?: number, outputLimit?: number,
     floatPrecision?: number, comparisonMode?: 'whole' | 'token' | 'custom',
+    checkerCode?: { [key: string]: string }, checkerLanguage?: keyof typeof LANGUAGES,
     testCases?: TestCase[], testGroups?: SubtaskTestGroup[],
     question?: string, answer?: string, options?: string[],
 ) => {
@@ -99,7 +100,13 @@ export const updateExercise = async (
         pageId: pageId,
     });
     if( answer )
-        batch.set(db.exercisePrivateFields(courseId, exerciseId), {answer: answer}, {merge: true});
+        batch.set(db.exercisePrivateFields(courseId, exerciseId), {
+            id: 'fields', answer: answer,
+        });
+    if( checkerCode && checkerLanguage )
+        batch.set(db.exercisePrivateFields(courseId, exerciseId), {
+            id: 'fields', checkerCode: checkerCode, checkerLanguage: checkerLanguage,
+        });
 
     // update the course as well (level.exercises and level.scores)
     const update = {
@@ -141,7 +148,9 @@ export const onExerciseInsightsChanged = (courseId: string, exerciseId: string, 
 
 export const getExercisePrivateFields = async (courseId: string, exerciseId: string) => {
     const snapshot = await db.exercisePrivateFields(courseId, exerciseId).get();
-    return snapshot.data();
+    const fields = snapshot.data();
+    console.log('Got exercise private fields:', fields);
+    return fields;
 }
 
 export const getExercisePrivateTestSummaries = async (courseId: string, exerciseId: string): Promise<PrivateTestsSummary> => {

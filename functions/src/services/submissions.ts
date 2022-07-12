@@ -19,6 +19,7 @@ const LOCALHOST = functions.config()?.host === 'local';
 
 const submitLambdaJudge = async (submission: Submission, exercise: Exercise): Promise<http.ClientRequest | void> => {
     const callbackUrl = LOCALHOST ? null : `${PROCESS_SUBMISSION_CALLBACK_URL}/${submission.userId}/${submission.id}`;
+    const privateFields = (await db.exercisePrivateFields(submission.course.id, submission.exercise.id).get()).data();
     const data = {
         problem: submission.testCases ? undefined : submission.exercise.id,
         testCases: submission.testCases,
@@ -32,6 +33,8 @@ const submitLambdaJudge = async (submission: Submission, exercise: Exercise): Pr
         testGroups: submission.isTestRun ? undefined : exercise?.testGroups,
         comparisonMode: exercise?.comparisonMode ?? 'token',
         floatPrecision: exercise?.floatPrecision ?? 0.001,
+        checkerCode: privateFields?.checkerCode,
+        checkerLanguage: privateFields?.checkerLanguage,
         callbackUrl: callbackUrl,
     };
     const dataString = JSON.stringify(data);

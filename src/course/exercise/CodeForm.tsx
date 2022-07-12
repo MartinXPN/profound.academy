@@ -13,6 +13,7 @@ import ToggleButton from "@mui/material/ToggleButton";
 import {Add} from "@mui/icons-material";
 import TestGroupsForm from "./TestGroupsForm";
 import useAsyncEffect from "use-async-effect";
+import CustomCheckerForm from "./CustomCheckerForm";
 
 const UploadBackground = styled(Box)({
     width: '100%',
@@ -120,10 +121,12 @@ function CodeForm() {
                                onChange={e => e.target.value ? onChange(Number(e.target.value)) : onChange(e.target.value)}
                                error={Boolean(errors.floatPrecision)} helperText={<>{errors.floatPrecision?.message}</>}
                                inputProps={{inputMode: 'numeric', pattern: '[0-9]*'}} inputRef={ref}
-                               {...field} sx={{flex: 1, minWidth: 100}} />
+                               {...field} sx={{flex: 1, minWidth: 120}} />
                 )}/>
             </>}
         </Stack>
+
+        {comparisonMode === 'custom' && <CustomCheckerForm />}
 
         <Typography variant="h4" marginBottom={2} marginTop={8}>Execution Parameters (per test-case)</Typography>
         <Stack direction="row" spacing={1} marginBottom={8}>

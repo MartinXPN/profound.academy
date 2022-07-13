@@ -134,7 +134,7 @@ function Console({onSubmitClicked, onRunClicked, isProcessing, submissionResult,
                 {submissionResult.compileResult?.errors?.trim() && <Typography whiteSpace='pre-wrap'>{submissionResult.compileResult?.errors}</Typography>}
             </>}
 
-            {!testResults && submissionResult && submissionResult.status !== 'Compilation error' && <>
+            {!testResults && submissionResult && submissionResult.status !== 'Compilation error' && submissionResult.status !== 'Checking' && <>
                 <StatusTypography style={{color: statusToColor(submissionResult.status)}}>
                     Result on the final Private tests: {submissionResult.status} with score {parseFloat(submissionResult.score.toFixed(2))} <br/>
                     Executed in {submissionResult.time.toFixed(2)} seconds, used {submissionResult.memory.toFixed(1)}MB

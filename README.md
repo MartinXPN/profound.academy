@@ -12,7 +12,7 @@ We try to fix that problem by providing tutoring sessions that help people get u
 
 | Join the community                                                                                  | Visit Profound Academy   | Contact us                                                |
 |-----------------------------------------------------------------------------------------------------|--------------------------|-----------------------------------------------------------|
-| <a href="https://discord.gg/TTTEcu2Jju"><img src="https://i.imgur.com/YSRtCwE.png" width="180"></a> | https://profound.academy | [support@pofound.academy](mailto:support@pofound.academy) |
+| <a href="https://discord.gg/TTTEcu2Jju"><img src="https://i.imgur.com/YSRtCwE.png" width="180"></a> | https://profound.academy | [contact@pofound.academy](mailto:support@pofound.academy) |
 
 
 

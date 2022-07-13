@@ -121,13 +121,14 @@ export const onSubmissionsChanged = async (
     });
 }
 
-export const onCourseSubmissionsChanged = async (courseId: string,
+export const onCourseSubmissionsChanged = async (courseId: string, userId: string | undefined, mode: 'all' | 'my',
                                            startAfterId: string | null, numItems: number,
                                            onChanged: (submissionResult: SubmissionResult[], hasMore: boolean) => void) => {
     const course = db.course(courseId);
-    let query = db.submissionResults
-        .where('course', '==', course)
-        .orderBy('createdAt', 'desc');
+    let query = db.submissionResults.where('course', '==', course);
+    if( mode === 'my' )
+        query = query.where('userId', '==', userId );
+    query = query.orderBy('createdAt', 'desc');
 
     console.log('startAfterId:', startAfterId);
     query = await submissionQuery(query, startAfterId, numItems);

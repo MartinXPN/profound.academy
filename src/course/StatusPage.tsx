@@ -5,13 +5,13 @@ import OutlinedButton from "../common/OutlinedButton";
 import {AuthContext} from "../App";
 import {CourseContext} from "./Course";
 import {useStickyState} from "../common/stickystate";
-import {CourseSubmissionsTable} from "./submission/SubmissionsTable";
 import Ranking from "./ranking/Ranking";
 import Dashboard from "./Dashboard";
 import Content from "../common/notion/Content";
 import {Link} from "react-router-dom";
 import {Edit} from "@mui/icons-material";
 import {LocalizeContext} from "../common/Localization";
+import CourseSubmissions from "./submission/CourseSubmissions";
 
 
 function StatusPage() {
@@ -38,7 +38,7 @@ function StatusPage() {
 
             {currentTab === 'description' && <Box mb={20}><Content notionPage={localize(course.introduction)} /></Box>}
             {currentTab === 'dashboard' && <Dashboard />}
-            {currentTab === 'submissions' && <CourseSubmissionsTable rowsPerPage={20} course={course} />}
+            {currentTab === 'submissions' && <CourseSubmissions rowsPerPage={20} />}
             {currentTab === 'ranking' && <Ranking />}
         </Box>
     </>

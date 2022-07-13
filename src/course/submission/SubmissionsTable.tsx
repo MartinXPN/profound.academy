@@ -130,12 +130,12 @@ export function UserDateSubmissionsTable({rowsPerPage, userId, startDate, endDat
 }
 
 
-export function CourseSubmissionsTable({rowsPerPage, course}: {rowsPerPage: number, course: Course}) {
+export function CourseSubmissionsTable({rowsPerPage, course, userId, mode}: {rowsPerPage: number, course: Course, userId?: string, mode: 'all' | 'my'}) {
     const loadSubmissions = async (startAfterId: string | null, onChange: (submissions: SubmissionResult[], more: boolean) => void) =>
-        await onCourseSubmissionsChanged(course.id, startAfterId ?? null, rowsPerPage, onChange);
+        await onCourseSubmissionsChanged(course.id, userId, mode, startAfterId ?? null, rowsPerPage, onChange);
 
     const [reset, setReset] = useState(0);
-    useEffect(() => setReset(r => r + 1), [course.id]);
+    useEffect(() => setReset(r => r + 1), [course.id, mode]);
     return <SubmissionsTable reset={reset} loadSubmissions={loadSubmissions} columns={columns.filter(c => c.id !== 'courseTitle')} rowsPerPage={rowsPerPage}/>
 }
 

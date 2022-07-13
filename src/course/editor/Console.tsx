@@ -31,18 +31,6 @@ function Console({onSubmitClicked, onRunClicked, isProcessing, submissionResult,
     const [selectedTest, setSelectedTest] = useState<number | null>(null);
     const [tests, setTests] = useState<TestCase[]>([]);
 
-    const getTestProp = (propName: 'message' | 'outputs' | 'errors' | 'status' | 'memory' | 'time' | 'score', index: number | null) => {
-        if( index === null )
-            return null;
-        if( Array.isArray(submissionResult?.[propName]) ) {
-            // @ts-ignore
-            return submissionResult?.[propName]?.[index];
-        }
-        if( !testResults || testResults.length <= index )
-            return submissionResult?.[propName];
-        return testResults[index][propName];
-    }
-
     useEffect(() => {
         if( exercise )
             setTests(exercise.testCases);
@@ -51,11 +39,11 @@ function Console({onSubmitClicked, onRunClicked, isProcessing, submissionResult,
         setSelectedTest(null);
 
     useEffect(() => {
-        if (selectedTest === null && submissionResult && submissionResult.status !== 'Checking')
+        if (selectedTest === null && testResults && submissionResult && submissionResult.status !== 'Checking')
             setSelectedTest(0);
         // the dependency array does not include selectedTest on purpose
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [submissionResult]);
+    }, [submissionResult, testResults]);
 
     const handleRun = () => onRunClicked(tests);
 
@@ -92,7 +80,7 @@ function Console({onSubmitClicked, onRunClicked, isProcessing, submissionResult,
             <ToggleButtonGroup value={selectedTest} exclusive size='small' sx={{float: 'left'}}>
 
                 {tests.map((test, index) => {
-                    const currentStatus = getTestProp('status', index);
+                    const currentStatus = testResults?.[index].status;
                     console.log('index:', index, 'status:', currentStatus);
                     return (<div key={index.toString()}>
                         <Badge invisible={selectedTest !== index || index < exercise.testCases.length} badgeContent={
@@ -146,20 +134,26 @@ function Console({onSubmitClicked, onRunClicked, isProcessing, submissionResult,
                 {submissionResult.compileResult?.errors?.trim() && <Typography whiteSpace='pre-wrap'>{submissionResult.compileResult?.errors}</Typography>}
             </>}
 
+            {!testResults && submissionResult && submissionResult.status !== 'Compilation error' && <>
+                <StatusTypography style={{color: statusToColor(submissionResult.status)}}>
+                    Result on the final Private tests: {submissionResult.status} with score {parseFloat(submissionResult.score.toFixed(2))} <br/>
+                    Executed in {submissionResult.time.toFixed(2)} seconds, used {submissionResult.memory.toFixed(1)}MB
+                </StatusTypography>
+
+                {submissionResult.message?.trim() && <Typography whiteSpace='pre-wrap'>{submissionResult.message}</Typography>}
+                {submissionResult.outputs?.trim() && <Typography whiteSpace='pre-wrap'>{submissionResult.outputs}</Typography>}
+                {submissionResult.errors?.trim() && <Typography whiteSpace='pre-wrap'>{submissionResult.errors}</Typography>}
+            </>}
+
             {!isProcessing && !submissionResult && selectedTest === null &&
-            <StatusTypography>Run the program to see the output, Submit to evaluate</StatusTypography>}
+                <StatusTypography>Run the program to see the output, Submit to evaluate</StatusTypography>}
 
             {selectedTest !== null && selectedTest < tests.length &&
             <TestView
                 testCase={tests[selectedTest]}
-                message={getTestProp('message', selectedTest)}
-                output={getTestProp('outputs', selectedTest)}
-                error={getTestProp('errors', selectedTest)}
+                testName={`Test ${selectedTest + 1}`}
+                testResult={testResults?.[selectedTest]}
                 readOnly={selectedTest < exercise.testCases.length}
-                status={getTestProp('status', selectedTest)}
-                score={getTestProp('score', selectedTest)}
-                memory={getTestProp('memory', selectedTest)}
-                time={getTestProp('time', selectedTest)}
                 onSaveTest={(input, target) => onSaveTest(selectedTest, input, target)} />}
         </Box>
     </>;

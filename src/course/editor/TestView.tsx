@@ -3,18 +3,14 @@ import {TestCase} from "models/exercise";
 import {TextField, Typography} from "@mui/material";
 import {statusToColor} from "../colors";
 import {StatusTypography} from "../../common/StatusTypography";
+import {TestResult} from "models/submissions";
 
 
-function TestView({testCase, message, output, error, readOnly, status, score, memory, time, onSaveTest}: {
+function TestView({testCase, testName, testResult, readOnly, onSaveTest}: {
     testCase: TestCase,
-    message?: string,
-    output?: string,
-    error?: string,
+    testName: string,
+    testResult?: TestResult,
     readOnly: boolean,
-    status?: string,
-    score?: number,
-    memory?: number,
-    time?: number,
     onSaveTest: (input: string, target: string) => void
 }) {
     const [input, setInput] = useState('');
@@ -37,13 +33,13 @@ function TestView({testCase, message, output, error, readOnly, status, score, me
     }, [testCase, input, target, onSaveTest]);
 
     return <>
-        {!!status && !!time && score !== undefined &&
-        <StatusTypography style={{color: statusToColor(status)}}>
-            {status} with score {parseFloat(score.toFixed(2))} in {time.toFixed(2)} seconds, used {memory?.toFixed(1)}MB
+        {!!testResult?.status && !!testResult?.time && testResult?.score !== undefined && <>
+        <StatusTypography style={{color: statusToColor(testResult?.status)}}>
+            {testName}: {testResult.status} with score {parseFloat(testResult.score.toFixed(2))} in {testResult.time.toFixed(2)} seconds, used {testResult.memory?.toFixed(1)}MB
         </StatusTypography>
-        }
+        </>}
 
-        {message && <Typography whiteSpace="pre-wrap" marginBottom={4}>{message}</Typography>}
+        {testResult?.message && <Typography whiteSpace="pre-wrap" marginBottom={4}>{testResult.message}</Typography>}
         <TextField multiline fullWidth
                    variant="outlined"
                    label="Input"
@@ -62,19 +58,19 @@ function TestView({testCase, message, output, error, readOnly, status, score, me
                    inputProps={{ readOnly: readOnly, style: {fontFamily: 'Monospace'} }}/>
 
         <br/><br/>
-        {output &&
+        {testResult?.outputs &&
         <TextField multiline fullWidth
                    variant="outlined"
                    label="Program output"
-                   value={output}
+                   value={testResult.outputs}
                    inputProps={{ readOnly: true, style: {fontFamily: 'Monospace'} }}/>
         }
         <br/><br/>
-        {error &&
+        {testResult?.errors &&
         <TextField multiline fullWidth
                    variant="outlined"
                    label="Program errors (stderr)"
-                   value={error}
+                   value={testResult.errors}
                    inputProps={{ readOnly: true, style: {fontFamily: 'Monospace'} }}/>
         }
     </>

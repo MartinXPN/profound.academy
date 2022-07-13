@@ -105,7 +105,6 @@ function Editor({disableCodeSync, userId}: {disableCodeSync?: boolean, userId?: 
                         : 'Please put your code in the editor above before submitting',
                 },
             });
-            setSubmissionTestResults(null);
             return;
         }
 

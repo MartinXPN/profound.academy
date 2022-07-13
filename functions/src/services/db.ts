@@ -10,6 +10,7 @@ import {Progress, ExerciseProgress} from '../models/progress';
 import {Submission, SubmissionResult, SubmissionSensitiveRecords, TestResults} from '../models/submissions';
 import {Comment, Vote} from '../models/forum';
 import {ScheduledUpdate} from '../models/updates';
+import {NotionPage} from '../models/notion';
 
 admin.initializeApp({credential: admin.credential.applicationDefault()});
 firestore().settings({ignoreUndefinedProperties: true});
@@ -71,7 +72,7 @@ const db = {
     submissionTestResults: (userId: string, submissionId: string) => dataPoint<TestResults>(`/submissions/${submissionId}/testResults`).doc(userId),
 
     codeDraft: (courseId: string, exerciseId: string, userId: string) => dataPoint<CodeDraft>(`codeDrafts/${courseId}/${exerciseId}`).doc(userId),
-
+    notionPage: (pageId: string) => dataPoint<NotionPage>('notionCache').doc(pageId),
     mails: dataPoint('mail'),
     updateQueue: dataPoint<ScheduledUpdate>('updateQueue'),
 };

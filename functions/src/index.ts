@@ -11,27 +11,38 @@ export const helloWorld = functions.https.onRequest((req, res) => {
 });
 
 export const getNotionPage = functions.https.onRequest(async (req, res) => {
-    res.set('Cache-Control', 'public, max-age=300, s-maxage=600');
+    res.set('Cache-Control', 'public, max-age=300, s-maxage=300');      // cache for 5 minutes
     if (req.method !== 'GET') {
         res.status(403).send('Forbidden');
         return;
     }
 
-    const {fetchNotionPage} = await import('./services/notion');
+    const {fetchNotionPage, getCachedPage, cacheNotionPage} = await import('./services/notion');
     const corsLib = await import('cors');
     const cors = corsLib({origin: true});
     cors(req, res, async () => {
         functions.logger.info(`query: ${JSON.stringify(req.query)}`);
-        const pageId = req.query.pageId;
+        const pageId = req.query.pageId as string;
 
         if (!pageId) {
             res.status(400).send('pageId needs to be provided in data');
             return;
         }
 
-        const recordMap = await fetchNotionPage(pageId as string);
+        let sent = false;
+        const cachedPage = await getCachedPage(pageId);
+        if (cachedPage) {
+            functions.logger.info('Sending results using cache');
+            res.status(200).send(cachedPage);
+            sent = true;
+        }
+
+        const recordMap = await fetchNotionPage(pageId);
+        await cacheNotionPage(pageId, recordMap);
         functions.logger.info(`recordMap #chars: ${JSON.stringify(recordMap).length}`);
-        res.status(200).send(recordMap);
+
+        if (!sent)
+            res.status(200).send(recordMap);
     });
 });
 

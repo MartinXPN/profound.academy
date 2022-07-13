@@ -103,14 +103,17 @@ function Exercise({launchCourse, registerCourse}: {launchCourse: () => void, reg
                 <Box width="100%" height="100%" sx={{overflowY: 'auto'}}>
                     <Grid container justifyContent="center">
                         <OutlinedButton selected={currentTab === 'description'} onClick={() => setCurrentTab('description')}>Description</OutlinedButton>
-                        {!split && <OutlinedButton selected={currentTab === 'solve'} onClick={() => setCurrentTab('solve')}>Solve</OutlinedButton>}
                         {auth.isSignedIn && <OutlinedButton selected={currentTab === 'submissions'} onClick={() => setCurrentTab('submissions')}>Submissions</OutlinedButton>}
                         {isCourseInstructor && <OutlinedButton selected={currentTab === 'codeDrafts'} onClick={() => setCurrentTab('codeDrafts')}>Code Drafts</OutlinedButton>}
                         {isCourseInstructor && <OutlinedButton selected={currentTab === 'edit'} endIcon={<Edit />} onClick={() => setCurrentTab('edit')}>Edit</OutlinedButton>}
                     </Grid>
 
-                    {currentTab === 'description' && <>{isCourseInstructor && <Dashboard/>}<Content notionPage={localize(exercise.pageId)}/>{auth.isSignedIn && <Forum/>}</>}
-                    {currentTab === 'solve' && <>{right}</>}
+                    {currentTab === 'description' && <>
+                        {isCourseInstructor && <Dashboard/>}
+                        <Content notionPage={localize(exercise.pageId)}/>
+                        {!split && <>{right}</>}
+                        {auth.isSignedIn && <Forum/>}
+                    </>}
                     {currentTab === 'submissions' && <ExerciseSubmissions rowsPerPage={20} />}
                     {currentTab === 'codeDrafts' && <CodeDrafts onCodeDraftSelected={setCodeDraftId} />}
                     {currentTab === 'edit' && <Suspense fallback={<></>}><ExerciseEditor cancelEditing={() => setCurrentTab('description')} exerciseTypeChanged={setExerciseType} /></Suspense>}

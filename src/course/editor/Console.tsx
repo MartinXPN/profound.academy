@@ -80,7 +80,7 @@ function Console({onSubmitClicked, onRunClicked, isProcessing, submissionResult,
             <ToggleButtonGroup value={selectedTest} exclusive size='small' sx={{float: 'left'}}>
 
                 {tests.map((test, index) => {
-                    const currentStatus = testResults?.[index].status;
+                    const currentStatus = testResults?.[index]?.status;
                     console.log('index:', index, 'status:', currentStatus);
                     return (<div key={index.toString()}>
                         <Badge invisible={selectedTest !== index || index < exercise.testCases.length} badgeContent={

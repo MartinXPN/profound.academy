@@ -1,11 +1,12 @@
 import {memo, ReactNode, useContext, useState} from "react";
-import {Button, Card, CardActions, CardContent, Stack, Grid, Typography, Box} from "@mui/material";
+import {Button, Card, CardActions, CardContent, Stack, Grid, Typography, Box, Snackbar, Alert} from "@mui/material";
 import {Check} from "@mui/icons-material";
 import {SignIn} from "../user/Auth";
 import {AuthContext} from "../App";
 import useAsyncEffect from "use-async-effect";
 import {subscribe} from "../services/subscriptions";
 import CircularProgress from "@mui/material/CircularProgress";
+import {AlertColor} from "@mui/material/Alert/Alert";
 
 function Benefit({name}: {name: string}) {
     return <>
@@ -47,6 +48,8 @@ function Pricing() {
     const [showSignIn, setShowSignIn] = useState(false);
     const [userRole, setUserRole] = useState<string | null>(null);
     const [startingPayment, setStartingPayment] = useState(false);
+    const [snackbar, setSnackbar] = useState<{message: string, severity: AlertColor} | null>(null);
+    const handleCloseSnackbar = () => setSnackbar(null);
 
     useAsyncEffect(async () => {
         if( !auth.isSignedIn )
@@ -54,6 +57,7 @@ function Pricing() {
 
         await auth.currentUser?.getIdToken(true);
         const token = await auth.currentUser?.getIdTokenResult();
+        console.log('token:', token);
         setUserRole(token?.claims?.stripeRole ?? null);
     }, [auth]);
 
@@ -65,9 +69,10 @@ function Pricing() {
         if( !auth.isSignedIn || !auth.currentUserId )
             return setShowSignIn(true);
 
+        const prodPrice = 'price_1LLihSCi2K53POQ28mnKKo6n';  // const testPrice = 'price_1LLiCACi2K53POQ2vhAkt6UL';
         setStartingPayment(true);
         await subscribe(
-            auth.currentUserId, 'price_1LLihSCi2K53POQ28mnKKo6n', window.location.origin,
+            auth.currentUserId, prodPrice, window.location.origin,
             (redirectUrl) => {
                 window.location.assign(redirectUrl);
                 setStartingPayment(false);
@@ -75,6 +80,10 @@ function Pricing() {
             (error) => {
                 console.warn('Stripe error', error);
                 setStartingPayment(false);
+                setSnackbar({
+                    message: error.message,
+                    severity: 'error',
+                });
             }
         );
     }
@@ -114,6 +123,12 @@ function Pricing() {
 
         {!auth.isSignedIn && showSignIn && <SignIn />}
         <Box marginBottom={12} />
+
+        <Snackbar open={!!snackbar} autoHideDuration={6000} onClose={handleCloseSnackbar}>
+            <Alert onClose={handleCloseSnackbar} severity={snackbar?.severity} sx={{ width: '100%' }}>
+                {snackbar?.message}
+            </Alert>
+        </Snackbar>
     </>
 }
 

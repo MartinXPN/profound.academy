@@ -146,8 +146,8 @@ function ExerciseEditor({cancelEditing, exerciseTypeChanged}: {
     errors && Object.keys(errors).length && console.log('errors:', errors);
     const isPublic = watch('isPublic');
     const level = watch('level');
-    if( isPublic && level === 'drafts' )
-        setValue('level', course?.levels?.at(-1)?.id ?? 'drafts');
+    if( isPublic && level === 'drafts' && course?.levels && course.levels.length > 0 )
+        setValue('level', course.levels.at(-1)!.id);
 
     // Keep track of the available levels
     useEffect(() => setLevels(course?.levels ?? []), [JSON.stringify(course?.levels)]);

@@ -109,7 +109,7 @@ function Pricing() {
 
             {/* Student plan */}
             <Grid item>
-            <Plan name="Student" price="$199/month" buttonText="Start Free trial"
+            <Plan name="Student" price="$199/month" buttonText="Start Free 7 Day Trial"
                   isSubscribed={userRole === 'student'}
                   onStartClicked={handleStartStudentPlan}
                   purchaseInProgress={startingPayment}>

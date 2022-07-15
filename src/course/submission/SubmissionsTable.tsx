@@ -54,7 +54,7 @@ function SubmissionsTable({reset, loadSubmissions, columns, rowsPerPage}: {
 
     const loadNextPage = () => {
         setStartAfterIds(startAfterIds => {
-            if( startAfterIds.length > 0 && startAfterIds[startAfterIds.length - 1] === lastId )
+            if( startAfterIds.length > 0 && startAfterIds.at(-1) === lastId )
                 return startAfterIds;
             console.log('load next page...', startAfterIds);
             setHasMore(false);

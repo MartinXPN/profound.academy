@@ -21,7 +21,7 @@ function SubmissionsPage({startAfterId, loadSubmissions, columns, startIndex, on
     useAsyncEffect(async () => {
         return await loadSubmissions(startAfterId, (submissions, more) => {
             setSubmissions(submissions);
-            more && submissions.length > 0 && onMoreLoaded(submissions[submissions.length - 1].id);
+            more && submissions.length > 0 && onMoreLoaded(submissions.at(-1)!.id);
         });
     }, unsubscribe => unsubscribe && unsubscribe(), [startAfterId]);
 

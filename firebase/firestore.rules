@@ -180,5 +180,33 @@ service cloud.firestore {
       allow read: if isCurrentUser(request, userId) || isCourseInstructor(request, courseId);
       allow write: if isCurrentUser(request, userId);
     }
+
+    // Subscriptions (Free, Student, etc)
+    match /subscriptions/{userId} {
+      allow read: if request.auth.uid == userId;
+
+      match /checkout_sessions/{id} {
+        allow read, write: if request.auth.uid == userId;
+      }
+      match /subscriptions/{id} {
+        allow read: if request.auth.uid == userId;
+      }
+      match /payments/{id} {
+        allow read: if request.auth.uid == userId;
+      }
+    }
+
+    // Payment plans
+    match /plans/{id} {
+      allow read: if request.auth != null;
+
+      match /prices/{id} {
+        allow read: if request.auth != null;
+      }
+
+      match /tax_rates/{id} {
+        allow read: if request.auth != null;
+      }
+    }
   }
 }

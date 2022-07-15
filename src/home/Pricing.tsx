@@ -1,10 +1,11 @@
-import {memo, ReactNode, useContext, useEffect, useState} from "react";
-import {Button, Card, CardActions, CardContent, Stack, Grid, Typography, Box, TextField} from "@mui/material";
+import {memo, ReactNode, useContext, useState} from "react";
+import {Button, Card, CardActions, CardContent, Stack, Grid, Typography, Box} from "@mui/material";
 import {Check} from "@mui/icons-material";
 import {SignIn} from "../user/Auth";
 import {AuthContext} from "../App";
-import {useStickyState} from "../common/stickystate";
-import {preRegister} from "../services/users";
+import useAsyncEffect from "use-async-effect";
+import {subscribe} from "../services/subscriptions";
+import CircularProgress from "@mui/material/CircularProgress";
 
 function Benefit({name}: {name: string}) {
     return <>
@@ -14,8 +15,9 @@ function Benefit({name}: {name: string}) {
     </>
 }
 
-function Plan({name, price, children, isSubscribed, onStartClicked}: {
-    name: string, price: string, children: ReactNode, isSubscribed: boolean, onStartClicked: () => void,
+function Plan({name, price, buttonText, children, isSubscribed, onStartClicked, purchaseInProgress}: {
+    name: string, price: string, buttonText: string, children: ReactNode,
+    isSubscribed: boolean, onStartClicked: () => void, purchaseInProgress?: boolean
 }) {
     return <>
         <Card sx={{ width: 240, borderRadius: 8, padding: 4 }}>
@@ -30,7 +32,10 @@ function Plan({name, price, children, isSubscribed, onStartClicked}: {
                 <Grid container justifyContent="center">
                     {isSubscribed
                         ? <Button variant="outlined" disabled>Current plan</Button>
-                        : <Button color="primary" variant="contained" onClick={onStartClicked}>Get started for free</Button>}
+                        : purchaseInProgress
+                            ? <CircularProgress color="inherit"  />
+                            : <Button color="primary" variant="contained" onClick={onStartClicked}>{buttonText}</Button>
+                    }
                 </Grid>
             </CardActions>
         </Card>
@@ -40,33 +45,38 @@ function Plan({name, price, children, isSubscribed, onStartClicked}: {
 function Pricing() {
     const auth = useContext(AuthContext);
     const [showSignIn, setShowSignIn] = useState(false);
-    const [showProInstructions, setShowProInstructions] = useState(false);
-    const [email, setEmail] = useStickyState<string | null>(null, `pro-email-${auth.currentUserId}`);
-    const [preRegisteredEmail, setPreRegisteredEmail] = useStickyState<string | null>(null, `pro-pre-registered-${auth.currentUserId}`);
+    const [userRole, setUserRole] = useState<string | null>(null);
+    const [startingPayment, setStartingPayment] = useState(false);
 
-    // Default user email
-    useEffect(() => {
+    useAsyncEffect(async () => {
         if( !auth.isSignedIn )
-            setShowProInstructions(false);
+            return setUserRole(null);
 
-        if( email === null && auth.currentUser !== null )
-            setEmail(auth.currentUser.email);
-    }, [auth, email, setEmail]);
+        await auth.currentUser?.getIdToken(true);
+        const token = await auth.currentUser?.getIdTokenResult();
+        setUserRole(token?.claims?.stripeRole ?? null);
+    }, [auth]);
 
     const handleStartFreePlan = () => {
         setShowSignIn(true);
         setTimeout(() => window.scrollTo({ behavior: 'smooth', top: window.scrollY + 200 }), 100);
     }
-    const handleStartProPlan = () => {
-        if( auth.isSignedIn )   setShowProInstructions(true);
-        else                    setShowSignIn(true);
-        setTimeout(() => window.scrollTo({ behavior: 'smooth', top: window.scrollY + 200 }), 100);
-    }
-    const handlePreRegisterPro = async () => {
-        if( !auth.currentUserId )
-            return;
-        setPreRegisteredEmail(email);
-        await preRegister(auth.currentUserId, email);
+    const handleStartStudentPlan = async () => {
+        if( !auth.isSignedIn || !auth.currentUserId )
+            return setShowSignIn(true);
+
+        setStartingPayment(true);
+        await subscribe(
+            auth.currentUserId, 'price_1LLihSCi2K53POQ28mnKKo6n', window.location.origin,
+            (redirectUrl) => {
+                window.location.assign(redirectUrl);
+                setStartingPayment(false);
+            },
+            (error) => {
+                console.warn('Stripe error', error);
+                setStartingPayment(false);
+            }
+        );
     }
 
     return <>
@@ -76,9 +86,11 @@ function Pricing() {
 
         <Grid container justifyContent="center" alignContent="center" alignItems="top"
             spacing={4} paddingTop={2} marginBottom={2}>
-            {/*Free*/}
+            {/* Free plan */}
             <Grid item>
-            <Plan name="Free" price="$0/month" isSubscribed={auth.isSignedIn} onStartClicked={handleStartFreePlan}>
+            <Plan name="Free" price="$0/month" buttonText="Get Started"
+                  isSubscribed={auth.isSignedIn && userRole !== 'student'}
+                  onStartClicked={handleStartFreePlan}>
                 <Benefit name="Participate in courses" />
                 <Benefit name="Access side quests" />
                 <Benefit name="Community of learners" />
@@ -86,11 +98,13 @@ function Pricing() {
             </Plan>
             </Grid>
 
-            {/*Pro*/}
+            {/* Student plan */}
             <Grid item>
-            <Plan name="Student" price="$199/month" isSubscribed={false} onStartClicked={handleStartProPlan}>
+            <Plan name="Student" price="$199/month" buttonText="Start Free trial"
+                  isSubscribed={userRole === 'student'}
+                  onStartClicked={handleStartStudentPlan}
+                  purchaseInProgress={startingPayment}>
                 <Benefit name="Group tutoring" />
-                <Benefit name="First session is FREE!" />
                 <Benefit name="Certificates" />
                 <Benefit name="Weekly meetings" />
                 <Benefit name="Personal guidance" />
@@ -99,27 +113,6 @@ function Pricing() {
         </Grid>
 
         {!auth.isSignedIn && showSignIn && <SignIn />}
-        {showProInstructions && <>
-            <Grid container direction="column" justifyContent="center" alignContent="center" padding={4}>
-                <Grid item><Typography fontWeight="bold">Start from the 1st of August.</Typography></Grid>
-                <Grid item>
-                    <Grid container direction="row" justifyContent="center" alignContent="center" alignItems="center" spacing={2} marginY={2}>
-                        <Grid item flex={1} minWidth={300}>
-                            <TextField fullWidth type="email"
-                                       placeholder="john.smith@gmail.com" label="Sign up with your preferred email"
-                                       onChange={event => setEmail(event.target.value)} value={email}/>
-                        </Grid>
-                        <Grid item>
-                            {preRegisteredEmail === email
-                                ? <Stack direction="row" alignItems="center" gap={1}>
-                                    <Check color="primary" /> <Typography variant="body1">Pre-Registered</Typography>
-                                </Stack>
-                                : <Button variant="contained" onClick={handlePreRegisterPro}>Pre-Register</Button>}
-                        </Grid>
-                    </Grid>
-                </Grid>
-            </Grid>
-        </>}
         <Box marginBottom={12} />
     </>
 }

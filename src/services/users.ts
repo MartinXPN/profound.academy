@@ -83,13 +83,3 @@ export const hasInstructorRole = async (userId: string) => {
     console.log('roles:', snapshot.data(), snapshot, snapshot.exists);
     return snapshot.exists;
 }
-
-export const preRegister = async (userId: string, email: string) => {
-    await db.userPreRegistrations(userId).set({
-        id: userId,
-        userId: userId,
-        email: email,
-        // @ts-ignore
-        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-    }, {merge: true});
-};

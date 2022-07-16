@@ -1,9 +1,8 @@
 import {memo, useCallback, useContext, useEffect, useState} from "react";
 import {Add, Done, Send} from "@mui/icons-material";
-import {Badge, Button, CircularProgress, IconButton, Typography} from "@mui/material";
+import {Badge, Button, CircularProgress, Grid, IconButton, Stack, Typography} from "@mui/material";
 import HighlightOffTwoToneIcon from '@mui/icons-material/HighlightOffTwoTone';
 import ToggleButton from '@mui/material/ToggleButton';
-import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 
 import {TestCase} from "models/exercise";
 import {SubmissionResult} from "models/submissions";
@@ -75,19 +74,18 @@ function Console({onSubmitClicked, onRunClicked, isProcessing, submissionResult,
     if( !exercise )
         return <></>
     return <>
-        <Box width="100%" overflow="hidden" padding={1}>
-            <Typography sx={{float: 'left', marginTop: 1, marginRight: 1}}>TESTS: </Typography>
-            <ToggleButtonGroup value={selectedTest} exclusive size='small' sx={{float: 'left'}}>
+        <Grid container direction="row" alignItems="center" padding={1}>
+            <Grid item><Typography marginRight={1}>TESTS: </Typography></Grid>
 
-                {tests.map((test, index) => {
-                    const currentStatus = testResults?.[index]?.status;
-                    console.log('index:', index, 'status:', currentStatus);
-                    return (<div key={index.toString()}>
-                        <Badge invisible={selectedTest !== index || index < exercise.testCases.length} badgeContent={
-                            <HighlightOffTwoToneIcon sx={{ color: '#515151', "&:focus,&:hover": {cursor: 'pointer'}}}
-                                                     fontSize="small"
-                                                     onClick={() => removeTest(index)}/>
-                        }>
+            {tests.map((test, index) => {
+                const currentStatus = testResults?.[index]?.status;
+                console.log('index:', index, 'status:', currentStatus);
+                return <Grid item key={`test-${index}`}>
+                    <Badge invisible={selectedTest !== index || index < exercise.testCases.length} badgeContent={
+                        <HighlightOffTwoToneIcon sx={{ color: '#515151', "&:focus,&:hover": {cursor: 'pointer'}}}
+                                                 fontSize="small"
+                                                 onClick={() => removeTest(index)}/>
+                    }>
                         <ToggleButton value={index} id={`${index}`}
                                       onClick={() => onTestSelected(index)}
                                       sx={{float: 'left', paddingLeft: 3, paddingRight: 3}}
@@ -95,29 +93,32 @@ function Console({onSubmitClicked, onRunClicked, isProcessing, submissionResult,
                                       style={{color: statusToColor(currentStatus, false)}}>
                             <Typography>{index + 1}</Typography>
                         </ToggleButton>
-                        </Badge>
-                    </div>)}
-                )}
-            </ToggleButtonGroup>
-            <IconButton id="add-test" sx={{float: 'left', padding: '12px'}} onClick={addTest} size="large"><Add /></IconButton>
+                    </Badge>
+                </Grid>
+            })}
 
-            <Button
-                variant="contained"
-                color="primary"
-                size="small"
-                sx={{float: 'right', margin: 1, marginRight: 2, marginLeft: 0}}
-                onClick={onSubmitClicked}
-                endIcon={<Done />}>Submit</Button>
+            <Grid item key="add-test" sx={{flex: 1}}>
+                <IconButton sx={{float: 'left', padding: '12px'}} onClick={addTest} size="large"><Add /></IconButton>
+            </Grid>
 
-            <Button
-                variant="contained"
-                color="primary"
-                size="small"
-                sx={{float: 'right', margin: 1}}
-                onClick={handleRun}
-                endIcon={<Send />}>Run</Button>
-        </Box>
+            <Grid item marginY={1}>
+                <Stack direction="row" spacing={1} sx={{float: 'right'}}>
+                    <Button
+                        variant="contained"
+                        color="primary"
+                        size="small"
+                        onClick={handleRun}
+                        endIcon={<Send />}>Run</Button>
 
+                    <Button
+                        variant="contained"
+                        color="primary"
+                        size="small"
+                        onClick={onSubmitClicked}
+                        endIcon={<Done />}>Submit</Button>
+                </Stack>
+            </Grid>
+        </Grid>
 
         {isProcessing &&
         <Box width="100%" marginTop="5%" marginBottom="5%" textAlign="center">

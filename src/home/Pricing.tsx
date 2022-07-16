@@ -17,7 +17,7 @@ function Benefit({name}: {name: string}) {
 }
 
 function Plan({name, price, buttonText, children, isSubscribed, onStartClicked, purchaseInProgress}: {
-    name: string, price: string, buttonText: string, children: ReactNode,
+    name: string, price: string, buttonText?: string, children: ReactNode,
     isSubscribed: boolean, onStartClicked: () => void, purchaseInProgress?: boolean
 }) {
     return <>
@@ -34,8 +34,8 @@ function Plan({name, price, buttonText, children, isSubscribed, onStartClicked, 
                     {isSubscribed
                         ? <Button variant="outlined" disabled>Current plan</Button>
                         : purchaseInProgress
-                            ? <CircularProgress color="inherit"  />
-                            : <Button color="primary" variant="contained" onClick={onStartClicked}>{buttonText}</Button>
+                            ? <CircularProgress color="primary"  />
+                            : <>{buttonText && <Button color="primary" variant="contained" onClick={onStartClicked}>{buttonText}</Button>}</>
                     }
                 </Grid>
             </CardActions>
@@ -97,7 +97,7 @@ function Pricing() {
             spacing={4} paddingTop={2} marginBottom={2}>
             {/* Free plan */}
             <Grid item>
-            <Plan name="Free" price="$0/month" buttonText="Get Started"
+            <Plan name="Free" price="$0/month" buttonText={userRole !== 'student' ? 'Get Started' : undefined}
                   isSubscribed={auth.isSignedIn && userRole !== 'student'}
                   onStartClicked={handleStartFreePlan}>
                 <Benefit name="Participate in courses" />

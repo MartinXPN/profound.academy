@@ -32,10 +32,10 @@ function Plan({name, price, buttonText, children, isSubscribed, onStartClicked, 
             <CardActions>
                 <Grid container justifyContent="center">
                     {isSubscribed
-                        ? <Button variant="outlined" disabled>Current plan</Button>
+                        ? <Button variant="outlined" disabled sx={{width: '100%'}}>Current plan</Button>
                         : purchaseInProgress
                             ? <CircularProgress color="primary"  />
-                            : <>{buttonText && <Button color="primary" variant="contained" onClick={onStartClicked}>{buttonText}</Button>}</>
+                            : <>{buttonText && <Button color="primary" variant="contained" onClick={onStartClicked} sx={{width: '100%'}}>{buttonText}</Button>}</>
                     }
                 </Grid>
             </CardActions>

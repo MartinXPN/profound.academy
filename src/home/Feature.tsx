@@ -24,7 +24,7 @@ export function MediaFeature({title, description, media, mediaPosition, action, 
                   sx={{ display: { xs: 'flex', md: 'none' } }}>
                 <Grid item>{title}</Grid>
                 <Grid item>{media}</Grid>
-                <Grid item>{description}</Grid>
+                <Grid item textAlign="start">{description}</Grid>
                 {action && <Grid item>{buttonPart}</Grid>}
             </Grid>
 

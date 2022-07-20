@@ -115,8 +115,8 @@ service cloud.firestore {
                            && request.auth.uid != request.resource.data.userId
                            && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['score', 'replies'])
                            && isValidScore(math.abs(resource.data.score - request.resource.data.score)));
-      allow delete: if isCurrentUser(request, request.resource.data.userId)
-                       || isCourseInstructor(request, request.resource.data.courseId);
+      allow delete: if isCurrentUser(request, get(/databases/$(database)/documents/forum/$(commentId)).data.userId)
+                       || isCourseInstructor(request, get(/databases/$(database)/documents/forum/$(commentId)).data.courseId);
 
       match /voters/{userId} {
         allow read: if isCurrentUser(request, userId);

@@ -92,8 +92,17 @@ export const updateComment = async (commentId: string, text: string) => {
 };
 
 export const deleteComment = async (commentId: string) => {
-    // TODO: remove replies from the parent comment if present
-    return await db.forumComment(commentId).delete();
+    return await firebase.firestore().runTransaction(async transaction => {
+        const commentRef = db.forumComment(commentId);
+        const comment = (await transaction.get(commentRef)).data();
+        if(comment?.repliedTo?.path?.includes(db.forum.path)) {
+            console.log(comment?.repliedTo?.path, 'includes:', db.forum.path);
+            transaction.update(comment?.repliedTo, {
+                replies: firebase.firestore.FieldValue.arrayRemove(commentRef),
+            });
+        }
+        transaction.delete(commentRef);
+    });
 }
 
 export const vote = async (commentId: string, userId: string, vote: number) => {

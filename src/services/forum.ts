@@ -55,30 +55,33 @@ export const saveComment = async (courseId: string, exerciseId: string,
 export const saveReply = async (commentId: string,
                                 userId: string, displayName: string, avatarUrl: string | null,
                                 text: string) => {
-    const commentRef = db.forumComment(commentId);
-    const comment = (await commentRef.get()).data();
-    const reply: Comment = {
-        id: '-1',
-        userId: userId,
-        displayName: displayName,
-        avatarUrl: avatarUrl ?? undefined,
-        courseId: comment?.courseId,
-        exerciseId: comment?.exerciseId,
-        submissionId: comment?.submissionId,
-        createdAt: firebase.firestore.FieldValue.serverTimestamp() as firebase.firestore.Timestamp,
-        repliedTo: commentRef,
-        replies: [],
-        score: 1,
-        text: text,
-    }
+    return await firebase.firestore().runTransaction(async transaction => {
+        const commentRef = db.forumComment(commentId);
+        const comment = (await transaction.get(commentRef)).data();
+        const reply: Comment = {
+            id: '-1',
+            userId: userId,
+            displayName: displayName,
+            avatarUrl: avatarUrl ?? undefined,
+            courseId: comment?.courseId,
+            exerciseId: comment?.exerciseId,
+            submissionId: comment?.submissionId,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp() as firebase.firestore.Timestamp,
+            repliedTo: commentRef,
+            replies: [],
+            score: 1,
+            text: text,
+        }
 
-    const ref = await db.forum.add(reply);
-    console.log('Saved the reply:', ref);
-    console.log('Adding to replies of:', commentId);
+        const replyId = db.forum.doc().id;
+        transaction.set(db.forumComment(replyId), reply);
+        console.log('Saved the reply:', replyId);
+        console.log('Adding to replies of:', commentId);
 
-    // update the comment as well
-    return await db.forumComment(commentId).update({
-        replies: firebase.firestore.FieldValue.arrayUnion(ref),
+        // update the comment as well
+        transaction.update(db.forumComment(commentId), {
+            replies: firebase.firestore.FieldValue.arrayUnion(db.forumComment(replyId)),
+        });
     });
 };
 

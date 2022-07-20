@@ -7530,7 +7530,7 @@ mkdirp@^0.5.1, mkdirp@~0.5.1:
     minimist "^1.2.6"
 
 "models@file:functions/src/models":
-  version "0.1.7"
+  version "0.1.8"
   dependencies:
     typescript "^4.5.5"
 

@@ -1,4 +1,4 @@
-import {useCallback, useContext, useEffect, useState} from "react";
+import {useCallback, useContext, useEffect, useState, MouseEvent, useMemo} from "react";
 import {Avatar, ListItem, ListItemIcon, ListItemText, IconButton, Button, List, MenuItem, Stack} from "@mui/material";
 import {Typography, TextField} from "@mui/material";
 import {ArrowDropDown, ArrowDropUp, Edit, Save, Reply as ReplyIcon, Delete} from '@mui/icons-material';
@@ -12,6 +12,7 @@ import {useNavigate} from "react-router-dom";
 import moment from "moment";
 import Box from "@mui/material/Box";
 import {styled} from "@mui/material/styles";
+import {CourseContext} from "../Course";
 
 const UserName = styled(Typography)({
     '&:focus,&:hover': {cursor: 'pointer'},
@@ -37,7 +38,7 @@ function CommentEditing({onEditClicked, onDeleteClicked}: {onEditClicked: () => 
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
     const open = Boolean(anchorEl);
 
-    const handleMenu = (event: React.MouseEvent<HTMLElement>) => setAnchorEl(event.currentTarget);
+    const handleMenu = (event: MouseEvent<HTMLElement>) => setAnchorEl(event.currentTarget);
     const handleClose = () => setAnchorEl(null);
 
     return <>
@@ -63,7 +64,7 @@ function CommentEditing({onEditClicked, onDeleteClicked}: {onEditClicked: () => 
             transformOrigin={{ horizontal: 'right', vertical: 'top' }}
             anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}>
 
-            <MenuItem onClick={onEditClicked}>
+            <MenuItem onClick={onEditClicked} sx={{paddingRight: 10}}>
                 <ListItemIcon><Edit fontSize="small" /></ListItemIcon>
                 <ListItemText>Edit</ListItemText>
             </MenuItem>
@@ -82,22 +83,18 @@ function CommentView({comment, allowReply}: {
 }) {
     const navigate = useNavigate();
     const auth = useContext(AuthContext);
+    const {course} = useContext(CourseContext);
 
     const [replies, setReplies] = useState<Comment[]>([]);
     const [showReplies, setShowReplies] = useState(false);
     const [showReply, setShowReply] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
     const [text, setText] = useState(comment.text);
-    useEffect(() => {
-        setText(comment.text);
-    }, [comment]);
+    useEffect(() => setText(comment.text), [comment]);
 
     useEffect(() => {
-        if( !showReplies )
-            return;
-
-        const unsubscribe = onCommentRepliesChanged(comment.id, replies => replies && setReplies(replies));
-        return () => unsubscribe();
+        if( showReplies )
+            return onCommentRepliesChanged(comment.id, replies => replies && setReplies(replies));
     }, [comment.id, showReplies]);
 
     const onShowReplies = () => setShowReplies(true);
@@ -115,6 +112,9 @@ function CommentView({comment, allowReply}: {
     }, [comment.id, text]);
     const onDelete = useCallback(async () => await deleteComment(comment.id), [comment.id]);
     const onUserClicked = useCallback((userId: string) => navigate(`/users/${userId}`), [navigate]);
+    const isEditingAllowed = useMemo(() => {
+        return comment.userId === auth.currentUserId || (auth.currentUserId && course?.instructors?.includes(auth.currentUserId));
+    }, [comment.userId, auth.currentUserId, course]);
 
     return <>
         <ListItem key={comment.id} alignItems="flex-start">
@@ -132,7 +132,7 @@ function CommentView({comment, allowReply}: {
                             <UserName onClick={() => onUserClicked(comment.userId)}>{comment.displayName}</UserName>
                             <Typography variant="body2" color="text.secondary" noWrap>&nbsp; • &nbsp;</Typography>
                             <Typography variant="body2" color="text.secondary">{comment.createdAt ? moment(comment.createdAt.toDate()).locale('en').fromNow() : 'just now'}</Typography>
-                            {auth && auth.currentUser && comment.userId === auth.currentUser.uid && !isEditing &&
+                            {isEditingAllowed && !isEditing &&
                             <CommentEditing onEditClicked={onEdit} onDeleteClicked={onDelete} />}
                         </Stack>
                     }
@@ -160,7 +160,7 @@ function CommentView({comment, allowReply}: {
                         {showReplies &&
                         <Button endIcon={<ArrowDropUp/>} size="small" onClick={onHideReplies} sx={{textTransform: 'none'}}>Hide replies</Button>}
                     </>}
-                    {auth && auth.currentUser && comment.userId === auth.currentUser.uid && isEditing &&
+                    {isEditingAllowed && isEditing &&
                     <Button size="small" endIcon={<Save/>} onClick={onSave}>Save</Button>}
                 </Box>
 

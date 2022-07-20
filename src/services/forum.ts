@@ -31,16 +31,6 @@ export const onCommentRepliesChanged = (commentId: string,
         });
 };
 
-export const getCommentReplies = async (commentId: string) => {
-    const comment = db.forumComment(commentId);
-    const snapshot = await db.forum
-        .where('repliedTo', '==', comment)
-        .orderBy('createdAt', 'asc').get();
-    const replies = snapshot.docs.map(r => r.data());
-    console.log('replies:', replies);
-    return replies;
-};
-
 export const saveComment = async (courseId: string, exerciseId: string,
                                   userId: string, displayName: string, avatarUrl: string | null,
                                   text: string) => {
@@ -50,6 +40,9 @@ export const saveComment = async (courseId: string, exerciseId: string,
         userId: userId,
         displayName: displayName,
         avatarUrl: avatarUrl ?? undefined,
+        courseId: courseId,
+        exerciseId: exerciseId,
+        submissionId: undefined,
         createdAt: firebase.firestore.FieldValue.serverTimestamp() as firebase.firestore.Timestamp,
         repliedTo: exercise,
         replies: [],
@@ -62,14 +55,18 @@ export const saveComment = async (courseId: string, exerciseId: string,
 export const saveReply = async (commentId: string,
                                 userId: string, displayName: string, avatarUrl: string | null,
                                 text: string) => {
-    const comment = db.forumComment(commentId);
+    const commentRef = db.forumComment(commentId);
+    const comment = (await commentRef.get()).data();
     const reply: Comment = {
         id: '-1',
         userId: userId,
         displayName: displayName,
         avatarUrl: avatarUrl ?? undefined,
+        courseId: comment?.courseId,
+        exerciseId: comment?.exerciseId,
+        submissionId: comment?.submissionId,
         createdAt: firebase.firestore.FieldValue.serverTimestamp() as firebase.firestore.Timestamp,
-        repliedTo: comment,
+        repliedTo: commentRef,
         replies: [],
         score: 1,
         text: text,
@@ -92,6 +89,7 @@ export const updateComment = async (commentId: string, text: string) => {
 };
 
 export const deleteComment = async (commentId: string) => {
+    // TODO: remove replies from the parent comment if present
     return await db.forumComment(commentId).delete();
 }
 

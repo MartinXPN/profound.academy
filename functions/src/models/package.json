@@ -1,7 +1,7 @@
 {
   "name": "models",
   "description": "shared models for profound.academy project",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "declarationMap": true,
   "composite": true,
   "main": "lib/index.js",

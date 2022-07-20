@@ -14,11 +14,6 @@ service cloud.firestore {
       allow create, update: if isCurrentUser(request, userId);
     }
 
-    match /preRegisters/{userId} {
-      allow read: if isCurrentUser(request, userId);
-      allow create, update: if isCurrentUser(request, userId);
-    }
-
     match /users/{userId} {
       allow read: if isCurrentUser(request, userId);
       allow create, update: if isCurrentUser(request, userId);
@@ -52,7 +47,7 @@ service cloud.firestore {
       return auth != null && auth.uid != null && exists(/databases/$(database)/documents/users/$(auth.uid)/roles/instructor);
     }
     function isCourseInstructor(request, courseId) {
-      return request.auth != null && request.auth.uid in get(/databases/$(database)/documents/courses/$(courseId)).data.instructors;
+      return request.auth != null && courseId != null && request.auth.uid in get(/databases/$(database)/documents/courses/$(courseId)).data.instructors;
     }
     function isInvited(auth, courseId) {
       let coursePrivates = get(/databases/$(database)/documents/courses/$(courseId)/private/fields).data;
@@ -115,11 +110,13 @@ service cloud.firestore {
       allow create: if isCurrentUser(request, request.resource.data.userId) && request.resource.data.score == 1;
       allow update: if (isCurrentUser(request, request.resource.data.userId)
                         && request.resource.data.score == resource.data.score)
+                       || isCourseInstructor(request, request.resource.data.courseId)
                        || (request.auth != null
                            && request.auth.uid != request.resource.data.userId
                            && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['score', 'replies'])
                            && isValidScore(math.abs(resource.data.score - request.resource.data.score)));
-      allow delete: if isCurrentUser(request, get(/databases/$(database)/documents/forum/$(commentId)).data.userId);
+      allow delete: if isCurrentUser(request, request.resource.data.userId)
+                       || isCourseInstructor(request, request.resource.data.courseId);
 
       match /voters/{userId} {
         allow read: if isCurrentUser(request, userId);
